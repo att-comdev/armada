@@ -1,0 +1,47 @@
+endpoints: &endpoints
+  glance:
+    this: is an example
+
+armada:
+
+  # results in "armada-keystone" release name below
+  # to avoid manipulating releases managed directtly
+  # with helm or other armadas
+  release_prefix: armada
+
+  charts:
+
+    # silent dependency 
+    - chart: &common
+        name: common
+        release_name: null
+        namespace: null
+        values: {}
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: common
+          reference: master
+        dependencies: []
+       
+    - chart: &keystone
+        name: keystone
+        release_name: keystone
+        namespace: openstack
+        install: 
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+          pre:
+            delete:
+              - Job/keystone-db-sync
+              - Job/keystone-db-init
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: keystone
+          reference: master
+        dependencies:
+          - *common
