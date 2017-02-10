@@ -9,12 +9,7 @@ from supermutes.dot import dotify
 from armada.armada import Armada
 from armada.logutil import *
 
-SOURCE_GIT = "git"
 DESCRIPTION = "Armada"
-
-# special top level parameters
-# we will copy to all configs
-COPY_LIST=['global']
 
 def parse_args():
 

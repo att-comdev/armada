@@ -5,14 +5,13 @@ Note that this project is pre-alpha and under active development. It may undergo
 
 # Overview
 
-TThe armada python library and command line tool provides a way to synchronize an operators intended state, consisting many several charts, dependencies, and overrides using a single file, with an intended helm target.  This allows operators to define many charts, different namespaces for those releases, and overrides in a central place and with a single command, deploy and upgrade them all where applicable.
+The armada python library and command line tool provides a way to synchronize a helm (tiller) target with an operators intended state, consisting of several charts, dependencies, and overrides using a single file or directory with a collection of files. This allows operators to define many charts, potentially with different namespaces for those releases, and their overrides in a central place.  With a single command, deploy and/or upgrade them where applicable.
 
-It supports fetching helm chart source from various local and remote locations, such as git/github endpoints.  In the future, it may supprot other mechanisms.
+Armada also supports fetching helm chart source and then building charts from source from various local and remote locations, such as git/github endpoints.  In the future, it may supprot other mechanisms as well.
 
-It should also give the operator some indication of what is about to change by assisting with diffs for both values, values overrides, and template changes.
+It will also give the operator some indication of what is about to change by assisting with diffs for both values, values overrides, and actual template changes.
 
-Its functionality may extend beyond helm, assisting in interacting with kubernetes directly to perform basic pre and post steps, such as removing completed or failed jobs, or deleting resources that do not support upgrades.  However, primarily, it will be an interface to support orchestrating Helm.
-
+Its functionality may extend beyond helm, assisting in interacting with kubernetes directly to perform basic pre and post steps, such as removing completed or failed jobs, running backup jobs,  blocking on chart readiness, or deleting resources that do not support upgrades. However, primarily, it will be an interface to support orchestrating Helm.
 
 # Installation
 

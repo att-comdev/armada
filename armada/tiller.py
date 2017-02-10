@@ -23,7 +23,10 @@ class Tiller(object):
         self.channel = self.get_channel()
 
         # init timeout for all requests
+        # and assume eventually this will
+        # be fed at runtime as an override
         self.timeout = TILLER_TIMEOUT
+
 
     @property
     def metadata(self):
@@ -32,6 +35,7 @@ class Tiller(object):
         '''
         return [(b'x-helm-api-client', TILLER_VERSION)]
 
+
     def get_channel(self):
         '''
         Return a tiller channel
@@ -39,6 +43,7 @@ class Tiller(object):
         tiller_ip = self._get_tiller_ip()
         tiller_port = self._get_tiller_port()
         return grpc.insecure_channel('%s:%s' % (tiller_ip, tiller_port))
+
 
     def _get_tiller_pod(self):
         '''
@@ -72,6 +77,7 @@ class Tiller(object):
         req = ListReleasesRequest()
         return stub.ListReleases(req, self.timeout, metadata=self.metadata)
 
+
     def list_charts(self):
         '''
         List Helm Charts from Latest Releases
@@ -92,6 +98,7 @@ class Tiller(object):
         Fetch a specific release
         '''
 
+
     def update_release(self, chart, dry_run, name, disable_hooks=False, values=None):
         '''
         Update a Helm Release
@@ -111,6 +118,7 @@ class Tiller(object):
             values=values,
             name=name)
         return stub.UpdateRelease(release_request, self.timeout, metadata=self.metadata)
+
 
     def install_release(self, chart, dry_run, name, namespace, values=None):
         '''

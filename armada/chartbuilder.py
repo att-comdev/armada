@@ -20,7 +20,15 @@ class ChartBuilder(object):
     source from external resources where necessary
     '''
 
+
     def __init__(self, chart, parent=None):
+        '''
+        Initialize the ChartBuilder class
+
+        Note that tthis will trigger a source pull as part of
+        initialization as its necessary in order to examine
+        the source service many of the calls on ChartBuilder
+        '''
 
         # cache for generated protoc chart object
         self._helm_chart = None
@@ -33,10 +41,6 @@ class ChartBuilder(object):
 
         # extract, pull, whatever the chart from its source
         self.source_directory = self.source_clone()
-
-        # cleanup temporary directories
-        self.source_cleanup()
-
 
     def source_clone(self):
         '''
@@ -51,21 +55,22 @@ class ChartBuilder(object):
             tmpdir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
             self._source_tmp_dir = tmpdir
             if self.parent:
-                LOG.info("Cloning %s/%s as dependency for %s" % (self.chart.source.location, self.chart.source.subpath, self.parent))
+                LOG.info("Cloning {}/{} as dependency for {}".format(self.chart.source.location, self.chart.source.subpath, self.parent))
             else:
-                LOG.info("Cloning %s/%s for release %s" % (self.chart.source.location, self.chart.source.subpath, self.chart.release_name))
+                LOG.info("Cloning {}/{} for release {}".format(self.chart.source.location, self.chart.source.subpath, self.chart.release_name))
             pygit2.clone_repository(self.chart.source.location, tmpdir)
             return os.path.join(tmpdir, self.chart.source.subpath)
 
         else:
-            LOG.exception("Unknown source type %s for chart %s" % (self.chart.name, self.chart.source.type))
+            LOG.exception("Unknown source type {} for chart {}" .format(self.chart.name, self.chart.source.type))
+
 
     def source_cleanup(self):
         '''
         Cleanup source
         '''
-        #shutil.rmtree(self._source_tmp_dir)
-        pass
+        shutil.rmtree(self._source_tmp_dir)
+
 
     def get_metadata(self):
         '''
@@ -81,11 +86,15 @@ class ChartBuilder(object):
             version=chart_yaml.version
         )
 
+
     def get_files(self):
         '''
         Return (non-template) files in this chart
+
+        TODO(alanmeadows): Not implemented
         '''
         return []
+
 
     def get_values(self):
         '''
@@ -96,10 +105,11 @@ class ChartBuilder(object):
         if os.path.exists(os.path.join(self.source_directory, 'values.yaml')):
             raw_values = open(os.path.join(self.source_directory, 'values.yaml')).read()
         else:
-            LOG.warn("No values.yaml in %s, using empty values", self.source_directory)
+            LOG.warn("No values.yaml in {}, using empty values".format(self.source_directory))
             raw_values = ''
 
         return Config(raw=raw_values)
+
 
     def get_templates(self):
         '''
@@ -110,12 +120,13 @@ class ChartBuilder(object):
         # building a Template object
         templates = []
         if not os.path.exists(os.path.join(self.source_directory, 'templates')):
-            LOG.warn("Chart %s has no templates directory, no templates will be deployed", self.chart.name)
+            LOG.warn("Chart {} has no templates directory, no templates will be deployed".format(self.chart.name))
         for root, dirs, files in os.walk(os.path.join(self.source_directory, 'templates'), topdown=True):
             for file in files:
                 templates.append(Template(name=file, data=open(os.path.join(root, file), 'r').read()))
 
         return templates
+
 
     def get_helm_chart(self):
         '''
@@ -128,7 +139,7 @@ class ChartBuilder(object):
         # [process_chart(x, is_dependency=True) for x in chart.dependencies]
         dependencies=[]
         for chart in self.chart.dependencies:
-            LOG.info("Building dependency chart %s for release %s" % (chart.name, self.chart.release_name))
+            LOG.info("Building dependency chart {} for release {}".format(chart.name, self.chart.release_name))
             dependencies.append(ChartBuilder(chart).get_helm_chart())
 
         helm_chart = Chart(
@@ -145,8 +156,9 @@ class ChartBuilder(object):
 
     def dump(self):
         '''
-        This method is used to dump a chart object, so that we can perform a diff
+        This method is used to dump a chart object as a serialized string so that we can perform a diff
 
         It should recurse into dependencies
         '''
         return self.get_helm_chart().SerializeToString()
+
