@@ -1,0 +1,28 @@
+language: python
+
+sudo: required
+
+python:
+  - "2.7"
+  - "3.6"
+
+before_install:
+  - export LIGGIT2_VERSION=0.24.0
+  - export LIBGIT2=$VIRTUAL_ENV
+  - wget https://github.com/libgit2/libgit2/archive/v${LIGGIT2_VERSION}.tar.gz
+  - tar xzf v${LIGGIT2_VERSION}.tar.gz
+  - cd libgit2-${LIGGIT2_VERSION}/
+  - cmake . -DCMAKE_INSTALL_PREFIX=$LIBGIT2
+  - make
+  - make install
+  - export LDFLAGS="-Wl,-rpath='$LIBGIT2/lib',--enable-new-dtags $LDFLAGS"
+  - cd ..
+  - pip install -r test-requirements.txt
+  - pip install -r requirements.txt
+    #  - flake8
+
+install:
+  - pip install .
+
+script:
+  - armada -c examples/armada.yaml
