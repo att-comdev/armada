@@ -4,7 +4,6 @@ sudo: required
 
 python:
   - "2.7"
-  - "3.6"
 
 before_install:
   - export LIGGIT2_VERSION=0.24.0
@@ -19,10 +18,11 @@ before_install:
   - cd ..
   - pip install -r test-requirements.txt
   - pip install -r requirements.txt
-    #  - flake8
 
 install:
   - pip install .
 
 script:
-  - armada -c examples/armada.yaml
+  - flake8
+  - armada -h
+#  - armada -c examples/armada.yaml -d
