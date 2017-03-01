@@ -20,7 +20,7 @@ armada:
         source:
           type: git
           location: git://github.com/att-comdev/openstack-helm
-          subpath: common
+          subpath: helm-toolkit
           reference: master
         dependencies: []
        
