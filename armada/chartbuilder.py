@@ -12,14 +12,13 @@ import yaml
 
 class ChartBuilder(object):
     '''
-    This class handles taking chart intentions as a paramter and 
+    This class handles taking chart intentions as a paramter and
     turning those into proper protoc helm charts that can be
     pushed to tiller.
 
     It also processes chart source declarations, fetching chart
     source from external resources where necessary
     '''
-
 
     def __init__(self, chart, parent=None):
         '''
@@ -55,15 +54,23 @@ class ChartBuilder(object):
             tmpdir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
             self._source_tmp_dir = tmpdir
             if self.parent:
-                LOG.info("Cloning {}/{} as dependency for {}".format(self.chart.source.location, self.chart.source.subpath, self.parent))
+                LOG.info("Cloning %s/%s as dependency for %s",
+                         self.chart.source.location,
+                         self.chart.source.subpath,
+                         self.parent)
             else:
-                LOG.info("Cloning {}/{} for release {}".format(self.chart.source.location, self.chart.source.subpath, self.chart.release_name))
+                LOG.info("Cloning %s/%s for release %s",
+                         self.chart.source.location,
+                         self.chart.source.subpath,
+                         self.chart.release_name)
+
             pygit2.clone_repository(self.chart.source.location, tmpdir)
             return os.path.join(tmpdir, self.chart.source.subpath)
 
         else:
-            LOG.exception("Unknown source type {} for chart {}" .format(self.chart.name, self.chart.source.type))
-
+            LOG.exception("Unknown source type %s for chart %s",
+                          self.chart.name,
+                          self.chart.source.type)
 
     def source_cleanup(self):
         '''
@@ -71,13 +78,13 @@ class ChartBuilder(object):
         '''
         shutil.rmtree(self._source_tmp_dir)
 
-
     def get_metadata(self):
         '''
         Process metadata
         '''
         # extract Chart.yaml to construct metadata
-        chart_yaml = dotify(yaml.load(open(os.path.join(self.source_directory, 'Chart.yaml')).read()))
+        chart_yaml = dotify(yaml.load(open(
+            os.path.join(self.source_directory, 'Chart.yaml')).read()))
 
         # construct Metadata object
         return Metadata(
@@ -85,7 +92,6 @@ class ChartBuilder(object):
             name=chart_yaml.name,
             version=chart_yaml.version
         )
-
 
     def get_files(self):
         '''
@@ -95,7 +101,6 @@ class ChartBuilder(object):
         '''
         return []
 
-
     def get_values(self):
         '''
         Return the chart (default) values
@@ -103,13 +108,14 @@ class ChartBuilder(object):
 
         # create config object representing unmarshaled values.yaml
         if os.path.exists(os.path.join(self.source_directory, 'values.yaml')):
-            raw_values = open(os.path.join(self.source_directory, 'values.yaml')).read()
+            raw_values = open(os.path.join(self.source_directory,
+                                           'values.yaml')).read()
         else:
-            LOG.warn("No values.yaml in {}, using empty values".format(self.source_directory))
+            LOG.warn("No values.yaml in %s, using empty values",
+                     self.source_directory)
             raw_values = ''
 
         return Config(raw=raw_values)
-
 
     def get_templates(self):
         '''
@@ -119,14 +125,18 @@ class ChartBuilder(object):
         # process all files in templates/ as a template to attach to the chart
         # building a Template object
         templates = []
-        if not os.path.exists(os.path.join(self.source_directory, 'templates')):
-            LOG.warn("Chart {} has no templates directory, no templates will be deployed".format(self.chart.name))
-        for root, dirs, files in os.walk(os.path.join(self.source_directory, 'templates'), topdown=True):
-            for file in files:
-                templates.append(Template(name=file, data=open(os.path.join(root, file), 'r').read()))
-
+        if not os.path.exists(os.path.join(self.source_directory,
+                                           'templates')):
+            LOG.warn("Chart %s has no templates directory,"
+                     "no templates will be deployed", self.chart.name)
+        for root, _, files in os.walk(os.path.join(self.source_directory,
+                                                   'templates'), topdown=True):
+            for tpl_file in files:
+                templates.append(Template(name=tpl_file,
+                                          data=open(os.path.join(root,
+                                                                 tpl_file),
+                                                    'r').read()))
         return templates
-
 
     def get_helm_chart(self):
         '''
@@ -137,9 +147,11 @@ class ChartBuilder(object):
             return self._helm_chart
         # dependencies
         # [process_chart(x, is_dependency=True) for x in chart.dependencies]
-        dependencies=[]
+        dependencies = []
+
         for chart in self.chart.dependencies:
-            LOG.info("Building dependency chart {} for release {}".format(chart.name, self.chart.release_name))
+            LOG.info("Building dependency chart %s for release %s", chart.name,
+                     self.chart.release_name)
             dependencies.append(ChartBuilder(chart).get_helm_chart())
 
         helm_chart = Chart(
@@ -153,12 +165,11 @@ class ChartBuilder(object):
         self._helm_chart = helm_chart
         return helm_chart
 
-
     def dump(self):
         '''
-        This method is used to dump a chart object as a serialized string so that we can perform a diff
+        This method is used to dump a chart object as a
+        serialized string so that we can perform a diff
 
         It should recurse into dependencies
         '''
         return self.get_helm_chart().SerializeToString()
-
