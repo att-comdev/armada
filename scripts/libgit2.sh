@@ -14,5 +14,5 @@ cd libgit2-${LIBGIT_VERSION}/
 cmake .
 make
 sudo make install
-sudo pip install pygit2==0.25.0
+sudo pip install pygit2==${LIBGIT_VERSION}
 sudo ldconfig
