@@ -1,16 +1,10 @@
 # UUID                                  	Group Name
 #
-user:jenkins-attcomdev                  	user/jenkins-attcomdev
-
-#groups by roles:
-f84cac0126111346f33575c7a6b1a3c7359049a6	attcomdev-projectbootstrap
+0843086f0cb2059592c38c23f19a78a06b03d945	attcomdev-verify
 0ea5296997e34489dc5c764319fff4cd42ee4044	attcomdev-releasemanagers
-c2f3f58c67a86c97d3a0c3a674ce4961174a8c91	attcomdev-ci-tool
-
-# groups by functions:
 4b905454b626b0a68d8f3a78bb0b160c00d06dac	attcomdev-approvers
 bb404d136e4b2206880a90f3cad303f4c487770b	attcomdev-workflow
-0843086f0cb2059592c38c23f19a78a06b03d945	attcomdev-verify
-
-#global groups:
-global:Registered-Users				Registered Users
+c2f3f58c67a86c97d3a0c3a674ce4961174a8c91	attcomdev-ci-tool
+f84cac0126111346f33575c7a6b1a3c7359049a6	attcomdev-projectbootstrap
+global:Registered-Users                 	Registered Users
+user:jenkins-attcomdev                  	user/Jenkins (jenkins-attcomdev)
