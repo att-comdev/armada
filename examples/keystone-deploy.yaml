@@ -1,0 +1,92 @@
+endpoints: &endpoints
+  glance:
+    this: is an example
+
+armada:
+  release_prefix: armada
+
+  charts:
+
+    - chart: &helm-toolkit
+        name: helm-toolkit
+        release_name: null
+        namespace: null
+        values: {}
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: helm-toolkit
+          reference: master
+        dependencies: []
+
+    - chart: &etcd
+        name: etcd-rabbitmq
+        release_name: etcd
+        namespace: openstack
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: etcd
+          reference: master
+        dependencies:
+          - *helm-toolkit
+
+    - chart: &memcached
+        name: memcached
+        release_name: memcached
+        namespace: openstack
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: memcached
+          reference: master
+        dependencies:
+          - *helm-toolkit
+
+    - chart: &rabbitmq
+        name: rabbitmq
+        release_name: rabbitmq
+        namespace: openstack
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: rabbitmq
+          reference: master
+        dependencies:
+          - *helm-toolkit
+
+    - chart: &keystone
+        name: keystone
+        release_name: keystone
+        namespace: openstack
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: keystone
+          reference: master
+        dependencies:
+          - *helm-toolkit

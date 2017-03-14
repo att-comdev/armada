@@ -46,7 +46,7 @@ NOTE: If you want to use virtualenv please refer to [pygit2](http://www.pygit2.o
 
 `sudo pip install -e .`
 
-`armada -h`
+`armada [-h | --help]`
 
 ## Using Armada
 
@@ -62,13 +62,13 @@ Before using armada we need to check a few things:
 To run armada, simply supply it with your YAML based intention for any number of charts:
 
 ```
-aramda -c examples/armada.yaml
+aramda apply examples/armada.yaml [--debug |
 ```
 
 Your output will look something like this:
 
 ```
-$ armada -c examples/armada.yaml
+$ armada apply examples/armada.yaml
 2017-02-10 09:42:36,753 armada       INFO     Cloning git://github.com/att-comdev/openstack-helm/keystone for release keystone
 2017-02-10 09:42:39,238 armada       INFO     Building dependency chart common for release keystone
 2017-02-10 09:42:39,238 armada       INFO     Cloning git://github.com/att-comdev/openstack-helm/common for release None
@@ -95,7 +95,7 @@ endpoints: &endpoints
 And re-run armada, we will notice it will upgrade the keystone release, instead of install it on this pass, as well as report back the values changes as a unified diff.  A unified diff for any template changes would also be shown had those occurred.
 
 ```
-alan@hpdesktop:~/Workbench/att/attcomdev/armada$ armada -c examples/armada.yaml
+alan@hpdesktop:~/Workbench/att/attcomdev/armada$ armada apply examples/armada.yaml
 2017-02-10 09:44:43,396 armada       INFO     Cloning git://github.com/att-comdev/openstack-helm/keystone for release keystone
 2017-02-10 09:44:47,640 armada       INFO     Building dependency chart common for release keystone
 2017-02-10 09:44:47,640 armada       INFO     Cloning git://github.com/att-comdev/openstack-helm/common for release None

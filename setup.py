@@ -1,6 +1,6 @@
-from setuptools import setup
 from setuptools.command.test import test as TestCommand
 import sys
+import setuptools
 
 class Tox(TestCommand):
     """Runs Tox comands"""
@@ -17,15 +17,16 @@ class Tox(TestCommand):
         sys.exit(errcode)
 
 
-setup(
-    name='armada',
-    version='0.1.0',
-    description='Armada Helm Orchestrator',
-    packages=['armada',
-              'hapi',
-              'hapi.chart',
-              'hapi.release',
-              'hapi.services',
-              'hapi.version'],
-    scripts=['scripts/armada']
-)
+# In python < 2.7.4, a lazy loading of package `pbr` will break
+# setuptools if some other modules registered functions in `atexit`.
+# solution from: http://bugs.python.org/issue15881#msg170215
+
+try:
+    import multiprocessing  # noqa
+except ImportError:
+    pass
+
+setuptools.setup(
+    setup_requires=['pbr'],
+    extras_require={'zabbix': ['pyzabbix==0.7.3']},
+    pbr=True)

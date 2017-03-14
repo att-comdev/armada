@@ -87,3 +87,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+libgit2-0.25.0/
+v0.25.0.tar.gz

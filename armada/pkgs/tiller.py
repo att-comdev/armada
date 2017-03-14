@@ -1,8 +1,25 @@
+# Copyright 2017 The Armada Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
     InstallReleaseRequest, UpdateReleaseRequest
 from hapi.chart.config_pb2 import Config
 from k8s import K8s
 import grpc
+import logging
+
+LOG = logging.getLogger(__name__)
 
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.1.3'
@@ -46,16 +63,20 @@ class Tiller(object):
         '''
         Search all namespaces for a pod beginning with tiller-deploy*
         '''
-        ret = self.k8s.client.list_pod_for_all_namespaces()
-        for i in ret.items:
-            # TODO(alanmeadows): this is a bit loose
-            if i.metadata.name.startswith('tiller-deploy'):
-                return i
+        try:
+            ret = self.k8s.client.list_pod_for_all_namespaces()
+            for i in ret.items:
+                # TODO(alanmeadows): this is a bit loose
+                if i.metadata.name.startswith('tiller-deploy'):
+                    return i
+        except Exception:
+            LOG.error("Could not find the tiller service")
 
     def _get_tiller_ip(self):
         '''
         Returns the tiller pod's IP address by searching all namespaces
         '''
+        LOG.info("Getting tiller IP")
         pod = self._get_tiller_pod()
         return pod.status.pod_ip
 
@@ -67,9 +88,12 @@ class Tiller(object):
         '''
         List Helm Releases
         '''
-        stub = ReleaseServiceStub(self.channel)
-        req = ListReleasesRequest()
-        return stub.ListReleases(req, self.timeout, metadata=self.metadata)
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            req = ListReleasesRequest()
+            return stub.ListReleases(req, self.timeout, metadata=self.metadata)
+        except Exception:
+            LOG.error("Could not get List of Helm Releases")
 
     def list_charts(self):
         '''
@@ -100,15 +124,19 @@ class Tiller(object):
             values = Config(raw=values)
 
         # build release install request
-        stub = ReleaseServiceStub(self.channel)
-        release_request = UpdateReleaseRequest(
-            chart=chart,
-            dry_run=dry_run,
-            disable_hooks=disable_hooks,
-            values=values,
-            name=name)
-        return stub.UpdateRelease(release_request, self.timeout,
-                                  metadata=self.metadata)
+        try:
+            LOG.info("Updating the %s chart", chart)
+            stub = ReleaseServiceStub(self.channel)
+            release_request = UpdateReleaseRequest(
+                chart=chart,
+                dry_run=dry_run,
+                disable_hooks=disable_hooks,
+                values=values,
+                name=name)
+            return stub.UpdateRelease(release_request, self.timeout,
+                                      metadata=self.metadata)
+        except Exception:
+            LOG.error("Could not update the helm release")
 
     def install_release(self, chart, dry_run, name, namespace, values=None):
         '''
@@ -121,13 +149,18 @@ class Tiller(object):
             values = Config(raw=values)
 
         # build release install request
-        stub = ReleaseServiceStub(self.channel)
-        release_request = InstallReleaseRequest(
-            chart=chart,
-            dry_run=dry_run,
-            values=values,
-            name=name,
-            namespace=namespace)
-        return stub.InstallRelease(release_request,
-                                   self.timeout,
-                                   metadata=self.metadata)
+        try:
+            LOG.debug("Installing the %s chart", chart)
+            stub = ReleaseServiceStub(self.channel)
+            release_request = InstallReleaseRequest(
+                chart=chart,
+                dry_run=dry_run,
+                values=values,
+                name=name,
+                namespace=namespace)
+            return stub.InstallRelease(release_request,
+                                       self.timeout,
+                                       metadata=self.metadata)
+        except Exception:
+            LOG.error("Could not install realease")
+            raise
