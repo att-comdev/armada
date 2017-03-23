@@ -1,9 +1,26 @@
+# Copyright 2017 The Armada Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import yaml
+import difflib
+import logging
+
 from supermutes.dot import dotify
 from chartbuilder import ChartBuilder
 from tiller import Tiller
-from logutil import LOG
-import yaml
-import difflib
+
+LOG = logging.getLogger(__name__)
 
 class Armada(object):
     '''
@@ -18,19 +35,19 @@ class Armada(object):
         '''
 
         self.args = args
-
-        # internalize config
-        self.config = yaml.load(open(args.config).read())
-
+        self.config = yaml.load(open(args.file).read())  # internalize config
         self.tiller = Tiller()
 
     def find_release_chart(self, known_releases, name):
         '''
         Find a release given a list of known_releases and a release name
         '''
-        for chart_name, version, chart, values in known_releases:
-            if chart_name == name:
-                return chart, values
+        try:
+            for chart_name, version, chart, values in known_releases:
+                if chart_name == name:
+                    return chart, values
+        except Exception:
+            LOG.error("Could not find %s in Known Releases", chart)
 
     def sync(self):
         '''
