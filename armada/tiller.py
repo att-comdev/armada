@@ -1,12 +1,17 @@
 from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
     InstallReleaseRequest, UpdateReleaseRequest
 from hapi.chart.config_pb2 import Config
-from k8s import K8s
+from kubernetes import client
+from kubernetes.client.rest import ApiException
 import grpc
+
+from k8s import K8s
+from logutil import LOG
 
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.1.3'
 TILLER_TIMEOUT = 300
+RELEASE_LIMIT = 64
 
 class Tiller(object):
     '''
@@ -67,9 +72,14 @@ class Tiller(object):
         '''
         List Helm Releases
         '''
+        releases = []
         stub = ReleaseServiceStub(self.channel)
-        req = ListReleasesRequest()
-        return stub.ListReleases(req, self.timeout, metadata=self.metadata)
+        req = ListReleasesRequest(limit=RELEASE_LIMIT)
+        release_list = stub.ListReleases(req, self.timeout,
+                                         metadata=self.metadata)
+        for y in release_list:
+            releases.extend(y.releases)
+        return releases
 
     def list_charts(self):
         '''
@@ -78,9 +88,8 @@ class Tiller(object):
         Returns list of (name, version, chart, values)
         '''
         charts = []
-        for x in self.list_releases():
+        for latest_release in self.list_releases():
             try:
-                latest_release = x.releases[-1]
                 charts.append((latest_release.name, latest_release.version,
                                latest_release.chart,
                                latest_release.config.raw))
@@ -88,8 +97,60 @@ class Tiller(object):
                 continue
         return charts
 
-    def update_release(self, chart, dry_run, name, disable_hooks=False,
-                       values=None):
+    def _pre_update_actions(self, actions, namespace):
+        '''
+        :params actions - array of items actions
+        :params namespace - name of pod for actions
+        '''
+        try:
+            for action in actions.get('delete'):
+                name = action.get("name")
+                action_type = action.get("type")
+                if "job" in action_type:
+                    LOG.info("Deleting %s in namespace: %s", name, namespace)
+                    self.delete_job_action(name, namespace)
+                    continue
+                LOG.error("Unable to execute name: %s type: %s ", name, type)
+        except Exception:
+            LOG.debug("Could not delete anything, please check yaml")
+
+        try:
+            for action in actions.get('create'):
+                name = action.get("name")
+                action_type = action.get("type")
+                if "job" in action_type:
+                    LOG.info("Creating %s in namespace: %s", name, namespace)
+                    self.create_job_action(name, action_type)
+                    continue
+        except Exception:
+            LOG.debug("Could not delete anything, please check yaml")
+
+    def _post_update_actions(self, actions, namespace):
+        pass
+
+    def delete_job_action(self, name, namespace):
+        '''
+        :params name - name of the job
+        :params namespace - name of pod that job
+        '''
+        try:
+            body = client.V1DeleteOptions()
+            self.k8s.api_client.delete_namespaced_job(name=name,
+                                                      namespace=namespace,
+                                                      body=body)
+        except ApiException as e:
+            LOG.error("Exception when deleting a job: %s", e)
+
+    def create_job_action(self, name, namespace):
+        '''
+        :params name - name of the job
+        :params namespace - name of pod that job
+        '''
+        LOG.info("Created %s in namespace: %s", name, namespace)
+
+    def update_release(self, chart, dry_run, name, namespace,
+                       pre_actions={}, post_actions={},
+                       disable_hooks=False, values=None):
         '''
         Update a Helm Release
         '''
@@ -99,6 +160,8 @@ class Tiller(object):
         else:
             values = Config(raw=values)
 
+        self._pre_update_actions(pre_actions, namespace)
+
         # build release install request
         stub = ReleaseServiceStub(self.channel)
         release_request = UpdateReleaseRequest(
@@ -107,8 +170,11 @@ class Tiller(object):
             disable_hooks=disable_hooks,
             values=values,
             name=name)
-        return stub.UpdateRelease(release_request, self.timeout,
-                                  metadata=self.metadata)
+
+        stub.UpdateRelease(release_request, self.timeout,
+                           metadata=self.metadata)
+
+        self._post_update_actions(post_actions, namespace)
 
     def install_release(self, chart, dry_run, name, namespace, values=None):
         '''

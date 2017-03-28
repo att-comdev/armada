@@ -11,9 +11,9 @@ armada:
 
   charts:
 
-    # silent dependency 
-    - chart: &common
-        name: common
+    # silent dependency
+    - chart: &helm-toolkit
+        name: helm-toolkit
         release_name: null
         namespace: null
         values: {}
@@ -23,19 +23,53 @@ armada:
           subpath: helm-toolkit
           reference: master
         dependencies: []
-       
-    - chart: &keystone
-        name: keystone
-        release_name: keystone
+
+    - chart: &mariadb
+        name: mariadb
+        release_name: mariadb
         namespace: openstack
-        install: 
+        install:
           no_hooks: false
         upgrade:
           no_hooks: false
           pre:
-            delete:
-              - Job/keystone-db-sync
-              - Job/keystone-db-init
+              delete: []
+              create: []
+          post:
+              delete: []
+              create: []
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: git://github.com/att-comdev/openstack-helm
+          subpath: mariadb
+          reference: master
+        dependencies:
+          - *helm-toolkit
+
+    - chart: &keystone
+        name: keystone
+        release_name: keystone
+        namespace: openstack
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+          pre:
+              delete:
+                  - name: keystone-db-sync
+                    type: job
+                  - name: keystone-db-init
+                    type: job
+              create:
+                  - name: keystone-db-sync
+                    type: job
+                  - name: keystone-db-init
+                    type: job
+          post:
+              delete: []
+              create: []
         values:
           endpoints: *endpoints
         source:
@@ -44,4 +78,4 @@ armada:
           subpath: keystone
           reference: master
         dependencies:
-          - *common
+          - *helm-toolkit
