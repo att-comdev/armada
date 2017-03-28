@@ -49,6 +49,8 @@ class Armada(object):
 
             chart = dotify(entry['chart'])
             values = entry['chart']['values']
+            pre_actions = {}
+            post_actions = {}
 
             if chart.release_name is None:
                 continue
@@ -61,15 +63,22 @@ class Armada(object):
             protoc_chart = chartbuilder.get_helm_chart()
 
             # determine install or upgrade by examining known releases
+            LOG.debug("RELEASE: %s", chart.release_name)
+
             if chart.release_name in [x[0] for x in known_releases]:
 
                 # indicate to the end user what path we are taking
                 LOG.info("Upgrading release %s", chart.release_name)
-
                 # extract the installed chart and installed values from the
                 # latest release so we can compare to the intended state
                 installed_chart, installed_values = self.find_release_chart(
                     known_releases, chart.release_name)
+
+                if not self.args.disable_update_pre:
+                    pre_actions = getattr(chart.upgrade, 'pre', {})
+
+                if not self.args.disable_update_post:
+                    post_actions = getattr(chart.upgrade, 'post', {})
 
                 # show delta for both the chart templates and the chart values
                 # TODO(alanmeadows) account for .files differences
@@ -85,7 +94,8 @@ class Armada(object):
 
                 # do actual update
                 self.tiller.update_release(protoc_chart, self.args.dry_run,
-                                           chart.release_name,
+                                           chart.release_name, chart.namespace,
+                                           pre_actions, post_actions,
                                            disable_hooks=chart.
                                            upgrade.no_hooks,
                                            values=yaml.safe_dump(values))
@@ -99,6 +109,15 @@ class Armada(object):
                                             chart.namespace,
                                             prefix,
                                             values=yaml.safe_dump(values))
+                try:
+                    LOG.info("Installing release %s", chart.release_name)
+                    self.tiller.install_release(protoc_chart,
+                                                self.args.dry_run,
+                                                chart.release_name,
+                                                chart.namespace,
+                                                values=yaml.safe_dump(values))
+                except Exception:
+                    LOG.error("Install failed, continuing.")
 
             LOG.debug("Cleaning up chart source in %s",
                       chartbuilder.source_directory)
