@@ -47,6 +47,8 @@ class Armada(object):
 
             chart = dotify(entry['chart'])
             values = entry['chart']['values']
+            pre_actions = {}
+            post_actions = {}
 
             if chart.release_name is None:
                 continue
@@ -59,37 +61,63 @@ class Armada(object):
             protoc_chart = chartbuilder.get_helm_chart()
 
             # determine install or upgrade by examining known releases
+            LOG.debug("RELEASE: %s", chart.release_name)
+
             if chart.release_name in [x[0] for x in known_releases]:
 
                 # indicate to the end user what path we are taking
                 LOG.info("Upgrading release %s", chart.release_name)
-
                 # extract the installed chart and installed values from the
                 # latest release so we can compare to the intended state
                 installed_chart, installed_values = self.find_release_chart(
                     known_releases, chart.release_name)
 
+                if not self.args.disable_update_pre:
+                    try:
+                        pre_actions = chart.upgrade.pre
+                    except Exception:
+                        LOG.debug("Could not find Pre actions")
+                else:
+                        pre_actions = {}
+
+                if not self.args.disable_update_post:
+                    try:
+                        post_actions = chart.upgrade.post
+                    except Exception:
+                        LOG.debug("Could not find Post actions")
+                else:
+                    post_actions = {}
+
                 # show delta for both the chart templates and the chart values
                 # TODO(alanmeadows) account for .files differences
                 # once we support those
-                self.show_diff(chart, installed_chart,
-                               installed_values, chartbuilder.dump(), values)
+                upgrade_diff = self.show_diff(chart, installed_chart,
+                                              installed_values,
+                                              chartbuilder.dump(), values)
+
+                if not upgrade_diff:
+                    LOG.info("There are no updates found in this chart")
+                    continue
 
                 # do actual update
                 self.tiller.update_release(protoc_chart, self.args.dry_run,
-                                           chart.release_name,
+                                           chart.release_name, chart.namespace,
+                                           pre_actions, post_actions,
                                            disable_hooks=chart.
                                            upgrade.no_hooks,
                                            values=yaml.safe_dump(values))
 
             # process install
             else:
-                LOG.info("Installing release %s", chart.release_name)
-                self.tiller.install_release(protoc_chart,
-                                            self.args.dry_run,
-                                            chart.release_name,
-                                            chart.namespace,
-                                            values=yaml.safe_dump(values))
+                try:
+                    LOG.info("Installing release %s", chart.release_name)
+                    self.tiller.install_release(protoc_chart,
+                                                self.args.dry_run,
+                                                chart.release_name,
+                                                chart.namespace,
+                                                values=yaml.safe_dump(values))
+                except Exception:
+                    LOG.error("Install failed, continuing.")
 
             LOG.debug("Cleaning up chart source in %s",
                       chartbuilder.source_directory)
@@ -120,3 +148,5 @@ class Armada(object):
             LOG.info("Values Unified Diff (%s)", chart.release_name)
             for line in values_diff:
                 print line
+
+        return (len(chart_diff) > 0) and (len(chart_diff) > 0)

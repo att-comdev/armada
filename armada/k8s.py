@@ -10,3 +10,4 @@ class K8s(object):
         '''
         config.load_kube_config()
         self.client = client.CoreV1Api()
+        self.api_client = client.BatchV1Api()
