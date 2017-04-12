@@ -14,6 +14,8 @@ def parse_args():
                     help='Path to YAML File or Directory')
     ap.add_argument('--debug', action='store_true', default=False,
                     required=False, help='Enable debug logging')
+    ap.add_argument('--enable-chart-cleanup', action='store_true',
+                    default=False, required=False, help='Clean up enviroment')
     ap.add_argument('-d', '--dry-run', action='store_true', default=False,
                     required=False, help='Enable dry-run flag on all Tiller'
                     'Calls')
