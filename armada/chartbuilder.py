@@ -64,7 +64,10 @@ class ChartBuilder(object):
                          self.chart.source.subpath,
                          self.chart.release_name)
 
-            pygit2.clone_repository(self.chart.source.location, tmpdir)
+            pygit2.clone_repository(self.chart.source.location, tmpdir,
+                                    checkout_branch=self.chart.
+                                    source.reference)
+
             return os.path.join(tmpdir, self.chart.source.subpath)
 
         else:
