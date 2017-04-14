@@ -72,8 +72,14 @@ class Armada(object):
                 # show delta for both the chart templates and the chart values
                 # TODO(alanmeadows) account for .files differences
                 # once we support those
-                self.show_diff(chart, installed_chart,
-                               installed_values, chartbuilder.dump(), values)
+
+                upgrade_diff = self.show_diff(chart, installed_chart,
+                                              installed_values,
+                                              chartbuilder.dump(), values)
+
+                if not upgrade_diff:
+                    LOG.info("There are no updates found in this chart")
+                    continue
 
                 # do actual update
                 self.tiller.update_release(protoc_chart, self.args.dry_run,
@@ -111,7 +117,7 @@ class Armada(object):
         if len(chart_diff) > 0:
             LOG.info("Chart Unified Diff (%s)", chart.release_name)
             for line in chart_diff:
-                print line
+                LOG.debug(line)
         values_diff = list(difflib.unified_diff(installed_values.split('\n'),
                                                 yaml
                                                 .safe_dump(target_values)
@@ -119,4 +125,6 @@ class Armada(object):
         if len(values_diff) > 0:
             LOG.info("Values Unified Diff (%s)", chart.release_name)
             for line in values_diff:
-                print line
+                LOG.debug(line)
+
+        return (len(chart_diff) > 0) or (len(chart_diff) > 0)
