@@ -10,7 +10,6 @@ armada:
   release_prefix: armada
 
   charts:
-
     # silent dependency
     - chart: &helm-toolkit
         name: helm-toolkit
@@ -19,9 +18,9 @@ armada:
         values: {}
         source:
           type: git
-          location: git://github.com/att-comdev/openstack-helm
+          location: git://github.com/gardlt/openstack-helm
           subpath: helm-toolkit
-          reference: master
+          reference: override-values
         dependencies: []
 
     - chart: &mariadb
@@ -32,19 +31,31 @@ armada:
           no_hooks: false
         upgrade:
           no_hooks: false
-          pre:
-              delete: []
-              create: []
-          post:
-              delete: []
-              create: []
         values:
           endpoints: *endpoints
         source:
           type: git
-          location: git://github.com/att-comdev/openstack-helm
+          location: git://github.com/gardlt/openstack-helm
           subpath: mariadb
-          reference: master
+          reference: override-values
+        dependencies:
+          - *helm-toolkit
+
+    - chart: &memcached
+        name: memcached
+        release_name: memcached
+        namespace: openstack
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: git://github.com/gardlt/openstack-helm
+          subpath: memcached
+          reference: override-values
         dependencies:
           - *helm-toolkit
 
@@ -62,16 +73,18 @@ armada:
                     type: job
                   - name: keystone-db-init
                     type: job
-              create: []
           post:
-              delete: []
-              create: []
+              create:
+                  - name: keystone-db-sync
+                    type: job
+                  - name: keystone-db-init
+                    type: job
         values:
           endpoints: *endpoints
         source:
           type: git
-          location: git://github.com/att-comdev/openstack-helm
+          location: git://github.com/gardlt/openstack-helm
           subpath: keystone
-          reference: master
+          reference: override-values
         dependencies:
           - *helm-toolkit

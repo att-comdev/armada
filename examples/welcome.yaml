@@ -1,0 +1,40 @@
+endpoints: &endpoints
+  hello-world:
+    this: is an example
+
+armada:
+  release_prefix: stable
+
+  charts:
+    - chart: &world
+        name: world
+        release_name: world
+        namespace: blog
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: https://github.com/gardlt/hello-world-chart
+          subpath: .
+          reference: master
+        dependencies: []
+    - chart: &hello
+        name: hello
+        release_name: hello
+        namespace: blog
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: https://github.com/gardlt/hello-world-chart
+          subpath: .
+          reference: master
+        dependencies: []

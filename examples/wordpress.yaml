@@ -1,0 +1,24 @@
+endpoints: &endpoints
+  wordpress:
+    this: is an example
+
+armada:
+  release_prefix: stable
+
+  charts:
+    - chart: &wordpress
+        name: wordpress
+        release_name: blog
+        namespace: blog
+        install:
+          no_hooks: false
+        upgrade:
+          no_hooks: false
+        values:
+          endpoints: *endpoints
+        source:
+          type: git
+          location: https://github.com/kubernetes/charts
+          subpath: ./stable/wordpress
+          reference: master
+        dependencies: []
