@@ -102,13 +102,6 @@ class Armada(object):
 
             # process install
             else:
-                LOG.info("Installing release %s", chart.release_name)
-                self.tiller.install_release(protoc_chart,
-                                            self.args.dry_run,
-                                            chart.release_name,
-                                            chart.namespace,
-                                            prefix,
-                                            values=yaml.safe_dump(values))
                 try:
                     LOG.info("Installing release %s", chart.release_name)
                     self.tiller.install_release(protoc_chart,
