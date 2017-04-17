@@ -39,6 +39,8 @@ class Armada(object):
 
         # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
+        prefix = self.config.get('armada').get('release_prefix')
+
         for release in known_releases:
             LOG.debug("Release %s, Version %s found on tiller", release[0],
                       release[1])
@@ -95,11 +97,16 @@ class Armada(object):
                                             self.args.dry_run,
                                             chart.release_name,
                                             chart.namespace,
+                                            prefix,
                                             values=yaml.safe_dump(values))
 
             LOG.debug("Cleaning up chart source in %s",
                       chartbuilder.source_directory)
             chartbuilder.source_cleanup()
+
+        if self.args.enable_chart_cleanup:
+            self.tiller.chart_cleanup(prefix, self.config['armada']['charts'],
+                                      known_releases)
 
     def show_diff(self, chart, installed_chart,
                   installed_values, target_chart, target_values):
