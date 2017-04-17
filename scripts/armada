@@ -19,6 +19,11 @@ def parse_args():
     ap.add_argument('-d', '--dry-run', action='store_true', default=False,
                     required=False, help='Enable dry-run flag on all Tiller'
                     'Calls')
+    ap.add_argument('--disable-update-pre', action='store_true', default=False,
+                    required=False, help='Disable pre update actions')
+    ap.add_argument('--disable-update-post', action='store_true',
+                    default=False, required=False,
+                    help='Disable post update actions')
 
     return ap.parse_args()
 
