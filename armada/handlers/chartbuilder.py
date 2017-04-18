@@ -1,14 +1,15 @@
+import os
+import yaml
+
 from hapi.chart.template_pb2 import Template
 from hapi.chart.chart_pb2 import Chart
 from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.config_pb2 import Config
-from logutil import LOG
 from supermutes.dot import dotify
-import shutil
-import tempfile
-import pygit2
-import os
-import yaml
+
+from armada.logutil import LOG
+from armada.utils.git import git_clone, source_cleanup
+
 
 class ChartBuilder(object):
     '''
@@ -50,9 +51,6 @@ class ChartBuilder(object):
         '''
 
         if self.chart.source.type == 'git':
-
-            tmpdir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
-            self._source_tmp_dir = tmpdir
             if self.parent:
                 LOG.info("Cloning %s/%s as dependency for %s",
                          self.chart.source.location,
@@ -64,11 +62,10 @@ class ChartBuilder(object):
                          self.chart.source.subpath,
                          self.chart.release_name)
 
-            pygit2.clone_repository(self.chart.source.location, tmpdir,
-                                    checkout_branch=self.chart.
-                                    source.reference)
+            self._source_tmp_dir = git_clone(self.chart.source.location,
+                                             self.chart.source.reference)
 
-            return os.path.join(tmpdir, self.chart.source.subpath)
+            return os.path.join(self._source_tmp_dir, self.chart.source.subpath)
 
         else:
             LOG.exception("Unknown source type %s for chart %s",
@@ -79,7 +76,7 @@ class ChartBuilder(object):
         '''
         Cleanup source
         '''
-        shutil.rmtree(self._source_tmp_dir)
+        source_cleanup(self._source_tmp_dir)
 
     def get_metadata(self):
         '''

@@ -1,9 +1,11 @@
-from supermutes.dot import dotify
-from chartbuilder import ChartBuilder
-from tiller import Tiller
-from logutil import LOG
-import yaml
 import difflib
+import yaml
+
+from supermutes.dot import dotify
+
+from handlers.chartbuilder import ChartBuilder
+from handlers.tiller import Tiller
+from logutil import LOG
 
 class Armada(object):
     '''
@@ -16,19 +18,15 @@ class Armada(object):
         Initialize the Armada Engine and establish
         a connection to Tiller
         '''
-
         self.args = args
-
-        # internalize config
         self.config = yaml.load(open(args.config).read())
-
         self.tiller = Tiller()
 
     def find_release_chart(self, known_releases, name):
         '''
         Find a release given a list of known_releases and a release name
         '''
-        for chart_name, version, chart, values in known_releases:
+        for chart_name, _, chart, values in known_releases:
             if chart_name == name:
                 return chart, values
 
@@ -114,6 +112,7 @@ class Armada(object):
 
             LOG.debug("Cleaning up chart source in %s",
                       chartbuilder.source_directory)
+
             chartbuilder.source_cleanup()
 
         if self.args.enable_chart_cleanup:
