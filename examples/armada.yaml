@@ -62,11 +62,7 @@ armada:
                     type: job
                   - name: keystone-db-init
                     type: job
-              create:
-                  - name: keystone-db-sync
-                    type: job
-                  - name: keystone-db-init
-                    type: job
+              create: []
           post:
               delete: []
               create: []
