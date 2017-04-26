@@ -7,8 +7,8 @@ from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.config_pb2 import Config
 from supermutes.dot import dotify
 
-from armada.logutil import LOG
-from armada.utils.git import git_clone, source_cleanup
+from logutil import LOG
+from git import git_clone, source_cleanup
 
 
 class ChartBuilder(object):
@@ -65,7 +65,8 @@ class ChartBuilder(object):
             self._source_tmp_dir = git_clone(self.chart.source.location,
                                              self.chart.source.reference)
 
-            return os.path.join(self._source_tmp_dir, self.chart.source.subpath)
+            return os.path.join(self._source_tmp_dir,
+                                self.chart.source.subpath)
 
         else:
             LOG.exception("Unknown source type %s for chart %s",

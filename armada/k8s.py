@@ -1,7 +1,7 @@
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from armada.logutil import LOG
+from logutil import LOG
 
 class K8s(object):
     '''

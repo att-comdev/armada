@@ -3,8 +3,8 @@ import yaml
 
 from supermutes.dot import dotify
 
-from handlers.chartbuilder import ChartBuilder
-from handlers.tiller import Tiller
+from chartbuilder import ChartBuilder
+from tiller import Tiller
 from logutil import LOG
 
 class Armada(object):
@@ -13,13 +13,20 @@ class Armada(object):
     workflows
     '''
 
-    def __init__(self, args):
+    def __init__(self, config,
+                 disable_update_pre=False,
+                 disable_update_post=False,
+                 enable_chart_cleanup=False,
+                 dry_run=False):
         '''
         Initialize the Armada Engine and establish
         a connection to Tiller
         '''
-        self.args = args
-        self.config = yaml.load(open(args.config).read())
+        self.disable_update_pre = disable_update_pre
+        self.disable_update_post = disable_update_post
+        self.enable_chart_cleanup = enable_chart_cleanup
+        self.dry_run = dry_run
+        self.config = yaml.load(config)
         self.tiller = Tiller()
 
     def find_release_chart(self, known_releases, name):
@@ -34,6 +41,11 @@ class Armada(object):
         '''
         Syncronize Helm with the Armada Config(s)
         '''
+        def release_prefix(prefix, chart):
+            '''
+            how to attach prefix to chart
+            '''
+            return "{}-{}".format(prefix, chart)
 
         # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
@@ -63,19 +75,21 @@ class Armada(object):
             # determine install or upgrade by examining known releases
             LOG.debug("RELEASE: %s", chart.release_name)
 
-            if chart.release_name in [x[0] for x in known_releases]:
+            if release_prefix(prefix, chart.release_name) in [x[0]
+                                                              for x in
+                                                              known_releases]:
 
                 # indicate to the end user what path we are taking
                 LOG.info("Upgrading release %s", chart.release_name)
                 # extract the installed chart and installed values from the
                 # latest release so we can compare to the intended state
                 installed_chart, installed_values = self.find_release_chart(
-                    known_releases, chart.release_name)
+                    known_releases, release_prefix(prefix, chart.release_name))
 
-                if not self.args.disable_update_pre:
+                if not self.disable_update_pre:
                     pre_actions = getattr(chart.upgrade, 'pre', {})
 
-                if not self.args.disable_update_post:
+                if not self.disable_update_post:
                     post_actions = getattr(chart.upgrade, 'post', {})
 
                 # show delta for both the chart templates and the chart values
@@ -91,34 +105,33 @@ class Armada(object):
                     continue
 
                 # do actual update
-                self.tiller.update_release(protoc_chart, self.args.dry_run,
-                                           chart.release_name, chart.namespace,
-                                           prefix, pre_actions, post_actions,
+                self.tiller.update_release(protoc_chart,
+                                           self.dry_run,
+                                           chart.release_name,
+                                           chart.namespace,
+                                           prefix, pre_actions,
+                                           post_actions,
                                            disable_hooks=chart.
                                            upgrade.no_hooks,
                                            values=yaml.safe_dump(values))
 
             # process install
             else:
-                try:
-                    LOG.info("Installing release %s", chart.release_name)
-                    self.tiller.install_release(protoc_chart,
-                                                self.args.dry_run,
-                                                chart.release_name,
-                                                chart.namespace,
-                                                prefix,
-                                                values=yaml.safe_dump(values))
-                except Exception:
-                    LOG.error("Install failed, continuing.")
+                LOG.info("Installing release %s", chart.release_name)
+                self.tiller.install_release(protoc_chart,
+                                            self.dry_run,
+                                            chart.release_name,
+                                            chart.namespace,
+                                            prefix,
+                                            values=yaml.safe_dump(values))
 
             LOG.debug("Cleaning up chart source in %s",
                       chartbuilder.source_directory)
 
             chartbuilder.source_cleanup()
 
-        if self.args.enable_chart_cleanup:
-            self.tiller.chart_cleanup(prefix, self.config['armada']['charts'],
-                                      known_releases)
+        if self.enable_chart_cleanup:
+            self.tiller.chart_cleanup(prefix, self.config['armada']['charts'])
 
     def show_diff(self, chart, installed_chart,
                   installed_values, target_chart, target_values):
