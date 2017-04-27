@@ -17,18 +17,18 @@ RUN apt-get update && \
         libffi-dev \
         libgit2-dev
 
-RUN useradd -ms /bin/bash armada
-USER armada
-WORKDIR /home/armada
+RUN useradd -ms /bin/bash $USER 
+USER $USER 
+WORKDIR /home/$USER
 
 RUN git clone -b $VERSION https://github.com/att-comdev/armada.git
 
-WORKDIR /home/armada/armada
-RUN virtualenv --no-site-packages /home/armada/.armada && \
-    . /home/armada/.armada/bin/activate
+WORKDIR /home/$USER/armada
+RUN virtualenv --no-site-packages /home/$USER/.armada && \
+    . /home/$USER/.armada/bin/activate
 
-RUN /home/armada/.armada/bin/pip install -r /home/armada/armada/requirements.txt
-RUN /home/armada/.armada/bin/python ./setup.py install
+RUN /home/$USER/.armada/bin/pip install -r /home/$USER/armada/requirements.txt
+RUN /home/$USER/.armada/bin/python ./setup.py install
 
-ENTRYPOINT ["/home/armada/.armada/bin/armada"]
+ENTRYPOINT ["/home/$USER/.armada/bin/armada"]
 CMD ["-h"]
