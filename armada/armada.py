@@ -95,7 +95,7 @@ class Armada(object):
                 # do actual update
                 self.tiller.update_release(protoc_chart, self.args.dry_run,
                                            chart.release_name, chart.namespace,
-                                           pre_actions, post_actions,
+                                           prefix, pre_actions, post_actions,
                                            disable_hooks=chart.
                                            upgrade.no_hooks,
                                            values=yaml.safe_dump(values))
@@ -108,6 +108,7 @@ class Armada(object):
                                                 self.args.dry_run,
                                                 chart.release_name,
                                                 chart.namespace,
+                                                prefix,
                                                 values=yaml.safe_dump(values))
                 except Exception:
                     LOG.error("Install failed, continuing.")
@@ -146,4 +147,4 @@ class Armada(object):
             for line in values_diff:
                 LOG.debug(line)
 
-        return (len(chart_diff) > 0) or (len(chart_diff) > 0)
+        return (len(chart_diff) > 0) or (len(values_diff) > 0)
