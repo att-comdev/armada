@@ -17,8 +17,8 @@ RUN apt-get update && \
         libssl-dev \
         libffi-dev \
         libgit2-dev \
+    && git clone -b $VERSION $REPO ${HOME}/armada
 
-RUN git clone -b $VERSION $REPO ${HOME}/armada
 WORKDIR /root/armada
 RUN pip install -r requirements.txt \
     && sh scripts/libgit2.sh \
