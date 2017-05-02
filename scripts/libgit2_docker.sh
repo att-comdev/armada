@@ -2,7 +2,7 @@
 
 # Ubuntu 16.04 Install only
 
-apt install git cmake make wget -y
+apt install git cmake make -y
 apt-get install -y python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libssh2-1 libgit2-dev python-pip libgit2-24
 apt-get install -y pkg-config libssh2-1-dev libhttp-parser-dev libssl-dev libz-dev
 

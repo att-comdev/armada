@@ -30,14 +30,18 @@ def parse_args():
 
 def run(args):
 
-    armada = Armada(args)
+    armada = Armada(open(args.config).read(),
+                    args.disable_update_pre,
+                    args.disable_update_post,
+                    args.enable_chart_cleanup,
+                    args.dry_run)
     armada.sync()
 
 
 if __name__ == '__main__':
 
     args = parse_args()
-    setup_logging(args)
+    setup_logging(args.debug)
 
     try:
         run(args)

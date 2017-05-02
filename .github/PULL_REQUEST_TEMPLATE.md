@@ -1,5 +1,5 @@
 <!--
-      Thanks for contributing to OpenStack-Helm!  Please be thorough
+      Thanks for contributing to Armada!  Please be thorough
       when filling out your pull request. If the purpose for your pull
       request is not clear, we may close your pull request and ask you
       to resubmit.

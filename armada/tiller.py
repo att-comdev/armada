@@ -1,7 +1,7 @@
+import grpc
 from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
     InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
 from hapi.chart.config_pb2 import Config
-import grpc
 
 from k8s import K8s
 from logutil import LOG
@@ -64,6 +64,15 @@ class Tiller(object):
     def _get_tiller_port(self):
         '''Stub method to support arbitrary ports in the future'''
         return TILLER_PORT
+
+    def tiller_status(self):
+        '''
+        return if tiller exist or not
+        '''
+        if self._get_tiller_ip:
+            return True
+
+        return False
 
     def list_releases(self):
         '''
@@ -134,7 +143,7 @@ class Tiller(object):
         except Exception:
             LOG.debug("POST: Could not create anything, please check yaml")
 
-    def update_release(self, chart, dry_run, name, namespace,
+    def update_release(self, chart, dry_run, name, namespace, prefix,
                        pre_actions=None, post_actions=None,
                        disable_hooks=False, values=None):
         '''
@@ -155,7 +164,7 @@ class Tiller(object):
             dry_run=dry_run,
             disable_hooks=disable_hooks,
             values=values,
-            name=name)
+            name="{}-{}".format(prefix, name))
 
         stub.UpdateRelease(release_request, self.timeout,
                            metadata=self.metadata)
@@ -202,7 +211,7 @@ class Tiller(object):
                                      self.timeout,
                                      metadata=self.metadata)
 
-    def chart_cleanup(self, prefix, charts, known_releases):
+    def chart_cleanup(self, prefix, charts):
         '''
         :params charts - list of yaml charts
         :params known_release - list of releases in tiller
@@ -210,6 +219,9 @@ class Tiller(object):
         :result - will remove any chart that is not present in yaml
         '''
         def release_prefix(prefix, chart):
+            '''
+            how to attach prefix to chart
+            '''
             return "{}-{}".format(prefix, chart["chart"]["release_name"])
 
         valid_charts = [release_prefix(prefix, chart) for chart in charts]

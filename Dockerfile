@@ -1,8 +1,9 @@
 FROM ubuntu:16.04
-MAINTAINER bjozsa@att.com
+MAINTAINER Armada Team
 
 ENV USER=armada \
-    VERSION=master
+    VERSION=master \
+    REPO=https://github.com/att-comdev/armada.git
 
 RUN apt-get update && \
     apt-get install -y \
@@ -15,20 +16,18 @@ RUN apt-get update && \
         gcc \
         libssl-dev \
         libffi-dev \
-        libgit2-dev
+        libgit2-dev \
 
-RUN useradd -ms /bin/bash $USER 
-USER $USER 
-WORKDIR /home/$USER
+RUN git clone -b $VERSION $REPO ${HOME}/armada
+WORKDIR /root/armada
+RUN pip install -r requirements.txt \
+    && sh scripts/libgit2.sh \
+    && pip install --upgrade urllib3 \
+    && pip install pygit2 \
+    && python setup.py install
 
-RUN git clone -b $VERSION https://github.com/att-comdev/armada.git
+ENTRYPOINT ["armada"]
 
-WORKDIR /home/$USER/armada
-RUN virtualenv --no-site-packages /home/$USER/.armada && \
-    . /home/$USER/.armada/bin/activate
+EXPOSE 8000
 
-RUN /home/$USER/.armada/bin/pip install -r /home/$USER/armada/requirements.txt
-RUN /home/$USER/.armada/bin/python ./setup.py install
-
-ENTRYPOINT ["/home/$USER/.armada/bin/armada"]
-CMD ["-h"]
+CMD gunicorn server:api -b :8000

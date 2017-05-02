@@ -1,5 +1,6 @@
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
+
 from logutil import LOG
 
 class K8s(object):
@@ -40,5 +41,5 @@ class K8s(object):
 
         This will return a list of objects req namespace
         '''
-        res = self.client.list_namespaced_pod(namespace)
-        return res
+
+        return self.client.list_namespaced_pod(namespace)
