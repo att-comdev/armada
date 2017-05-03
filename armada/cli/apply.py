@@ -1,0 +1,53 @@
+# Copyright 2017 The Armada Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import logging
+
+from cliff import command as cmd
+
+from armada.handlers.armada import Armada
+
+LOG = logging.getLogger(__name__)
+
+def applyCharts(args):
+
+    armada = Armada(open(args.file).read(),
+                    args.disable_update_pre,
+                    args.disable_update_post,
+                    args.enable_chart_cleanup,
+                    args.skip_pre_flight,
+                    args.dry_run)
+    armada.sync()
+
+class ApplyChartsCommand(cmd.Command):
+    def get_parser(self, prog_name):
+        parser = super(ApplyChartsCommand, self).get_parser(prog_name)
+        parser.add_argument('file', type=str, metavar='FILE',
+                            help='Armada yaml file')
+        parser.add_argument('--dry-run', action='store_true',
+                            default=False, help='Run charts with dry run')
+        parser.add_argument('--skip-pre-flight', action='store_true',
+                            default=False, help='Skip Pre Flight')
+        parser.add_argument('--debug', action='store',
+                            default=False, help='Run charts with dry run')
+        parser.add_argument('--disable-update-pre', action='store',
+                            default=False, help='Disable pre upgrade actions')
+        parser.add_argument('--disable-update-post', action='store',
+                            default=False, help='Disable post upgrade actions')
+        parser.add_argument('--enable-chart-cleanup', action='store',
+                            default=False, help='Enable Chart Clean Up')
+        return parser
+
+    def take_action(self, parsed_args):
+        applyCharts(parsed_args)

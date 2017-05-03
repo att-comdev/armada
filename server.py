@@ -1,11 +1,28 @@
+# Copyright 2017 The Armada Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
+
+import logging
 import falcon
 import json
 from falcon import HTTP_200
 
-from armada.tiller import Tiller as tillerHandler
-from armada.armada import Armada as armadaHandler
-from armada.logutil import setup_logging
+from armada.handlers.tiller import Tiller as tillerHandler
+from armada.handlers.armada import Armada as armadaHandler
+
+LOG = logging.getLogger(__name__)
 
 class Tiller(object):
     '''
@@ -32,7 +49,6 @@ class Armada(object):
 
     def on_post(self, req, resp):
         armada = armadaHandler(req.stream.read())
-        print armada.tiller.k8s.get_namespace_pod()
         armada.sync()
 
         resp.data = json.dumps({'message': 'Success'})
@@ -51,6 +67,3 @@ url_routes = (
 
 for route, service in url_routes:
     api.add_route(route, service)
-
-
-setup_logging(False)

@@ -1,5 +1,20 @@
+# Copyright 2017 The Armada Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import yaml
+import logging
 
 from hapi.chart.template_pb2 import Template
 from hapi.chart.chart_pb2 import Chart
@@ -7,9 +22,9 @@ from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.config_pb2 import Config
 from supermutes.dot import dotify
 
-from logutil import LOG
-from git import git_clone, source_cleanup
+from ..utils.git import git_clone, source_cleanup
 
+LOG = logging.getLogger(__name__)
 
 class ChartBuilder(object):
     '''
@@ -67,6 +82,9 @@ class ChartBuilder(object):
 
             return os.path.join(self._source_tmp_dir,
                                 self.chart.source.subpath)
+        if self.chart.source.type == 'local':
+            return os.path.join(self.chart.source.location,
+                                self.chart.source.subpath)
 
         else:
             LOG.exception("Unknown source type %s for chart %s",
@@ -77,7 +95,8 @@ class ChartBuilder(object):
         '''
         Cleanup source
         '''
-        source_cleanup(self._source_tmp_dir)
+        if self.chart.source.type == 'git':
+            source_cleanup(self._source_tmp_dir)
 
     def get_metadata(self):
         '''

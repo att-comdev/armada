@@ -5,11 +5,22 @@ Development
 Docker
 ######
 
-To use this container, use these simple instructions:
+To use the docker containter to develop:
+
+1. Fork the [repo](http://github.com/att-comdev/armada)
+2. After making changes push to repo and build from forked repo
 
 .. code-block:: bash
 
-   docker run quay.io/attcomdev/armada:latest
+    export repo="https://github.com/<forked-repo>/armada.git"
+    export branch="<branch>"
+    docker build . -p 8000:8000 -v ${HOME}/.kube/config:/root/.kube/config -t quay.io/attcomdev/armada:latest --build-arg REPO=$repo --build-arg VERSION=$branch
+
+.. note::
+
+    The first build will take a little while. Afterwards the it will much faster
+
+3. EZPZ :)
 
 Virtualenv
 ##########

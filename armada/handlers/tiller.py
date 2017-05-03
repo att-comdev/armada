@@ -1,15 +1,33 @@
+# Copyright 2017 The Armada Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import grpc
+import logging
+
 from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
     InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
 from hapi.chart.config_pb2 import Config
 
 from k8s import K8s
-from logutil import LOG
+from ..utils.release import release_prefix
 
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.1.3'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
+
+LOG = logging.getLogger(__name__)
 
 class Tiller(object):
     '''
@@ -69,7 +87,7 @@ class Tiller(object):
         '''
         return if tiller exist or not
         '''
-        if self._get_tiller_ip:
+        if self._get_tiller_ip():
             return True
 
         return False
@@ -218,11 +236,6 @@ class Tiller(object):
 
         :result - will remove any chart that is not present in yaml
         '''
-        def release_prefix(prefix, chart):
-            '''
-            how to attach prefix to chart
-            '''
-            return "{}-{}".format(prefix, chart["chart"]["release_name"])
 
         valid_charts = [release_prefix(prefix, chart) for chart in charts]
         actual_charts = [x.name for x in self.list_releases()]
