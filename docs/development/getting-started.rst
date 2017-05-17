@@ -2,6 +2,26 @@
 Development
 ***********
 
+Vagrant
+#######
+
+Use vagrant for simple env set up `here <../../dev/README.md>`_
+
+Usage:
+
+.. code-block:: bash
+
+   vagrant up --provision
+   vagrant ssh
+
+   source venv/bin/activate
+
+   cd armada
+
+   pip install -r requirements.txt
+   pip install -r test-requirements.txt
+
+
 Docker
 ######
 
