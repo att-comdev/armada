@@ -67,7 +67,7 @@ Installing Dependecies:
 
 you can run:
 
--  ``tox testenv:ubuntu`` or ``sudo sh scripts/libgit2.sh``
+-  ``tox testenv:ubuntu`` or ``sudo sh tools/libgit2.sh``
 -  ``sudo pip install -r requirements.txt``
 
 NOTE: If you want to use virtualenv please refer to `pygit2`_
@@ -98,13 +98,13 @@ number of charts:
 
 ::
 
-    $ aramda apply examples/armada.yaml [--debug ]
+    $ armada apply examples/openstack-helm.yaml [--debug ]
 
 Your output will look something like this:
 
 ::
 
-    $ armada apply examples/armada.yaml 2017-02-10 09:42:36,753
+    $ armada apply examples/openstack-helm.yaml 2017-02-10 09:42:36,753
       armada INFO Cloning git:
 
 .. _pygit2: http://www.pygit2.org/install.html#libgit2-within-a-virtual-environment
