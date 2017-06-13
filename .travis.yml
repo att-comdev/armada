@@ -6,24 +6,30 @@ python:
   - "2.7"
 
 before_install:
-  - export LIGGIT2_VERSION=0.24.0
-  - export LIBGIT2=$VIRTUAL_ENV
-  - wget https://github.com/libgit2/libgit2/archive/v${LIGGIT2_VERSION}.tar.gz
-  - tar xzf v${LIGGIT2_VERSION}.tar.gz
-  - cd libgit2-${LIGGIT2_VERSION}/
-  - cmake . -DCMAKE_INSTALL_PREFIX=$LIBGIT2
-  - make
-  - make install
-  - export LDFLAGS="-Wl,-rpath='$LIBGIT2/lib',--enable-new-dtags $LDFLAGS"
-  - cd ..
-  - pip install -r test-requirements.txt
-  - pip install -r requirements.txt
-  - pip install pygit2==0.24.0
+    - export LIGGIT2_VERSION=0.24.0
+    - export LIBGIT2=$VIRTUAL_ENV
+    - wget https://github.com/libgit2/libgit2/archive/v${LIGGIT2_VERSION}.tar.gz
+    - tar xzf v${LIGGIT2_VERSION}.tar.gz
+    - cd libgit2-${LIGGIT2_VERSION}/
+    - cmake . -DCMAKE_INSTALL_PREFIX=$LIBGIT2
+    - make
+    - make install
+    - export LDFLAGS="-Wl,-rpath='$LIBGIT2/lib',--enable-new-dtags $LDFLAGS"
+    - cd ..
+    - pip install -r test-requirements.txt
+    - pip install -r requirements.txt
+    - pip install tox
+    - pip install pygit2==0.24.0
 
 install:
-  - pip install .
+    - pip install .
 
 script:
-  - flake8
-  - armada -h
+    - flake8
+    - armada -h
 #  - armada -c examples/armada.yaml -d
+
+after_success:
+    - cd docs && make html
+    - touch .nojekyll
+    - git clean -fdx

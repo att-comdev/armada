@@ -5,6 +5,12 @@ kubernetes==1.0.0
 protobuf==3.2.0
 PyYAML==3.12
 supermutes==0.2.5
+urllib3==1.21.1
 
+# API
 falcon==1.1.0
 gunicorn==19.7.1
+
+# CLI
+
+cliff==2.7.0

@@ -1,11 +1,30 @@
+# Copyright 2017 The Armada Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import difflib
 import yaml
+import logging
 
 from supermutes.dot import dotify
 
 from chartbuilder import ChartBuilder
 from tiller import Tiller
-from logutil import LOG
+from ..utils.release import release_prefix
+from ..utils import git
+from ..utils import lint
+
+LOG = logging.getLogger(__name__)
 
 class Armada(object):
     '''
@@ -17,6 +36,7 @@ class Armada(object):
                  disable_update_pre=False,
                  disable_update_post=False,
                  enable_chart_cleanup=False,
+                 skip_pre_flight=False,
                  dry_run=False):
         '''
         Initialize the Armada Engine and establish
@@ -25,6 +45,7 @@ class Armada(object):
         self.disable_update_pre = disable_update_pre
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
+        self.skip_pre_flight = skip_pre_flight
         self.dry_run = dry_run
         self.config = yaml.load(config)
         self.tiller = Tiller()
@@ -37,15 +58,24 @@ class Armada(object):
             if chart_name == name:
                 return chart, values
 
+    def pre_flight_checks(self):
+        for ch in self.config['armada']['charts']:
+            location = ch.get('chart').get('source').get('location')
+            ct_type = ch.get('chart').get('source').get('type')
+
+            if ct_type == 'git' and not git.check_available_repo(location):
+                raise ValueError(str("Invalid Url Path: " + location))
+
+            if not self.tiller.tiller_status():
+                raise Exception("Tiller Services is not Available")
+
+            if not lint.valid_manifest(self.config):
+                raise Exception("Invalid Armada Manifest")
+
     def sync(self):
         '''
         Syncronize Helm with the Armada Config(s)
         '''
-        def release_prefix(prefix, chart):
-            '''
-            how to attach prefix to chart
-            '''
-            return "{}-{}".format(prefix, chart)
 
         # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
@@ -55,10 +85,16 @@ class Armada(object):
             LOG.debug("Release %s, Version %s found on tiller", release[0],
                       release[1])
 
+        if not self.skip_pre_flight:
+            LOG.info("Performing Checking Pre Flight Tasks")
+            self.pre_flight_checks()
+        else:
+            LOG.info("Skipping Pre flight Checks")
+
         for entry in self.config['armada']['charts']:
 
             chart = dotify(entry['chart'])
-            values = entry['chart']['values']
+            values = entry.get('chart').get('values', {})
             pre_actions = {}
             post_actions = {}
 
@@ -86,10 +122,12 @@ class Armada(object):
                 installed_chart, installed_values = self.find_release_chart(
                     known_releases, release_prefix(prefix, chart.release_name))
 
-                if not self.disable_update_pre:
+                if not self.disable_update_pre and getattr(chart, 'upgrade',
+                                                           False):
                     pre_actions = getattr(chart.upgrade, 'pre', {})
 
-                if not self.disable_update_post:
+                if not self.disable_update_post and getattr(chart, 'upgrade',
+                                                            False):
                     post_actions = getattr(chart.upgrade, 'post', {})
 
                 # show delta for both the chart templates and the chart values
