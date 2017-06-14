@@ -14,10 +14,11 @@
 
 import difflib
 import yaml
+from threading import Event, Timer
+from time import sleep
 
 from oslo_config import cfg
 from oslo_log import log as logging
-
 from supermutes.dot import dotify
 
 from chartbuilder import ChartBuilder
@@ -34,6 +35,7 @@ logging.register_options(CONF)
 logging.setup(CONF, DOMAIN)
 
 LOG = logging.getLogger(__name__)
+DEFAULT_TIMEOUT = 3600
 
 class Armada(object):
     '''
@@ -46,7 +48,9 @@ class Armada(object):
                  disable_update_post=False,
                  enable_chart_cleanup=False,
                  skip_pre_flight=False,
-                 dry_run=False):
+                 dry_run=False,
+                 wait=False,
+                 timeout=DEFAULT_TIMEOUT):
         '''
         Initialize the Armada Engine and establish
         a connection to Tiller
@@ -56,6 +60,8 @@ class Armada(object):
         self.enable_chart_cleanup = enable_chart_cleanup
         self.skip_pre_flight = skip_pre_flight
         self.dry_run = dry_run
+        self.wait = wait
+        self.timeout = float(timeout)
         self.config = yaml.load(config)
         self.tiller = Tiller()
 
@@ -181,6 +187,11 @@ class Armada(object):
 
             chartbuilder.source_cleanup()
 
+        # if requested, wait for chart deployment
+        if self.wait:
+            LOG.info("Waiting for chart deployment")
+            self.wait_for_deployment()
+
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(prefix, self.config['armada']['charts'])
 
@@ -211,3 +222,35 @@ class Armada(object):
                 LOG.debug(line)
 
         return (len(chart_diff) > 0) or (len(values_diff) > 0)
+
+    def wait_for_deployment(self):
+        FAIL_STATUS = 'Failed'
+        RUN_STATUS = 'Running'
+        SUCCESS_STATUS = 'Succeeded'
+
+        pods = self.tiller.k8s.get_all_pods().items
+        timeout_event = Event()
+        timer = Timer(self.timeout, timeout_event.set)
+
+        try:
+            timer.start()
+            while not len(pods) == 0 and not timeout_event.is_set():
+                sleep(1)
+                pods_copy = list(pods)
+                for pod in pods_copy:
+                    if pod.status.phase == FAIL_STATUS:
+                        timer.cancel()
+                        raise RuntimeError('Deploy failed {}'
+                                           .format(pod.metadata.name))
+                    elif (pod.status.phase == RUN_STATUS or
+                            pod.status.phase == SUCCESS_STATUS):
+                        pods.remove(pod)
+        except:
+            timer.cancel()
+            pass
+
+        if timeout_event.is_set():
+            raise RuntimeError('Deploy timeout {}'
+                               .format([pod.metadata.name for pod in (pods)]))
+        else:
+            timer.cancel()

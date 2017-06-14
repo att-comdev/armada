@@ -58,3 +58,13 @@ class K8s(object):
         '''
 
         return self.client.list_namespaced_pod(namespace)
+
+    def get_all_pods(self, label_selector=''):
+        '''
+        :params - label_selector - filters pods by label
+
+        Returns a list of pods from all namespaces
+        '''
+
+        return self.client \
+            .list_pod_for_all_namespaces(label_selector=label_selector)
