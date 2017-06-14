@@ -110,8 +110,8 @@ class ChartBuilder(object):
         Process metadata
         '''
         # extract Chart.yaml to construct metadata
-        chart_yaml = dotify(yaml.load(open(
-            os.path.join(self.source_directory, 'Chart.yaml')).read()))
+        chart_yaml = dotify(yaml.load(open(os.path.join(self.source_directory,
+                                                        'Chart.yaml')).read()))
 
         # construct Metadata object
         return Metadata(
