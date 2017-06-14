@@ -9,6 +9,10 @@ def git_clone(repo_url, branch='master'):
     '''
     clones repo to a /tmp/ dir
     '''
+
+    if repo_url == '' or not check_available_repo(repo_url):
+        return False
+
     _tmp_dir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
     pygit2.clone_repository(repo_url, _tmp_dir, checkout_branch=branch)
 
