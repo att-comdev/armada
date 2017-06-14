@@ -27,7 +27,9 @@ def applyCharts(args):
                     args.disable_update_post,
                     args.enable_chart_cleanup,
                     args.skip_pre_flight,
-                    args.dry_run)
+                    args.dry_run,
+                    args.wait,
+                    args.timeout)
     armada.sync()
 
 class ApplyChartsCommand(cmd.Command):
@@ -47,6 +49,12 @@ class ApplyChartsCommand(cmd.Command):
                             default=False, help='Disable post upgrade actions')
         parser.add_argument('--enable-chart-cleanup', action='store',
                             default=False, help='Enable Chart Clean Up')
+        parser.add_argument('--wait', action='store_true',
+                            default=False, help='Wait until all charts'
+                                                'have been deployed')
+        parser.add_argument('--timeout', action='store',
+                            default=3600, help='Specifies time to wait'
+                                                ' for charts to deploy')
         return parser
 
     def take_action(self, parsed_args):
