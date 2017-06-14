@@ -43,7 +43,7 @@ To use this container, use these simple instructions:
 
 ::
 
-    docker run -d --name armada -p 8000:8000 -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples -v /tmp:/dev/log quay.io/attcomdev/armada:latest
+    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
 
 Manual Install
 ~~~~~~~~~~~~~~
@@ -53,7 +53,7 @@ If you want to build the docker image, follow these steps:
 ::
 
     docker build . -t <namespace>/armada
-    docker run -d --name armada -p 8000:8000 -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples <namespace>/armada
+    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples <namespace>/armada
 
 Installation
 ------------
@@ -116,4 +116,3 @@ Your output will look something like this:
    :target: https://travis-ci.org/att-comdev/armada
 .. |Doc Status| image:: https://readthedocs.org/projects/armada-helm/badge/?version=latest
    :target: http://armada-helm.readthedocs.io/
-

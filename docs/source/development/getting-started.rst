@@ -8,13 +8,14 @@ Docker
 To use the docker containter to develop:
 
 1. Fork the [repo](http://github.com/att-comdev/armada)
-2. After making changes push to repo and build from forked repo
+2. Clone the forked repo
+3. After making changes push to repo and build from forked repo
 
 .. code-block:: bash
 
     export repo="https://github.com/<forked-repo>/armada.git"
     export branch="<branch>"
-    docker build . -p 8000:8000 -v ${HOME}/.kube/config:/root/.kube/config -t quay.io/attcomdev/armada:latest --build-arg REPO=$repo --build-arg VERSION=$branch
+    docker build . -t quay.io/attcomdev/armada:latest --build-arg REPO=$repo --build-arg VERSION=$branch
 
 .. note::
 
