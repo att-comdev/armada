@@ -9,10 +9,10 @@ To use the docker containter to develop:
 
 1. Fork the [repo](http://github.com/att-comdev/armada)
 2. Clone the forked repo
-3. After making changes push to repo and build from forked repo
 
 .. code-block:: bash
 
+    cd armada
     export repo="https://github.com/<forked-repo>/armada.git"
     export branch="<branch>"
     docker build . -t quay.io/attcomdev/armada:latest --build-arg REPO=$repo --build-arg VERSION=$branch
@@ -62,11 +62,9 @@ Test that it worked with:
 
    python -c 'import pygit2'
 
+From the directory of the forked repository:
 
 .. code-block:: bash
-
-   git clone https://github.com/att-comdev/armada.git
-   cd armada
    pip install -r requirements.txt
    pip install -r test-requirements.txt
 
