@@ -14,7 +14,9 @@
 
 import difflib
 import yaml
-import logging
+
+from oslo_config import cfg
+from oslo_log import log as logging
 
 from supermutes.dot import dotify
 
@@ -23,6 +25,13 @@ from tiller import Tiller
 from ..utils.release import release_prefix
 from ..utils import git
 from ..utils import lint
+
+LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.register_options(CONF)
+logging.setup(CONF, DOMAIN)
 
 LOG = logging.getLogger(__name__)
 
