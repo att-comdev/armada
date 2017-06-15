@@ -36,8 +36,6 @@ class ArmadaApp(app.App):
     def configure_logging(self):
         super(ArmadaApp, self).configure_logging()
         log.set_console_formatter()
-        log.silence_iso8601()
-
 
 def main(argv=None):
     if argv is None:
