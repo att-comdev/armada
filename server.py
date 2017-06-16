@@ -14,15 +14,22 @@
 #
 
 
-import logging
 import falcon
 import json
 from falcon import HTTP_200
+
+from oslo_config import cfg
+from oslo_log import log as logging
 
 from armada.handlers.tiller import Tiller as tillerHandler
 from armada.handlers.armada import Armada as armadaHandler
 
 LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.register_options(CONF)
+logging.setup(CONF, DOMAIN)
 
 class Tiller(object):
     '''
