@@ -131,13 +131,17 @@ class Armada(object):
                 installed_chart, installed_values = self.find_release_chart(
                     known_releases, release_prefix(prefix, chart.release_name))
 
-                if not self.disable_update_pre and getattr(chart, 'upgrade',
-                                                           False):
-                    pre_actions = getattr(chart.upgrade, 'pre', {})
+                LOG.info("Checking Pre/Post Actions")
+                upgrade = entry.get('chart', {}).get('upgrade', False)
+                if upgrade:
+                    if not self.disable_update_pre and upgrade.get('pre',
+                                                                   False):
+                        pre_actions = getattr(chart.upgrade, 'pre', {})
 
-                if not self.disable_update_post and getattr(chart, 'upgrade',
-                                                            False):
-                    post_actions = getattr(chart.upgrade, 'post', {})
+                    if not self.disable_update_post and upgrade.get('post',
+                                                                    False):
+                        LOG.info("Checking Post Actions")
+                        post_actions = getattr(chart.upgrade, 'post', {})
 
                 # show delta for both the chart templates and the chart values
                 # TODO(alanmeadows) account for .files differences
