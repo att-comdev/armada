@@ -27,6 +27,13 @@ TILLER_VERSION = b'2.1.3'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
 
+# the standard gRPC max message size is 4MB
+# this expansion comes at a performance penalty
+# but until proper paging is supported, we need
+# to support a larger payload as the current
+# limit is exhausted with just 10 releases
+MAX_MESSAGE_LENGTH=4194304*10
+
 LOG = logging.getLogger(__name__)
 
 class Tiller(object):
@@ -61,7 +68,9 @@ class Tiller(object):
         '''
         tiller_ip = self._get_tiller_ip()
         tiller_port = self._get_tiller_port()
-        return grpc.insecure_channel('%s:%s' % (tiller_ip, tiller_port))
+        return grpc.insecure_channel('%s:%s' % (tiller_ip, tiller_port), options=\
+          [('grpc.max_send_message_length', MAX_MESSAGE_LENGTH), (
+            'grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)])
 
     def _get_tiller_pod(self):
         '''
