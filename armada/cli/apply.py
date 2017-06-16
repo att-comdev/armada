@@ -41,9 +41,9 @@ class ApplyChartsCommand(cmd.Command):
                             default=False, help='Skip Pre Flight')
         parser.add_argument('--debug', action='store',
                             default=False, help='Run charts with dry run')
-        parser.add_argument('--disable-update-pre', action='store',
+        parser.add_argument('--disable-update-pre', action='store_true',
                             default=False, help='Disable pre upgrade actions')
-        parser.add_argument('--disable-update-post', action='store',
+        parser.add_argument('--disable-update-post', action='store_true',
                             default=False, help='Disable post upgrade actions')
         parser.add_argument('--enable-chart-cleanup', action='store',
                             default=False, help='Enable Chart Clean Up')
