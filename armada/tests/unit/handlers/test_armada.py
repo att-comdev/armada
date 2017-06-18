@@ -10,38 +10,37 @@ from armada.handlers.armada import Armada
 
 class ArmadaTestCase(unittest.TestCase):
     test_yaml = """
-        endpoints: &endpoints
-          hello-world:
-            this: is an example
-
         armada:
           release_prefix: armada
           charts:
-            - chart:
-                name: test_chart_1
-                release_name: test_chart_1
-                namespace: test
-                values: {}
-                source:
-                  type: null
-                  location: null
-                  subpath: null
-                  reference: null
-                dependencies: []
-                timeout: 50
+              - description: this is a test
+                sequenced: False
+                chart_group:
+                  - chart:
+                      name: test_chart_1
+                      release_name: test_chart_1
+                      namespace: test
+                      values: {}
+                      source:
+                        type: null
+                        location: null
+                        subpath: null
+                        reference: null
+                      dependencies: []
+                      timeout: 50
 
-            - chart:
-                name: test_chart_2
-                release_name: test_chart_2
-                namespace: test
-                values: {}
-                source:
-                  type: null
-                  location: null
-                  subpath: null
-                  reference: null
-                dependencies: []
-                timeout: 5
+                  - chart:
+                      name: test_chart_2
+                      release_name: test_chart_2
+                      namespace: test
+                      values: {}
+                      source:
+                        type: null
+                        location: null
+                        subpath: null
+                        reference: null
+                      dependencies: []
+                      timeout: 5
     """
 
     @mock.patch('armada.handlers.armada.ChartBuilder')
@@ -57,8 +56,9 @@ class ArmadaTestCase(unittest.TestCase):
         armada.tiller = mock_tiller
         armada.config = yaml.load(self.test_yaml)
 
-        chart_1 = armada.config['armada']['charts'][0]['chart']
-        chart_2 = armada.config['armada']['charts'][1]['chart']
+        charts = armada.config['armada']['charts'][0]['chart_group']
+        chart_1 = charts[0]['chart']
+        chart_2 = charts[1]['chart']
 
         # mock irrelevant methods called by armada.sync()
         mock_tiller.list_charts.return_value = []

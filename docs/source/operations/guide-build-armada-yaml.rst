@@ -56,6 +56,19 @@ Behavior
 Chart Keywords
 ^^^^^^^^^^^^^^
 
+Chart Group
+^^^^^^^^^^^
+
++-----------------+----------+------------------------------------------------------------------------+
+| keyword         | type     | action                                                                 |
++=================+==========+========================================================================+
+| description     | string   | description of chart set                                               |
++-----------------+----------+------------------------------------------------------------------------+
+| charts_group    | array    | stores definiton of the charts in a group                              |
++-----------------+----------+------------------------------------------------------------------------+
+| sequenced       | bool     | enables sequeced chart deployment in a group                           |
++-----------------+----------+------------------------------------------------------------------------+
+
 Chart
 ^^^^^
 
@@ -108,21 +121,24 @@ Simple Example
     armada:
       release_prefix: "my_armada"
       charts:
-        - chart: &cockroach
-            name: cockroach
-            release_name: cockroach
-            namespace: db
-            timeout: 20
-            install:
-              no_hooks: false
-            values:
-              Replicas: 1
-            source:
-              type: git
-              location: git://github.com/kubernetes/charts/
-              subpath: stable/cockroachdb
-              reference: master
-            dependencies: []
+        - description: I am a chart group
+          sequenced: False
+          chart_group:
+            - chart: &cockroach
+              name: cockroach
+              release_name: cockroach
+              namespace: db
+              timeout: 20
+              install:
+                no_hooks: false
+              values:
+                Replicas: 1
+              source:
+                type: git
+                location: git://github.com/kubernetes/charts/
+                subpath: stable/cockroachdb
+                reference: master
+              dependencies: []
 
 Multichart Example
 ~~~~~~~~~~~~~~~~~~
@@ -132,35 +148,57 @@ Multichart Example
     armada:
       release_prefix: "my_armada"
       charts:
-        - chart: &common
-            name: common
-            release_name: null
-            namespace: null
-            timeout: None
-            values: {}
-            source:
-              type: git
-              location: git://github.com/kubernetes/charts/
-              subpath: common
-              reference: master
-            dependencies: []
-
-        - chart: &cockroach
-            name: cockroach
-            release_name: cockroach
-            namespace: db
-            timeout: 100
-            install:
-              no_hooks: false
-            values:
-              Replicas: 1
-            source:
-              type: git
-              location: git://github.com/kubernetes/charts/
-              subpath: stable/cockroachdb
-              reference: master
-            dependencies:
-              - *common
+        - description: I am group 1
+          sequenced: True
+          chart_group:
+            - chart: &common
+              name: common
+              release_name: common
+              namespace: db
+              timeout: 20
+              install:
+                no_hooks: false
+              values:
+                Replicas: 1
+              source:
+                type: git
+                location: git://github.com/kubernetes/charts/
+                subpath: stable/common
+                reference: master
+              dependencies: []
+            - chart: &cockroach
+              name: cockroach
+              release_name: cockroach
+              namespace: db
+              timeout: 20
+              install:
+                no_hooks: false
+              values:
+                Replicas: 1
+              source:
+                type: git
+                location: git://github.com/kubernetes/charts/
+                subpath: stable/cockroachdb
+                reference: master
+              dependencies: []
+        - description: I am group 2
+          sequenced: False
+          chart_group:
+            - chart: &mariadb
+              name: mariadb
+              release_name: mariadb
+              namespace: db
+              timeout: 20
+              install:
+                no_hooks: false
+              values:
+                Replicas: 1
+              source:
+                type: git
+                location: git://github.com/kubernetes/charts/
+                subpath: stable/mariadb
+                reference: master
+              dependencies: []
 
 References
 ~~~~~~~~~~

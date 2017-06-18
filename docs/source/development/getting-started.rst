@@ -7,7 +7,7 @@ Docker
 
 To use the docker containter to develop:
 
-1. Fork the [repo](http://github.com/att-comdev/armada)
+1. Fork the `Repository <http://github.com/att-comdev/armada>`_
 2. Clone the forked repo
 
 .. code-block:: bash
@@ -15,7 +15,10 @@ To use the docker containter to develop:
     cd armada
     export repo="https://github.com/<forked-repo>/armada.git"
     export branch="<branch>"
+
     docker build . -t quay.io/attcomdev/armada:latest --build-arg REPO=$repo --build-arg VERSION=$branch
+
+    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
 
 .. note::
 
@@ -30,31 +33,7 @@ To use VirtualEnv we will need to add some extra steps
 
 1. virtualenv venv
 2. source ./venv/bin/activate
-3. export LIBGIT2=$VIRTUAL_ENV
-4. run modified bash below
-
-
-.. code-block:: bash
-
-    #!/bin/sh
-
-    # Ubuntu 16.04 Install only
-
-    sudo apt install git cmake make -y
-    sudo apt-get install -y python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libssh2-1 libgit2-dev python-pip libgit2-24
-    sudo apt-get install -y pkg-config libssh2-1-dev libhttp-parser-dev libssl-dev libz-dev
-
-    LIBGIT_VERSION='0.25.0'
-
-    wget https://github.com/libgit2/libgit2/archive/v${LIBGIT_VERSION}.tar.gz
-    tar xzf v${LIBGIT_VERSION}.tar.gz
-    cd libgit2-${LIBGIT_VERSION}/
-    cmake . -DCMAKE_INSTALL_PREFIX=$LIBGIT2
-    make
-    sudo make install
-    export LDFLAGS="-Wl,-rpath='$LIBGIT2/lib',--enable-new-dtags $LDFLAGS"
-    sudo pip install pygit2==${LIBGIT_VERSION}
-    sudo ldconfig
+3. sudo sh ./tools/libgit2.sh
 
 Test that it worked with:
 
@@ -65,7 +44,7 @@ Test that it worked with:
 From the directory of the forked repository:
 
 .. code-block:: bash
-   
+
     pip install -r requirements.txt
     pip install -r test-requirements.txt
 
@@ -76,10 +55,12 @@ Your env is now ready to go! :)
 Kubernetes
 ##########
 
-To test your armada fixes/features you will need to set-up a Kubernetes cluster. We recommend:
+To test your armada fixes/features you will need to set-up a Kubernetes cluster.
 
-`Minikube <https://github.com/kubernetes/minikube#installation>`_
+We recommend:
 
-`Halcyon <https://github.com/att-comdev/halcyon-vagrant-kubernetes>`_
+`Kubeadm <https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/>`_
+
+`Kubeadm-aio <https://github.com/openstack/openstack-helm/tree/master/tools/kubeadm-aio>`_
 
 .. note:: When using Halcyon it will not generate a config file. Run the following commands to create one: `get_k8s_creds.sh <https://github.com/att-comdev/halcyon-vagrant-kubernetes#accessing-the-cluster>`_

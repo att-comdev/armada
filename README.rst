@@ -62,8 +62,8 @@ The installation is fairly straight forward:
 
 Recomended Enviroment: Ubuntu 16.04
 
-Installing Dependecies:
-~~~~~~~~~~~~~~~~~~~~~~~
+Installing Dependecies
+~~~~~~~~~~~~~~~~~~~~~~
 
 you can run:
 
@@ -72,8 +72,8 @@ you can run:
 
 NOTE: If you want to use virtualenv please refer to `pygit2`_
 
-Installing armada:
-~~~~~~~~~~~~~~~~~~
+Installing armada
+~~~~~~~~~~~~~~~~~
 
 ``sudo pip install -e .``
 
