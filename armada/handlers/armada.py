@@ -87,18 +87,18 @@ class Armada(object):
         '''
 
         # extract known charts on tiller right now
+        if not self.skip_pre_flight:
+            LOG.info("Performing Pre-Flight Checks")
+            self.pre_flight_checks()
+        else:
+            LOG.info("Skipping Pre-Flight Checks")
+
         known_releases = self.tiller.list_charts()
         prefix = self.config.get('armada').get('release_prefix')
 
         for release in known_releases:
             LOG.debug("Release %s, Version %s found on tiller", release[0],
                       release[1])
-
-        if not self.skip_pre_flight:
-            LOG.info("Performing Checking Pre Flight Tasks")
-            self.pre_flight_checks()
-        else:
-            LOG.info("Skipping Pre flight Checks")
 
         for entry in self.config['armada']['charts']:
 
