@@ -7,36 +7,29 @@ Keywords
 +---------------------+--------+----------------------+
 | keyword             | type   | action               |
 +=====================+========+======================+
-| ``armada``          | object | will                 |
-|                     |        | define an            |
+| ``armada``          | object | define an            |
 |                     |        | armada               |
 |                     |        | release              |
 +---------------------+--------+----------------------+
-| ``release_prefix``  | string | will tag             |
-|                     |        | all                  |
+| ``release_prefix``  | string | tag appended to the  |
+|                     |        | front of all         |
 |                     |        | charts               |
 |                     |        | released             |
 |                     |        | by the               |
 |                     |        | yaml in              |
 |                     |        | order to             |
-|                     |        | manage it            |
-|                     |        | the                  |
-|                     |        | lifecycle            |
-|                     |        | of charts            |
+|                     |        | manage them          |
+|                     |        | throughout their     |
+|                     |        | lifecycles           |
 +---------------------+--------+----------------------+
-| ``charts``          | array  | will                 |
-|                     |        | store the            |
-|                     |        | definitio            |
-|                     |        | ns                   |
+| ``charts``          | array  | stores the           |
+|                     |        | definitions          |
 |                     |        | of all               |
-|                     |        | your                 |
 |                     |        | charts               |
 +---------------------+--------+----------------------+
-| ``chart``           | object | will                 |
-|                     |        | define               |
-|                     |        | what your            |
+| ``chart``           | object | definition           |
+|                     |        | of the               |
 |                     |        | chart                |
-|                     |        |                      |
 +---------------------+--------+----------------------+
 
 Defining a chart
@@ -69,21 +62,23 @@ Chart
 +-----------------+----------+------------------------------------------------------------------------+
 | keyword         | type     | action                                                                 |
 +=================+==========+========================================================================+
-| name            | string   | will be the name fo the chart                                          |
+| name            | string   | name for the chart                                                     |
 +-----------------+----------+------------------------------------------------------------------------+
-| release\_name   | string   | will be the name of the release                                        |
+| release\_name   | string   | name of the release                                                    |
 +-----------------+----------+------------------------------------------------------------------------+
-| namespace       | string   | will place your chart in define namespace                              |
+| namespace       | string   | namespace of your chart                                                |
 +-----------------+----------+------------------------------------------------------------------------+
-| install         | object   | will install the chart into your kubernetes cluster                    |
+| timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set |
 +-----------------+----------+------------------------------------------------------------------------+
-| update          | object   | will updated any chart managed by the armada yaml                      |
+| install         | object   | install the chart into your Kubernetes cluster                         |
 +-----------------+----------+------------------------------------------------------------------------+
-| values          | object   | will override any default values in the charts                         |
+| update          | object   | update the chart managed by the armada yaml                            |
 +-----------------+----------+------------------------------------------------------------------------+
-| source          | object   | will provide a path to a ``git repo`` or ``local dir`` deploy chart.   |
+| values          | object   | override any default values in the charts                              |
 +-----------------+----------+------------------------------------------------------------------------+
-| dependencies    | object   | will reference any chart deps before install                           |
+| source          | object   | provide a path to a ``git repo`` or ``local dir`` deploy chart.        |
++-----------------+----------+------------------------------------------------------------------------+
+| dependencies    | object   | reference any chart dependencies before install                        |
 +-----------------+----------+------------------------------------------------------------------------+
 
 Source
@@ -92,13 +87,13 @@ Source
 +-------------+----------+---------------------------------------------------------------+
 | keyword     | type     | action                                                        |
 +=============+==========+===============================================================+
-| type        | string   | will be the source to build the charts ``git`` or ``local``   |
+| type        | string   | source to build the chart: ``git`` or ``local``               |
 +-------------+----------+---------------------------------------------------------------+
-| location    | string   | will be the ``url`` or ``path`` to the charts                 |
+| location    | string   | ``url`` or ``path`` to the chart's parent directory           |
 +-------------+----------+---------------------------------------------------------------+
-| subpath     | string   | will specify the path to target chart                         |
+| subpath     | string   | relative path to target chart from parent                     |
 +-------------+----------+---------------------------------------------------------------+
-| reference   | string   | will be the branch of the repo                                |
+| reference   | string   | branch of the repo                                            |
 +-------------+----------+---------------------------------------------------------------+
 
 .. note::
@@ -111,16 +106,17 @@ Simple Example
 ::
 
     armada:
-       release_prefix: "my_armada"
-       charts:
-           - chart: &cockroach
+      release_prefix: "my_armada"
+      charts:
+        - chart: &cockroach
             name: cockroach
             release_name: cockroach
             namespace: db
+            timeout: 20
             install:
               no_hooks: false
             values:
-                Replicas: 1
+              Replicas: 1
             source:
               type: git
               location: git://github.com/kubernetes/charts/
@@ -134,35 +130,37 @@ Multichart Example
 ::
 
     armada:
-       release_prefix: "my_armada"
-       charts:
-           - chart: &common
-             name: common
-             release_name: null
-             namespace: null
-             values: {}
-             source:
-                type: git
-                location: git://github.com/kubernetes/charts/
-                subpath: common
-                reference: master
-             dependencies: []
+      release_prefix: "my_armada"
+      charts:
+        - chart: &common
+            name: common
+            release_name: null
+            namespace: null
+            timeout: None
+            values: {}
+            source:
+              type: git
+              location: git://github.com/kubernetes/charts/
+              subpath: common
+              reference: master
+            dependencies: []
 
-           - chart: &cockroach
+        - chart: &cockroach
             name: cockroach
             release_name: cockroach
             namespace: db
+            timeout: 100
             install:
               no_hooks: false
             values:
-                Replicas: 1
+              Replicas: 1
             source:
               type: git
               location: git://github.com/kubernetes/charts/
               subpath: stable/cockroachdb
               reference: master
             dependencies:
-                - *common
+              - *common
 
 References
 ~~~~~~~~~~

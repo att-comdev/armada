@@ -52,7 +52,7 @@ class ApplyChartsCommand(cmd.Command):
         parser.add_argument('--wait', action='store_true',
                             default=False, help='Wait until all charts'
                                                 'have been deployed')
-        parser.add_argument('--timeout', action='store',
+        parser.add_argument('--timeout', action='store', type=int,
                             default=3600, help='Specifies time to wait'
                                                 ' for charts to deploy')
         return parser
