@@ -13,8 +13,10 @@
 # limitations under the License.
 
 import os
+import os.path
 import yaml
 import logging
+import supermutes
 
 from hapi.chart.template_pb2 import Template
 from hapi.chart.chart_pb2 import Chart
