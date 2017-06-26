@@ -23,7 +23,7 @@ from k8s import K8s
 from ..utils.release import release_prefix
 
 TILLER_PORT = 44134
-TILLER_VERSION = b'2.1.3'
+TILLER_VERSION = b'2.4.2'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
 
@@ -32,7 +32,7 @@ RELEASE_LIMIT = 64
 # but until proper paging is supported, we need
 # to support a larger payload as the current
 # limit is exhausted with just 10 releases
-MAX_MESSAGE_LENGTH = 4010241024
+MAX_MESSAGE_LENGTH = 429496729
 
 LOG = logging.getLogger(__name__)
 
@@ -176,7 +176,8 @@ class Tiller(object):
 
     def update_release(self, chart, dry_run, name, namespace, prefix,
                        pre_actions=None, post_actions=None,
-                       disable_hooks=False, values=None):
+                       disable_hooks=False, values=None,
+                       wait=False, timeout=None):
         '''
         Update a Helm Release
         '''
@@ -195,7 +196,9 @@ class Tiller(object):
             dry_run=dry_run,
             disable_hooks=disable_hooks,
             values=values,
-            name="{}-{}".format(prefix, name))
+            name="{}-{}".format(prefix, name),
+            wait=wait,
+            timeout=timeout)
 
         stub.UpdateRelease(release_request, self.timeout,
                            metadata=self.metadata)
@@ -203,7 +206,7 @@ class Tiller(object):
         self._post_update_actions(post_actions, namespace)
 
     def install_release(self, chart, dry_run, name, namespace, prefix,
-                        values=None):
+                        values=None, wait=False, timeout=None):
         '''
         Create a Helm Release
         '''
@@ -220,7 +223,10 @@ class Tiller(object):
             dry_run=dry_run,
             values=values,
             name="{}-{}".format(prefix, name),
-            namespace=namespace)
+            namespace=namespace,
+            wait=wait,
+            timeout=timeout)
+
         return stub.InstallRelease(release_request,
                                    self.timeout,
                                    metadata=self.metadata)

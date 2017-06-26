@@ -28,6 +28,7 @@ armada:
         name: mariadb
         release_name: mariadb
         namespace: openstack
+        timeout: 50
         install:
           no_hooks: false
         upgrade:
@@ -55,6 +56,7 @@ armada:
         name: memcached
         release_name: memcached
         namespace: openstack
+        timeout: 10
         install:
           no_hooks: false
         upgrade:
@@ -79,6 +81,7 @@ armada:
         name: etcd
         release_name: etcd
         namespace: openstack
+        timeout: 10
         install:
           no_hooks: false
         upgrade:
@@ -103,6 +106,7 @@ armada:
         name: rabbitmq
         release_name: rabbitmq
         namespace: openstack
+        timeout: 10
         install:
           no_hooks: false
         upgrade:
@@ -128,6 +132,7 @@ armada:
         name: keystone
         release_name: keystone
         namespace: openstack
+        timeout: 20
         install:
           no_hooks: false
         upgrade:
@@ -155,6 +160,7 @@ armada:
         name: horizon
         release_name: horizon
         namespace: openstack
+        timeout: 10
         install:
           no_hooks: false
         upgrade:
