@@ -17,6 +17,17 @@ import os
 from oslo_config import cfg
 
 default_options = [
+
+    cfg.ListOpt(
+        'armada_apply_roles',
+        default=['admin'],
+        help='IDs of approved API access roles.'),
+
+    cfg.StrOpt(
+        'auth_url',
+        default='http://0.0.0.0/v3',
+        help='The default Keystone authentication url.'),
+
     cfg.BoolOpt(
         'debug',
         default='false',
@@ -106,6 +117,21 @@ default_options = [
         %(user_identity)s that is used in logging_context_format_string.'),
 
     cfg.BoolOpt(
+        'middleware',
+        default='true',
+        help='Enables or disables Keystone authentication middleware.'),
+
+    cfg.StrOpt(
+        'project_domain_name',
+        default='default',
+        help='The Keystone project domain name used for authentication.'),
+
+    cfg.StrOpt(
+        'project_name',
+        default='admin',
+        help='The Keystone project name used for authentication.'),
+
+    cfg.BoolOpt(
         'publish_errors',
         default='true',
         help='Enables or disables publication of error events.'),
@@ -151,6 +177,16 @@ default_options = [
         'use_syslog',
         default='true',
         help='Log output to syslog.'),
+
+    cfg.ListOpt(
+        'tiller_release_roles',
+        default=['admin'],
+        help='IDs of approved API access roles.'),
+
+    cfg.ListOpt(
+        'tiller_status_roles',
+        default=['admin'],
+        help='IDs of approved API access roles.'),
 
     cfg.BoolOpt(
         'watch_log_file',

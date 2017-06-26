@@ -15,7 +15,6 @@
 
 from armada.conf import default
 
-import falcon
 import json
 from falcon import HTTP_200
 
@@ -26,7 +25,6 @@ from oslo_log import log as logging
 default.register_opts()
 
 from armada.handlers.tiller import Tiller as tillerHandler
-from armada.handlers.armada import Armada as armadaHandler
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -34,11 +32,7 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
-class Tiller(object):
-    '''
-    tiller service endpoints
-    '''
-
+class Status(object):
     def on_get(self, req, resp):
         '''
         get tiller status
@@ -54,28 +48,18 @@ class Tiller(object):
         resp.content_type = 'application/json'
         resp.status = HTTP_200
 
-class Armada(object):
-    '''
-    apply armada endpoint service
-    '''
+class Release(object):
+    def on_get(self, req, resp):
+        '''
+        get tiller releases
+        '''
+        # Get tiller releases
+        handler = tillerHandler()
 
-    def on_post(self, req, resp):
-        armada = armadaHandler(req.stream.read())
-        armada.sync()
+        releases = {}
+        for release in handler.list_releases():
+            releases[release.name] = release.namespace
 
-        resp.data = json.dumps({'message': 'Success'})
+        resp.data = json.dumps({'releases': releases})
         resp.content_type = 'application/json'
         resp.status = HTTP_200
-
-
-wsgi_app = api = falcon.API()
-
-# Routing
-
-url_routes = (
-    ('/tiller/status', Tiller()),
-    ('/apply', Armada()),
-)
-
-for route, service in url_routes:
-    api.add_route(route, service)
