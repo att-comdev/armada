@@ -12,13 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from cliff import command as cmd
 
 from armada.handlers.armada import Armada
-
-LOG = logging.getLogger(__name__)
 
 def applyCharts(args):
 
@@ -29,7 +25,8 @@ def applyCharts(args):
                     args.skip_pre_flight,
                     args.dry_run,
                     args.wait,
-                    args.timeout)
+                    args.timeout,
+                    args.debug_logging)
     armada.sync()
 
 class ApplyChartsCommand(cmd.Command):
@@ -41,8 +38,8 @@ class ApplyChartsCommand(cmd.Command):
                             default=False, help='Run charts with dry run')
         parser.add_argument('--skip-pre-flight', action='store_true',
                             default=False, help='Skip Pre Flight')
-        parser.add_argument('--debug', action='store',
-                            default=False, help='Run charts with dry run')
+        parser.add_argument('--debug-logging', action='store_true',
+                            default=False, help='Show debug logs')
         parser.add_argument('--disable-update-pre', action='store_true',
                             default=False, help='Disable pre upgrade actions')
         parser.add_argument('--disable-update-post', action='store_true',
