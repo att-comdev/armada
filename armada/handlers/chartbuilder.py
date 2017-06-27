@@ -14,7 +14,6 @@
 
 import os
 import yaml
-import logging
 
 from hapi.chart.template_pb2 import Template
 from hapi.chart.chart_pb2 import Chart
@@ -24,7 +23,15 @@ from supermutes.dot import dotify
 
 from ..utils.git import git_clone, source_cleanup
 
+from oslo_config import cfg
+from oslo_log import log as logging
+
 LOG = logging.getLogger(__name__)
+
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.setup(CONF, DOMAIN)
 
 class ChartBuilder(object):
     '''

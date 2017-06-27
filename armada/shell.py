@@ -16,9 +16,9 @@ import sys
 
 from cliff import app
 from cliff import commandmanager as cm
+from conf import default
 
 import armada
-from armada import log
 
 class ArmadaApp(app.App):
     def __init__(self, **kwargs):
@@ -35,7 +35,7 @@ class ArmadaApp(app.App):
 
     def configure_logging(self):
         super(ArmadaApp, self).configure_logging()
-        log.set_console_formatter()
+        default.register_opts()
 
 def main(argv=None):
     if argv is None:

@@ -26,13 +26,11 @@ from ..utils import git
 from ..utils import lint
 
 LOG = logging.getLogger(__name__)
+
 CONF = cfg.CONF
 DOMAIN = "armada"
 
-logging.register_options(CONF)
 logging.setup(CONF, DOMAIN)
-
-LOG = logging.getLogger(__name__)
 
 class Armada(object):
     '''
@@ -47,7 +45,8 @@ class Armada(object):
                  skip_pre_flight=False,
                  dry_run=False,
                  wait=False,
-                 timeout=None):
+                 timeout=None,
+                 debug=False):
         '''
         Initialize the Armada Engine and establish
         a connection to Tiller
@@ -61,6 +60,11 @@ class Armada(object):
         self.timeout = timeout
         self.config = yaml.load(config)
         self.tiller = Tiller()
+        self.debug = debug
+
+        # Set debug value
+        CONF.set_default('debug', self.debug)
+        logging.setup(CONF, DOMAIN)
 
     def find_release_chart(self, known_releases, name):
         '''

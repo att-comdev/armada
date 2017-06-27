@@ -43,8 +43,10 @@ class Tiller(object):
         message = "Tiller Server is {}"
         if tillerHandler().tiller_status():
             resp.data = json.dumps({'message': message.format('Active')})
+            LOG.info('Tiller Server is Active.')
         else:
             resp.data = json.dumps({'message': message.format('Not Present')})
+            LOG.info('Tiller Server is Not Present.')
 
         resp.content_type = 'application/json'
         resp.status = HTTP_200

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import grpc
-import logging
 
 from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
     InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
@@ -21,6 +20,9 @@ from hapi.chart.config_pb2 import Config
 
 from k8s import K8s
 from ..utils.release import release_prefix
+
+from oslo_config import cfg
+from oslo_log import log as logging
 
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.4.2'
@@ -35,6 +37,11 @@ RELEASE_LIMIT = 64
 MAX_MESSAGE_LENGTH = 429496729
 
 LOG = logging.getLogger(__name__)
+
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.setup(CONF, DOMAIN)
 
 class Tiller(object):
     '''

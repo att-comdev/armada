@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from cliff import command as cmd
 
 from armada.handlers.tiller import Tiller
 
+from oslo_config import cfg
+from oslo_log import log as logging
+
 LOG = logging.getLogger(__name__)
+
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.setup(CONF, DOMAIN)
 
 def tillerServer(args):
 
