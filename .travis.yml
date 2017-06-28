@@ -18,7 +18,7 @@ install:
 script:
     - flake8
     - armada -h
-    - nosetests -w ./armada --with-coverage --cover-package=armada --cover-tests
+    - nosetests -w armada/tests/unit --cover-package=armada --with-coverage --cover-tests
 
 # after_success:
 #     - codecov

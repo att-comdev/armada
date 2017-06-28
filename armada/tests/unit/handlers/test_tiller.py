@@ -1,19 +1,27 @@
-from armada.handlers.tiller import Tiller
-
 import mock
 import unittest
 
+# Required Oslo configuration setup
+from armada.conf import default
+default.register_opts()
+
+from armada.handlers.tiller import Tiller
+
 class TillerTestCase(unittest.TestCase):
 
+    @mock.patch.object(Tiller, '_get_tiller_ip')
+    @mock.patch('armada.handlers.tiller.K8s')
     @mock.patch('armada.handlers.tiller.grpc')
     @mock.patch('armada.handlers.tiller.Config')
     @mock.patch('armada.handlers.tiller.InstallReleaseRequest')
     @mock.patch('armada.handlers.tiller.ReleaseServiceStub')
     def test_install_release(self, mock_stub, mock_install_request,
-                             mock_config, mock_grpc):
+                             mock_config, mock_grpc, mock_k8s, mock_ip):
         # instantiate Tiller object
         mock_grpc.insecure_channel.return_value = None
+        mock_ip.return_value = '0.0.0.0'
         tiller = Tiller()
+        assert tiller._get_tiller_ip() == '0.0.0.0'
 
         # set params
         chart = mock.Mock()

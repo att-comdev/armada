@@ -11,15 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 import unittest
 import mock
 
 from supermutes.dot import dotify
 
-from armada.handlers.chartbuilder import ChartBuilder
+# Required Oslo configuration setup
+from armada.conf import default
+default.register_opts()
 
+from armada.handlers.chartbuilder import ChartBuilder
 
 class ChartBuilderTestCase(unittest.TestCase):
     chart_stream = """
