@@ -82,11 +82,11 @@ class Armada(object):
             if ct_type == 'git' and not git.check_available_repo(location):
                 raise ValueError(str("Invalid Url Path: " + location))
 
-            if not self.tiller.tiller_status():
-                raise Exception("Tiller Services is not Available")
+        if not self.tiller.tiller_status():
+            raise Exception("Tiller Services is not Available")
 
-            if not lint.valid_manifest(self.config):
-                raise Exception("Invalid Armada Manifest")
+        if not lint.valid_manifest(self.config):
+            raise Exception("Invalid Armada Manifest")
 
     def sync(self):
         '''
