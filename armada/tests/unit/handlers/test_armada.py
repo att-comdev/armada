@@ -1,8 +1,12 @@
-from armada.handlers.armada import Armada
-
 import mock
 import unittest
 import yaml
+
+# Required Oslo configuration setup
+from armada.conf import default
+default.register_opts()
+
+from armada.handlers.armada import Armada
 
 class ArmadaTestCase(unittest.TestCase):
     test_yaml = """
@@ -41,7 +45,7 @@ class ArmadaTestCase(unittest.TestCase):
     """
 
     @mock.patch('armada.handlers.armada.ChartBuilder')
-    @mock.patch('armada.handlers.tiller.Tiller')
+    @mock.patch('armada.handlers.armada.Tiller')
     def test_install(self, mock_tiller, mock_chartbuilder):
         '''Test install functionality from the sync() method'''
 
@@ -81,6 +85,7 @@ class ArmadaTestCase(unittest.TestCase):
                                   timeout=chart_2['timeout'])]
         mock_tiller.install_release.assert_has_calls(method_calls)
 
+    @unittest.skip('skipping update')
     def test_upgrade(self):
         '''Test upgrade functionality from the sync() method'''
         # TODO
