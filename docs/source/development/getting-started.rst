@@ -60,13 +60,14 @@ Test that it worked with:
 
 .. code-block:: bash
 
-   python -c 'import pygit2'
+    python -c 'import pygit2'
 
 From the directory of the forked repository:
 
 .. code-block:: bash
-   pip install -r requirements.txt
-   pip install -r test-requirements.txt
+   
+    pip install -r requirements.txt
+    pip install -r test-requirements.txt
 
 Your env is now ready to go! :)
 
