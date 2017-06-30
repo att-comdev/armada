@@ -75,12 +75,13 @@ class Armada(object):
                 return chart, values
 
     def pre_flight_checks(self):
-        for ch in self.config['armada']['charts']:
-            location = ch.get('chart').get('source').get('location')
-            ct_type = ch.get('chart').get('source').get('type')
+        for group in self.config.get('armada').get('charts'):
+            for ch in group.get('chart_group'):
+                location = ch.get('chart').get('source').get('location')
+                ct_type = ch.get('chart').get('source').get('type')
 
-            if ct_type == 'git' and not git.check_available_repo(location):
-                raise ValueError(str("Invalid Url Path: " + location))
+                if ct_type == 'git' and not git.check_available_repo(location):
+                    raise ValueError(str("Invalid Url Path: " + location))
 
         if not self.tiller.tiller_status():
             raise Exception("Tiller Services is not Available")
@@ -93,6 +94,8 @@ class Armada(object):
         Syncronize Helm with the Armada Config(s)
         '''
 
+        # TODO: (gardlt) we need to break up this func into
+        # a more cleaner format
         # extract known charts on tiller right now
         if not self.skip_pre_flight:
             LOG.info("Performing Pre-Flight Checks")
@@ -109,96 +112,104 @@ class Armada(object):
 
         for entry in self.config['armada']['charts']:
 
-            chart = dotify(entry['chart'])
-            values = entry.get('chart').get('values', {})
-            pre_actions = {}
-            post_actions = {}
+            desc = entry.get('description', 'A Chart Group')
+            chart_group = entry.get('chart_group', [])
 
-            if chart.release_name is None:
-                continue
+            if entry.get('sequenced', False):
+                self.wait = True
 
-            # retrieve appropriate timeout value if 'wait' is specified
-            chart_timeout = None
-            if self.wait:
-                if self.timeout:
-                    chart_timeout = self.timeout
-                elif getattr(chart, 'timeout', None):
-                    chart_timeout = chart.timeout
+            LOG.info('Deploying: %s', desc)
 
-            # initialize helm chart and request a
-            # protoc helm chart object which will
-            # pull the sources down and walk the
-            # dependencies
-            chartbuilder = ChartBuilder(chart)
-            protoc_chart = chartbuilder.get_helm_chart()
+            for gchart in chart_group:
+                chart = dotify(gchart['chart'])
+                values = gchart.get('chart').get('values', {})
+                pre_actions = {}
+                post_actions = {}
+                LOG.info('%s', chart.release_name)
 
-            # determine install or upgrade by examining known releases
-            LOG.debug("RELEASE: %s", chart.release_name)
-
-            if release_prefix(prefix, chart.release_name) in [x[0]
-                                                              for x in
-                                                              known_releases]:
-
-                # indicate to the end user what path we are taking
-                LOG.info("Upgrading release %s", chart.release_name)
-                # extract the installed chart and installed values from the
-                # latest release so we can compare to the intended state
-                installed_chart, installed_values = self.find_release_chart(
-                    known_releases, release_prefix(prefix, chart.release_name))
-
-                LOG.info("Checking Pre/Post Actions")
-                upgrade = entry.get('chart', {}).get('upgrade', False)
-                if upgrade:
-                    if not self.disable_update_pre and upgrade.get('pre',
-                                                                   False):
-                        pre_actions = getattr(chart.upgrade, 'pre', {})
-
-                    if not self.disable_update_post and upgrade.get('post',
-                                                                    False):
-                        LOG.info("Checking Post Actions")
-                        post_actions = getattr(chart.upgrade, 'post', {})
-
-                # show delta for both the chart templates and the chart values
-                # TODO(alanmeadows) account for .files differences
-                # once we support those
-
-                upgrade_diff = self.show_diff(chart, installed_chart,
-                                              installed_values,
-                                              chartbuilder.dump(), values)
-
-                if not upgrade_diff:
-                    LOG.info("There are no updates found in this chart")
+                if chart.release_name is None:
                     continue
 
-                # do actual update
-                self.tiller.update_release(protoc_chart,
-                                           self.dry_run,
-                                           chart.release_name,
-                                           chart.namespace,
-                                           prefix, pre_actions,
-                                           post_actions,
-                                           disable_hooks=chart.
-                                           upgrade.no_hooks,
-                                           values=yaml.safe_dump(values),
-                                           wait=self.wait,
-                                           timeout=chart_timeout)
+                # retrieve appropriate timeout value if 'wait' is specified
+                chart_timeout = None
+                if self.wait:
+                    if getattr(chart, 'timeout', None):
+                        chart_timeout = chart.timeout
+                    else:
+                        chart_timeout = self.timeout
 
-            # process install
-            else:
-                LOG.info("Installing release %s", chart.release_name)
-                self.tiller.install_release(protoc_chart,
-                                            self.dry_run,
-                                            chart.release_name,
-                                            chart.namespace,
-                                            prefix,
-                                            values=yaml.safe_dump(values),
-                                            wait=self.wait,
-                                            timeout=chart_timeout)
+                chartbuilder = ChartBuilder(chart)
+                protoc_chart = chartbuilder.get_helm_chart()
 
-            LOG.debug("Cleaning up chart source in %s",
-                      chartbuilder.source_directory)
+                # determine install or upgrade by examining known releases
+                LOG.debug("RELEASE: %s", chart.release_name)
+                deployed_releases = [x[0] for x in known_releases]
+                prefix_chart = release_prefix(prefix, chart.release_name)
 
-            chartbuilder.source_cleanup()
+                if prefix_chart in deployed_releases:
+
+                    # indicate to the end user what path we are taking
+                    LOG.info("Upgrading release %s", chart.release_name)
+                    # extract the installed chart and installed values from the
+                    # latest release so we can compare to the intended state
+                    LOG.info("Checking Pre/Post Actions")
+                    apply_chart, apply_values = self.find_release_chart(
+                        known_releases, prefix_chart)
+
+                    LOG.info("Checking Pre/Post Actions")
+                    upgrade = gchart.get('chart', {}).get('upgrade', False)
+
+                    if upgrade:
+                        if not self.disable_update_pre and upgrade.get('pre',
+                                                                       False):
+                            pre_actions = getattr(chart.upgrade, 'pre', {})
+
+                        if not self.disable_update_post and upgrade.get('post',
+                                                                        False):
+                            post_actions = getattr(chart.upgrade, 'post', {})
+
+                    # show delta for both the chart templates and the chart
+                    # values
+                    # TODO(alanmeadows) account for .files differences
+                    # once we support those
+
+                    upgrade_diff = self.show_diff(chart, apply_chart,
+                                                  apply_values,
+                                                  chartbuilder.dump(), values)
+
+                    if not upgrade_diff:
+                        LOG.info("There are no updates found in this chart")
+                        continue
+
+                    # do actual update
+                    self.tiller.update_release(protoc_chart,
+                                               self.dry_run,
+                                               chart.release_name,
+                                               chart.namespace,
+                                               prefix, pre_actions,
+                                               post_actions,
+                                               disable_hooks=chart.
+                                               upgrade.no_hooks,
+                                               values=yaml.safe_dump(values),
+                                               wait=self.wait,
+                                               timeout=chart_timeout)
+
+                # process install
+                else:
+                    LOG.info("Installing release %s", chart.release_name)
+                    self.tiller.install_release(protoc_chart,
+                                                self.dry_run,
+                                                chart.release_name,
+                                                chart.namespace,
+                                                prefix,
+                                                values=yaml.safe_dump(values),
+                                                wait=self.wait,
+                                                timeout=chart_timeout)
+
+                LOG.debug("Cleaning up chart source in %s",
+                          chartbuilder.source_directory)
+
+                chartbuilder.source_cleanup()
 
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(prefix, self.config['armada']['charts'])

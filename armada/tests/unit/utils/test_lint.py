@@ -24,10 +24,11 @@ class LintTestCase(unittest.TestCase):
         armada:
             release_prefix: armada-test
             charts:
-                - chart:
-                    name: chart
-                    release_name: chart
-                    namespace: chart
+                - chart_group:
+                    - chart:
+                        name: chart
+                        release_name: chart
+                        namespace: chart
         """)
         resp = lint.valid_manifest(config)
         self.assertTrue(resp)
@@ -37,10 +38,11 @@ class LintTestCase(unittest.TestCase):
         armasda:
             release_prefix: armada-test
             charts:
-                - chart:
-                    name: chart
-                    release_name: chart
-                    namespace: chart
+                - chart_group:
+                    - chart:
+                        name: chart
+                        release_name: chart
+                        namespace: chart
         """)
 
         with self.assertRaises(Exception):
@@ -51,10 +53,11 @@ class LintTestCase(unittest.TestCase):
         armada:
             release: armada-test
             charts:
-                - chart:
-                    name: chart
-                    release_name: chart
-                    namespace: chart
+                - chart_group:
+                    - chart:
+                        name: chart
+                        release_name: chart
+                        namespace: chart
         """)
 
         with self.assertRaises(Exception):
@@ -62,13 +65,14 @@ class LintTestCase(unittest.TestCase):
 
     def test_lint_armada_removed(self):
         config = yaml.load("""
-        armasda:
+        sarmada:
             release_prefix: armada-test
-            chart:
-                - chart:
-                    name: chart
-                    release_name: chart
-                    namespace: chart
+            charts:
+                - chart_group:
+                    - chart:
+                        name: chart
+                        release_name: chart
+                        namespace: chart
         """)
 
         with self.assertRaises(Exception):
