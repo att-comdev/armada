@@ -12,3 +12,4 @@ Operations Guide
 
    guide-troubleshooting.rst
    guide-build-armada-yaml.rst
+   guide-use-armada.rst

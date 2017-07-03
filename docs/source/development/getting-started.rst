@@ -22,9 +22,8 @@ To use the docker containter to develop:
 
 .. note::
 
-    The first build will take a little while. Afterwards the it will much faster
-
-3. EZPZ :)
+    The first build will take a little while. Afterwords, it will build much
+    faster.
 
 Virtualenv
 ##########
@@ -47,10 +46,12 @@ From the directory of the forked repository:
 
     pip install -r requirements.txt
     pip install -r test-requirements.txt
+    pip install -e .
 
-Your env is now ready to go! :)
+.. note::
 
-.. note:: this will install latest libgit2 library so you have to make sure you install the same version library with pip ( current version: 0.25.0 )
+    this will install the latest libgit2 library so you have to make sure you
+    install the same version library with pip ( current version: 0.25.0 )
 
 Kubernetes
 ##########
@@ -61,6 +62,4 @@ We recommend:
 
 `Kubeadm <https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/>`_
 
-`Kubeadm-aio <https://github.com/openstack/openstack-helm/tree/master/tools/kubeadm-aio>`_
-
-.. note:: When using Halcyon it will not generate a config file. Run the following commands to create one: `get_k8s_creds.sh <https://github.com/att-comdev/halcyon-vagrant-kubernetes#accessing-the-cluster>`_
+`Kubeadm-AIO <https://github.com/openstack/openstack-helm/tree/master/tools/kubeadm-aio>`_
