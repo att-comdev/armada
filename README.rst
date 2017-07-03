@@ -3,84 +3,33 @@ Armada
 
 |Docker Repository on Quay| |Build Status| |Doc Status|
 
-A python orchestrator for a installing, upgrading, and managing a
-collection of helm charts, dependencies, and values overrides.
+Armada is a tool for managing multiple helm charts with dependencies by centralizing
+all configurations in a single Armada yaml and providing lifecycle
+hooks for all hem releases.
 
-Note that this project is pre-alpha and under active development. It may
-undergo drastic changes to support the long-term vision but
-contributions are welcome.
+Roadmap
+-------
 
-Overview
---------
+Detailed roadmap can be viewed `here <https://github.com/att-comdev/armada/milestones>`_
 
-The armada python library and command line tool provides a way to
-synchronize a helm (tiller) target with an operators intended state,
-consisting of several charts, dependencies, and overrides using a single
-file or directory with a collection of files. This allows operators to
-define many charts, potentially with different namespaces for those
-releases, and their overrides in a central place. With a single command,
-deploy and/or upgrade them where applicable.
-
-Armada also supports fetching helm chart source and then building charts
-from source from various local and remote locations, such as git/github
-endpoints. In the future, it may supprot other mechanisms as well.
-
-It will also give the operator some indication of what is about to
-change by assisting with diffs for both values, values overrides, and
-actual template changes.
-
-Its functionality may extend beyond helm, assisting in interacting with
-kubernetes directly to perform basic pre and post steps, such as
-removing completed or failed jobs, running backup jobs, blocking on
-chart readiness, or deleting resources that do not support upgrades.
-However, primarily, it will be an interface to support orchestrating
-Helm.
-
-Running Armada
---------------
-
-To use this container, use these simple instructions:
-
-::
-
-    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
-
-Manual Install
-~~~~~~~~~~~~~~
-
-If you want to build the docker image, follow these steps:
-
-::
-
-    docker build . -t <namespace>/armada
-    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples <namespace>/armada
+Issues can be reported `here <https://github.com/att-comdev/armada/issues>`_
 
 Installation
 ------------
 
-The installation is fairly straight forward:
+.. code-block:: bash
 
-Recomended Enviroment: Ubuntu 16.04
+    docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
 
-Installing Dependecies
-~~~~~~~~~~~~~~~~~~~~~~
+Using armada `docs <docs/source/operations/guide-use-armada.rst>`_
 
-you can run:
+Getting Started
+---------------
 
--  ``tox testenv:ubuntu`` or ``sudo sh tools/libgit2.sh``
--  ``sudo pip install -r requirements.txt``
+Get started guide can be found in our `docs <docs/source/development/getting-started.rst>`_
 
-NOTE: If you want to use virtualenv please refer to `pygit2`_
-
-Installing armada
-~~~~~~~~~~~~~~~~~
-
-``sudo pip install -e .``
-
-``armada [-h | --help]``
-
-Using Armada
-------------
+Usage
+-----
 
 Before using armada we need to check a few things:
 
@@ -98,7 +47,7 @@ number of charts:
 
 ::
 
-    $ armada apply examples/openstack-helm.yaml [--debug ]
+    $ armada apply examples/openstack-helm.yaml [--debug-loggging ]
 
 Your output will look something like this:
 
