@@ -52,7 +52,7 @@ class ArmadaTestCase(unittest.TestCase):
         armada = Armada('',
                         skip_pre_flight=True,
                         wait=True,
-                        timeout=None)
+                        timeout=1000)
         armada.tiller = mock_tiller
         armada.config = yaml.load(self.test_yaml)
 
@@ -75,14 +75,14 @@ class ArmadaTestCase(unittest.TestCase):
                                   armada.config['armada']['release_prefix'],
                                   values=yaml.safe_dump(chart_1['values']),
                                   wait=armada.wait,
-                                  timeout=chart_1['timeout']),
+                                  timeout=1000),
                         mock.call(mock_chartbuilder().get_helm_chart(),
                                   armada.dry_run, chart_2['release_name'],
                                   chart_2['namespace'],
                                   armada.config['armada']['release_prefix'],
                                   values=yaml.safe_dump(chart_2['values']),
                                   wait=armada.wait,
-                                  timeout=chart_2['timeout'])]
+                                  timeout=1000)]
         mock_tiller.install_release.assert_has_calls(method_calls)
 
     @unittest.skip('skipping update')
