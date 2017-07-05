@@ -79,7 +79,7 @@ Chart
 +-----------------+----------+------------------------------------------------------------------------+
 | keyword         | type     | action                                                                 |
 +=================+==========+========================================================================+
-| chart\_name      | string   | name for the chart                                                     |
+| chart\_name     | string   | name for the chart                                                     |
 +-----------------+----------+------------------------------------------------------------------------+
 | release\_name   | string   | name of the release                                                    |
 +-----------------+----------+------------------------------------------------------------------------+
@@ -98,6 +98,53 @@ Chart
 | dependencies    | object   | reference any chart dependencies before install                        |
 +-----------------+----------+------------------------------------------------------------------------+
 
+Update - Pre or Post
+^^^^^^^^^^^^^^^^^^^^
+
++-------------+----------+---------------------------------------------------------------+
+| keyword     | type     | action                                                        |
++=============+==========+===============================================================+
+| pre         | object   | actions prior to updating chart                               |
++-------------+----------+---------------------------------------------------------------+
+| post        | object   | actions post updating chart                                   |
++-------------+----------+---------------------------------------------------------------+
+
+
+Update - Actions
+^^^^^^^^^^^^^^^^
+
++-------------+----------+---------------------------------------------------------------+
+| keyword     | type     | action                                                        |
++=============+==========+===============================================================+
+| update      | object   | updates daemonsets in pre update actions                      |
++-------------+----------+---------------------------------------------------------------+
+| delete      | object   | delete jobs in pre delete actions                             |
++-------------+----------+---------------------------------------------------------------+
+
+
+.. note::
+
+    Update actions are performed in the pre/post sections of update
+
+
+Update - Actions - Update/Delete
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
++-------------+----------+---------------------------------------------------------------+
+| keyword     | type     | action                                                        |
++=============+==========+===============================================================+
+| name        | string   | name of action                                                |
++-------------+----------+---------------------------------------------------------------+
+| type        | string   | type of K8s kind to execute                                   |
++-------------+----------+---------------------------------------------------------------+
+| labels      | object   | array of labels to query against kinds. (key: value)          |
++-------------+----------+---------------------------------------------------------------+
+
+.. note::
+
+   Update Actions only support type: 'daemonset'
+
+
 Source
 ^^^^^^
 
@@ -112,6 +159,52 @@ Source
 +-------------+----------+---------------------------------------------------------------+
 | reference   | string   | branch of the repo                                            |
 +-------------+----------+---------------------------------------------------------------+
+
+Example
+~~~~~~~
+
+::
+
+    ---
+    schema: armada/Chart/v1
+    metadata:
+      schema: metadata/Document/v1
+      name: blog-1
+    data:
+      chart_name: blog-1
+      release_name: blog-1
+      namespace: default
+      timeout: 100
+      install:
+        no_hook: false
+      upgrade:
+        no_hook: false
+        pre:
+            update:
+                - name: test-daemonset
+                  type: daemonset
+                  labels:
+                    foo: bar
+                    component: bar
+                    rak1: enababled
+            delete:
+                - name: test-job
+                  type: job
+                  labels:
+                    foo: bar
+                    component: bar
+                    rak1: enababled
+      values: {}
+      source:
+        type: git
+        location: https://github.com/namespace/repo
+        subpath: .
+        reference: master
+      dependencies: []
+
+
+
+
 
 Defining a Chart
 ~~~~~~~~~~~~~~~~

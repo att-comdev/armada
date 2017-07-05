@@ -122,7 +122,8 @@ data:
           type: job
         - name: keystone-db-init
           type: job
-  values: {}
+  values:
+    replicas: 2
   source:
     type: git
     location: git://github.com/openstack/openstack-helm
