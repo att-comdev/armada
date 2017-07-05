@@ -27,6 +27,7 @@ from ..utils import lint
 
 LOG = logging.getLogger(__name__)
 
+DEFAULT_TIMEOUT = 3600
 CONF = cfg.CONF
 DOMAIN = "armada"
 
@@ -45,7 +46,7 @@ class Armada(object):
                  skip_pre_flight=False,
                  dry_run=False,
                  wait=False,
-                 timeout=None,
+                 timeout=DEFAULT_TIMEOUT,
                  debug=False):
         '''
         Initialize the Armada Engine and establish
@@ -131,12 +132,11 @@ class Armada(object):
                     continue
 
                 # retrieve appropriate timeout value if 'wait' is specified
-                chart_timeout = None
+                chart_timeout = self.timeout
                 if chart_wait:
-                    if getattr(chart, 'timeout', None):
-                        chart_timeout = chart.timeout
-                    else:
-                        chart_timeout = self.timeout
+                    if chart_timeout == DEFAULT_TIMEOUT:
+                        chart_timeout = getattr(chart, 'timeout',
+                                                chart_timeout)
 
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
