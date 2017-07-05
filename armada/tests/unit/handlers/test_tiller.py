@@ -28,22 +28,21 @@ class TillerTestCase(unittest.TestCase):
         dry_run = False
         name = None
         namespace = None
-        prefix = None
         initial_values = None
         updated_values = mock_config(raw=initial_values)
         wait = False
         timeout = None
 
-        tiller.install_release(chart, dry_run, name, namespace, prefix,
-                               values=initial_values, wait=wait,
-                               timeout=timeout)
+        tiller.install_release(chart, name, namespace,
+                               dry_run=dry_run, values=initial_values,
+                               wait=wait, timeout=timeout)
 
         mock_stub.assert_called_with(tiller.channel)
         release_request = mock_install_request(
             chart=chart,
             dry_run=dry_run,
             values=updated_values,
-            name="{}-{}".format(prefix, name),
+            release=name,
             namespace=namespace,
             wait=wait,
             timeout=timeout

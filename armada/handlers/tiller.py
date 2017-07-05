@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import grpc
+import yaml
 
 from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
     InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
@@ -45,6 +46,7 @@ CONF = cfg.CONF
 DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
+
 
 class Tiller(object):
     '''
@@ -139,45 +141,67 @@ class Tiller(object):
 
         for y in release_list:
             releases.extend(y.releases)
+
         return releases
 
-    def list_charts(self):
-        '''
-        List Helm Charts from Latest Releases
+    def get_chart_templates(self, template_name, name, release_name, namespace,
+                            chart, disable_hooks, values):
+        # returns some info
 
-        Returns a list of tuples in the form:
-        (name, version, chart, values, status)
-        '''
-        charts = []
-        for latest_release in self.list_releases():
-            try:
-                charts.append(
-                    (latest_release.name, latest_release.version,
-                     latest_release.chart, latest_release.config.raw,
-                     latest_release.info.status.Code.Name(
-                         latest_release.info.status.code)))
-            except IndexError:
-                continue
-        return charts
+        LOG.info("Template( %s ) : %s ", template_name, name)
 
-    def _pre_update_actions(self, release_name, actions, namespace):
+        stub = ReleaseServiceStub(self.channel)
+        release_request = InstallReleaseRequest(
+            chart=chart,
+            dry_run=True,
+            values=values,
+            name=name,
+            namespace=namespace,
+            wait=False)
+
+        templates = stub.InstallRelease(
+            release_request, self.timeout, metadata=self.metadata)
+
+        for template in yaml.load_all(
+                getattr(templates.release, 'manifest', [])):
+            if template_name == template.get('metadata', None).get(
+                    'name', None):
+                LOG.info(template_name)
+                return template
+
+    def _pre_update_actions(self, actions, release_name, namespace, chart,
+                            disable_hooks, values):
         '''
         :params actions - array of items actions
         :params namespace - name of pod for actions
         '''
+
+        try:
+            for action in actions.get('update', []):
+                name = action.get('name')
+                LOG.info('Updating %s ', name)
+                action_type = action.get('type')
+                labels = action.get('labels')
+
+                self.rolling_upgrade_pod_deployment(
+                    name, release_name, namespace, labels,
+                    action_type, chart, disable_hooks, values)
+        except Exception:
+            LOG.debug("Pre: Could not update anything, please check yaml")
+
         try:
             for action in actions.get('delete', []):
                 name = action.get('name')
                 action_type = action.get('type')
                 labels = action.get('labels', None)
 
-                self.delete_resource(release_name, name, action_type,
-                                     labels, namespace)
+                self.delete_resources(
+                    release_name, name, action_type, labels, namespace)
 
                 # Ensure pods get deleted when job is deleted
                 if 'job' in action_type:
-                    self.delete_resource(release_name, name, 'pod',
-                                         labels, namespace)
+                    self.delete_resources(
+                        release_name, name, 'pod', labels, namespace)
         except Exception:
             raise tiller_exceptions.PreUpdateJobDeleteException(name,
                                                                 namespace)
@@ -207,6 +231,7 @@ class Tiller(object):
 
         Apply deletion logic based on type of resource
         '''
+
         label_selector = 'release_name={}'.format(release_name)
         for label in resource_labels:
             label_selector += ', {}={}'.format(label.keys()[0],
@@ -241,10 +266,33 @@ class Tiller(object):
             raise tiller_exceptions.PreUpdateJobCreateException()
             LOG.debug("POST: Could not create anything, please check yaml")
 
-    def update_release(self, chart, dry_run, name, namespace, prefix,
-                       pre_actions=None, post_actions=None,
-                       disable_hooks=False, values=None,
-                       wait=False, timeout=None):
+    def list_charts(self):
+        '''
+        List Helm Charts from Latest Releases
+
+        Returns a list of tuples in the form:
+        (name, version, chart, values, status)
+        '''
+        charts = []
+        for latest_release in self.list_releases():
+            try:
+                charts.append(
+                    (latest_release.name, latest_release.version,
+                     latest_release.chart, latest_release.config.raw,
+                     latest_release.info.status.Code.Name(
+                         latest_release.info.status.code)))
+            except IndexError:
+                continue
+        return charts
+
+    def update_release(self, chart, release, namespace,
+                       dry_run=False,
+                       pre_actions=None,
+                       post_actions=None,
+                       disable_hooks=False,
+                       values=None,
+                       wait=False,
+                       timeout=None):
         '''
         Update a Helm Release
         '''
@@ -256,11 +304,10 @@ class Tiller(object):
         else:
             values = Config(raw=values)
 
-        release_name = "{}-{}".format(prefix, name)
-        self._pre_update_actions(release_name, pre_actions, namespace)
+        self._pre_update_actions(pre_actions, release, namespace, chart,
+                                 disable_hooks, values)
 
         # build release install request
-
         try:
             stub = ReleaseServiceStub(self.channel)
             release_request = UpdateReleaseRequest(
@@ -268,18 +315,22 @@ class Tiller(object):
                 dry_run=dry_run,
                 disable_hooks=disable_hooks,
                 values=values,
-                name="{}-{}".format(prefix, name),
+                name=release,
                 wait=wait,
                 timeout=timeout)
 
-            stub.UpdateRelease(release_request, self.timeout,
-                               metadata=self.metadata)
+            stub.UpdateRelease(
+                release_request, self.timeout, metadata=self.metadata)
         except Exception:
-            raise tiller_exceptions.ReleaseInstallException(name, namespace)
+            raise tiller_exceptions.ReleaseInstallException(release, namespace)
+
         self._post_update_actions(post_actions, namespace)
 
-    def install_release(self, chart, dry_run, name, namespace, prefix,
-                        values=None, wait=False, timeout=None):
+    def install_release(self, chart, release, namespace,
+                        dry_run=False,
+                        values=None,
+                        wait=False,
+                        timeout=None):
         '''
         Create a Helm Release
         '''
@@ -298,17 +349,16 @@ class Tiller(object):
                 chart=chart,
                 dry_run=dry_run,
                 values=values,
-                name="{}-{}".format(prefix, name),
+                name=release,
                 namespace=namespace,
                 wait=wait,
                 timeout=timeout)
 
-            return stub.InstallRelease(release_request,
-                                       self.timeout,
-                                       metadata=self.metadata)
+            return stub.InstallRelease(
+                release_request, self.timeout, metadata=self.metadata)
 
         except Exception:
-            raise tiller_exceptions.ReleaseInstallException(name, namespace)
+            raise tiller_exceptions.ReleaseInstallException(release, namespace)
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
         '''
@@ -321,12 +371,11 @@ class Tiller(object):
         # build release install request
         try:
             stub = ReleaseServiceStub(self.channel)
-            release_req = UninstallReleaseRequest(name=release,
-                                                  disable_hooks=disable_hooks,
-                                                  purge=purge)
-            return stub.UninstallRelease(release_req,
-                                         self.timeout,
-                                         metadata=self.metadata)
+            release_request = UninstallReleaseRequest(
+                name=release, disable_hooks=disable_hooks, purge=purge)
+
+            return stub.UninstallRelease(
+                release_request, self.timeout, metadata=self.metadata)
 
         except Exception:
             raise tiller_exceptions.ReleaseUninstallException(release)
@@ -342,9 +391,8 @@ class Tiller(object):
         valid_charts = []
         for gchart in charts:
             for chart in gchart.get('chart_group'):
-                valid_charts.append(release_prefix(prefix,
-                                                   chart.get('chart')
-                                                        .get('name')))
+                valid_charts.append(release_prefix(
+                    prefix, chart.get('chart').get('name')))
 
         actual_charts = [x.name for x in self.list_releases()]
         chart_diff = list(set(actual_charts) - set(valid_charts))
@@ -353,3 +401,97 @@ class Tiller(object):
             if chart.startswith(prefix):
                 LOG.debug("Release: %s will be removed", chart)
                 self.uninstall_release(chart)
+
+    def delete_resources(self, release_name, resource_name, resource_type,
+                         resource_labels, namespace):
+        '''
+        :params release_name - release name the specified resource is under
+        :params resource_name - name of specific resource
+        :params resource_type - type of resource e.g. job, pod, etc.
+        :params resource_labels - labels by which to identify the resource
+        :params namespace - namespace of the resource
+
+        Apply deletion logic based on type of resource
+        '''
+
+        label_selector = ''
+
+        if not resource_type == 'job':
+            label_selector = 'release_name={}'.format(release_name)
+
+        if resource_labels is not None:
+            for label in resource_labels:
+                if label_selector == '':
+                    label_selector = '{}={}'.format(label.keys()[0],
+                                                    label.values()[0])
+                    continue
+
+                label_selector += ', {}={}'.format(label.keys()[0],
+                                                   label.values()[0])
+
+        if 'job' in resource_type:
+            LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
+            get_jobs = self.k8s.get_namespace_job(namespace, label_selector)
+            for jb in get_jobs.items:
+                jb_name = jb.metadata.name
+
+                self.k8s.delete_job_action(jb_name, namespace)
+
+        elif 'pod' in resource_type:
+            release_pods = self.k8s.get_namespace_pod(
+                namespace, label_selector)
+
+            for pod in release_pods.items:
+                pod_name = pod.metadata.name
+                LOG.info("Deleting %s in namespace: %s", pod_name, namespace)
+                self.k8s.delete_namespace_pod(pod_name, namespace)
+                self.k8s.wait_for_pod_redeployment(pod_name, namespace)
+        else:
+            LOG.error("Unable to execute name: %s type: %s ",
+                      resource_name, resource_type)
+
+    def rolling_upgrade_pod_deployment(self, name, release_name, namespace,
+                                       labels, action_type, chart,
+                                       disable_hooks, values):
+        '''
+        update statefullsets (daemon, stateful)
+        '''
+
+        if action_type == 'daemonset':
+
+            LOG.info('Updating: %s', action_type)
+            label_selector = 'release_name={}'.format(release_name)
+
+            if labels is not None:
+                for label in labels:
+                    label_selector += ', {}={}'.format(label.keys()[0],
+                                                       label.values()[0])
+
+            get_daemonset = self.k8s.get_namespace_daemonset(
+                namespace=namespace, label=label_selector)
+
+            for ds in get_daemonset.items:
+                ds_name = ds.metadata.name
+                ds_labels = ds.metadata.labels
+                if ds_name == name:
+                    LOG.info("Deleting %s : %s in %s", action_type, ds_name,
+                             namespace)
+                    self.k8s.delete_daemon_action(ds_name, namespace)
+
+                    # update the daemonset yaml
+                    template = self.get_chart_templates(
+                        ds_name, name, release_name, namespace, chart,
+                        disable_hooks, values)
+                    template['metadata']['labels'] = ds_labels
+                    template['spec']['template']['metadata'][
+                        'labels'] = ds_labels
+
+                    self.k8s.create_daemon_action(
+                        namespace=namespace, template=template)
+
+                    # delete pods
+                    self.delete_resources(release_name, name, 'pod', labels,
+                                          namespace)
+
+        elif action_type == 'statefulset':
+            pass
