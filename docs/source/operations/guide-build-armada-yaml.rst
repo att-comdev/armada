@@ -64,9 +64,9 @@ Chart Group
 +=================+==========+========================================================================+
 | description     | string   | description of chart set                                               |
 +-----------------+----------+------------------------------------------------------------------------+
-| charts_group    | array    | stores definiton of the charts in a group                              |
+| chart_group     | array    | stores definition of the charts in a group                             |
 +-----------------+----------+------------------------------------------------------------------------+
-| sequenced       | bool     | enables sequeced chart deployment in a group                           |
+| sequenced       | bool     | enables sequenced chart deployment in a group                           |
 +-----------------+----------+------------------------------------------------------------------------+
 
 Chart
