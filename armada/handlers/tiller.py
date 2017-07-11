@@ -25,7 +25,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 TILLER_PORT = 44134
-TILLER_VERSION = b'2.4.2'
+TILLER_VERSION = b'2.5.0'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
 
@@ -188,6 +188,8 @@ class Tiller(object):
         '''
         Update a Helm Release
         '''
+        LOG.debug("wait: %s", wait)
+        LOG.debug("timeout: %s", timeout)
 
         if values is None:
             values = Config(raw='')
@@ -217,6 +219,8 @@ class Tiller(object):
         '''
         Create a Helm Release
         '''
+        LOG.debug("wait: %s", wait)
+        LOG.debug("timeout: %s", timeout)
 
         if values is None:
             values = Config(raw='')
