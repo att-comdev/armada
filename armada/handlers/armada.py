@@ -111,12 +111,12 @@ class Armada(object):
                       release[1])
 
         for entry in self.config['armada']['charts']:
-
+            chart_wait = self.wait
             desc = entry.get('description', 'A Chart Group')
             chart_group = entry.get('chart_group', [])
 
             if entry.get('sequenced', False):
-                self.wait = True
+                chart_wait = True
 
             LOG.info('Deploying: %s', desc)
 
@@ -132,7 +132,7 @@ class Armada(object):
 
                 # retrieve appropriate timeout value if 'wait' is specified
                 chart_timeout = None
-                if self.wait:
+                if chart_wait:
                     if getattr(chart, 'timeout', None):
                         chart_timeout = chart.timeout
                     else:
@@ -191,7 +191,7 @@ class Armada(object):
                                                disable_hooks=chart.
                                                upgrade.no_hooks,
                                                values=yaml.safe_dump(values),
-                                               wait=self.wait,
+                                               wait=chart_wait,
                                                timeout=chart_timeout)
 
                 # process install
@@ -203,7 +203,7 @@ class Armada(object):
                                                 chart.namespace,
                                                 prefix,
                                                 values=yaml.safe_dump(values),
-                                                wait=self.wait,
+                                                wait=chart_wait,
                                                 timeout=chart_timeout)
 
                 LOG.debug("Cleaning up chart source in %s",
