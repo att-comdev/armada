@@ -21,8 +21,6 @@ from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.config_pb2 import Config
 from supermutes.dot import dotify
 
-from ..utils.git import git_clone, source_cleanup
-
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -62,48 +60,14 @@ class ChartBuilder(object):
         self.chart = chart
 
         # extract, pull, whatever the chart from its source
-        self.source_directory = self.source_clone()
+        self.source_directory = self.get_source_path()
 
-    def source_clone(self):
+    def get_source_path(self):
         '''
-        Clone the charts source
-
-        We only support a git source type right now, which can also
-        handle git:// local paths as well
+        Return the joined path of the source directory and subpath
         '''
-
-        if self.chart.source.type == 'git':
-            if self.parent:
-                LOG.info("Cloning %s/%s as dependency for %s",
-                         self.chart.source.location,
-                         self.chart.source.subpath,
-                         self.parent)
-            else:
-                LOG.info("Cloning %s/%s for release %s",
-                         self.chart.source.location,
-                         self.chart.source.subpath,
-                         self.chart.release_name)
-
-            self._source_tmp_dir = git_clone(self.chart.source.location,
-                                             self.chart.source.reference)
-
-            return os.path.join(self._source_tmp_dir,
-                                self.chart.source.subpath)
-        if self.chart.source.type == 'local':
-            return os.path.join(self.chart.source.location,
-                                self.chart.source.subpath)
-
-        else:
-            LOG.exception("Unknown source type %s for chart %s",
-                          self.chart.name,
-                          self.chart.source.type)
-
-    def source_cleanup(self):
-        '''
-        Cleanup source
-        '''
-        if self.chart.source.type == 'git':
-            source_cleanup(self._source_tmp_dir)
+        return os.path.join(self.chart.source_dir[0],
+                            self.chart.source_dir[1])
 
     def get_metadata(self):
         '''
