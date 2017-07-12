@@ -14,8 +14,6 @@
 import unittest
 import mock
 
-from supermutes.dot import dotify
-
 # Required Oslo configuration setup
 from armada.conf import default
 default.register_opts()
@@ -73,16 +71,6 @@ class ChartBuilderTestCase(unittest.TestCase):
         cpu: 100m
         memory: 128Mi
     """
-
-    def test_chartbuilder_source_clone(self):
-
-        chart = dotify(self.chart_stream)
-        ChartBuilder.source_clone = mock.Mock(return_value='path')
-        chartbuilder = ChartBuilder(chart)
-        resp = getattr(chartbuilder, 'source_directory', None)
-
-        self.assertIsNotNone(resp)
-        self.assertIsInstance(resp, basestring)
 
     @unittest.skip("we are having wierd scenario")
     @mock.patch('armada.handlers.chartbuilder.dotify')
