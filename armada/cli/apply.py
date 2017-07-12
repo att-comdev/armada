@@ -41,7 +41,7 @@ class ApplyChartsCommand(cmd.Command):
                             default=False, help='Disable pre upgrade actions')
         parser.add_argument('--disable-update-post', action='store_true',
                             default=False, help='Disable post upgrade actions')
-        parser.add_argument('--enable-chart-cleanup', action='store',
+        parser.add_argument('--enable-chart-cleanup', action='store_true',
                             default=False, help='Enable Chart Clean Up')
         parser.add_argument('--wait', action='store_true',
                             default=False, help='Wait until all charts'
