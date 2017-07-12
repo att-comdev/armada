@@ -267,7 +267,13 @@ class Tiller(object):
         :result - will remove any chart that is not present in yaml
         '''
 
-        valid_charts = [release_prefix(prefix, chart) for chart in charts]
+        valid_charts = []
+        for gchart in charts:
+            for chart in gchart.get('chart_group'):
+                valid_charts.append(release_prefix(prefix,
+                                                   chart.get('chart')
+                                                        .get('name')))
+
         actual_charts = [x.name for x in self.list_releases()]
         chart_diff = list(set(actual_charts) - set(valid_charts))
 

@@ -1,0 +1,29 @@
+# For simple deployments
+
+armada:
+  release_prefix: armada
+  charts:
+    - description: Deploys Helm Toolkit and Mariadb
+      chart_group:
+      - chart: &blog-1
+          name: blog-1
+          release_name: blog-1
+          namespace: default
+          values: {}
+          source:
+              type: git
+              location: https://github.com/gardlt/hello-world-chart
+              subpath: .
+              reference: master
+          dependencies: []
+      - chart: &blog-2
+          name: blog-2
+          release_name: blog-2
+          namespace: default
+          values: {}
+          source:
+              type: git
+              location: https://github.com/gardlt/hello-world-chart
+              subpath: .
+              reference: master
+          dependencies: []
