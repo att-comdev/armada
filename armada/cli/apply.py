@@ -22,6 +22,7 @@ def applyCharts(args):
                     args.disable_update_pre,
                     args.disable_update_post,
                     args.enable_chart_cleanup,
+                    args.skip_pre_flight,
                     args.dry_run,
                     args.wait,
                     args.timeout,
@@ -35,6 +36,8 @@ class ApplyChartsCommand(cmd.Command):
                             help='Armada yaml file')
         parser.add_argument('--dry-run', action='store_true',
                             default=False, help='Run charts with dry run')
+        parser.add_argument('--skip-pre-flight', action='store_true',
+                            default=False, help='Skip Pre Flight')
         parser.add_argument('--debug-logging', action='store_true',
                             default=False, help='Show debug logs')
         parser.add_argument('--disable-update-pre', action='store_true',
