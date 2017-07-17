@@ -43,6 +43,7 @@ class Armada(object):
                  disable_update_pre=False,
                  disable_update_post=False,
                  enable_chart_cleanup=False,
+                 skip_pre_flight=False,
                  dry_run=False,
                  wait=False,
                  timeout=DEFAULT_TIMEOUT,
@@ -54,6 +55,7 @@ class Armada(object):
         self.disable_update_pre = disable_update_pre
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
+        self.skip_pre_flight = skip_pre_flight
         self.dry_run = dry_run
         self.wait = wait
         self.timeout = timeout
@@ -73,55 +75,20 @@ class Armada(object):
             if chart_name == name:
                 return chart, values
 
-    def pre_flight_ops(self):
-        '''
-        Perform a series of checks and operations to ensure proper deployment
-        '''
-        # Ensure tiller is available and yaml is valid
-        if not self.tiller.tiller_status():
-            raise Exception("Tiller Services is not Available")
-        if not lint.valid_manifest(self.config):
-            raise Exception("Invalid Armada Manifest")
-
-        # Clone the chart sources
-        #
-        # We only support a git source type right now, which can also
-        # handle git:// local paths as well
-        repos = {}
+    def pre_flight_checks(self):
         for group in self.config.get('armada').get('charts'):
             for ch in group.get('chart_group'):
                 location = ch.get('chart').get('source').get('location')
                 ct_type = ch.get('chart').get('source').get('type')
-                reference = ch.get('chart').get('source').get('reference')
-                subpath = ch.get('chart').get('source').get('subpath')
 
-                if ct_type == 'local':
-                    ch.get('chart')['source_dir'] = (location, subpath)
-                elif ct_type == 'git':
-                    if location not in repos.keys():
-                        try:
-                            LOG.info('Cloning repo: %s', location)
-                            repo_dir = git.git_clone(location, reference)
-                        except Exception as e:
-                            raise ValueError(e)
-                        repos[location] = repo_dir
-                        ch.get('chart')['source_dir'] = (repo_dir, subpath)
-                    else:
-                        ch.get('chart')['source_dir'] = (repos.get(location),
-                                                         subpath)
-                else:
-                    raise Exception("Unknown source type %s for chart %s",
-                                    ct_type, ch.get('chart').get('name'))
+                if ct_type == 'git' and not git.check_available_repo(location):
+                    raise ValueError(str("Invalid Url Path: " + location))
 
-    def post_flight_ops(self):
-        '''
-        Operations to run after deployment process has terminated
-        '''
-        # Delete git repos cloned for deployment
-        for group in self.config.get('armada').get('charts'):
-            for ch in group.get('chart_group'):
-                if ch.get('chart').get('source').get('type') == 'git':
-                    git.source_cleanup(ch.get('chart').get('source_dir')[0])
+        if not self.tiller.tiller_status():
+            raise Exception("Tiller Services is not Available")
+
+        if not lint.valid_manifest(self.config):
+            raise Exception("Invalid Armada Manifest")
 
     def sync(self):
         '''
@@ -131,8 +98,11 @@ class Armada(object):
         # TODO: (gardlt) we need to break up this func into
         # a more cleaner format
         # extract known charts on tiller right now
-        LOG.info("Performing Pre-Flight Operations")
-        self.pre_flight_ops()
+        if not self.skip_pre_flight:
+            LOG.info("Performing Pre-Flight Checks")
+            self.pre_flight_checks()
+        else:
+            LOG.info("Skipping Pre-Flight Checks")
 
         known_releases = self.tiller.list_charts()
         prefix = self.config.get('armada').get('release_prefix')
@@ -239,8 +209,7 @@ class Armada(object):
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
 
-        LOG.info("Performing Post-Flight Operations")
-        self.post_flight_ops()
+                chartbuilder.source_cleanup()
 
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(prefix, self.config['armada']['charts'])

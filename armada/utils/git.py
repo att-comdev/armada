@@ -1,14 +1,16 @@
 import pygit2
 import tempfile
 import shutil
-from os import path
+import requests
+
+HTTP_OK = 200
 
 def git_clone(repo_url, branch='master'):
     '''
     clones repo to a /tmp/ dir
     '''
 
-    if repo_url == '':
+    if repo_url == '' or not check_available_repo(repo_url):
         return False
 
     _tmp_dir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
@@ -20,5 +22,15 @@ def source_cleanup(target_dir):
     '''
     Clean up source
     '''
-    if path.exists(target_dir):
-        shutil.rmtree(target_dir)
+    shutil.rmtree(target_dir)
+
+
+def check_available_repo(repo_url):
+    try:
+        resp = requests.get(repo_url.replace('git:', 'http:'))
+        if resp.status_code == HTTP_OK:
+            return True
+
+        return False
+    except Exception:
+        return False
