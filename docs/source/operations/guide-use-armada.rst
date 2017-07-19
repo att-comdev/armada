@@ -17,6 +17,12 @@ Armada.yaml `here <guide-build-armada-yaml.rst>`_
 Usage
 -----
 
+
+.. note::
+
+    The apply command performs two main actions: installing and updating define
+    charts in the armada manifest
+
 1. Pull or Build the Armada Docker Images:
 
 .. code:: bash
@@ -53,20 +59,24 @@ Usage
 
 .. code:: bash
 
-    docker exec -it armada armada tiller --status
+    docker exec armada armada tiller --status
 
 
 4. If tiller is up then we can start deploying our armada yamls
 
 .. code:: bash
 
-    docker exec -it armada armada apply /examples/openstack-helm.yaml [ --debug-logging ]
+    docker exec armada armada apply /examples/openstack-helm.yaml [ --debug-logging ]
 
-5. To upgrade charts just modify the armada yaml or chart code and re-run ``armada
+5. Upgrading charts: modify the armada yaml or chart source code and run ``armada
    apply`` above
+
+.. code:: bash
+
+    docker exec armada armada apply /examples/openstack-helm.yaml [ --debug-logging ]
 
 6. To check deployed releases:
 
 .. code:: bash
 
-   docker exec -it armada armada tiller --releases
+   docker exec armada armada tiller --releases
