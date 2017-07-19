@@ -62,12 +62,40 @@ class ChartBuilder(object):
         # extract, pull, whatever the chart from its source
         self.source_directory = self.get_source_path()
 
+        # load ignored files from .helmignore if present
+        self.ignored_files = self.get_ignored_files()
+
     def get_source_path(self):
         '''
         Return the joined path of the source directory and subpath
         '''
         return os.path.join(self.chart.source_dir[0],
                             self.chart.source_dir[1])
+
+    def get_ignored_files(self):
+        '''
+        Load files from .helmignore if present
+        '''
+        ignored_files = []
+        if os.path.exists(os.path.join(self.source_directory, '.helmignore')):
+            with open(os.path.join(self.source_directory, '.helmignore')) as f:
+                ignored_files = f.readlines()
+        return [filename.strip() for filename in ignored_files]
+
+    def ignore_file(self, filename):
+        '''
+        :params file - filename to compare against list of ignored files
+
+        Returns true if file matches an ignored file wildcard or exact name,
+         false otherwise
+        '''
+        for ignored_file in self.ignored_files:
+            if (ignored_file.startswith('*') and
+                    filename.endswith(ignored_file.strip('*'))):
+                return True
+            elif ignored_file == filename:
+                return True
+        return False
 
     def get_metadata(self):
         '''
@@ -118,14 +146,17 @@ class ChartBuilder(object):
         templates = []
         if not os.path.exists(os.path.join(self.source_directory,
                                            'templates')):
-            LOG.warn("Chart %s has no templates directory,"
-                     "no templates will be deployed", self.chart.name)
+            LOG.warn("Chart %s has no templates directory. "
+                     "No templates will be deployed", self.chart.name)
         for root, _, files in os.walk(os.path.join(self.source_directory,
                                                    'templates'), topdown=True):
             for tpl_file in files:
                 tname = os.path.relpath(os.path.join(root, tpl_file),
                                         os.path.join(self.source_directory,
                                                      'templates'))
+                if self.ignore_file(tname):
+                    LOG.debug('Ignoring file %s', tname)
+                    continue
 
                 templates.append(Template(name=tname,
                                           data=open(os.path.join(root,
