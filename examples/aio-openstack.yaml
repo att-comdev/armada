@@ -1,0 +1,312 @@
+armada:
+  release_prefix: armada
+  charts:
+    - description: Deploys Ceph Storage
+      sequenced: True
+      chart_group:
+      - chart: &helm-toolkit
+          name: helm-toolkit
+          release_name: null
+          namespace: null
+          values: {}
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: helm-toolkit
+            reference: master
+          dependencies: []
+    - description: Deploys Helm Toolkit and Mariadb
+      sequenced: True
+      chart_group:
+      - chart: &mariadb
+          name: mariadb
+          release_name: mariadb
+          namespace: openstack
+          timeout: 3360
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values: {}
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: mariadb
+            reference: master
+          dependencies:
+            - *helm-toolkit
+    - description: OpenStack-Helm Infra Services
+      sequenced: False
+      chart_group:
+      - chart: &memcached
+          name: memcached
+          release_name: memcached
+          namespace: openstack
+          timeout: 100
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values: {}
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: memcached
+            reference: master
+          dependencies:
+          - *helm-toolkit
+      - chart: &etcd
+         name: etcd-rabbitmq
+         release_name: etcd
+         namespace: openstack
+         timeout: 100
+         install:
+           no_hooks: False
+         upgrade:
+           no_hooks: False
+         values: {}
+         source:
+           type: git
+           location: git://git.openstack.org/openstack/openstack-helm
+           subpath: etcd
+           reference: master
+         dependencies:
+         - *helm-toolkit
+      - chart: &rabbitmq
+          name: rabbitmq
+          release_name: rabbitmq
+          namespace: openstack
+          timeout: 100
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values:
+            replicas: 1
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: rabbitmq
+            reference: master
+          dependencies:
+          - *helm-toolkit
+      - chart: &ingress
+          name: ingress
+          release_name: ingress
+          namespace: openstack
+          timeout: 100
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values: {}
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: ingress
+            reference: master
+          dependencies:
+          - *helm-toolkit
+    - description: Openstack Services
+      sequenced: False
+      chart_group:
+      - chart: &keystone
+          name: keystone
+          release_name: keystone
+          namespace: openstack
+          timeout: 20
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+            pre:
+            delete:
+            - name: keystone-db-sync
+              type: job
+            - name: keystone-db-init
+              type: job
+          values: {}
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: keystone
+            reference: master
+          dependencies:
+          - *helm-toolkit
+      - chart: &horizon
+          name: horizon
+          release_name: horizon
+          namespace: openstack
+          timeout: 100
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values: {}
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: horizon
+            reference: master
+          dependencies:
+          - *helm-toolkit
+      - chart: &glance
+          name: glance
+          release_name: glance
+          namespace: openstack
+          timeout: 100
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values:
+            replicas:
+              api: 2
+              registry: 2
+            storage: pvc
+            conf:
+              glance:
+                default:
+                  oslo:
+                    log:
+                      debug: false
+                glance_store:
+                  glance:
+                    store:
+                      stores: file, http
+                      default_store: file
+                      filesystem_store_datadir: /var/lib/glance/images
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: glance
+            reference: master
+          dependencies:
+          - *helm-toolkit
+      - chart: &neutron
+          name: neutron
+          release_name: neutron
+          namespace: openstack
+          timeout: 3600
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values:
+            replicas:
+              server: 2
+            network:
+              interface:
+                tunnel: docker0
+            conf:
+              neutron:
+                default:
+                  oslo:
+                    log:
+                      debug: false
+                  neutron:
+                    db:
+                      l3_ha: False
+                      min_l3_agents_per_router: 1
+                      max_l3_agents_per_router: 1
+                      l3_ha_network_type: vxlan
+                      dhcp_agents_per_network: 1
+              ml2_conf:
+                ml2_type_flat:
+                  neutron:
+                    ml2:
+                      flat_networks: public
+              openvswitch_agent:
+                agent:
+                  neutron:
+                    ml2:
+                      ovs:
+                        agent:
+                          tunnel_types: vxlan
+                ovs:
+                  neutron:
+                    ml2:
+                      ovs:
+                        agent:
+                          of_interface: ovs-ofctl
+                          ovsdb_interface: vsctl
+                          bridge_mappings: public:br-ex
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: neutron
+            reference: master
+          dependencies:
+          - *helm-toolkit
+      - chart: &nova
+          name: nova
+          release_name: nova
+          namespace: openstack
+          timeout: 3600
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values:
+            control_replicas: 2
+            ceph:
+              enabled: false
+            conf:
+              nova:
+                default:
+                  oslo:
+                    log:
+                      debug: false
+                libvirt:
+                  nova:
+                    conf:
+                      virt_type: qemu
+                      images_type: null
+                      images_rbd_pool: null
+                      images_rbd_ceph_conf: null
+                      rbd_user: null
+                      rbd_secret_uuid: null
+                      disk_cachemodes: null
+                      hw_disk_discard: null
+                upgrade_levels:
+                  nova:
+                    conf:
+                      compute: null
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: nova
+            reference: master
+          dependencies:
+          - *helm-toolkit
+      - chart: &cinder
+          name: cinder
+          release_name: cinder
+          namespace: openstack
+          timeout: 100
+          install:
+            no_hooks: False
+          upgrade:
+            no_hooks: False
+          values:
+            replicas:
+              api: 2
+            storage: "gate"
+            conf:
+              cinder:
+                default:
+                  oslo:
+                    log:
+                      debug: false
+                  cinder:
+                    backup_driver: "cinder.backup.drivers.nfs"
+              backends:
+                rbd1:
+                  volume_driver: "cinder.volume.drivers.nfs.NfsDriver"
+          source:
+            type: git
+            location: git://git.openstack.org/openstack/openstack-helm
+            subpath: cinder
+            reference: master
+          dependencies:
+          - *helm-toolkit
