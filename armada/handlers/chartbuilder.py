@@ -21,6 +21,8 @@ from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.config_pb2 import Config
 from supermutes.dot import dotify
 
+from ..exceptions import chartbuilder_exceptions
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -76,11 +78,16 @@ class ChartBuilder(object):
         '''
         Load files from .helmignore if present
         '''
-        ignored_files = []
-        if os.path.exists(os.path.join(self.source_directory, '.helmignore')):
-            with open(os.path.join(self.source_directory, '.helmignore')) as f:
-                ignored_files = f.readlines()
-        return [filename.strip() for filename in ignored_files]
+        try:
+            ignored_files = []
+            if os.path.exists(os.path.join(self.source_directory,
+                                           '.helmignore')):
+                with open(os.path.join(self.source_directory,
+                          '.helmignore')) as f:
+                    ignored_files = f.readlines()
+            return [filename.strip() for filename in ignored_files]
+        except Exception:
+            raise chartbuilder_exceptions.IgnoredFilesLoadException()
 
     def ignore_file(self, filename):
         '''
@@ -102,10 +109,14 @@ class ChartBuilder(object):
         Process metadata
         '''
         # extract Chart.yaml to construct metadata
-        chart_yaml = dotify(
-            yaml.load(
-                open(os.path.join(self.source_directory, 'Chart.yaml'))
-                .read()))
+
+        try:
+            chart_yaml = dotify(
+                yaml.load(
+                    open(os.path.join(self.source_directory, 'Chart.yaml'))
+                    .read()))
+        except Exception:
+            raise chartbuilder_exceptions.MetadataLoadException()
 
         # construct Metadata object
         return Metadata(
@@ -176,18 +187,25 @@ class ChartBuilder(object):
         # dependencies
         # [process_chart(x, is_dependency=True) for x in chart.dependencies]
         dependencies = []
-
         for dep in self.chart.dependencies:
             LOG.info("Building dependency chart %s for release %s",
                      self.chart.chart_name, self.chart.release)
-            dependencies.append(ChartBuilder(dep.chart).get_helm_chart())
+            try:
+                dependencies.append(ChartBuilder(dep.chart).get_helm_chart())
+            except Exception:
+                chart_name = self.chart.chart_name
+                raise chartbuilder_exceptions.DependencyException(chart_name)
 
-        helm_chart = Chart(
-            metadata=self.get_metadata(),
-            templates=self.get_templates(),
-            dependencies=dependencies,
-            values=self.get_values(),
-            files=self.get_files(), )
+        try:
+            helm_chart = Chart(
+                metadata=self.get_metadata(),
+                templates=self.get_templates(),
+                dependencies=dependencies,
+                values=self.get_values(),
+                files=self.get_files(), )
+        except Exception:
+            chart_name = self.chart.chart_name
+            raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
 
         self._helm_chart = helm_chart
         return helm_chart

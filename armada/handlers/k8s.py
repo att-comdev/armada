@@ -16,7 +16,6 @@ import re
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 
-
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -36,6 +35,7 @@ class K8s(object):
         Initialize connection to Kubernetes
         '''
         config.load_kube_config()
+
         self.client = client.CoreV1Api()
         self.api_client = client.BatchV1Api()
 

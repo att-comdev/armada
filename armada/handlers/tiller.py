@@ -20,6 +20,8 @@ from hapi.chart.config_pb2 import Config
 
 from k8s import K8s
 from ..const import STATUS_DEPLOYED, STATUS_FAILED
+
+from ..exceptions import tiller_exceptions
 from ..utils.release import release_prefix
 
 from oslo_config import cfg
@@ -77,13 +79,17 @@ class Tiller(object):
         Return a tiller channel
         '''
         tiller_ip = self._get_tiller_ip()
-        return grpc.insecure_channel(
-            '%s:%s' % (tiller_ip, self.tiller_port),
-            options=[
-                ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-                ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
-            ]
-        )
+        tiller_port = self._get_tiller_port()
+        try:
+            return grpc.insecure_channel(
+                '%s:%s' % (tiller_ip, tiller_port),
+                options=[
+                    ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                    ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
+                ]
+            )
+        except Exception:
+            raise tiller_exceptions.ChannelException()
 
     def _get_tiller_pod(self):
         '''
@@ -173,6 +179,8 @@ class Tiller(object):
                     self.delete_resource(release_name, name, 'pod',
                                          labels, namespace)
         except Exception:
+            raise tiller_exceptions.PreUpdateJobDeleteException(name,
+                                                                namespace)
             LOG.debug("PRE: Could not delete anything, please check yaml")
 
         try:
@@ -184,6 +192,8 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
+            raise tiller_exceptions.PreUpdateJobCreateException(name,
+                                                                namespace)
             LOG.debug("PRE: Could not create anything, please check yaml")
 
     def delete_resource(self, release_name, resource_name, resource_type,
@@ -228,6 +238,7 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
+            raise tiller_exceptions.PreUpdateJobCreateException()
             LOG.debug("POST: Could not create anything, please check yaml")
 
     def update_release(self, chart, dry_run, name, namespace, prefix,
@@ -249,19 +260,22 @@ class Tiller(object):
         self._pre_update_actions(release_name, pre_actions, namespace)
 
         # build release install request
-        stub = ReleaseServiceStub(self.channel)
-        release_request = UpdateReleaseRequest(
-            chart=chart,
-            dry_run=dry_run,
-            disable_hooks=disable_hooks,
-            values=values,
-            name=release_name,
-            wait=wait,
-            timeout=timeout)
 
-        stub.UpdateRelease(release_request, self.timeout,
-                           metadata=self.metadata)
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = UpdateReleaseRequest(
+                chart=chart,
+                dry_run=dry_run,
+                disable_hooks=disable_hooks,
+                values=values,
+                name="{}-{}".format(prefix, name),
+                wait=wait,
+                timeout=timeout)
 
+            stub.UpdateRelease(release_request, self.timeout,
+                               metadata=self.metadata)
+        except Exception:
+            raise tiller_exceptions.ReleaseInstallException(name, namespace)
         self._post_update_actions(post_actions, namespace)
 
     def install_release(self, chart, dry_run, name, namespace, prefix,
@@ -278,19 +292,23 @@ class Tiller(object):
             values = Config(raw=values)
 
         # build release install request
-        stub = ReleaseServiceStub(self.channel)
-        release_request = InstallReleaseRequest(
-            chart=chart,
-            dry_run=dry_run,
-            values=values,
-            name="{}-{}".format(prefix, name),
-            namespace=namespace,
-            wait=wait,
-            timeout=timeout)
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = InstallReleaseRequest(
+                chart=chart,
+                dry_run=dry_run,
+                values=values,
+                name="{}-{}".format(prefix, name),
+                namespace=namespace,
+                wait=wait,
+                timeout=timeout)
 
-        return stub.InstallRelease(release_request,
-                                   self.timeout,
-                                   metadata=self.metadata)
+            return stub.InstallRelease(release_request,
+                                       self.timeout,
+                                       metadata=self.metadata)
+
+        except Exception:
+            raise tiller_exceptions.ReleaseInstallException(name, namespace)
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
         '''
@@ -301,13 +319,17 @@ class Tiller(object):
         '''
 
         # build release install request
-        stub = ReleaseServiceStub(self.channel)
-        release_request = UninstallReleaseRequest(name=release,
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_req = UninstallReleaseRequest(name=release,
                                                   disable_hooks=disable_hooks,
                                                   purge=purge)
-        return stub.UninstallRelease(release_request,
-                                     self.timeout,
-                                     metadata=self.metadata)
+            return stub.UninstallRelease(release_req,
+                                         self.timeout,
+                                         metadata=self.metadata)
+
+        except Exception:
+            raise tiller_exceptions.ReleaseUninstallException(release)
 
     def chart_cleanup(self, prefix, charts):
         '''
