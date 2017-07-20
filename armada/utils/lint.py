@@ -12,26 +12,87 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARMADA_DEFINITION = 'armada'
-RELEASE_PREFIX = 'release_prefix'
-CHARTS_DEFINITION = 'charts'
+from armada.const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
+from armada.const import KEYWORD_ARMADA, KEYWORD_PREFIX, KEYWORD_GROUPS, \
+    KEYWORD_CHARTS, KEYWORD_RELEASE
 
+def validate_armada_documents(documents):
+    manifest = validate_manifest_document(documents)
+    group = validate_chart_group_document(documents)
+    chart = validate_chart_document(documents)
 
-def valid_manifest(config):
-    if not isinstance(config.get(ARMADA_DEFINITION, None), dict):
-        raise Exception("Did not declare armada object")
+    return manifest and group and chart
 
-    armada_config = config.get('armada')
+def validate_armada_object(object):
+    if not isinstance(object.get(KEYWORD_ARMADA, None), dict):
+        raise Exception("Could not find {} keyword".format(KEYWORD_ARMADA))
 
-    if not isinstance(armada_config.get(RELEASE_PREFIX), basestring):
-        raise Exception('Release needs to be a string')
+    armada_object = object.get('armada')
 
-    if not isinstance(armada_config.get(CHARTS_DEFINITION), list):
-        raise Exception('Check yaml invalid chart definition must be array')
+    if not isinstance(armada_object.get(KEYWORD_PREFIX), str):
+        raise Exception("Could not find {} keyword".format(KEYWORD_PREFIX))
 
-    for group in armada_config.get('charts'):
-        for chart in group.get('chart_group'):
-            if not isinstance(chart.get('chart').get('name'), basestring):
-                raise Exception('Chart name needs to be a string')
+    if not isinstance(armada_object.get(KEYWORD_GROUPS), list):
+        raise Exception(
+            '{} is of correct type: {} (expected: {} )'.format(
+                KEYWORD_GROUPS,
+                type(armada_object.get(KEYWORD_GROUPS)), list))
+
+    for group in armada_object.get(KEYWORD_GROUPS):
+        for chart in group.get(KEYWORD_CHARTS):
+            chart_obj = chart.get('chart')
+            if not isinstance(chart_obj.get(KEYWORD_RELEASE), str):
+                raise Exception(
+                    'Could not find {} in {}'.format(KEYWORD_RELEASE,
+                                                     chart_obj.get('name')))
+
+    return True
+
+def validate_manifest_document(documents):
+    manifest_documents = []
+    for document in documents:
+        if document.get('schema') == DOCUMENT_MANIFEST:
+            manifest_documents.append(document)
+            manifest_data = document.get('data')
+            if not manifest_data.get(KEYWORD_PREFIX, False):
+                raise Exception(
+                    'Missing {} keyword in manifest'.format(KEYWORD_PREFIX))
+            if not isinstance(manifest_data.get('chart_groups'),
+                              list) and not manifest_data.get(
+                                  'chart_groups', False):
+                raise Exception(
+                    'Missing %s values. Expecting list type'.format(
+                        KEYWORD_GROUPS))
+
+        if len(manifest_documents) > 1:
+            raise Exception(
+                'Schema {} must be unique'.format(DOCUMENT_MANIFEST))
+
+    return True
+
+def validate_chart_group_document(documents):
+    for document in documents:
+        if document.get('schema') == DOCUMENT_GROUP:
+            manifest_data = document.get('data')
+            if not isinstance(manifest_data.get(KEYWORD_CHARTS),
+                              list) and not manifest_data.get(
+                                  'chart_group', False):
+                raise Exception(
+                    'Missing %s values. Expecting a list type'.format(
+                        KEYWORD_CHARTS))
+
+    return True
+
+def validate_chart_document(documents):
+    for document in documents:
+        if document.get('schema') == DOCUMENT_CHART:
+            manifest_data = document.get('data')
+            if not isinstance(manifest_data.get(KEYWORD_RELEASE),
+                              str) and not manifest_data.get(
+                                  KEYWORD_RELEASE, False):
+                raise Exception(
+                    'Missing %s values in %s. Expecting a string type'.format(
+                        KEYWORD_RELEASE,
+                        document.get('metadata').get('name')))
 
     return True

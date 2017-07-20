@@ -15,7 +15,8 @@
 from cliff import command as cmd
 import yaml
 
-from armada.utils.lint import valid_manifest
+from armada.utils.lint import validate_armada_documents, validate_armada_object
+from armada.handlers.manifest import Manifest
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -28,9 +29,16 @@ DOMAIN = "armada"
 logging.setup(CONF, DOMAIN)
 
 def validateYaml(args):
-    config = yaml.load(open(args.file).read())
-    if valid_manifest(config):
-        LOG.info('File successfully validated')
+    documents = yaml.safe_load_all(open(args.file).read())
+    manifest_obj = Manifest(documents).get_manifest()
+    obj_check = validate_armada_object(manifest_obj)
+    doc_check = validate_armada_documents(documents)
+
+    try:
+        if doc_check and obj_check:
+            LOG.info('Successfully validated: %s', args.file)
+    except Exception:
+        raise Exception('Failed to validate: %s', args.file)
 
 class ValidateYamlCommand(cmd.Command):
     def get_parser(self, prog_name):

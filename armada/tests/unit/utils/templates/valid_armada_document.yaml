@@ -1,0 +1,56 @@
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: example-manifest
+data:
+  release_prefix: example
+  chart_groups:
+    - example-group
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: example-group
+data:
+  description: "OpenStack Infra Services"
+  chart_group:
+    - example-chart
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: example-chart
+data:
+  name: keystone
+  release: keystone
+  namespace: undercloud
+  timeout: 100
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+  values: {}
+  source:
+    type: git
+    location: git://github.com/example/example
+    subpath: example-chart
+    reference: master
+  dependencies:
+    - dep-chart
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: dep-chart
+data:
+  name: dep-chart
+  release: null
+  namespace: null
+  values: {}
+  source:
+    type: git
+    location: git://github.com/example/example
+    subpath: dep-chart
+    reference: master
+  dependencies: []
