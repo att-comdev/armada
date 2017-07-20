@@ -15,6 +15,8 @@
 import mock
 import unittest
 
+from armada.exceptions import git_exceptions
+
 from armada.utils import git
 
 class GitTestCase(unittest.TestCase):
@@ -31,9 +33,9 @@ class GitTestCase(unittest.TestCase):
 
     def test_git_clone_empty_url(self):
         url = ''
-        dir = git.git_clone(url)
 
-        self.assertFalse(dir)
+        with self.assertRaises(Exception):
+            self.assertFalse(git.git_clone(url))
 
     def test_git_clone_bad_url(self):
         url = 'http://github.com/dummy/armada'
@@ -47,7 +49,11 @@ class GitTestCase(unittest.TestCase):
         mock_path.exists.return_value = True
         path = 'armada'
 
-        git.source_cleanup(path)
+        try:
+            git.source_cleanup(path)
+        except git_exceptions.SourceCleanupException:
+            pass
+
         mock_shutil.rmtree.assert_called_with(path)
 
     @mock.patch('armada.utils.git.shutil')
@@ -55,6 +61,6 @@ class GitTestCase(unittest.TestCase):
     def test_source_cleanup_bad_path(self, mock_path, mock_shutil):
         mock_path.exists.return_value = False
         path = 'armada'
-
-        git.source_cleanup(path)
+        with self.assertRaises(Exception):
+            git.source_cleanup(path)
         mock_shutil.rmtree.assert_not_called()

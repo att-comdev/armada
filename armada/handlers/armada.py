@@ -22,6 +22,12 @@ from supermutes.dot import dotify
 from chartbuilder import ChartBuilder
 from tiller import Tiller
 from manifest import Manifest
+
+from ..exceptions import armada_exceptions
+from ..exceptions import git_exceptions
+from ..exceptions import lint_exceptions
+from ..exceptions import tiller_exceptions
+
 from ..utils.release import release_prefix
 from ..utils import git
 from ..utils import lint
@@ -93,15 +99,13 @@ class Armada(object):
 
         # Ensure tiller is available and yaml is valid
         if not self.tiller.tiller_status():
-            raise Exception("Service: Tiller is not Available")
+            raise tiller_exceptions.TillerServicesUnavailableException()
         if not lint.validate_armada_documents(self.documents):
-            raise Exception("Invalid Armada Manifest")
+            raise lint_exceptions.InvalidManifestException()
+        if not lint.validate_armada_object(self.config):
+            raise lint_exceptions.InvalidArmadaObjectExceptionl()
 
         self.config = self.get_armada_manifest()
-
-        if not lint.validate_armada_object(self.config):
-            raise Exception("Invalid Armada Object")
-
         # Purge known releases that have failed and are in the current yaml
         prefix = self.config.get(KEYWORD_ARMADA).get(KEYWORD_PREFIX)
         failed_releases = self.get_releases_by_status(STATUS_FAILED)
@@ -141,15 +145,15 @@ class Armada(object):
                 try:
                     LOG.info('Cloning repo: %s', location)
                     repo_dir = git.git_clone(location, reference)
-                except Exception as e:
-                    raise ValueError(e)
+                except Exception:
+                    raise git_exceptions.GitLocationException(location)
                 repos[location] = repo_dir
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
             else:
                 ch.get('chart')['source_dir'] = (repos.get(location), subpath)
         else:
-            raise Exception("Unknown source type %s for chart %s", ct_type,
-                            ch.get('chart').get('name'))
+            chart_name = ch.get('chart').get('name')
+            raise armada_exceptions.ChartSourceException(ct_type, chart_name)
 
     def get_releases_by_status(self, status):
         '''
@@ -178,6 +182,9 @@ class Armada(object):
         # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
         prefix = self.config.get(KEYWORD_ARMADA).get(KEYWORD_PREFIX)
+
+        if known_releases is None:
+            raise armada_exceptions.KnownReleasesException()
 
         for release in known_releases:
             LOG.debug("Release %s, Version %s found on tiller", release[0],

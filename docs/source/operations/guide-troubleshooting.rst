@@ -25,6 +25,10 @@ When running Armada in the container you can execute docker logs to retrieve log
 
     docker logs [container-name | container-id]
 
+Errors/Exceptions
+-----------------
+
+A guide for interpreting errors/exceptions can be found `here <http://armada-helm.readthedocs.io/en/latest/operations/guide-exceptions.html>`_.
 
 Working with SSL
 ----------------
@@ -49,5 +53,5 @@ Issue
 -----
 
 If the issue that you are having does not appear here please check the aramda
-issues [here](https://github.com/att-comdev/armada/issues). If the issue does
+issues `here <https://github.com/att-comdev/armada/issues>`_. If the issue does
 not exist, please create an issue. 
