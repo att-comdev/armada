@@ -4,7 +4,9 @@ Armada RESTful API
 Armada Endpoints
 -----------------
 
-.. http:post:: /armada/apply
+::
+
+    Endpoint: POST /armada/apply
 
     :string file The yaml file to apply
     :>json boolean debug Enable debug logging
@@ -16,42 +18,47 @@ Armada Endpoints
     :>json boolean wait
     :>json float timeout
 
+
+.. code-block:: json
+
     Request:
 
-    .. sourcecode:: js
+    {
+    	"file": "examples/openstack-helm.yaml",
+    	"options": {
+    		"debug": true,
+    		"disable_update_pre": false,
+    		"disable_update_post": false,
+    		"enable_chart_cleanup": false,
+    		"skip_pre_flight": false,
+    		"dry_run": false,
+    		"wait": false,
+    		"timeout": false
+    	}
+    }
 
-        {
-        	"file": "examples/openstack-helm.yaml",
-        	"options": {
-        		"debug": true,
-        		"disable_update_pre": false,
-        		"disable_update_post": false,
-        		"enable_chart_cleanup": false,
-        		"skip_pre_flight": false,
-        		"dry_run": false,
-        		"wait": false,
-        		"timeout": false
-        	}
-        }
+
+.. code-block:: json
 
     Results:
 
-    .. sourcecode:: js
-
-        {
-            "message": "success"
-        }
+    {
+        "message": "success"
+    }
 
 Tiller Endpoints
 -----------------
 
-.. http:get:: /tiller/releases
+::
 
-    Retrieves tiller releases.
+    Endpoint: GET /tiller/releases
+
+    Description: Retrieves tiller releases.
+
+
+.. code-block:: json
 
     Results:
-
-    .. sourcecode:: js
 
     {
         "releases": {
@@ -63,13 +70,17 @@ Tiller Endpoints
         }
     }
 
-.. http:get:: /tiller/status
+
+::
+
+    Endpoint: GET /tiller/status
 
     Retrieves the status of the Tiller server.
 
-    Results:
 
-    .. sourcecode:: js
+.. code-block:: json
+
+    Results:
 
     {
         "message": Tiller Server is Active

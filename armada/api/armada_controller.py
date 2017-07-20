@@ -13,10 +13,24 @@
 # limitations under the License.
 #
 
-from armada.handlers.armada import Armada as Handler
-from falcon import HTTP_200
+from armada.conf import default
 
 import json
+from falcon import HTTP_200
+
+from oslo_config import cfg
+from oslo_log import log as logging
+
+# Required Oslo configuration setup
+default.register_opts()
+
+from armada.handlers.armada import Armada as Handler
+
+LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.setup(CONF, DOMAIN)
 
 class Apply(object):
     '''
