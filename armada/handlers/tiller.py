@@ -118,9 +118,13 @@ class Tiller(object):
         '''
         releases = []
         stub = ReleaseServiceStub(self.channel)
-        req = ListReleasesRequest(limit=RELEASE_LIMIT)
+        req = ListReleasesRequest(limit=RELEASE_LIMIT,
+                                  status_codes=['DEPLOYED', 'FAILED'],
+                                  sort_by='LAST_RELEASED',
+                                  sort_order='DESC')
         release_list = stub.ListReleases(req, self.timeout,
                                          metadata=self.metadata)
+
         for y in release_list:
             releases.extend(y.releases)
         return releases
@@ -129,14 +133,17 @@ class Tiller(object):
         '''
         List Helm Charts from Latest Releases
 
-        Returns list of (name, version, chart, values)
+        Returns a list of tuples in the form:
+        (name, version, chart, values, status)
         '''
         charts = []
         for latest_release in self.list_releases():
             try:
-                charts.append((latest_release.name, latest_release.version,
-                               latest_release.chart,
-                               latest_release.config.raw))
+                charts.append(
+                    (latest_release.name, latest_release.version,
+                     latest_release.chart, latest_release.config.raw,
+                     latest_release.info.status.Code.Name(
+                         latest_release.info.status.code)))
             except IndexError:
                 continue
         return charts

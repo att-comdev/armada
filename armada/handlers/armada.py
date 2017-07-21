@@ -69,7 +69,7 @@ class Armada(object):
         '''
         Find a release given a list of known_releases and a release name
         '''
-        for chart_name, _, chart, values in known_releases:
+        for chart_name, _, chart, values, _ in known_releases:
             if chart_name == name:
                 return chart, values
 
@@ -82,6 +82,19 @@ class Armada(object):
             raise Exception("Tiller Services is not Available")
         if not lint.valid_manifest(self.config):
             raise Exception("Invalid Armada Manifest")
+
+        # Purge known releases that have failed and are in the current yaml
+        prefix = self.config.get('armada').get('release_prefix')
+        failed_releases = self.get_releases_by_status('FAILED')
+        for release in failed_releases:
+            for group in self.config.get('armada').get('charts'):
+                for ch in group.get('chart_group'):
+                    ch_release_name = release_prefix(prefix, ch.get('chart')
+                                                               .get('name'))
+                    if release[0] == ch_release_name:
+                        LOG.info('Purging failed release %s '
+                                 'before deployment', release[0])
+                        self.tiller.uninstall_release(release[0])
 
         # Clone the chart sources
         #
@@ -113,15 +126,19 @@ class Armada(object):
                     raise Exception("Unknown source type %s for chart %s",
                                     ct_type, ch.get('chart').get('name'))
 
-    def post_flight_ops(self):
+    def get_releases_by_status(self, status):
         '''
-        Operations to run after deployment process has terminated
+        :params status - status string to filter releases on
+
+        Return a list of current releases with a specified status
         '''
-        # Delete git repos cloned for deployment
-        for group in self.config.get('armada').get('charts'):
-            for ch in group.get('chart_group'):
-                if ch.get('chart').get('source').get('type') == 'git':
-                    git.source_cleanup(ch.get('chart').get('source_dir')[0])
+        filtered_releases = []
+        known_releases = self.tiller.list_charts()
+        for release in known_releases:
+            if release[4] == status:
+                filtered_releases.append(release)
+
+        return filtered_releases
 
     def sync(self):
         '''
@@ -130,10 +147,10 @@ class Armada(object):
 
         # TODO: (gardlt) we need to break up this func into
         # a more cleaner format
-        # extract known charts on tiller right now
         LOG.info("Performing Pre-Flight Operations")
         self.pre_flight_ops()
 
+        # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
         prefix = self.config.get('armada').get('release_prefix')
 
@@ -244,6 +261,16 @@ class Armada(object):
 
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(prefix, self.config['armada']['charts'])
+
+    def post_flight_ops(self):
+        '''
+        Operations to run after deployment process has terminated
+        '''
+        # Delete git repos cloned for deployment
+        for group in self.config.get('armada').get('charts'):
+            for ch in group.get('chart_group'):
+                if ch.get('chart').get('source').get('type') == 'git':
+                    git.source_cleanup(ch.get('chart').get('source_dir')[0])
 
     def show_diff(self, chart, installed_chart,
                   installed_values, target_chart, target_values):
