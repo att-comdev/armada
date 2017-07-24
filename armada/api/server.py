@@ -13,45 +13,71 @@
 # limitations under the License.
 #
 
+import sys
+
 from armada.conf import default
 
-# Required Oslo configuration setup
 default.register_opts()
-
-from armada_controller import Apply
-from tiller_controller import Release, Status
-
-from middleware import AuthMiddleware, RoleMiddleware
-
-import falcon
 
 from oslo_config import cfg
 from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
-DOMAIN = "armada"
+CONF(sys.argv[1:])
+
+
+LOG = logging.getLogger(__name__)
+
+CONF = cfg.CONF
+DOMAIN = 'armada'
 
 logging.setup(CONF, DOMAIN)
 
-# Build API
+import falcon
+
+from middleware import AuthMiddleware, ContextMiddleware, LoggingMiddleware
+
+from armada.api.armada_controller import Apply
+from armada.api.tiller_controller import Release, Status
+from armada.api.validate_controller import Validate
+from armada.policy import ArmadaPolicy
+
+from armada.api import ArmadaRequest
+
 def create(middleware=CONF.middleware):
     if middleware:
-        api = falcon.API(middleware=[AuthMiddleware(), RoleMiddleware()])
+        api = falcon.API(
+            request_type=ArmadaRequest,
+            middleware=[
+                AuthMiddleware(),
+                ContextMiddleware(),
+                LoggingMiddleware()
+            ])
     else:
         api = falcon.API()
 
-    # Configure API routing
-    url_routes = (
-        ('/tiller/status', Status()),
-        ('/tiller/releases', Release()),
-        ('/armada/apply/', Apply())
+    # Authencitcation Policy
+    policy_engine = ArmadaPolicy(CONF)
+    policy_engine.register_policy()
+
+    # Define serives Routes v1.0
+    url_routes_v1 = (
+        ('status', Status(policy_engine=policy_engine)),
+        ('releases', Release(policy_engine=policy_engine)),
+        ('validate', Validate(policy_engine=policy_engine)),
+        ('apply', Apply(policy_engine=policy_engine))
     )
 
-    for route, service in url_routes:
-        api.add_route(route, service)
+    for route, service in url_routes_v1:
+        api.add_route('/v1.0/{}'.format(route), service)
 
     return api
+
+def paste_start_armada(global_conf, **kwargs):
+        # At this time just ignore everything in the paste configuration
+        # and rely on oslo_config
+
+        return api
 
 
 api = create()
