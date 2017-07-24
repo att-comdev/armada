@@ -13,21 +13,34 @@ To use the docker containter to develop:
 
 .. code-block:: bash
 
-    docker build . -t armada/latest
+    git clone http://github.com/att-comdev/armada.git
+    cd armada
 
-    docker run -d --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/examples/:/examples armada/latest
+    tox -e genconfig
+    tox -e genpolicy
+
+    docker build . -t armada:local
+
+    docker run -d --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/examples/:/examples armada:local
 
 .. note::
 
     The first build will take a little while. Afterwords, it will build much
     faster.
 
+
 Virtualenv
 ##########
 
 To use VirtualEnv:
+We will show you how to set up armada in your local using virtualenv
 
-1. virtualenv venv
+.. note::
+
+    Suggest that you use a Ubuntu 16.04 VM
+
+1. git clone http://github.com/att-comdev/armada.git && cd armada
+2. virtualenv venv
 2. source ./venv/bin/activate
 
 From the directory of the forked repository:
@@ -47,6 +60,12 @@ From the directory of the forked repository:
     tox -e pep8
     tox -e bandit
     tox -e cover
+
+    # policy and config are used in order to use and configure Armada API
+    tox -e genconfig
+    tox -e genpolicy
+
+    armada -h
 
 .. note::
 

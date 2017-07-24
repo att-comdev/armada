@@ -18,11 +18,14 @@ from armada.const import KEYWORD_ARMADA, KEYWORD_PREFIX, KEYWORD_GROUPS, \
 
 
 def validate_armada_documents(documents):
-    manifest = validate_manifest_document(documents)
-    group = validate_chart_group_document(documents)
-    chart = validate_chart_document(documents)
+    try:
+        manifest = validate_manifest_document(documents)
+        group = validate_chart_group_document(documents)
+        chart = validate_chart_document(documents)
 
-    return manifest and group and chart
+        return manifest and group and chart
+    except:
+        return False
 
 
 def validate_armada_object(object):
@@ -49,47 +52,63 @@ def validate_armada_object(object):
 
 
 def validate_manifest_document(documents):
-    manifest_documents = []
-    for document in documents:
-        if document.get('schema') == DOCUMENT_MANIFEST:
-            manifest_documents.append(document)
-            manifest_data = document.get('data')
-            if not manifest_data.get(KEYWORD_PREFIX, False):
+    try:
+        manifest_documents = []
+        for document in documents:
+            if document.get('schema') == DOCUMENT_MANIFEST:
+                manifest_documents.append(document)
+                manifest_data = document.get('data')
+                if not manifest_data.get(KEYWORD_PREFIX, False):
+                    raise Exception(
+                        'Missing {} keyword in manifest'.format(
+                            KEYWORD_PREFIX))
+                if not isinstance(manifest_data.get('chart_groups'),
+                                  list) and not manifest_data.get(
+                                      'chart_groups', False):
+                    raise Exception(
+                        'Missing %s values. Expecting list type'.format(
+                            KEYWORD_GROUPS))
+
+            if len(manifest_documents) > 1:
                 raise Exception(
-                    'Missing {} keyword in manifest'.format(KEYWORD_PREFIX))
-            if not isinstance(manifest_data.get('chart_groups'),
-                              list) and not manifest_data.get(
-                                  'chart_groups', False):
-                raise Exception('Missing %s values. Expecting list type'.
-                                format(KEYWORD_GROUPS))
+                    'Schema {} must be unique'.format(DOCUMENT_MANIFEST))
 
-        if len(manifest_documents) > 1:
-            raise Exception(
-                'Schema {} must be unique'.format(DOCUMENT_MANIFEST))
-
-    return True
+        return True
+    except:
+        return False
 
 
 def validate_chart_group_document(documents):
-    for document in documents:
-        if document.get('schema') == DOCUMENT_GROUP:
-            manifest_data = document.get('data')
-            if not isinstance(manifest_data.get(KEYWORD_CHARTS),
-                              list) and not manifest_data.get(
-                                  'chart_group', False):
-                raise Exception('Missing %s values. Expecting a list type'.
-                                format(KEYWORD_CHARTS))
+    try:
+        for document in documents:
+            if document.get('schema') == DOCUMENT_GROUP:
+                manifest_data = document.get('data')
+                if not isinstance(manifest_data.get(KEYWORD_CHARTS),
+                                  list) and not manifest_data.get(
+                                      'chart_group', False):
+                    raise Exception(
+                        'Missing %s values. Expecting a list type'.format(
+                            KEYWORD_CHARTS))
 
-    return True
+        return True
+    except:
+        return False
 
 
 def validate_chart_document(documents):
-    for document in documents:
-        if document.get('schema') == DOCUMENT_CHART:
-            manifest_data = document.get('data')
-            if not manifest_data.get(KEYWORD_RELEASE, False):
-                raise Exception(
-                    'Missing %s values in %s. Expecting a string type'.format(
-                        KEYWORD_RELEASE, document.get('metadata').get('name')))
+    try:
+        for document in documents:
+            if document.get('schema') == DOCUMENT_CHART:
+                manifest_data = document.get('data')
+                if not isinstance(manifest_data.get(KEYWORD_RELEASE),
+                                  str) and not manifest_data.get(
+                                      KEYWORD_RELEASE, False):
+                    raise Exception(
+                        'Missing %s values in %s. Expecting'
+                        'string type'.format(
+                            KEYWORD_RELEASE,
+                            document.get('metadata').get('name')))
 
-    return True
+        return True
+    except:
+        return False

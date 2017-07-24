@@ -6,9 +6,9 @@ Armada Endpoints
 
 ::
 
-    Endpoint: POST /armada/apply
+    Endpoint: POST v1.0/apply
 
-    :string file The yaml file to apply
+    :body application/json armada manifest
     :>json boolean debug Enable debug logging
     :>json boolean disable_update_pre
     :>json boolean disable_update_post
@@ -24,17 +24,17 @@ Armada Endpoints
     Request:
 
     {
-    	"file": "examples/openstack-helm.yaml",
-    	"options": {
-    		"debug": true,
-    		"disable_update_pre": false,
-    		"disable_update_post": false,
-    		"enable_chart_cleanup": false,
-    		"skip_pre_flight": false,
-    		"dry_run": false,
-    		"wait": false,
-    		"timeout": false
-    	}
+        "body": "<armada-manifest>",
+        "options": {
+            "debug": true,
+            "disable_update_pre": false,
+            "disable_update_post": false,
+            "enable_chart_cleanup": false,
+            "skip_pre_flight": false,
+            "dry_run": false,
+            "wait": false,
+            "timeout": false
+        }
     }
 
 
@@ -46,12 +46,9 @@ Armada Endpoints
         "message": "success"
     }
 
-Tiller Endpoints
------------------
-
 ::
 
-    Endpoint: GET /tiller/releases
+    Endpoint: GET /v1.0/releases
 
     Description: Retrieves tiller releases.
 
@@ -73,7 +70,7 @@ Tiller Endpoints
 
 ::
 
-    Endpoint: GET /tiller/status
+    Endpoint: GET /v1.0/status
 
     Retrieves the status of the Tiller server.
 
@@ -83,5 +80,30 @@ Tiller Endpoints
     Results:
 
     {
-        "message": Tiller Server is Active
+        "tiller": true
+    }
+
+
+::
+
+    Endpoint: POST /v1.0/validate
+
+    Retrieves the status of the Tiller server.
+
+    :body application/json armada manifest
+
+.. code-block:: json
+
+    Request:
+
+    {
+        "body": "<armada-manifest>"
+    }
+
+.. code-block:: json
+
+    Results:
+
+    {
+        "valid": true
     }

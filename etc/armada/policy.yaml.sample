@@ -1,0 +1,10 @@
+# Actions requiring admin auth
+"admin_required": "role:admin or is_admin:1"
+# Validate Manifest
+"chart_installer:validate": "role:admin"
+# Installs Manifest charts
+"chart_installer:install": "role:admin"
+# Read Deployed Releases
+"chart_installer:read_releases": "role:admin"
+# Check status of armada services
+"chart_installer:query_status": "role:admin"

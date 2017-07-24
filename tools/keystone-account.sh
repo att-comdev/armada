@@ -1,0 +1,6 @@
+#!//bin/bash
+
+openstack domain create 'ucp'
+openstack project create --domain 'ucp' 'service'
+openstack user create --domain ucp --project service --project-domain 'ucp' --password armada armada
+openstack role add --project-domain ucp --user-domain ucp --user armada --project service admin
