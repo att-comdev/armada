@@ -207,7 +207,6 @@ class Tiller(object):
                 LOG.info("Deleting %s in namespace: %s",
                          pod_name, namespace)
                 self.k8s.delete_namespace_pod(pod_name, namespace)
-                self.k8s.wait_for_pod_redeployment(pod_name, namespace)
         else:
             LOG.error("Unable to execute name: %s type: %s ",
                       resource_name, resource_type)
