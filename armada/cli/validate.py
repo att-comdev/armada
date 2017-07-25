@@ -27,16 +27,21 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 def validateYaml(args):
     config = yaml.load(open(args.file).read())
     if valid_manifest(config):
         LOG.info('File successfully validated')
 
+
 class ValidateYamlCommand(cmd.Command):
     def get_parser(self, prog_name):
         parser = super(ValidateYamlCommand, self).get_parser(prog_name)
-        parser.add_argument('file', type=str, metavar='FILE',
-                            help='Armada yaml file to validate')
+        parser.add_argument(
+            'file',
+            type=str,
+            metavar='FILE',
+            help='Armada yaml file to validate')
         return parser
 
     def take_action(self, parsed_args):

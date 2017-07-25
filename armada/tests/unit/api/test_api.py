@@ -18,11 +18,13 @@ from falcon import testing
 import json
 import mock
 
+
 class APITestCase(testing.TestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 
         self.app = server.create(middleware=False)
+
 
 class TestAPI(APITestCase):
     @mock.patch('armada.api.armada_controller.Handler')
@@ -32,15 +34,19 @@ class TestAPI(APITestCase):
         '''
         mock_armada.sync.return_value = None
 
-        body = json.dumps({'file': '../examples/openstack-helm.yaml',
-                           'options': {'debug': 'true',
-                                       'disable_update_pre': 'false',
-                                       'disable_update_post': 'false',
-                                       'enable_chart_cleanup': 'false',
-                                       'skip_pre_flight': 'false',
-                                       'dry_run': 'false',
-                                       'wait': 'false',
-                                       'timeout': '100'}})
+        body = json.dumps({
+            'file': '../examples/openstack-helm.yaml',
+            'options': {
+                'debug': 'true',
+                'disable_update_pre': 'false',
+                'disable_update_post': 'false',
+                'enable_chart_cleanup': 'false',
+                'skip_pre_flight': 'false',
+                'dry_run': 'false',
+                'wait': 'false',
+                'timeout': '100'
+            }
+        })
 
         doc = {u'message': u'Success'}
 
