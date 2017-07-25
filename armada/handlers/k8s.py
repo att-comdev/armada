@@ -57,38 +57,21 @@ class K8s(object):
         '''
         LOG.debug(" %s in namespace: %s", name, namespace)
 
-    def get_namespace_pod(self, namespace="default",
-                          label_selector=''):
+    def get_namespace_pod(self, namespace="default"):
         '''
-        :params namespace - namespace of the Pod
-        :params label_selector - filters Pods by label
+        :params - namespace - pod namespace
 
         This will return a list of objects req namespace
         '''
 
-        return self.client \
-            .list_namespaced_pod(namespace, label_selector=label_selector)
+        return self.client.list_namespaced_pod(namespace)
 
     def get_all_pods(self, label_selector=''):
         '''
-        :params label_selector - filters Pods by label
+        :params - label_selector - filters pods by label
 
         Returns a list of pods from all namespaces
         '''
 
         return self.client \
             .list_pod_for_all_namespaces(label_selector=label_selector)
-
-    def delete_namespace_pod(self, name, namespace="default", body=None):
-        '''
-        :params name - name of the Pod
-        :params namespace - namespace of the Pod
-        :params body - V1DeleteOptions
-
-        Deletes pod by name and returns V1Status object
-        '''
-        if body is None:
-            body = client.V1DeleteOptions()
-
-        return self.client \
-            .delete_namespaced_pod(name, namespace, body)
