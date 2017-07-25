@@ -46,6 +46,8 @@ class Armada(object):
                  dry_run=False,
                  wait=False,
                  timeout=DEFAULT_TIMEOUT,
+                 tiller_host=None,
+                 tiller_port=44134,
                  debug=False):
         '''
         Initialize the Armada Engine and establish
@@ -58,7 +60,7 @@ class Armada(object):
         self.wait = wait
         self.timeout = timeout
         self.config = yaml.load(config)
-        self.tiller = Tiller()
+        self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
         self.debug = debug
 
         # Set debug value
