@@ -29,6 +29,7 @@ LOG = logging.getLogger(__name__)
 configs.set_app_default_configs()
 CONF = cfg.CONF
 
+
 # Build API
 def create(middleware=CONF.middleware):
     logging.register_options(CONF)
@@ -41,11 +42,8 @@ def create(middleware=CONF.middleware):
         api = falcon.API()
 
     # Configure API routing
-    url_routes = (
-        ('/tiller/status', Status()),
-        ('/tiller/releases', Release()),
-        ('/armada/apply/', Apply())
-    )
+    url_routes = (('/tiller/status', Status()),
+                  ('/tiller/releases', Release()), ('/armada/apply/', Apply()))
 
     for route, service in url_routes:
         api.add_route(route, service)

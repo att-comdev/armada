@@ -25,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
 
+
 def validateYaml(args):
     documents = yaml.safe_load_all(open(args.file).read())
     manifest_obj = Manifest(documents).get_manifest()
@@ -37,11 +38,15 @@ def validateYaml(args):
     except Exception:
         raise Exception('Failed to validate: %s', args.file)
 
+
 class ValidateYamlCommand(cmd.Command):
     def get_parser(self, prog_name):
         parser = super(ValidateYamlCommand, self).get_parser(prog_name)
-        parser.add_argument('file', type=str, metavar='FILE',
-                            help='Armada yaml file to validate')
+        parser.add_argument(
+            'file',
+            type=str,
+            metavar='FILE',
+            help='Armada yaml file to validate')
         return parser
 
     def take_action(self, parsed_args):

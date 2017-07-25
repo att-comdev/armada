@@ -14,6 +14,7 @@
 
 from ..const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
 
+
 class Manifest(object):
     def __init__(self, documents):
         self.config = None
@@ -70,15 +71,14 @@ class Manifest(object):
                     'chart': chart_dep.get('data')
                 }
         except Exception:
-            raise Exception(
-                "Could not find dependency chart {} in {}".format(
-                    dep, DOCUMENT_CHART))
+            raise Exception("Could not find dependency chart {} in {}".format(
+                dep, DOCUMENT_CHART))
 
     def build_chart_group(self, chart_group):
         try:
             chart = None
-            for iter, chart in enumerate(chart_group.get('data').get(
-                    'chart_group', [])):
+            for iter, chart in enumerate(
+                    chart_group.get('data').get('chart_group', [])):
                 if isinstance(chart, dict):
                     continue
                 chart_dep = self.find_chart_document(chart)
@@ -87,29 +87,25 @@ class Manifest(object):
                 }
         except Exception:
             raise Exception(
-                "Could not find chart {} in {}".format(
-                    chart, DOCUMENT_GROUP))
+                "Could not find chart {} in {}".format(chart, DOCUMENT_GROUP))
 
     def build_armada_manifest(self):
         try:
             group = None
-            for iter, group in enumerate(self.manifest.get('data').get(
-                    'chart_groups', [])):
+            for iter, group in enumerate(
+                    self.manifest.get('data').get('chart_groups', [])):
                 if isinstance(group, dict):
                     continue
                 chart_grp = self.find_chart_group_document(group)
                 self.manifest['data']['chart_groups'][iter] = chart_grp.get(
                     'data')
         except Exception:
-            raise Exception(
-                "Could not find chart group {} in {}".format(
-                    group, DOCUMENT_MANIFEST))
+            raise Exception("Could not find chart group {} in {}".format(
+                group, DOCUMENT_MANIFEST))
 
     def get_manifest(self):
         self.build_charts_deps()
         self.build_chart_groups()
         self.build_armada_manifest()
 
-        return {
-            'armada': self.manifest.get('data')
-        }
+        return {'armada': self.manifest.get('data')}

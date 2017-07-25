@@ -24,6 +24,7 @@ LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
+
 class Status(object):
     def on_get(self, req, resp):
         '''
@@ -39,6 +40,7 @@ class Status(object):
 
         resp.content_type = 'application/json'
         resp.status = HTTP_200
+
 
 class Release(object):
     def on_get(self, req, resp):

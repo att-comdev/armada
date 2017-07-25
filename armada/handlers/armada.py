@@ -266,28 +266,29 @@ class Armada(object):
                         continue
 
                     # do actual update
-                    self.tiller.update_release(protoc_chart,
-                                               prefix_chart,
-                                               chart.namespace,
-                                               pre_actions=pre_actions,
-                                               post_actions=post_actions,
-                                               dry_run=self.dry_run,
-                                               disable_hooks=chart.
-                                               upgrade.no_hooks,
-                                               values=yaml.safe_dump(values),
-                                               wait=chart_wait,
-                                               timeout=chart_timeout)
+                    self.tiller.update_release(
+                        protoc_chart,
+                        prefix_chart,
+                        chart.namespace,
+                        pre_actions=pre_actions,
+                        post_actions=post_actions,
+                        dry_run=self.dry_run,
+                        disable_hooks=chart.upgrade.no_hooks,
+                        values=yaml.safe_dump(values),
+                        wait=chart_wait,
+                        timeout=chart_timeout)
 
                 # process install
                 else:
                     LOG.info("Installing release %s", chart.release)
-                    self.tiller.install_release(protoc_chart,
-                                                prefix_chart,
-                                                chart.namespace,
-                                                dry_run=self.dry_run,
-                                                values=yaml.safe_dump(values),
-                                                wait=chart_wait,
-                                                timeout=chart_timeout)
+                    self.tiller.install_release(
+                        protoc_chart,
+                        prefix_chart,
+                        chart.namespace,
+                        dry_run=self.dry_run,
+                        values=yaml.safe_dump(values),
+                        wait=chart_wait,
+                        timeout=chart_timeout)
 
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
