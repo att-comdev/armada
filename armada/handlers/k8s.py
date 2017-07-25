@@ -1,4 +1,4 @@
-# Copyright 2015 The Armada Authors.
+# Copyright 2017 The Armada Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
-from kubernetes import client, config, watch
+from kubernetes import client, config
 from kubernetes.client.rest import ApiException
-
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -94,30 +92,3 @@ class K8s(object):
 
         return self.client \
             .delete_namespaced_pod(name, namespace, body)
-
-    def wait_for_pod_redeployment(self, old_pod_name, namespace):
-        base_pod_pattern = re.compile('^(.+)-[a-zA-Z0-9]+$')
-        if not base_pod_pattern.match(old_pod_name):
-            LOG.error(
-                'Could not identify new pod after purging %s', old_pod_name)
-            return
-        pod_base_name = base_pod_pattern.match(old_pod_name).group(1)
-
-        new_pod_name = ''
-        w = watch.Watch()
-        for event in w.stream(self.client.list_namespaced_pod, namespace):
-            event_name = event['object'].metadata.name
-            event_match = base_pod_pattern.match(event_name)
-            if not event_match or not event_match.group(1) == pod_base_name:
-                continue
-
-            pod_conditions = event['object'].status.conditions
-            # wait for new pod deployment
-            if event['type'] == 'ADDED' and not pod_conditions:
-                new_pod_name = event_name
-            elif new_pod_name:
-                for condition in pod_conditions:
-                    if (condition.type == 'Ready' and
-                            condition.status == 'True'):
-                        LOG.info('New pod %s deployed', new_pod_name)
-                        w.stop()
