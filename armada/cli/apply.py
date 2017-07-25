@@ -25,6 +25,8 @@ def applyCharts(args):
                     args.dry_run,
                     args.wait,
                     args.timeout,
+                    args.tiller_host,
+                    args.tiller_port,
                     args.debug_logging)
     armada.sync()
 
@@ -49,6 +51,10 @@ class ApplyChartsCommand(cmd.Command):
         parser.add_argument('--timeout', action='store', type=int,
                             default=3600, help='Specifies time to wait'
                                                 ' for charts to deploy')
+        parser.add_argument('--tiller-host', action='store', type=str,
+                            help='Specify the tiller host')
+        parser.add_argument('--tiller-port', action='store', type=int,
+                            default=44134, help='Specify the tiller port')
         return parser
 
     def take_action(self, parsed_args):

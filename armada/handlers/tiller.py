@@ -49,8 +49,10 @@ class Tiller(object):
     service over gRPC
     '''
 
-    def __init__(self):
+    def __init__(self, tiller_host=None, tiller_port=TILLER_PORT):
 
+        self.tiller_host = tiller_host
+        self.tiller_port = tiller_port
         # init k8s connectivity
         self.k8s = K8s()
 
@@ -74,9 +76,8 @@ class Tiller(object):
         Return a tiller channel
         '''
         tiller_ip = self._get_tiller_ip()
-        tiller_port = self._get_tiller_port()
         return grpc.insecure_channel(
-            '%s:%s' % (tiller_ip, tiller_port),
+            '%s:%s' % (tiller_ip, self.tiller_port),
             options=[
                 ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
                 ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
@@ -96,8 +97,11 @@ class Tiller(object):
         '''
         Returns the tiller pod's IP address by searching all namespaces
         '''
-        pod = self._get_tiller_pod()
-        return pod.status.pod_ip
+        if self.tiller_host:
+            return self.tiller_host
+        else:
+            pod = self._get_tiller_pod()
+            return pod.status.pod_ip
 
     def _get_tiller_port(self):
         '''Stub method to support arbitrary ports in the future'''
