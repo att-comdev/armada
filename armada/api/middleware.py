@@ -31,8 +31,8 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
-class AuthMiddleware(object):
 
+class AuthMiddleware(object):
     def process_request(self, req, resp):
 
         # Validate token and get user session
@@ -55,8 +55,8 @@ class AuthMiddleware(object):
         roles = []
         for role_id in role_ids:
             request_url = CONF.auth_url + '/roles/' + role_id
-            resp = self._session_request(session=session,
-                                         request_url=request_url)
+            resp = self._session_request(
+                session=session, request_url=request_url)
 
             role = resp.json()['role']['name'].encode('utf-8')
             roles.append(role)
@@ -66,10 +66,11 @@ class AuthMiddleware(object):
     def _get_user_session(self, token):
 
         # Get user session from token
-        auth = v3.Token(auth_url=CONF.auth_url,
-                        project_name=CONF.project_name,
-                        project_domain_name=CONF.project_domain_name,
-                        token=token)
+        auth = v3.Token(
+            auth_url=CONF.auth_url,
+            project_name=CONF.project_name,
+            project_domain_name=CONF.project_domain_name,
+            token=token)
 
         return session.Session(auth=auth)
 
@@ -80,8 +81,8 @@ class AuthMiddleware(object):
             raise falcon.HTTPUnauthorized('Authentication required',
                                           ('Authentication token is invalid.'))
 
-class RoleMiddleware(object):
 
+class RoleMiddleware(object):
     def process_request(self, req, resp):
         endpoint = req.path
         roles = req.context['roles']

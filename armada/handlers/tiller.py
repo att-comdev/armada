@@ -43,6 +43,7 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 class Tiller(object):
     '''
     The Tiller class supports communication and requests to the Tiller Helm
@@ -77,11 +78,8 @@ class Tiller(object):
         tiller_port = self._get_tiller_port()
         return grpc.insecure_channel(
             '%s:%s' % (tiller_ip, tiller_port),
-            options=[
-                ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-                ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
-            ]
-        )
+            options=[('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                     ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)])
 
     def _get_tiller_pod(self):
         '''
@@ -119,8 +117,8 @@ class Tiller(object):
         releases = []
         stub = ReleaseServiceStub(self.channel)
         req = ListReleasesRequest(limit=RELEASE_LIMIT)
-        release_list = stub.ListReleases(req, self.timeout,
-                                         metadata=self.metadata)
+        release_list = stub.ListReleases(
+            req, self.timeout, metadata=self.metadata)
         for y in release_list:
             releases.extend(y.releases)
         return releases
@@ -134,9 +132,9 @@ class Tiller(object):
         charts = []
         for latest_release in self.list_releases():
             try:
-                charts.append((latest_release.name, latest_release.version,
-                               latest_release.chart,
-                               latest_release.config.raw))
+                charts.append(
+                    (latest_release.name, latest_release.version,
+                     latest_release.chart, latest_release.config.raw))
             except IndexError:
                 continue
         return charts
@@ -181,10 +179,18 @@ class Tiller(object):
         except Exception:
             LOG.debug("POST: Could not create anything, please check yaml")
 
-    def update_release(self, chart, dry_run, name, namespace, prefix,
-                       pre_actions=None, post_actions=None,
-                       disable_hooks=False, values=None,
-                       wait=False, timeout=None):
+    def update_release(self,
+                       chart,
+                       dry_run,
+                       name,
+                       namespace,
+                       prefix,
+                       pre_actions=None,
+                       post_actions=None,
+                       disable_hooks=False,
+                       values=None,
+                       wait=False,
+                       timeout=None):
         '''
         Update a Helm Release
         '''
@@ -209,13 +215,20 @@ class Tiller(object):
             wait=wait,
             timeout=timeout)
 
-        stub.UpdateRelease(release_request, self.timeout,
-                           metadata=self.metadata)
+        stub.UpdateRelease(
+            release_request, self.timeout, metadata=self.metadata)
 
         self._post_update_actions(post_actions, namespace)
 
-    def install_release(self, chart, dry_run, name, namespace, prefix,
-                        values=None, wait=False, timeout=None):
+    def install_release(self,
+                        chart,
+                        dry_run,
+                        name,
+                        namespace,
+                        prefix,
+                        values=None,
+                        wait=False,
+                        timeout=None):
         '''
         Create a Helm Release
         '''
@@ -238,9 +251,8 @@ class Tiller(object):
             wait=wait,
             timeout=timeout)
 
-        return stub.InstallRelease(release_request,
-                                   self.timeout,
-                                   metadata=self.metadata)
+        return stub.InstallRelease(
+            release_request, self.timeout, metadata=self.metadata)
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
         '''
@@ -252,12 +264,10 @@ class Tiller(object):
 
         # build release install request
         stub = ReleaseServiceStub(self.channel)
-        release_request = UninstallReleaseRequest(name=release,
-                                                  disable_hooks=disable_hooks,
-                                                  purge=purge)
-        return stub.UninstallRelease(release_request,
-                                     self.timeout,
-                                     metadata=self.metadata)
+        release_request = UninstallReleaseRequest(
+            name=release, disable_hooks=disable_hooks, purge=purge)
+        return stub.UninstallRelease(
+            release_request, self.timeout, metadata=self.metadata)
 
     def chart_cleanup(self, prefix, charts):
         '''
@@ -270,9 +280,8 @@ class Tiller(object):
         valid_charts = []
         for gchart in charts:
             for chart in gchart.get('chart_group'):
-                valid_charts.append(release_prefix(prefix,
-                                                   chart.get('chart')
-                                                        .get('name')))
+                valid_charts.append(
+                    release_prefix(prefix, chart.get('chart').get('name')))
 
         actual_charts = [x.name for x in self.list_releases()]
         chart_diff = list(set(actual_charts) - set(valid_charts))

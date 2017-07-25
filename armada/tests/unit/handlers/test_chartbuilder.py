@@ -20,6 +20,7 @@ default.register_opts()
 
 from armada.handlers.chartbuilder import ChartBuilder
 
+
 class ChartBuilderTestCase(unittest.TestCase):
     chart_stream = """
         chart:

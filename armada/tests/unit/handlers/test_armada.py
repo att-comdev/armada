@@ -8,6 +8,7 @@ default.register_opts()
 
 from armada.handlers.armada import Armada
 
+
 class ArmadaTestCase(unittest.TestCase):
     test_yaml = """
         armada:
@@ -66,10 +67,12 @@ class ArmadaTestCase(unittest.TestCase):
                                                    'master')
         for group in armada.config.get('armada').get('charts'):
             for counter, chart in enumerate(group.get('chart_group')):
-                self.assertEqual(chart.get('chart').get('source_dir')[0],
-                                 CHART_SOURCES[counter][0])
-                self.assertEqual(chart.get('chart').get('source_dir')[1],
-                                 CHART_SOURCES[counter][1])
+                self.assertEqual(
+                    chart.get('chart').get('source_dir')[0],
+                    CHART_SOURCES[counter][0])
+                self.assertEqual(
+                    chart.get('chart').get('source_dir')[1],
+                    CHART_SOURCES[counter][1])
 
     @mock.patch('armada.handlers.armada.git')
     @mock.patch('armada.handlers.armada.lint')
@@ -101,14 +104,12 @@ class ArmadaTestCase(unittest.TestCase):
     @mock.patch.object(Armada, 'pre_flight_ops')
     @mock.patch('armada.handlers.armada.ChartBuilder')
     @mock.patch('armada.handlers.armada.Tiller')
-    def test_install(self, mock_tiller, mock_chartbuilder,
-                     mock_pre_flight, mock_post_flight):
+    def test_install(self, mock_tiller, mock_chartbuilder, mock_pre_flight,
+                     mock_post_flight):
         '''Test install functionality from the sync() method'''
 
         # instantiate Armada and Tiller objects
-        armada = Armada('',
-                        wait=True,
-                        timeout=1000)
+        armada = Armada('', wait=True, timeout=1000)
         armada.tiller = mock_tiller
         armada.config = yaml.load(self.test_yaml)
 
@@ -124,20 +125,26 @@ class ArmadaTestCase(unittest.TestCase):
         armada.sync()
 
         # check params that should be passed to tiller.install_release()
-        method_calls = [mock.call(mock_chartbuilder().get_helm_chart(),
-                                  armada.dry_run, chart_1['release_name'],
-                                  chart_1['namespace'],
-                                  armada.config['armada']['release_prefix'],
-                                  values=yaml.safe_dump(chart_1['values']),
-                                  wait=armada.wait,
-                                  timeout=1000),
-                        mock.call(mock_chartbuilder().get_helm_chart(),
-                                  armada.dry_run, chart_2['release_name'],
-                                  chart_2['namespace'],
-                                  armada.config['armada']['release_prefix'],
-                                  values=yaml.safe_dump(chart_2['values']),
-                                  wait=armada.wait,
-                                  timeout=1000)]
+        method_calls = [
+            mock.call(
+                mock_chartbuilder().get_helm_chart(),
+                armada.dry_run,
+                chart_1['release_name'],
+                chart_1['namespace'],
+                armada.config['armada']['release_prefix'],
+                values=yaml.safe_dump(chart_1['values']),
+                wait=armada.wait,
+                timeout=1000),
+            mock.call(
+                mock_chartbuilder().get_helm_chart(),
+                armada.dry_run,
+                chart_2['release_name'],
+                chart_2['namespace'],
+                armada.config['armada']['release_prefix'],
+                values=yaml.safe_dump(chart_2['values']),
+                wait=armada.wait,
+                timeout=1000)
+        ]
         mock_tiller.install_release.assert_has_calls(method_calls)
 
     @unittest.skip('skipping update')

@@ -17,8 +17,8 @@ import yaml
 
 from armada.utils import lint
 
-class LintTestCase(unittest.TestCase):
 
+class LintTestCase(unittest.TestCase):
     def test_lint_armada_yaml_pass(self):
         config = yaml.load("""
         armada:
