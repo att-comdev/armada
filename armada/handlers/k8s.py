@@ -25,10 +25,12 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 class K8s(object):
     '''
     Object to obtain the local kube config file
     '''
+
     def __init__(self):
         '''
         Initialize connection to Kubernetes
@@ -44,9 +46,8 @@ class K8s(object):
         '''
         try:
             body = client.V1DeleteOptions()
-            self.api_client.delete_namespaced_job(name=name,
-                                                  namespace=namespace,
-                                                  body=body)
+            self.api_client.delete_namespaced_job(
+                name=name, namespace=namespace, body=body)
         except ApiException as e:
             LOG.error("Exception when deleting a job: %s", e)
 

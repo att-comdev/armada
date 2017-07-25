@@ -17,8 +17,8 @@ import unittest
 
 from armada.utils import git
 
-class GitTestCase(unittest.TestCase):
 
+class GitTestCase(unittest.TestCase):
     @mock.patch('armada.utils.git.tempfile')
     @mock.patch('armada.utils.git.pygit2')
     def test_git_clone_good_url(self, mock_pygit, mock_temp):

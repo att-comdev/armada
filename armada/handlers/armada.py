@@ -33,13 +33,15 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 class Armada(object):
     '''
     This is the main Armada class handling the Armada
     workflows
     '''
 
-    def __init__(self, config,
+    def __init__(self,
+                 config,
                  disable_update_pre=False,
                  disable_update_post=False,
                  enable_chart_cleanup=False,
@@ -190,12 +192,12 @@ class Armada(object):
                     upgrade = gchart.get('chart', {}).get('upgrade', False)
 
                     if upgrade:
-                        if not self.disable_update_pre and upgrade.get('pre',
-                                                                       False):
+                        if not self.disable_update_pre and upgrade.get(
+                                'pre', False):
                             pre_actions = getattr(chart.upgrade, 'pre', {})
 
-                        if not self.disable_update_post and upgrade.get('post',
-                                                                        False):
+                        if not self.disable_update_post and upgrade.get(
+                                'post', False):
                             post_actions = getattr(chart.upgrade, 'post', {})
 
                     # show delta for both the chart templates and the chart
@@ -212,29 +214,31 @@ class Armada(object):
                         continue
 
                     # do actual update
-                    self.tiller.update_release(protoc_chart,
-                                               self.dry_run,
-                                               chart.release_name,
-                                               chart.namespace,
-                                               prefix, pre_actions,
-                                               post_actions,
-                                               disable_hooks=chart.
-                                               upgrade.no_hooks,
-                                               values=yaml.safe_dump(values),
-                                               wait=chart_wait,
-                                               timeout=chart_timeout)
+                    self.tiller.update_release(
+                        protoc_chart,
+                        self.dry_run,
+                        chart.release_name,
+                        chart.namespace,
+                        prefix,
+                        pre_actions,
+                        post_actions,
+                        disable_hooks=chart.upgrade.no_hooks,
+                        values=yaml.safe_dump(values),
+                        wait=chart_wait,
+                        timeout=chart_timeout)
 
                 # process install
                 else:
                     LOG.info("Installing release %s", chart.release_name)
-                    self.tiller.install_release(protoc_chart,
-                                                self.dry_run,
-                                                chart.release_name,
-                                                chart.namespace,
-                                                prefix,
-                                                values=yaml.safe_dump(values),
-                                                wait=chart_wait,
-                                                timeout=chart_timeout)
+                    self.tiller.install_release(
+                        protoc_chart,
+                        self.dry_run,
+                        chart.release_name,
+                        chart.namespace,
+                        prefix,
+                        values=yaml.safe_dump(values),
+                        wait=chart_wait,
+                        timeout=chart_timeout)
 
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
@@ -245,8 +249,8 @@ class Armada(object):
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(prefix, self.config['armada']['charts'])
 
-    def show_diff(self, chart, installed_chart,
-                  installed_values, target_chart, target_values):
+    def show_diff(self, chart, installed_chart, installed_values, target_chart,
+                  target_values):
         '''
         Produce a unified diff of the installed chart vs our intention
 
@@ -254,18 +258,17 @@ class Armada(object):
         unified diff output and avoid the use of print
         '''
 
-        chart_diff = list(difflib.unified_diff(installed_chart
-                                               .SerializeToString()
-                                               .split('\n'),
-                                               target_chart.split('\n')))
+        chart_diff = list(
+            difflib.unified_diff(installed_chart.SerializeToString()
+                                 .split('\n'), target_chart.split('\n')))
         if len(chart_diff) > 0:
             LOG.info("Chart Unified Diff (%s)", chart.release_name)
             for line in chart_diff:
                 LOG.debug(line)
-        values_diff = list(difflib.unified_diff(installed_values.split('\n'),
-                                                yaml
-                                                .safe_dump(target_values)
-                                                .split('\n')))
+        values_diff = list(
+            difflib.unified_diff(
+                installed_values.split('\n'),
+                yaml.safe_dump(target_values).split('\n')))
         if len(values_diff) > 0:
             LOG.info("Values Unified Diff (%s)", chart.release_name)
             for line in values_diff:

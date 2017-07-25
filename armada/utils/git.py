@@ -3,6 +3,7 @@ import tempfile
 import shutil
 from os import path
 
+
 def git_clone(repo_url, branch='master'):
     '''
     clones repo to a /tmp/ dir
@@ -15,6 +16,7 @@ def git_clone(repo_url, branch='master'):
     pygit2.clone_repository(repo_url, _tmp_dir, checkout_branch=branch)
 
     return _tmp_dir
+
 
 def source_cleanup(target_dir):
     '''

@@ -31,6 +31,7 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 class ChartBuilder(object):
     '''
     This class handles taking chart intentions as a paramter and
@@ -69,8 +70,7 @@ class ChartBuilder(object):
         '''
         Return the joined path of the source directory and subpath
         '''
-        return os.path.join(self.chart.source_dir[0],
-                            self.chart.source_dir[1])
+        return os.path.join(self.chart.source_dir[0], self.chart.source_dir[1])
 
     def get_ignored_files(self):
         '''
@@ -90,8 +90,8 @@ class ChartBuilder(object):
          false otherwise
         '''
         for ignored_file in self.ignored_files:
-            if (ignored_file.startswith('*') and
-                    filename.endswith(ignored_file.strip('*'))):
+            if (ignored_file.startswith('*')
+                    and filename.endswith(ignored_file.strip('*'))):
                 return True
             elif ignored_file == filename:
                 return True
@@ -102,15 +102,16 @@ class ChartBuilder(object):
         Process metadata
         '''
         # extract Chart.yaml to construct metadata
-        chart_yaml = dotify(yaml.load(open(os.path.join(self.source_directory,
-                                                        'Chart.yaml')).read()))
+        chart_yaml = dotify(
+            yaml.load(
+                open(os.path.join(self.source_directory, 'Chart.yaml'))
+                .read()))
 
         # construct Metadata object
         return Metadata(
             description=chart_yaml.description,
             name=chart_yaml.name,
-            version=chart_yaml.version
-        )
+            version=chart_yaml.version)
 
     def get_files(self):
         '''
@@ -127,8 +128,8 @@ class ChartBuilder(object):
 
         # create config object representing unmarshaled values.yaml
         if os.path.exists(os.path.join(self.source_directory, 'values.yaml')):
-            raw_values = open(os.path.join(self.source_directory,
-                                           'values.yaml')).read()
+            raw_values = open(
+                os.path.join(self.source_directory, 'values.yaml')).read()
         else:
             LOG.warn("No values.yaml in %s, using empty values",
                      self.source_directory)
@@ -144,24 +145,25 @@ class ChartBuilder(object):
         # process all files in templates/ as a template to attach to the chart
         # building a Template object
         templates = []
-        if not os.path.exists(os.path.join(self.source_directory,
-                                           'templates')):
+        if not os.path.exists(
+                os.path.join(self.source_directory, 'templates')):
             LOG.warn("Chart %s has no templates directory. "
                      "No templates will be deployed", self.chart.name)
-        for root, _, files in os.walk(os.path.join(self.source_directory,
-                                                   'templates'), topdown=True):
+        for root, _, files in os.walk(
+                os.path.join(self.source_directory, 'templates'),
+                topdown=True):
             for tpl_file in files:
-                tname = os.path.relpath(os.path.join(root, tpl_file),
-                                        os.path.join(self.source_directory,
-                                                     'templates'))
+                tname = os.path.relpath(
+                    os.path.join(root, tpl_file),
+                    os.path.join(self.source_directory, 'templates'))
                 if self.ignore_file(tname):
                     LOG.debug('Ignoring file %s', tname)
                     continue
 
-                templates.append(Template(name=tname,
-                                          data=open(os.path.join(root,
-                                                                 tpl_file),
-                                                    'r').read()))
+                templates.append(
+                    Template(
+                        name=tname,
+                        data=open(os.path.join(root, tpl_file), 'r').read()))
         return templates
 
     def get_helm_chart(self):
@@ -185,8 +187,7 @@ class ChartBuilder(object):
             templates=self.get_templates(),
             dependencies=dependencies,
             values=self.get_values(),
-            files=self.get_files(),
-        )
+            files=self.get_files(), )
 
         self._helm_chart = helm_chart
         return helm_chart
