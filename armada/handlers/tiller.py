@@ -148,24 +148,20 @@ class Tiller(object):
                 continue
         return charts
 
-    def _pre_update_actions(self, release_name, actions, namespace):
+    def _pre_update_actions(self, actions, namespace):
         '''
         :params actions - array of items actions
         :params namespace - name of pod for actions
         '''
         try:
             for action in actions.get('delete', []):
-                name = action.get('name')
-                action_type = action.get('type')
-                labels = action.get('labels', None)
-
-                self.delete_resource(release_name, name, action_type,
-                                     labels, namespace)
-
-                # Ensure pods get deleted when job is deleted
-                if 'job' in action_type:
-                    self.delete_resource(release_name, name, 'pod',
-                                         labels, namespace)
+                name = action.get("name")
+                action_type = action.get("type")
+                if "job" in action_type:
+                    LOG.info("Deleting %s in namespace: %s", name, namespace)
+                    self.k8s.delete_job_action(name, namespace)
+                    continue
+                LOG.error("Unable to execute name: %s type: %s ", name, type)
         except Exception:
             LOG.debug("PRE: Could not delete anything, please check yaml")
 
@@ -179,37 +175,6 @@ class Tiller(object):
                     continue
         except Exception:
             LOG.debug("PRE: Could not create anything, please check yaml")
-
-    def delete_resource(self, release_name, resource_name, resource_type,
-                        resource_labels, namespace):
-        '''
-        :params release_name - release name the specified resource is under
-        :params resource_name - name of specific resource
-        :params resource_type - type of resource e.g. job, pod, etc.
-        :params resource_labels - labels by which to identify the resource
-        :params namespace - namespace of the resource
-
-        Apply deletion logic based on type of resource
-        '''
-        label_selector = 'release_name={}'.format(release_name)
-        for label in resource_labels:
-            label_selector += ', {}={}'.format(label.keys()[0],
-                                               label.values()[0])
-
-        if 'job' in resource_type:
-            LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
-            self.k8s.delete_job_action(resource_name, namespace)
-        elif 'pod' in resource_type:
-            release_pods = self.k8s.get_namespace_pod(namespace,
-                                                      label_selector)
-            for pod in release_pods.items:
-                pod_name = pod.metadata.name
-                LOG.info("Deleting %s in namespace: %s",
-                         pod_name, namespace)
-                self.k8s.delete_namespace_pod(pod_name, namespace)
-        else:
-            LOG.error("Unable to execute name: %s type: %s ",
-                      resource_name, resource_type)
 
     def _post_update_actions(self, actions, namespace):
         try:
@@ -238,8 +203,7 @@ class Tiller(object):
         else:
             values = Config(raw=values)
 
-        release_name = "{}-{}".format(prefix, name)
-        self._pre_update_actions(release_name, pre_actions, namespace)
+        self._pre_update_actions(pre_actions, namespace)
 
         # build release install request
         stub = ReleaseServiceStub(self.channel)
@@ -248,7 +212,7 @@ class Tiller(object):
             dry_run=dry_run,
             disable_hooks=disable_hooks,
             values=values,
-            name=release_name,
+            name="{}-{}".format(prefix, name),
             wait=wait,
             timeout=timeout)
 
