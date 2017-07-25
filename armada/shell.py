@@ -20,6 +20,7 @@ from conf import default
 
 import armada
 
+
 class ArmadaApp(app.App):
     def __init__(self, **kwargs):
         super(ArmadaApp, self).__init__(
@@ -36,6 +37,7 @@ class ArmadaApp(app.App):
     def configure_logging(self):
         super(ArmadaApp, self).configure_logging()
         default.register_opts()
+
 
 def main(argv=None):
     if argv is None:

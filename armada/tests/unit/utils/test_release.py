@@ -16,8 +16,8 @@ import unittest
 
 from armada.utils import release as rel
 
-class ReleaseTestCase(unittest.TestCase):
 
+class ReleaseTestCase(unittest.TestCase):
     def test_release_prefix_pass(self):
         expected = 'armada-test'
         prefix, chart = ('armada', 'test')

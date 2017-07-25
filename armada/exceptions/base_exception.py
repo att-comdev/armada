@@ -23,6 +23,7 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 class ArmadaBaseException(Exception):
     '''Base class for Armada exception and error handling.'''
 

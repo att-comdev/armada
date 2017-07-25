@@ -7,6 +7,7 @@ from os import path
 
 from ..exceptions import source_exceptions
 
+
 def git_clone(repo_url, branch='master'):
     '''
     clones repo to a /tmp/ dir
@@ -24,9 +25,11 @@ def git_clone(repo_url, branch='master'):
 
     return _tmp_dir
 
+
 def get_tarball(tarball_url):
     tarball_path = download_tarball(tarball_url)
     return extract_tarball(tarball_path)
+
 
 def download_tarball(tarball_url):
     '''
@@ -40,6 +43,7 @@ def download_tarball(tarball_url):
     except Exception:
         raise source_exceptions.TarballDownloadException(tarball_url)
     return tarball_filename
+
 
 def extract_tarball(tarball_path):
     '''
@@ -56,6 +60,7 @@ def extract_tarball(tarball_path):
     except Exception:
         raise source_exceptions.TarballExtractException(tarball_path)
     return _tmp_dir
+
 
 def source_cleanup(target_dir):
     '''

@@ -34,6 +34,7 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 # Build API
 def create(middleware=CONF.middleware):
     if middleware:
@@ -42,11 +43,8 @@ def create(middleware=CONF.middleware):
         api = falcon.API()
 
     # Configure API routing
-    url_routes = (
-        ('/tiller/status', Status()),
-        ('/tiller/releases', Release()),
-        ('/armada/apply/', Apply())
-    )
+    url_routes = (('/tiller/status', Status()),
+                  ('/tiller/releases', Release()), ('/armada/apply/', Apply()))
 
     for route, service in url_routes:
         api.add_route(route, service)

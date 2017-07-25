@@ -9,6 +9,7 @@ default.register_opts()
 from armada.handlers.armada import Armada
 from armada.handlers.manifest import Manifest
 
+
 class ArmadaTestCase(unittest.TestCase):
     test_yaml = """
     ---
