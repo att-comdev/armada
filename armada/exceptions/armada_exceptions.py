@@ -14,10 +14,12 @@
 
 import base_exception
 
+
 class ArmadaException(base_exception.ArmadaBaseException):
     '''Base class for Armada handler exception and error handling.'''
 
     message = 'An unknown Armada handler error occured.'
+
 
 class KnownReleasesException(ArmadaException):
     '''Exception that occurs when no known releases are found'''

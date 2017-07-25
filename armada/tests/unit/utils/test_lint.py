@@ -18,8 +18,8 @@ import os
 
 from armada.utils import lint
 
-class LintTestCase(unittest.TestCase):
 
+class LintTestCase(unittest.TestCase):
     def setUp(self):
         self.basepath = os.path.join(os.path.dirname(__file__))
 

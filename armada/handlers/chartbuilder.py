@@ -80,10 +80,10 @@ class ChartBuilder(object):
         '''
         try:
             ignored_files = []
-            if os.path.exists(os.path.join(self.source_directory,
-                                           '.helmignore')):
+            if os.path.exists(
+                    os.path.join(self.source_directory, '.helmignore')):
                 with open(os.path.join(self.source_directory,
-                          '.helmignore')) as f:
+                                       '.helmignore')) as f:
                     ignored_files = f.readlines()
             return [filename.strip() for filename in ignored_files]
         except Exception:

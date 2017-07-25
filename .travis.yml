@@ -16,7 +16,7 @@ install:
     - pip install -e .
 
 script:
-    - flake8
+    - tox -e checkdiff
     - armada -h
     - nosetests -w armada/tests/unit --cover-package=armada --with-coverage --cover-tests
 

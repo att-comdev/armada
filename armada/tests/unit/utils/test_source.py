@@ -19,6 +19,7 @@ from armada.exceptions import source_exceptions
 
 from armada.utils import source
 
+
 class GitTestCase(unittest.TestCase):
 
     SOURCE_UTILS_LOCATION = 'armada.utils.source'
@@ -55,8 +56,10 @@ class GitTestCase(unittest.TestCase):
         mock_requests.get.return_value = mock_response
 
         mock_open = mock.mock_open()
-        with mock.patch('{}.open'.format(self.SOURCE_UTILS_LOCATION),
-                        mock_open, create=True):
+        with mock.patch(
+                '{}.open'.format(self.SOURCE_UTILS_LOCATION),
+                mock_open,
+                create=True):
             source.download_tarball(url)
 
         mock_temp.mkstemp.assert_called_once()

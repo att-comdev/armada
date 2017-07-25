@@ -14,30 +14,36 @@
 
 import base_exception
 
+
 class LintException(base_exception.ArmadaBaseException):
     '''Base class for linting exceptions and errors.'''
 
     message = 'An unknown linting error occured.'
+
 
 class InvalidManifestException(LintException):
     '''Exception for invalid manifests.'''
 
     message = 'Armada manifest invalid.'
 
+
 class InvalidChartNameException(LintException):
     '''Exception that occurs when an invalid filename is encountered.'''
 
     message = 'Chart name must be a string,'
+
 
 class InvalidChartDefinitionException(LintException):
     '''Exception when invalid chart definition is encountered.'''
 
     message = 'Invalid chart definition.Chart definition must be array.'
 
+
 class InvalidReleaseException(LintException):
     '''Exception that occurs when a release is invalid.'''
 
     message = 'Release needs to be a string.'
+
 
 class InvalidArmadaObjectException(LintException):
     '''Exception that occurs when an Armada object is not declared.'''

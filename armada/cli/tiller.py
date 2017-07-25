@@ -26,6 +26,7 @@ DOMAIN = "armada"
 
 logging.setup(CONF, DOMAIN)
 
+
 def tillerServer(args):
 
     tiller = Tiller()
@@ -38,13 +39,20 @@ def tillerServer(args):
             LOG.info("Release: %s ( namespace= %s )", release.name,
                      release.namespace)
 
+
 class TillerServerCommand(cmd.Command):
     def get_parser(self, prog_name):
         parser = super(TillerServerCommand, self).get_parser(prog_name)
-        parser.add_argument('--status', action='store_true',
-                            default=False, help='Check Tiller service')
-        parser.add_argument('--releases', action='store_true',
-                            default=False, help='List Tiller Releases')
+        parser.add_argument(
+            '--status',
+            action='store_true',
+            default=False,
+            help='Check Tiller service')
+        parser.add_argument(
+            '--releases',
+            action='store_true',
+            default=False,
+            help='List Tiller Releases')
         return parser
 
     def take_action(self, parsed_args):

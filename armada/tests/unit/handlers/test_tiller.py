@@ -7,8 +7,8 @@ default.register_opts()
 
 from armada.handlers.tiller import Tiller
 
-class TillerTestCase(unittest.TestCase):
 
+class TillerTestCase(unittest.TestCase):
     @mock.patch.object(Tiller, '_get_tiller_ip')
     @mock.patch('armada.handlers.tiller.K8s')
     @mock.patch('armada.handlers.tiller.grpc')
@@ -33,9 +33,14 @@ class TillerTestCase(unittest.TestCase):
         wait = False
         timeout = None
 
-        tiller.install_release(chart, name, namespace,
-                               dry_run=dry_run, values=initial_values,
-                               wait=wait, timeout=timeout)
+        tiller.install_release(
+            chart,
+            name,
+            namespace,
+            dry_run=dry_run,
+            values=initial_values,
+            wait=wait,
+            timeout=timeout)
 
         mock_stub.assert_called_with(tiller.channel)
         release_request = mock_install_request(
@@ -45,9 +50,6 @@ class TillerTestCase(unittest.TestCase):
             release=name,
             namespace=namespace,
             wait=wait,
-            timeout=timeout
-        )
-        (mock_stub(tiller.channel).InstallRelease
-         .assert_called_with(release_request,
-                             tiller.timeout,
-                             metadata=tiller.metadata))
+            timeout=timeout)
+        (mock_stub(tiller.channel).InstallRelease.assert_called_with(
+            release_request, tiller.timeout, metadata=tiller.metadata))
