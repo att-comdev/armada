@@ -231,6 +231,8 @@ class Tiller(object):
         '''
         Update a Helm Release
         '''
+        LOG.info('Updating chart "%s" into namespace "%s" as release "%s-%s".',
+                 chart.metadata.name, namespace, prefix, name)
         LOG.debug("wait: %s", wait)
         LOG.debug("timeout: %s", timeout)
 
@@ -263,6 +265,9 @@ class Tiller(object):
         '''
         Create a Helm Release
         '''
+        LOG.info('Installing chart "%s" into namespace "%s" '
+                 'as release "%s-%s".',
+                 chart.metadata.name, namespace, prefix, name)
         LOG.debug("wait: %s", wait)
         LOG.debug("timeout: %s", timeout)
 

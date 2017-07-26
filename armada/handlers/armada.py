@@ -173,9 +173,10 @@ class Armada(object):
                 values = gchart.get('chart').get('values', {})
                 pre_actions = {}
                 post_actions = {}
-                LOG.info('%s', chart.release_name)
+                LOG.info('Chart release: %s', chart.release_name)
 
                 if chart.release_name is None:
+                    LOG.debug('Skipping chart..')
                     continue
 
                 # retrieve appropriate timeout value if 'wait' is specified
