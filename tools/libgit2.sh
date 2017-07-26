@@ -1,12 +1,27 @@
 #!/bin/sh
 
+set -ex
+
 # Ubuntu 16.04 Install only
 
-apt install git cmake make wget -y
-apt-get install -y python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libssh2-1 libgit2-dev python-pip libgit2-24
-apt-get install -y pkg-config libssh2-1-dev libhttp-parser-dev libssl-dev libz-dev
+apt-get update
+apt-get install -y \
+    cmake \
+    git \
+    libffi-dev \
+    libssh2-1 \
+    libssh2-1-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libz-dev \
+    make \
+    pkg-config \
+    python-dev \
+    python-pip \
+    wget
 
-LIBGIT_VERSION='0.25.0'
+LIBGIT_VERSION=${LIBGIT_VERSION:-'0.25.0'}
 
 wget https://github.com/libgit2/libgit2/archive/v${LIBGIT_VERSION}.tar.gz
 tar xzf v${LIBGIT_VERSION}.tar.gz
@@ -14,5 +29,4 @@ cd libgit2-${LIBGIT_VERSION}/
 cmake .
 make
 make install
-pip install pygit2==${LIBGIT_VERSION}
 ldconfig
