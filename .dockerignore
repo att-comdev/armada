@@ -1,0 +1,7 @@
+.tox
+*.egg-info
+examples
+CODE_OF_CONDUCT.rst
+ChangeLog
+LICENSE
+OWNERS

@@ -1,38 +1,40 @@
 FROM ubuntu:16.04
 MAINTAINER Armada Team
 
-ARG VERSION
-ARG REPO
-
-ENV USER=armada \
-    VERSION=${VERSION:-master} \
-    REPO=${REPO:-https://github.com/att-comdev/armada.git}
-
-
-RUN apt-get update -yqq && \
-    apt-get install -yqq \
-        build-essential \
-        git \
-        git-review \
-        python-virtualenv \
-        python-dev \
-        python-pip \
-        gcc \
-        libssl-dev \
-        libffi-dev \
-        libgit2-dev
-
-RUN git clone -b $VERSION $REPO ${HOME}/armada
-
-WORKDIR /root/armada
-RUN pip install -r requirements.txt \
-    && sh tools/libgit2.sh \
-    && pip install --upgrade urllib3 \
-    && pip install pygit2==0.25.0 \
-    && pip install -e .
-
 EXPOSE 8000
 
 ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["server"]
+
+ENV \
+    LIBGIT_VERSION=0.25.0 \
+    USER=armada
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc \
+        git \
+        git-review \
+        libffi-dev \
+        libgit2-dev \
+        libssl-dev \
+        netbase \
+        python-dev \
+        python-pip \
+        python-virtualenv \
+    && mkdir -p /root/armada/tools
+
+WORKDIR /root/armada
+
+COPY ./tools/libgit2.sh /root/armada/tools
+RUN /root/armada/tools/libgit2.sh
+
+COPY requirements.txt /root/armada
+RUN pip install --upgrade setuptools urllib3 \
+    && pip install -r requirements.txt pygit2==$LIBGIT_VERSION
+
+COPY . /root/armada
+
+RUN pip install -e .
