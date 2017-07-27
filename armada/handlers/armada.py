@@ -68,7 +68,6 @@ class Armada(object):
         self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
         self.documents = list(yaml.safe_load_all(file))
         self.config = None
-        self.tiller = Tiller()
         self.debug = debug
 
         # Set debug value
