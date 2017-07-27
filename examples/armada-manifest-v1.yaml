@@ -5,8 +5,8 @@ metadata:
   name: helm-toolkit
 data:
   chart_name: helm-toolkit
-  release: null
-  namespace: null
+  release: helm-toolkit
+  namespace: helm-tookit
   values: {}
   source:
     type: git
