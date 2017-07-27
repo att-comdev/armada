@@ -66,8 +66,8 @@ class Armada(object):
         self.wait = wait
         self.timeout = timeout
         self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
-        self.documents = yaml.safe_load_all(file)
-        self.config = self.get_armada_manifest()
+        self.documents = list(yaml.safe_load_all(file))
+        self.config = None
         self.tiller = Tiller()
         self.debug = debug
 
@@ -96,6 +96,9 @@ class Armada(object):
             raise Exception("Service: Tiller is not Available")
         if not lint.validate_armada_documents(self.documents):
             raise Exception("Invalid Armada Manifest")
+
+        self.config = self.get_armada_manifest()
+
         if not lint.validate_armada_object(self.config):
             raise Exception("Invalid Armada Object")
 
