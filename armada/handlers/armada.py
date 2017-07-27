@@ -26,7 +26,7 @@ from ..utils.release import release_prefix
 from ..utils import git
 from ..utils import lint
 from ..const import KEYWORD_ARMADA, KEYWORD_GROUPS, KEYWORD_CHARTS,\
-    KEYWORD_PREFIX
+    KEYWORD_PREFIX, STATUS_FAILED
 
 LOG = logging.getLogger(__name__)
 
@@ -100,11 +100,11 @@ class Armada(object):
             raise Exception("Invalid Armada Object")
 
         # Purge known releases that have failed and are in the current yaml
-        prefix = self.config.get('armada').get('release_prefix')
-        failed_releases = self.get_releases_by_status('FAILED')
+        prefix = self.config.get(KEYWORD_ARMADA).get(KEYWORD_PREFIX)
+        failed_releases = self.get_releases_by_status(STATUS_FAILED)
         for release in failed_releases:
-            for group in self.config.get('armada').get('charts'):
-                for ch in group.get('chart_group'):
+            for group in self.config.get(KEYWORD_ARMADA).get(KEYWORD_GROUPS):
+                for ch in group.get(KEYWORD_CHARTS):
                     ch_release_name = release_prefix(prefix,
                                                      ch.get('chart')
                                                      .get('name'))
@@ -292,8 +292,8 @@ class Armada(object):
         Operations to run after deployment process has terminated
         '''
         # Delete git repos cloned for deployment
-        for group in self.config.get('armada').get('charts'):
-            for ch in group.get('chart_group'):
+        for group in self.config.get(KEYWORD_ARMADA).get(KEYWORD_GROUPS):
+            for ch in group.get(KEYWORD_CHARTS):
                 if ch.get('chart').get('source').get('type') == 'git':
                     git.source_cleanup(ch.get('chart').get('source_dir')[0])
 
