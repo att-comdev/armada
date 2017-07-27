@@ -19,6 +19,7 @@ from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
 from hapi.chart.config_pb2 import Config
 
 from k8s import K8s
+from ..const import STATUS_DEPLOYED, STATUS_FAILED
 from ..utils.release import release_prefix
 
 from oslo_config import cfg
@@ -123,7 +124,8 @@ class Tiller(object):
         releases = []
         stub = ReleaseServiceStub(self.channel)
         req = ListReleasesRequest(limit=RELEASE_LIMIT,
-                                  status_codes=['DEPLOYED', 'FAILED'],
+                                  status_codes=[STATUS_DEPLOYED,
+                                                STATUS_FAILED],
                                   sort_by='LAST_RELEASED',
                                   sort_order='DESC')
         release_list = stub.ListReleases(req, self.timeout,
