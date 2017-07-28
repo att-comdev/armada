@@ -1,0 +1,57 @@
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: helm-toolkit
+data:
+  chart_name: helm-toolkit
+  release: helm-toolkit
+  namespace: helm-tookit
+  values: {}
+  source:
+    type: git
+    location: git://github.com/openstack/openstack-helm
+    subpath: helm-toolkit
+    reference: master
+  dependencies: []
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: mariadb-tarball
+data:
+  chart_name: mariadb-tarball
+  release: mariadb-tarball
+  namespace: tarball
+  timeout: 3600
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+  values: {}
+  source:
+    type: tar
+    location: http://localhost:8879/charts/mariadb-0.1.0.tgz
+    subpath: mariadb
+    reference: null
+  dependencies:
+    - helm-toolkit
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: tar-example
+data:
+  description: "Deploying mariadb tarball URL"
+  sequenced: True
+  chart_group:
+    - mariadb-tarball
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: armada-manifest
+data:
+  release_prefix: armada
+  chart_groups:
+    - tar-example

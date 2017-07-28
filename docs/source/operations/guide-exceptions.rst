@@ -4,8 +4,6 @@ Armada Exceptions
 +------------------------+----------------------------------------------------------+
 | Exception              | Error Description                                        |
 +========================+==========================================================+
-| ChartSourceException   | Occurs when an unknown chart source type is encountered. |
-+------------------------+----------------------------------------------------------+
 | KnownReleasesException | Occurs when no known releases are found.                 |
 +------------------------+----------------------------------------------------------+
 
@@ -53,16 +51,24 @@ Chartbuilder Exceptions
 | UnknownChartSourceException | The chart source is unknown or invalid.                     |
 +-----------------------------+-------------------------------------------------------------+
 
-Git Exceptions
+Source Exceptions
 ===============
 
-+------------------------+---------------------------------------------+
-| Exception              | Error Description                           |
-+========================+=============================================+
-| GitLocationException   | Repository location is not valid.           |
-+------------------------+---------------------------------------------+
-| SourceCleanupException | The source dir of a chart no longer exists. |
-+------------------------+---------------------------------------------+
++--------------------------+---------------------------------------------------------------------+
+| Exception                | Error Description                                                   |
++==========================+=====================================================================+
+| GitLocationException     | Repository location is not valid.                                   |
++--------------------------+---------------------------------------------------------------------+
+| SourceCleanupException   | The source dir of a chart no longer exists.                         |
++--------------------------+---------------------------------------------------------------------+
+| TarballDownloadException | Occurs when the tarball cannot be downloaded from the provided URL. |
++--------------------------+---------------------------------------------------------------------+
+| TarballExtractException  | Occurs when extracting a tarball fails.                             |
++--------------------------+---------------------------------------------------------------------+
+| InvalidPathException     | Occurs when a nonexistant path is accessed.                         |
++--------------------------+---------------------------------------------------------------------+
+| ChartSourceException     | Occurs when an unknown chart source type is encountered.            |
++--------------------------+---------------------------------------------------------------------+
 
 Lint Exceptions
 ===============

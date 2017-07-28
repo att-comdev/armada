@@ -24,12 +24,12 @@ from tiller import Tiller
 from manifest import Manifest
 
 from ..exceptions import armada_exceptions
-from ..exceptions import git_exceptions
+from ..exceptions import source_exceptions
 from ..exceptions import lint_exceptions
 from ..exceptions import tiller_exceptions
 
 from ..utils.release import release_prefix
-from ..utils import git
+from ..utils import source
 from ..utils import lint
 from ..const import KEYWORD_ARMADA, KEYWORD_GROUPS, KEYWORD_CHARTS,\
     KEYWORD_PREFIX, STATUS_FAILED
@@ -142,20 +142,24 @@ class Armada(object):
 
         if ct_type == 'local':
             ch.get('chart')['source_dir'] = (location, subpath)
+        elif ct_type == 'tar':
+            LOG.info('Downloading tarball from: %s', location)
+            tarball_dir = source.get_tarball(location)
+            ch.get('chart')['source_dir'] = (tarball_dir, subpath)
         elif ct_type == 'git':
             if location not in repos.keys():
                 try:
                     LOG.info('Cloning repo: %s', location)
-                    repo_dir = git.git_clone(location, reference)
+                    repo_dir = source.git_clone(location, reference)
                 except Exception:
-                    raise git_exceptions.GitLocationException(location)
+                    raise source_exceptions.GitLocationException(location)
                 repos[location] = repo_dir
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
             else:
                 ch.get('chart')['source_dir'] = (repos.get(location), subpath)
         else:
             chart_name = ch.get('chart').get('chart_name')
-            raise armada_exceptions.ChartSourceException(ct_type, chart_name)
+            raise source_exceptions.ChartSourceException(ct_type, chart_name)
 
     def get_releases_by_status(self, status):
         '''
@@ -305,7 +309,7 @@ class Armada(object):
         for group in self.config.get(KEYWORD_ARMADA).get(KEYWORD_GROUPS):
             for ch in group.get(KEYWORD_CHARTS):
                 if ch.get('chart').get('source').get('type') == 'git':
-                    git.source_cleanup(ch.get('chart').get('source_dir')[0])
+                    source.source_cleanup(ch.get('chart').get('source_dir')[0])
 
     def show_diff(self, chart, installed_chart, installed_values, target_chart,
                   target_values):

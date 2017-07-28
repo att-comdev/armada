@@ -202,7 +202,7 @@ class ChartBuilder(object):
                 templates=self.get_templates(),
                 dependencies=dependencies,
                 values=self.get_values(),
-                files=self.get_files(), )
+                files=self.get_files())
         except Exception:
             chart_name = self.chart.chart_name
             raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
