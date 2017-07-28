@@ -116,7 +116,7 @@ class Armada(object):
                 for ch in group.get(KEYWORD_CHARTS):
                     ch_release_name = release_prefix(prefix,
                                                      ch.get('chart')
-                                                     .get('name'))
+                                                     .get('chart_name'))
                     if release[0] == ch_release_name:
                         LOG.info('Purging failed release %s '
                                  'before deployment', release[0])
@@ -154,7 +154,7 @@ class Armada(object):
             else:
                 ch.get('chart')['source_dir'] = (repos.get(location), subpath)
         else:
-            chart_name = ch.get('chart').get('name')
+            chart_name = ch.get('chart').get('chart_name')
             raise armada_exceptions.ChartSourceException(ct_type, chart_name)
 
     def get_releases_by_status(self, status):
