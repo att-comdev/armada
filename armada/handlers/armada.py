@@ -101,6 +101,9 @@ class Armada(object):
             raise tiller_exceptions.TillerServicesUnavailableException()
         if not lint.validate_armada_documents(self.documents):
             raise lint_exceptions.InvalidManifestException()
+
+        self.config = self.get_armada_manifest()
+
         if not lint.validate_armada_object(self.config):
             raise lint_exceptions.InvalidArmadaObjectExceptionl()
 

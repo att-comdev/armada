@@ -28,5 +28,3 @@ def source_cleanup(target_dir):
     '''
     if path.exists(target_dir):
         shutil.rmtree(target_dir)
-    else:
-        raise git_exceptions.SourceCleanupException(target_dir)
