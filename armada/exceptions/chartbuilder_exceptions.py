@@ -23,7 +23,7 @@ class DependencyException(ChartBuilderException):
     '''Exception that occurs when dependencies cannot be resolved.'''
 
     def __init__(self, chart_name):
-        self._chart_name
+        self._chart_name = chart_name
         self._message = 'Failed to resolve dependencies for ' + \
                         self._chart_name + '.'
 
@@ -33,7 +33,7 @@ class HelmChartBuildException(ChartBuilderException):
     '''Exception that occurs when Helm Chart fails to build.'''
 
     def __init__(self, chart_name):
-        self._chart_name
+        self._chart_name = chart_name
         self._message = 'Failed to build Helm chart for ' + \
                         self._chart_name + '.'
 

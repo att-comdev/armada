@@ -23,15 +23,3 @@ class KnownReleasesException(ArmadaException):
     '''Exception that occurs when no known releases are found'''
 
     message = 'No known releases found'
-
-class ChartSourceException(ArmadaException):
-    '''Exception for unknown chart source type.'''
-
-    def __init__(self, chart_name, source_type):
-        self._chart_name = chart_name
-        self._source_type = source_type
-
-        self._message = 'Unknown source type \"' + self._source_type + '\" for \
-                        chart \"' + self._chart_name + '\"'
-
-        super(ChartSourceException, self).__init__(self._message)

@@ -151,7 +151,7 @@ Source
 +-------------+----------+---------------------------------------------------------------+
 | keyword     | type     | action                                                        |
 +=============+==========+===============================================================+
-| type        | string   | source to build the chart: ``git`` or ``local``               |
+| type        | string   | source to build the chart: ``git``, ``local``, or ``tar``     |
 +-------------+----------+---------------------------------------------------------------+
 | location    | string   | ``url`` or ``path`` to the chart's parent directory           |
 +-------------+----------+---------------------------------------------------------------+
@@ -247,9 +247,9 @@ Simple Example
       namespace: default
       values: {}
       source:
-        type: git
-        location: https://github.com/namespace/repo
-        subpath: .
+        type: tar
+        location: http://localhost:8879/namespace/repo
+        subpath: blog-2
         reference: master
       dependencies: []
     ---
