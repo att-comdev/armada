@@ -5,7 +5,7 @@ Armada
 
 Armada is a tool for managing multiple helm charts with dependencies by centralizing
 all configurations in a single Armada yaml and providing lifecycle
-hooks for all hem releases.
+hooks for all helm releases.
 
 Roadmap
 -------
@@ -19,7 +19,7 @@ Installation
 
 .. code-block:: bash
 
-    docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
+    docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
 
 Using armada `docs <docs/source/operations/guide-use-armada.rst>`_
 
