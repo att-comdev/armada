@@ -19,7 +19,10 @@ Installation
 
 .. code-block:: bash
 
-    docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
+    tox -e genconfig
+    tox -e genpolicy
+
+    docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples -v $(pwd)/etc/:/root/armada/etc/ quay.io/attcomdev/armada:latest
 
 Using armada `docs <docs/source/operations/guide-use-armada.rst>`_
 

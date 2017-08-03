@@ -11,6 +11,7 @@ requests==2.17.3
 sphinx_rtd_theme
 supermutes==0.2.5
 urllib3==1.21.1
+uwsgi
 
 # API
 falcon==1.1.0
@@ -21,5 +22,9 @@ cliff==2.7.0
 
 # Oslo
 oslo.log==3.28.0
+oslo.policy==1.9.0
 oslo.config>=3.22.0 # Apache-2.0
 oslo.middleware>=3.27.0 # Apache-2.0
+keystonemiddleware===4.9.1
+Paste==2.0.3
+PasteDeploy==1.5.2

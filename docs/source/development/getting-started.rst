@@ -13,28 +13,42 @@ To use the docker containter to develop:
 
 .. code-block:: bash
 
-    docker build . -t armada/latest
+    git clone http://github.com/att-comdev/armada.git 
+    cd armada
 
-    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples armada/latest
+    tox -e genconfig
+    tox -e genpolicy
+
+    docker build . -t armada:local
+
+    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples -v $(pwd)/etc:/root/armada/etc armada:local
 
 .. note::
 
     The first build will take a little while. Afterwords, it will build much
     faster.
 
+
 Virtualenv
 ##########
 
-To use VirtualEnv we will need to add some extra steps
+We will show you how to set up armada in your local using virtualenv
 
-1. virtualenv venv
+.. note::
+
+    Suggest that you use a Ubuntu 16.04 VM
+
+1. git clone http://github.com/att-comdev/armada.git && cd armada
+2. virtualenv venv
 2. source ./venv/bin/activate
 3. sudo sh ./tools/libgit2.sh
+4. pip install pygit2==0.25.0
 
 Test that it worked with:
 
 .. code-block:: bash
 
+    # We want to validate that libgit2/pygit2 is installed properly
     python -c 'import pygit2'
 
 From the directory of the forked repository:
@@ -44,6 +58,12 @@ From the directory of the forked repository:
     pip install -r requirements.txt
     pip install -r test-requirements.txt
     pip install -e .
+
+    # policy and config are used in order to use and configure Armada API
+    tox -e genconfig
+    tox -e genpolicy
+
+    armada -h
 
 .. note::
 

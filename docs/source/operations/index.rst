@@ -14,3 +14,4 @@ Operations Guide
    guide-build-armada-yaml.rst
    guide-use-armada.rst
    guide-api.rst
+   guide-configure.rst
