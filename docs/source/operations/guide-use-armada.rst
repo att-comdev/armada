@@ -41,7 +41,7 @@ Usage
 
 .. note::
 
-    Make sure to mount your kubeconfig into ``/root/.kube/config`` in
+    Make sure to mount your kubeconfig into ``/armada/.kube/config`` in
     the container
 
 .. note::
