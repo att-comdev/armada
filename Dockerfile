@@ -22,6 +22,7 @@ RUN apt-get update && \
       libffi-dev \
       python-all-dev && \
     useradd -u 1000 -g users -d /armada armada && \
+    chown armada:users /armada && \
     \
     curl -sSL https://github.com/libgit2/libgit2/archive/v$LIBGIT_VERSION.tar.gz \
       | tar zx -C /tmp && \
