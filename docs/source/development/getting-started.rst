@@ -13,9 +13,13 @@ To use the docker containter to develop:
 
 .. code-block:: bash
 
-    docker build . -t armada/latest
-
-    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples armada/latest
+    CURRENT_COMMIT=$(git log --pretty=format:'%h' -n 1)
+    docker build . --file ./Dockerfile-requirements --tag armada-requirements:${CURRENT_COMMIT}
+    docker run -d -P --name armada-requirements-${CURRENT_COMMIT} armada-requirements:${CURRENT_COMMIT} "python -m SimpleHTTPServer 8000"
+    REQUIREMENTS_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' armada-requirements-${CURRENT_COMMIT})
+    docker build . --file ./Dockerfile --tag armada:${CURRENT_COMMIT} --build-arg WHEELS_URL="http://${REQUIREMENTS_IP}:8000/wheels.tar.gz"
+    docker rm -f armada-requirements-${CURRENT_COMMIT}
+    docker run -d --name armada -v ~/.kube/config:/var/lib/armada/.kube/config:ro -v $(pwd)/examples/:/examples armada:${CURRENT_COMMIT}
 
 .. note::
 

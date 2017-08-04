@@ -1,0 +1,82 @@
+FROM ubuntu:16.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PROJECT=requirements \
+    LIBGIT_VERSION=0.25.0 \
+    PATH=/builder/bin:$PATH
+
+ADD . /opt/armada/
+
+RUN set -x \
+    && apt-get update \
+    && apt-get dist-upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+        git \
+        liberasurecode-dev \
+        libffi-dev \
+        libldap2-dev \
+        libmysqlclient-dev \
+        libnss3-dev \
+        libpq-dev \
+        libsasl2-dev \
+        libssl-dev \
+        libsystemd-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libvirt-dev \
+        libyaml-dev \
+        libz-dev \
+        pkg-config \
+        python \
+        python-dev \
+        python-pip \
+        python-virtualenv \
+    && LIBGIT_TMP=$(mktemp -d) \
+    && curl -sSL https://github.com/libgit2/libgit2/archive/v$LIBGIT_VERSION.tar.gz | tar zx  --strip-components 1 -C ${LIBGIT_TMP} \
+    && cd ${LIBGIT_TMP} \
+    && cmake . \
+    && cmake --build . --target install \
+    && ldconfig \
+    && rm -rf ${LIBGIT_TMP} \
+    && mkdir /root/packages \
+    && python -m virtualenv /builder \
+    && pip install -U pip \
+    && pip install -U wheel setuptools \
+    && pip wheel -w /root/packages/ -r /opt/armada/requirements.txt \
+    && cd /root \
+    && tar -zcvf wheels.tar.gz ./packages \
+    && mv ./wheels.tar.gz ./packages/ \
+    && apt-get purge -y --auto-remove \
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+        git \
+        liberasurecode-dev \
+        libffi-dev \
+        libldap2-dev \
+        libmysqlclient-dev \
+        libnss3-dev \
+        libpq-dev \
+        libsasl2-dev \
+        libssl-dev \
+        libsystemd-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libvirt-dev \
+        libyaml-dev \
+        libz-dev \
+        pkg-config \
+        python-dev \
+        python-pip \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /root/.cache
+
+WORKDIR /root/packages
+
+ENTRYPOINT ["bash", "-xc", "python -m SimpleHTTPServer 8000"]
+
+EXPOSE 8000/tcp

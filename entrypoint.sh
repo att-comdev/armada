@@ -1,12 +1,10 @@
 #!/bin/bash
 
 CMD="armada"
-PORT="8000"
-
-set -e
+set -ex
 
 if [ "$1" = 'server' ]; then
-    exec gunicorn server:api -b :$PORT --chdir armada/api
+    exec gunicorn server:api -b :$PORT --chdir /opt/armada/armada/api
 fi
 
 if [ "$1" = 'tiller' ] || [ "$1" = 'apply' ]; then
