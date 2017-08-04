@@ -19,6 +19,7 @@ RUN apt-get update && \
       git \
       python-all-dev && \
     useradd -u 1000 -g users -d /armada armada && \
+    chown -R armada:users /armada && \
     \
     cd /armada && \
     pip install --upgrade pip && \
