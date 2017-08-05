@@ -43,9 +43,6 @@ MAX_MESSAGE_LENGTH = 429496729
 LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
-DOMAIN = "armada"
-
-logging.setup(CONF, DOMAIN)
 
 
 class Tiller(object):

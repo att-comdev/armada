@@ -38,9 +38,6 @@ LOG = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 3600
 CONF = cfg.CONF
-DOMAIN = "armada"
-
-logging.setup(CONF, DOMAIN)
 
 
 class Armada(object):
@@ -77,8 +74,9 @@ class Armada(object):
         self.debug = debug
 
         # Set debug value
-        CONF.set_default('debug', self.debug)
-        logging.setup(CONF, DOMAIN)
+        # Define a default handler at INFO logging level
+        if self.debug:
+            logging.basicConfig(level=logging.DEBUG)
 
     def get_armada_manifest(self):
         return Manifest(self.documents).get_manifest()

@@ -11,3 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import os
+
+from oslo_config import cfg
+
+from armada.conf import default
+
+CONF = cfg.CONF
+
+# Load config file if exists
+if (os.path.exists('etc/armada/armada.conf')):
+    CONF(['--config-file', 'etc/armada/armada.conf'])
+
+def set_app_default_configs():
+    default.register_opts(CONF)

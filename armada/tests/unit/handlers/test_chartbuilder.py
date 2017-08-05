@@ -14,11 +14,8 @@
 import unittest
 import mock
 
-# Required Oslo configuration setup
-from armada.conf import default
-default.register_opts()
-
 from armada.handlers.chartbuilder import ChartBuilder
+
 
 class ChartBuilderTestCase(unittest.TestCase):
     chart_stream = """

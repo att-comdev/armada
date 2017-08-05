@@ -1,11 +1,8 @@
 import mock
 import unittest
 
-# Required Oslo configuration setup
-from armada.conf import default
-default.register_opts()
-
 from armada.handlers.tiller import Tiller
+
 
 class TillerTestCase(unittest.TestCase):
 

@@ -22,9 +22,6 @@ from oslo_log import log as logging
 LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
-DOMAIN = "armada"
-
-logging.setup(CONF, DOMAIN)
 
 
 class K8s(object):
