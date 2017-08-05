@@ -14,11 +14,14 @@
 
 import sys
 
+from oslo_config import cfg
+from oslo_log import log
 from cliff import app
 from cliff import commandmanager as cm
-from conf import default
 
 import armada
+
+CONF = cfg.CONF
 
 class ArmadaApp(app.App):
     def __init__(self, **kwargs):
@@ -35,7 +38,9 @@ class ArmadaApp(app.App):
 
     def configure_logging(self):
         super(ArmadaApp, self).configure_logging()
-        default.register_opts()
+        log.register_options(CONF)
+        log.set_defaults(default_log_levels=CONF.default_log_levels)
+        log.setup(CONF, 'armada')
 
 def main(argv=None):
     if argv is None:

@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-
-from armada.conf import default
 
 import json
 from falcon import HTTP_200
@@ -21,16 +18,11 @@ from falcon import HTTP_200
 from oslo_config import cfg
 from oslo_log import log as logging
 
-# Required Oslo configuration setup
-default.register_opts()
-
 from armada.handlers.tiller import Tiller as tillerHandler
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
-DOMAIN = "armada"
 
-logging.setup(CONF, DOMAIN)
 
 class Status(object):
     def on_get(self, req, resp):

@@ -24,7 +24,10 @@ data:
   chart_name: blog-2
   release: blog-2
   namespace: default
-  values: {}
+  values:
+    some: value
+  upgrade:
+    no_hooks: false
   source:
     type: git
     location: https://github.com/gardlt/hello-world-chart

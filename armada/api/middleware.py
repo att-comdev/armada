@@ -12,24 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from armada.conf import default
-
-# Required Oslo configuration setup
-default.register_opts()
+import falcon
 
 from keystoneauth1 import session
 from keystoneauth1.identity import v3
-
 from oslo_config import cfg
 from oslo_log import log as logging
 
-import falcon
-
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
-DOMAIN = "armada"
 
-logging.setup(CONF, DOMAIN)
 
 class AuthMiddleware(object):
 

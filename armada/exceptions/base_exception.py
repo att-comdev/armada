@@ -19,9 +19,7 @@ LOG = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 3600
 CONF = cfg.CONF
-DOMAIN = "armada"
 
-logging.setup(CONF, DOMAIN)
 
 class ArmadaBaseException(Exception):
     '''Base class for Armada exception and error handling.'''
