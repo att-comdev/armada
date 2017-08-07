@@ -16,6 +16,10 @@ from cliff import command as cmd
 
 from armada.handlers.tiller import Tiller
 
+# Required Oslo config setup
+from armada.conf import default
+default.register_opts()
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -48,4 +52,8 @@ class TillerServerCommand(cmd.Command):
         return parser
 
     def take_action(self, parsed_args):
-        tillerServer(parsed_args)
+        try:
+            tillerServer(parsed_args)
+        except Exception as e:
+            LOG.error('{} error occurred with message {} while loading tiller \
+                      information.'.format(type(e).__name__, e.message))

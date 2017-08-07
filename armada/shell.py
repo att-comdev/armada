@@ -16,9 +16,21 @@ import sys
 
 from cliff import app
 from cliff import commandmanager as cm
+
+# Required oslo config setup
 from conf import default
+default.register_opts()
+
+from oslo_config import cfg
+from oslo_log import log as logging
 
 import armada
+
+LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.setup(CONF, DOMAIN)
 
 class ArmadaApp(app.App):
     def __init__(self, **kwargs):
@@ -40,4 +52,9 @@ class ArmadaApp(app.App):
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
-    return ArmadaApp().run(argv)
+
+    try:
+        return ArmadaApp().run(argv)
+    except Exception as e:
+        LOG.error('{} error occurred with message {} while starting \
+                  Armada.'.format(type(e).__name__, e.message))
