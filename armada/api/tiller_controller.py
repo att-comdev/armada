@@ -37,29 +37,54 @@ class Status(object):
         '''
         get tiller status
         '''
-        message = "Tiller Server is {}"
-        if tillerHandler().tiller_status():
-            resp.data = json.dumps({'message': message.format('Active')})
-            LOG.info('Tiller Server is Active.')
-        else:
-            resp.data = json.dumps({'message': message.format('Not Present')})
-            LOG.info('Tiller Server is Not Present.')
 
-        resp.content_type = 'application/json'
-        resp.status = HTTP_200
+        try:
+            message = "Tiller Server is {}"
+            if tillerHandler().tiller_status():
+                resp.data = json.dumps({'message': message.format('Active')})
+                LOG.info('Tiller Server is Active.')
+            else:
+                resp.data = json.dumps({'message': message.format('Not'
+                                                                  ' Present')})
+                LOG.info('Tiller Server is Not Present.')
+
+        except Exception as e:
+            LOG.error('{} error occrred with message {} retrieving tiller \
+                      information.'.format(type(e).__name__, e.message))
+
+            resp.data = json.dumps({'message': 'A server error occured while'
+                                    ' retrieving tiller information. Check'
+                                    ' the Armada log for more information.'})
+
+        finally:
+            resp.content_type = 'application/json'
+            resp.status = HTTP_200
+
 
 class Release(object):
     def on_get(self, req, resp):
         '''
         get tiller releases
         '''
-        # Get tiller releases
-        handler = tillerHandler()
 
-        releases = {}
-        for release in handler.list_releases():
-            releases[release.name] = release.namespace
+        try:
+            # Get tiller releases
+            handler = tillerHandler()
 
-        resp.data = json.dumps({'releases': releases})
-        resp.content_type = 'application/json'
-        resp.status = HTTP_200
+            releases = {}
+            for release in handler.list_releases():
+                releases[release.name] = release.namespace
+
+            resp.data = json.dumps({'releases': releases})
+
+        except Exception as e:
+            LOG.error('{} error occrred with message {} retrieving release \
+                      information.'.format(type(e).__name__, e.message))
+
+            resp.data = json.dumps({'message': 'A server error occured while'
+                                    ' retrieving release information. Check'
+                                    ' the Armada log for more information.'})
+
+        finally:
+            resp.content_type = 'application/json'
+            resp.status = HTTP_200

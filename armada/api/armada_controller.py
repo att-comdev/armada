@@ -38,24 +38,33 @@ class Apply(object):
     '''
 
     def on_post(self, req, resp):
+        try:
+            # Load data from request and get options
+            data = json.load(req.stream)
+            opts = data['options']
 
-        # Load data from request and get options
-        data = json.load(req.stream)
-        opts = data['options']
+            # Encode filename
+            data['file'] = data['file'].encode('utf-8')
 
-        # Encode filename
-        data['file'] = data['file'].encode('utf-8')
+            armada = Handler(open('../../' + data['file']),
+                             disable_update_pre=opts['disable_update_pre'],
+                             disable_update_post=opts['disable_update_post'],
+                             enable_chart_cleanup=opts['enable_chart_cleanup'],
+                             dry_run=opts['dry_run'],
+                             wait=opts['wait'],
+                             timeout=opts['timeout'])
 
-        armada = Handler(open('../../' + data['file']),
-                         disable_update_pre=opts['disable_update_pre'],
-                         disable_update_post=opts['disable_update_post'],
-                         enable_chart_cleanup=opts['enable_chart_cleanup'],
-                         dry_run=opts['dry_run'],
-                         wait=opts['wait'],
-                         timeout=opts['timeout'])
+            armada.sync()
+            resp.data = json.dumps({'message': 'Success'})
 
-        armada.sync()
+        except Exception as e:
+            LOG.error('{} error occrred with message {} while \
+                      syncing.'.format(type(e).__name__, e.message))
 
-        resp.data = json.dumps({'message': 'Success'})
-        resp.content_type = 'application/json'
-        resp.status = HTTP_200
+            resp.data = json.dumps({'message': 'A server error occured while'
+                                    ' applying the charts. Check the Armada'
+                                    ' log for more information.'})
+
+        finally:
+            resp.content_type = 'application/json'
+            resp.status = HTTP_200
