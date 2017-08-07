@@ -15,8 +15,14 @@
 import grpc
 import yaml
 
-from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
-    InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
+from hapi.services.tiller_pb2 import ReleaseServiceStub
+from hapi.services.tiller_pb2 import ListReleasesRequest
+from hapi.services.tiller_pb2 import InstallReleaseRequest
+from hapi.services.tiller_pb2 import UpdateReleaseRequest
+from hapi.services.tiller_pb2 import UninstallReleaseRequest
+from hapi.services.tiller_pb2 import TestReleaseRequest
+from hapi.services.tiller_pb2 import GetVersionRequest
+
 from hapi.chart.config_pb2 import Config
 
 from k8s import K8s
@@ -356,6 +362,19 @@ class Tiller(object):
 
         except Exception:
             raise tiller_exceptions.ReleaseInstallException(release, namespace)
+
+    def testing_release(self, release, timeout=3600, cleanup=False):
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = TestReleaseRequest(release, timeout, cleanup)
+
+            resp = stub.RunReleaseTest(
+                release_request, self.timeout, metadata=self.metadata)
+
+            return resp
+
+        except Exception:
+            raise Exception('{}'.format(release))
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
         '''
