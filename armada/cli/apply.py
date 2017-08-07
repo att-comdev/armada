@@ -14,7 +14,20 @@
 
 from cliff import command as cmd
 
+# Required Oslo config setup
+from armada.conf import default
+default.register_opts()
+
 from armada.handlers.armada import Armada
+
+from oslo_config import cfg
+from oslo_log import log as logging
+
+LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
+DOMAIN = "armada"
+
+logging.setup(CONF, DOMAIN)
 
 def applyCharts(args):
 
@@ -58,4 +71,8 @@ class ApplyChartsCommand(cmd.Command):
         return parser
 
     def take_action(self, parsed_args):
-        applyCharts(parsed_args)
+        try:
+            applyCharts(parsed_args)
+        except Exception as e:
+            LOG.error('{} error occurred with message {} while applying \
+                      charts.'.format(type(e).__name__, e.message))
