@@ -109,19 +109,14 @@ metadata:
   name: keystone
 data:
   chart_name: keystone
+  test: true
   release: keystone
   namespace: undercloud
-  timeout: 100
+  timeout: 3600
   install:
     no_hooks: false
   upgrade:
     no_hooks: false
-    pre:
-      delete:
-        - name: keystone-db-sync
-          type: job
-        - name: keystone-db-init
-          type: job
   values:
     replicas: 2
   source:
@@ -142,7 +137,6 @@ data:
   chart_group:
     - mariadb
     - etcd
-    - rabbitmq
     - memcached
 ---
 schema: armada/ChartGroup/v1
@@ -151,7 +145,8 @@ metadata:
   name: openstack-keystone
 data:
   description: "Deploying OpenStack Keystone"
-  sequenced: False
+  sequenced: True
+  test_charts: False
   chart_group:
     - keystone
 ---

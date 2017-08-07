@@ -173,3 +173,20 @@ class K8s(object):
                         LOG.info('New pod %s deployed', new_pod_name)
 
                         w.stop()
+
+    def wait_get_completed_podphase(self, release, timeout=300):
+        '''
+        :param release - part of namespace
+        :param timeout - time before disconnecting stream
+        '''
+
+        w = watch.Watch()
+        for event in w.stream(self.client.list_pod_for_all_namespaces,
+                              timeout_seconds=timeout):
+            pod_name = event['object'].metadata.name
+
+            if release in pod_name:
+                pod_state = event['object'].status.phase
+                if pod_state == 'Succeeded':
+                    w.stop()
+                    break
