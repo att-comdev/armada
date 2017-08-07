@@ -7,16 +7,16 @@ armada/Manifest/v1
 +---------------------+--------+----------------------+
 | keyword             | type   | action               |
 +=====================+========+======================+
-| ``release_prefix``  | string | tag appended to the  |
+| ``release_prefix``  | string | appends to the       |
 |                     |        | front of all         |
 |                     |        | charts               |
 |                     |        | released             |
 |                     |        | by the               |
-|                     |        | yaml in              |
+|                     |        | manifest in          |
 |                     |        | order to             |
-|                     |        | manage releses       |
+|                     |        | manage releases      |
 |                     |        | throughout their     |
-|                     |        | lifecycles           |
+|                     |        | lifecycle            |
 +---------------------+--------+----------------------+
 | ``chart_groups``    | array  | references           |
 |                     |        | ChartGroup document  |
@@ -52,6 +52,8 @@ armada/ChartGroup/v1
 +-----------------+----------+------------------------------------------------------------------------+
 | sequenced       | bool     | enables sequenced chart deployment in a group                          |
 +-----------------+----------+------------------------------------------------------------------------+
+| test_charts     | bool     | run pre-defined helm tests helm in a ChartGroup                        |
++-----------------+----------+------------------------------------------------------------------------+
 
 Example
 ~~~~~~~~
@@ -86,6 +88,8 @@ Chart
 | namespace       | string   | namespace of your chart                                                   |
 +-----------------+----------+---------------------------------------------------------------------------+
 | timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set    |
++-----------------+----------+---------------------------------------------------------------------------+
+| test            | bool     | run pre-defined helm tests helm in a chart                                |
 +-----------------+----------+---------------------------------------------------------------------------+
 | install         | object   | install the chart into your Kubernetes cluster                            |
 +-----------------+----------+---------------------------------------------------------------------------+
@@ -135,7 +139,7 @@ Update - Actions - Update/Delete
 +=============+==========+===============================================================+
 | name        | string   | name of action                                                |
 +-------------+----------+---------------------------------------------------------------+
-| type        | string   | type of K8s kind to execute                                   |
+| type        | string   | type of kubernetes workload  to execute                       |
 +-------------+----------+---------------------------------------------------------------+
 | labels      | object   | array of labels to query against kinds. (key: value)          |
 +-------------+----------+---------------------------------------------------------------+
@@ -143,6 +147,84 @@ Update - Actions - Update/Delete
 .. note::
 
    Update Actions only support type: 'daemonset'
+
+.. note::
+
+   Delete Actions only support type: 'job'
+
+Example
+~~~~~~~
+
+::
+
+    # type git
+    ---
+    schema: armada/Chart/v1
+    metadata:
+      schema: metadata/Document/v1
+      name: blog-1
+    data:
+      chart_name: blog-1
+      release_name: blog-1
+      namespace: default
+      timeout: 100
+      install:
+        no_hook: false
+      upgrade:
+        no_hook: false
+      values: {}
+      source:
+        type: git
+        location: https://github.com/namespace/repo
+        subpath: .
+        reference: master
+      dependencies: []
+
+    # type local
+    ---
+    schema: armada/Chart/v1
+    metadata:
+      schema: metadata/Document/v1
+      name: blog-1
+    data:
+      chart_name: blog-1
+      release_name: blog-1
+      namespace: default
+      timeout: 100
+      install:
+        no_hook: false
+      upgrade:
+        no_hook: false
+      values: {}
+      source:
+        type: local
+        location: /path/to/charts
+        subpath: chart
+        reference: master
+      dependencies: []
+
+    # type tar
+    ---
+    schema: armada/Chart/v1
+    metadata:
+      schema: metadata/Document/v1
+      name: blog-1
+    data:
+      chart_name: blog-1
+      release_name: blog-1
+      namespace: default
+      timeout: 100
+      install:
+        no_hook: false
+      upgrade:
+        no_hook: false
+      values: {}
+      source:
+        type: tar
+        location: https://localhost:8879/charts/chart-0.1.0.tgz
+        subpath: mariadb
+        reference: null
+      dependencies: []
 
 
 Source
@@ -159,6 +241,7 @@ Source
 +-------------+----------+-------------------------------------------------------------------------------+
 | reference   | string   | (optional) branch of the repo (``master`` if not specified)                   |
 +-------------+----------+-------------------------------------------------------------------------------+
+
 
 Example
 ~~~~~~~
@@ -205,31 +288,39 @@ Example
 
 
 
+Defining a Manifest
+~~~~~~~~~~~~~~~~~~~
 
-Defining a Chart
-~~~~~~~~~~~~~~~~
+To define your Manifest you need to define a ``armada/Manifest/v1`` document,
+``armada/ChartGroup/v1`` document, ``armada/Chart/v1``.
+Following the definitions above for each document you will be able to construct
+an armada manifest.
 
-To define your charts is not any different than helm. we do provide some
-post/pre actions that will help us manage our charts better.
+Armada - Deploy Behavior
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-Behavior
-^^^^^^^^
+1. Armada will perform set of pre-flight checks to before applying the manifest
+   - validate input manifest
+   - check tiller service is Running
+   - check chart source locations are valid
 
-1. will check if chart exists
+2. Deploying Armada Manifest
 
-   1. if it does not exist
+   1. If the chart is not found
 
       -  we will install the chart
 
-   2. if exist then
 
-      -  armada will check if there are any differences in the charts
+   3. If exist then
+
+      -  Armada will check if there are any differences in the chart
       -  if the charts are different then it will execute an upgrade
       -  else it will not perform any actions
 
 .. note::
 
-    You can use references in order to build your charts, this will reduce the size of the chart definition will show example in multichart below
+    You can use references in order to build your charts, this will reduce
+    the size of the chart definition will show example in multichart below
 
 Simple Example
 ~~~~~~~~~~~~~~

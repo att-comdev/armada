@@ -11,5 +11,6 @@ Commands Guide
    :caption: Contents:
 
    apply.rst
-   validate.rst
+   test.rst
    tiller.rst
+   validate.rst
