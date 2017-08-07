@@ -204,6 +204,7 @@ class Armada(object):
 
             desc = entry.get('description', 'A Chart Group')
             chart_group = entry.get(KEYWORD_CHARTS, [])
+            test_charts = entry.get('test_charts', False)
 
             if entry.get('sequenced', False):
                 chart_wait = True
@@ -271,6 +272,7 @@ class Armada(object):
                         continue
 
                     # do actual update
+                    LOG.info('wait: %s', chart_wait)
                     self.tiller.update_release(protoc_chart,
                                                prefix_chart,
                                                chart.namespace,
@@ -294,8 +296,17 @@ class Armada(object):
                                                 wait=chart_wait,
                                                 timeout=chart_timeout)
 
+
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
+
+                if test_charts:
+                    LOG.info('Testing: %s', prefix_chart)
+                    resp = self.tiller.testing_release(prefix_chart)
+                    if resp is None:
+                        LOG.info("PASSED: %s", prefix_chart)
+                    else:
+                        LOG.info("FAILED: %s", prefix_chart)
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()
