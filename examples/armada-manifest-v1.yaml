@@ -120,8 +120,12 @@ data:
       delete:
         - name: keystone-db-sync
           type: job
+          labels:
+            - job-name: keystone-db-sync
         - name: keystone-db-init
           type: job
+          labels:
+            - job-name: keystone-db-init
   values:
     replicas: 2
   source:

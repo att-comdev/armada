@@ -403,7 +403,7 @@ class Tiller(object):
                 self.uninstall_release(chart)
 
     def delete_resources(self, release_name, resource_name, resource_type,
-                         resource_labels, namespace):
+                         resource_labels, namespace, wait=False):
         '''
         :params release_name - release name the specified resource is under
         :params resource_name - name of specific resource
@@ -445,7 +445,8 @@ class Tiller(object):
                 pod_name = pod.metadata.name
                 LOG.info("Deleting %s in namespace: %s", pod_name, namespace)
                 self.k8s.delete_namespace_pod(pod_name, namespace)
-                self.k8s.wait_for_pod_redeployment(pod_name, namespace)
+                if wait:
+                    self.k8s.wait_for_pod_redeployment(pod_name, namespace)
         else:
             LOG.error("Unable to execute name: %s type: %s ",
                       resource_name, resource_type)
@@ -491,7 +492,7 @@ class Tiller(object):
 
                     # delete pods
                     self.delete_resources(release_name, name, 'pod', labels,
-                                          namespace)
+                                          namespace, wait=True)
 
         elif action_type == 'statefulset':
             pass
