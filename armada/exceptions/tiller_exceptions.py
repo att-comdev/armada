@@ -27,10 +27,10 @@ class TillerServicesUnavailableException(TillerException):
 class ChartCleanupException(TillerException):
     '''Exception that occures during chart cleanup.'''
 
-    def __init__(self, chart_name, source_type):
-        super(ChartCleanupException, self).__init__('An error occred during \
-                                                     cleanup while removing \
-                                                     the chart ' + chart_name)
+    def __init__(self, chart_name):
+        msg = 'An error occred during cleanup while removing {}'.format(
+            chart_name)
+        super(ChartCleanupException, self).__init__(msg)
 
 class ListChartsException(TillerException):
     '''Exception that occurs when listing charts'''
@@ -41,11 +41,9 @@ class PostUpdateJobDeleteException(TillerException):
     '''Exception that occurs when a job deletion'''
 
     def __init__(self, name, namespace):
-        self._name = name
-        self._namespace = namespace
 
-        self._message = 'Failed to delete k8s job ' + self._name + ' in ' + \
-                        self._namespace + ' namspace.'
+        self._message = 'Failed to delete k8s job {} in {}'.format(
+            name, namespace)
 
         super(PostUpdateJobDeleteException, self).__init__(self._message)
 
@@ -53,11 +51,9 @@ class PostUpdateJobCreateException(TillerException):
     '''Exception that occurs when a job creation fails.'''
 
     def __init__(self, name, namespace):
-        self._name = name
-        self._namespace = namespace
 
-        self._message = 'Failed to create k8s job ' + self._name + ' in ' + \
-                        self._namespace + ' namespace.'
+        self._message = 'Failed to create k8s job {} in {}'.format(
+            name, namespace)
 
         super(PostUpdateJobCreateException, self).__init__(self._message)
 
@@ -65,11 +61,9 @@ class PreUpdateJobDeleteException(TillerException):
     '''Exception that occurs when a job deletion'''
 
     def __init__(self, name, namespace):
-        self._name = name
-        self._namespace = namespace
 
-        self._message = 'Failed to delete k8s job ' + self._name + ' in ' + \
-                        self._namespace + ' namspace.'
+        self._message = 'Failed to delete k8s job {} in {}'.format(
+            name, namespace)
 
         super(PreUpdateJobDeleteException, self).__init__(self._message)
 
@@ -77,11 +71,9 @@ class PreUpdateJobCreateException(TillerException):
     '''Exception that occurs when a job creation fails.'''
 
     def __init__(self, name, namespace):
-        self._name = name
-        self._namespace = namespace
 
-        self._message = 'Failed to create k8s job ' + self._name + ' in ' + \
-                        self._namespace + ' namespace.'
+        self._message = 'Failed to create k8s job {} in {}'.format(
+            name, namespace)
 
         super(PreUpdateJobCreateException, self).__init__(self._message)
 
@@ -89,26 +81,28 @@ class ReleaseUninstallException(TillerException):
     '''Exception that occurs when a release fails to uninstall.'''
 
     def __init__(self, name, namespace):
-        self._name = name
-        self._message = 'Failed to uninstall release' + self._name + '.'
+        self._message = 'Failed to uninstall release {} in {}'.format(
+            name, namespace)
 
         super(ReleaseUninstallException, self).__init__(self._message)
 
 class ReleaseInstallException(TillerException):
     '''Exception that occurs when a release fails to install.'''
 
-    def __init__(self, name, namespace):
-        self._name = name
-        self._message = 'Failed to install release' + self._name + '.'
+    def __init__(self, name, namespace, status):
+        til_msg = getattr(status.info, 'Description').encode()
+        self._message = 'Release: {} - Tiller Message: {}'.format(
+            name, til_msg)
 
-        super(ReleaseInstallException, self).__init__(self._message)
+        super(TillerException, self).__init__(self._message)
 
 class ReleaseUpdateException(TillerException):
     '''Exception that occurs when a release fails to update.'''
 
-    def __init__(self, name, namespace):
-        self._name = name
-        self._message = 'Failed to update release' + self._name + '.'
+    def __init__(self, name, namespace, status):
+        til_msg = getattr(status.info, 'Description').encode()
+        self._message = 'Release: {} - Tiller Message: {}'.format(
+            name, til_msg)
 
         super(ReleaseUpdateException, self).__init__(self._message)
 
@@ -116,3 +110,34 @@ class ChannelException(TillerException):
     '''Exception that occurs during a failed GRPC channel creation'''
 
     message = 'Failed to create GRPC channel.'
+
+class TestingReleaseException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    def __init__(self, release):
+        self._message = 'Failed run {} tests'.format(release)
+
+        super(TestingReleaseException, self).__init__(self._message)
+
+class GetReleaseStatusException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    def __init__(self, release, version):
+        self._message = 'Failed to get {} status {} version'.format(
+            release, version)
+
+        super(GetReleaseStatusException, self).__init__(self._message)
+
+class GetReleaseContentException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    def __init__(self, release, version):
+        self._message = 'Failed to get {} content {} version {}'.format(
+            release, version)
+
+        super(GetReleaseContentException, self).__init__(self._message)
+
+class TillerVersionException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    message = 'Failed to get Tiller Version'
