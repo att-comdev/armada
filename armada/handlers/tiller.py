@@ -12,26 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
 import yaml
+import grpc
 
-from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
-    InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
 from hapi.chart.config_pb2 import Config
-
-from k8s import K8s
-from ..const import STATUS_DEPLOYED, STATUS_FAILED
-
-from ..exceptions import tiller_exceptions
-from ..utils.release import release_prefix
-
+from hapi.services.tiller_pb2 import GetReleaseContentRequest
+from hapi.services.tiller_pb2 import GetReleaseStatusRequest
+from hapi.services.tiller_pb2 import GetVersionRequest
+from hapi.services.tiller_pb2 import InstallReleaseRequest
+from hapi.services.tiller_pb2 import ListReleasesRequest
+from hapi.services.tiller_pb2 import ReleaseServiceStub
+from hapi.services.tiller_pb2 import TestReleaseRequest
+from hapi.services.tiller_pb2 import UninstallReleaseRequest
+from hapi.services.tiller_pb2 import UpdateReleaseRequest
 from oslo_config import cfg
 from oslo_log import log as logging
+
+from ..const import STATUS_DEPLOYED, STATUS_FAILED
+from ..exceptions import tiller_exceptions as ex
+from ..utils.release import release_prefix
+from k8s import K8s
+
 
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.5.0'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
+RUNTEST_SUCCESS = 9
 
 # the standard gRPC max message size is 4MB
 # this expansion comes at a performance penalty
@@ -88,7 +95,7 @@ class Tiller(object):
                 ]
             )
         except Exception:
-            raise tiller_exceptions.ChannelException()
+            raise ex.ChannelException()
 
     def _get_tiller_pod(self):
         '''
@@ -200,8 +207,8 @@ class Tiller(object):
                     self.delete_resources(
                         release_name, name, 'pod', labels, namespace)
         except Exception:
-            raise tiller_exceptions.PreUpdateJobDeleteException(name,
-                                                                namespace)
+            raise ex.PreUpdateJobDeleteException(name, namespace)
+
             LOG.debug("PRE: Could not delete anything, please check yaml")
 
         try:
@@ -213,8 +220,8 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
-            raise tiller_exceptions.PreUpdateJobCreateException(name,
-                                                                namespace)
+            raise ex.PreUpdateJobCreateException(name, namespace)
+
             LOG.debug("PRE: Could not create anything, please check yaml")
 
     def delete_resource(self, release_name, resource_name, resource_type,
@@ -260,7 +267,7 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
-            raise tiller_exceptions.PreUpdateJobCreateException()
+            raise ex.PreUpdateJobCreateException()
             LOG.debug("POST: Could not create anything, please check yaml")
 
     def list_charts(self):
@@ -319,7 +326,8 @@ class Tiller(object):
             stub.UpdateRelease(
                 release_request, self.timeout, metadata=self.metadata)
         except Exception:
-            raise tiller_exceptions.ReleaseInstallException(release, namespace)
+            status = self.get_release_status(release)
+            raise ex.ReleaseException(release, status, 'Upgrade')
 
         self._post_update_actions(post_actions, namespace)
 
@@ -331,6 +339,7 @@ class Tiller(object):
         '''
         Create a Helm Release
         '''
+
         LOG.debug("wait: %s", wait)
         LOG.debug("timeout: %s", timeout)
 
@@ -355,7 +364,95 @@ class Tiller(object):
                 release_request, self.timeout, metadata=self.metadata)
 
         except Exception:
-            raise tiller_exceptions.ReleaseInstallException(release, namespace)
+            status = self.get_release_status(release)
+            raise ex.ReleaseException(release, status, 'Install')
+
+    def testing_release(self, release, timeout=300, cleanup=True):
+        '''
+        :param release - name of release to test
+        :param timeout - runtime before exiting
+        :param cleanup - removes testing pod created
+
+        :returns - results of test pod
+
+        '''
+
+        try:
+
+            stub = ReleaseServiceStub(self.channel)
+            release_request = TestReleaseRequest(name=release, timeout=timeout,
+                                                 cleanup=cleanup)
+
+            content = self.get_release_content(release)
+
+            if not len(content.release.hooks):
+                LOG.info('No test found')
+                return False
+
+            if content.release.hooks[0].events[0] == RUNTEST_SUCCESS:
+                test = stub.RunReleaseTest(
+                    release_request, self.timeout, metadata=self.metadata)
+
+                if test.running():
+                    self.k8s.wait_get_completed_podphase(release)
+
+                test.cancel()
+
+                return self.get_release_status(release)
+
+        except Exception:
+            status = self.get_release_status(release)
+            raise ex.ReleaseException(release, status, 'Test')
+
+    def get_release_status(self, release, version=0):
+        '''
+        :param release - name of release to test
+        :param version - version of release status
+
+        '''
+
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            status_request = GetReleaseStatusRequest(
+                name=release, version=version)
+
+            return stub.GetReleaseStatus(
+                status_request, self.timeout, metadata=self.metadata)
+
+        except Exception:
+            raise ex.GetReleaseStatusException(release, version)
+
+    def get_release_content(self, release, version=0):
+        '''
+        :param release - name of release to test
+        :param version - version of release status
+
+        '''
+
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            status_request = GetReleaseContentRequest(
+                name=release, version=version)
+
+            return stub.GetReleaseContent(
+                status_request, self.timeout, metadata=self.metadata)
+
+        except Exception:
+            raise ex.GetReleaseContentException(release, version)
+
+    def tiller_version(self):
+        '''
+        :returns - tiller version
+        '''
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = GetVersionRequest()
+
+            return stub.GetVersion(
+                release_request, self.timeout, metadata=self.metadata)
+
+        except Exception:
+            raise ex.TillerVersionException()
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
         '''
@@ -375,7 +472,8 @@ class Tiller(object):
                 release_request, self.timeout, metadata=self.metadata)
 
         except Exception:
-            raise tiller_exceptions.ReleaseUninstallException(release)
+            status = self.get_release_status(release)
+            raise ex.ReleaseException(release, status, 'Delete')
 
     def chart_cleanup(self, prefix, charts):
         '''

@@ -204,8 +204,9 @@ class Armada(object):
 
             desc = entry.get('description', 'A Chart Group')
             chart_group = entry.get(KEYWORD_CHARTS, [])
+            test_charts = entry.get('test_charts', False)
 
-            if entry.get('sequenced', False):
+            if entry.get('sequenced', False) or test_charts:
                 chart_wait = True
 
             LOG.info('Deploying: %s', desc)
@@ -213,12 +214,17 @@ class Armada(object):
             for gchart in chart_group:
                 chart = dotify(gchart['chart'])
                 values = gchart.get('chart').get('values', {})
+                test_chart = gchart.get('chart').get('test', False)
                 pre_actions = {}
                 post_actions = {}
+
                 LOG.info('%s', chart.release)
 
                 if chart.release is None:
                     continue
+
+                if test_chart:
+                    chart_wait = True
 
                 # retrieve appropriate timeout value if 'wait' is specified
                 chart_timeout = self.timeout
@@ -271,6 +277,7 @@ class Armada(object):
                         continue
 
                     # do actual update
+                    LOG.info('wait: %s', chart_wait)
                     self.tiller.update_release(protoc_chart,
                                                prefix_chart,
                                                chart.namespace,
@@ -296,6 +303,17 @@ class Armada(object):
 
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
+
+                if test_charts or test_chart:
+                    LOG.info('Testing: %s', prefix_chart)
+                    resp = self.tiller.testing_release(prefix_chart)
+                    test_status = getattr(resp.info.status,
+                                          'last_test_suite_run', 'FAILED')
+                    LOG.info("Test INFO: %s", test_status)
+                    if resp:
+                        LOG.info("PASSED: %s", prefix_chart)
+                    else:
+                        LOG.info("FAILED: %s", prefix_chart)
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()

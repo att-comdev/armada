@@ -28,7 +28,9 @@ def tillerServer(args):
     tiller = Tiller()
 
     if args.status:
-        LOG.info('Tiller is Active: %s', tiller.tiller_status())
+        resp = tiller.tiller_version()
+        LOG.info('Tiller Service: %s', tiller.tiller_status())
+        LOG.info('Tiller Version: %s', getattr(resp.Version, 'sem_ver', False))
 
     if args.releases:
         for release in tiller.list_releases():
