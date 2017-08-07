@@ -116,3 +116,12 @@ class ChannelException(TillerException):
     '''Exception that occurs during a failed GRPC channel creation'''
 
     message = 'Failed to create GRPC channel.'
+
+class TestingReleaseException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    def __init__(self, release, exception):
+        message = 'Failed run {} tests: {}'
+        message.format(release, exception)
+
+        super(TestingReleaseException, self).__init__(self._message)
