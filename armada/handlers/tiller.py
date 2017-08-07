@@ -15,8 +15,16 @@
 import grpc
 import yaml
 
-from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
-    InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
+from hapi.services.tiller_pb2 import ReleaseServiceStub
+from hapi.services.tiller_pb2 import ListReleasesRequest
+from hapi.services.tiller_pb2 import InstallReleaseRequest
+from hapi.services.tiller_pb2 import UpdateReleaseRequest
+from hapi.services.tiller_pb2 import UninstallReleaseRequest
+from hapi.services.tiller_pb2 import TestReleaseRequest
+from hapi.services.tiller_pb2 import GetVersionRequest
+from hapi.services.tiller_pb2 import GetReleaseStatusRequest
+from hapi.services.tiller_pb2 import GetReleaseContentRequest
+
 from hapi.chart.config_pb2 import Config
 
 from k8s import K8s
@@ -32,6 +40,7 @@ TILLER_PORT = 44134
 TILLER_VERSION = b'2.5.0'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
+RUNTEST_SUCCESS = 9
 
 # the standard gRPC max message size is 4MB
 # this expansion comes at a performance penalty
@@ -331,6 +340,7 @@ class Tiller(object):
         '''
         Create a Helm Release
         '''
+
         LOG.debug("wait: %s", wait)
         LOG.debug("timeout: %s", timeout)
 
@@ -356,6 +366,91 @@ class Tiller(object):
 
         except Exception:
             raise tiller_exceptions.ReleaseInstallException(release, namespace)
+
+    def testing_release(self, release, timeout=300, cleanup=True):
+        '''
+        :param release - name of release to test
+        :param timeout - runtime before exiting
+        :param cleanup - removes testing pod created
+
+        '''
+
+        try:
+
+            stub = ReleaseServiceStub(self.channel)
+            release_request = TestReleaseRequest(name=release, timeout=timeout,
+                                                 cleanup=cleanup)
+
+            content = self.get_release_content(release)
+
+            if not len(content.release.hooks):
+                LOG.info('No test found')
+                return False
+
+            if content.release.hooks[0].events[0] == RUNTEST_SUCCESS:
+                test = stub.RunReleaseTest(
+                    release_request, self.timeout, metadata=self.metadata)
+
+                if test.running():
+                    self.k8s.wait_get_completed_podphase(release)
+
+                test.cancel()
+
+                return self.get_release_status(release)
+
+        except Exception as e:
+            raise tiller_exceptions.TestingRelaseException(release, e)
+
+    def get_release_status(self, release, version=0):
+        '''
+        :param release - name of release to test
+        :param version - version of release status
+
+        '''
+
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            status_request = GetReleaseStatusRequest(
+                name=release, version=version)
+
+            return stub.GetReleaseStatus(
+                status_request, self.timeout, metadata=self.metadata)
+
+        except Exception:
+            raise tiller_exceptions.GetReleaseStatusException(release, version)
+
+    def get_release_content(self, release, version=0):
+        '''
+        :param release - name of release to test
+        :param version - version of release status
+
+        '''
+
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            status_request = GetReleaseContentRequest(
+                name=release, version=version)
+
+            return stub.GetReleaseContent(
+                status_request, self.timeout, metadata=self.metadata)
+
+        except Exception:
+            raise tiller_exceptions.GetReleaseContentException(
+                release, version)
+
+    def tiller_version(self):
+        '''
+        :returns - tiller version
+        '''
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = GetVersionRequest()
+
+            return stub.GetVersion(
+                release_request, self.timeout, metadata=self.metadata)
+
+        except Exception:
+            raise tiller_exceptions.TillerVersionException()
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
         '''

@@ -116,3 +116,35 @@ class ChannelException(TillerException):
     '''Exception that occurs during a failed GRPC channel creation'''
 
     message = 'Failed to create GRPC channel.'
+
+class TestingReleaseException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    def __init__(self, release, exception):
+        message = 'Failed run {} tests: {}'
+        message.format(release, exception)
+
+        super(TestingReleaseException, self).__init__(self._message)
+
+class GetReleaseStatusException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    def __init__(self, release, version):
+        message = 'Failed to get {} status {} version {}'
+        message.format(release, version)
+
+        super(TestingReleaseException, self).__init__(self._message)
+
+class GetReleaseContentException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    def __init__(self, release, version):
+        message = 'Failed to get {} content {} version {}'
+        message.format(release, version)
+
+        super(GetReleaseContentException, self).__init__(self._message)
+
+class TillerVersionException(TillerException):
+    '''Exception that occurs during a failed Release Testing'''
+
+    message = 'Failed to get Tiller Version'
