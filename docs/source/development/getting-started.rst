@@ -25,17 +25,10 @@ To use the docker containter to develop:
 Virtualenv
 ##########
 
-To use VirtualEnv we will need to add some extra steps
+To use VirtualEnv:
 
 1. virtualenv venv
 2. source ./venv/bin/activate
-3. sudo sh ./tools/libgit2.sh
-
-Test that it worked with:
-
-.. code-block:: bash
-
-    python -c 'import pygit2'
 
 From the directory of the forked repository:
 
@@ -47,8 +40,8 @@ From the directory of the forked repository:
 
 .. note::
 
-    this will install the latest libgit2 library so you have to make sure you
-    install the same version library with pip ( current version: 0.25.0 )
+    If building from source, Armada requires that git be installed on
+    the system.
 
 Kubernetes
 ##########
