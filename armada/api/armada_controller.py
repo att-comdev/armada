@@ -24,6 +24,7 @@ LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
+
 class Apply(object):
     '''
     apply armada endpoint service
@@ -38,13 +39,14 @@ class Apply(object):
         # Encode filename
         data['file'] = data['file'].encode('utf-8')
 
-        armada = Handler(open('../../' + data['file']),
-                         disable_update_pre=opts['disable_update_pre'],
-                         disable_update_post=opts['disable_update_post'],
-                         enable_chart_cleanup=opts['enable_chart_cleanup'],
-                         dry_run=opts['dry_run'],
-                         wait=opts['wait'],
-                         timeout=opts['timeout'])
+        armada = Handler(
+            open('../../' + data['file']),
+            disable_update_pre=opts['disable_update_pre'],
+            disable_update_post=opts['disable_update_post'],
+            enable_chart_cleanup=opts['enable_chart_cleanup'],
+            dry_run=opts['dry_run'],
+            wait=opts['wait'],
+            timeout=opts['timeout'])
 
         armada.sync()
 

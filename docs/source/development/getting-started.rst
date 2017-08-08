@@ -50,6 +50,18 @@ From the directory of the forked repository:
     this will install the latest libgit2 library so you have to make sure you
     install the same version library with pip ( current version: 0.25.0 )
 
+To check if your code is formatted correctly, run the tox below. It will return FAIL and the location of the improper formatting if the code is not formatted properly.
+
+.. code-block:: bash
+
+    tox -e checkdiff
+
+To format your code to the neccessary standards, run the tox command utilizing yapf:
+
+.. code-block:: bash
+
+    tox -e yapf
+
 Kubernetes
 ##########
 

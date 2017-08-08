@@ -9,7 +9,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 """Single point of entry to generate the sample configuration file.
 
 This module collects all the necessary info from the other modules in this
@@ -32,7 +31,6 @@ import collections
 import importlib
 import os
 import pkgutil
-
 
 LIST_OPTS_FUNC_NAME = 'list_opts'
 IGNORED_MODULES = ('opts', 'constants', 'utils')
@@ -71,9 +69,8 @@ def _import_modules(module_names):
         if not hasattr(module, LIST_OPTS_FUNC_NAME):
             raise Exception(
                 "The module '%s' should have a '%s' function which "
-                "returns the config options." % (
-                    full_module_path,
-                    LIST_OPTS_FUNC_NAME))
+                "returns the config options." % (full_module_path,
+                                                 LIST_OPTS_FUNC_NAME))
         else:
             imported_modules.append(module)
     return imported_modules

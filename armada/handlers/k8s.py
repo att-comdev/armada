@@ -51,8 +51,7 @@ class K8s(object):
         except ApiException as e:
             LOG.error("Exception when deleting a job: %s", e)
 
-    def get_namespace_job(self, namespace="default",
-                          label_selector=''):
+    def get_namespace_job(self, namespace="default", label_selector=''):
         '''
         :params lables - of the job
         :params namespace - name of jobs
@@ -71,8 +70,7 @@ class K8s(object):
         '''
         LOG.debug(" %s in namespace: %s", name, namespace)
 
-    def get_namespace_pod(self, namespace="default",
-                          label_selector=''):
+    def get_namespace_pod(self, namespace="default", label_selector=''):
         '''
         :params namespace - namespace of the Pod
         :params label_selector - filters Pods by label
@@ -135,8 +133,7 @@ class K8s(object):
         if body is None:
             body = client.V1DeleteOptions()
 
-        return self.client.delete_namespaced_pod(
-            name, namespace, body)
+        return self.client.delete_namespaced_pod(name, namespace, body)
 
     def wait_for_pod_redeployment(self, old_pod_name, namespace):
         '''

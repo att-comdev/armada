@@ -14,10 +14,12 @@
 
 import base_exception
 
+
 class ChartBuilderException(base_exception.ArmadaBaseException):
     '''Base class for the Chartbuilder handler exception and error handling.'''
 
     message = 'An unknown Armada handler error occured.'
+
 
 class DependencyException(ChartBuilderException):
     '''Exception that occurs when dependencies cannot be resolved.'''
@@ -29,6 +31,7 @@ class DependencyException(ChartBuilderException):
 
         super(DependencyException, self).__init__(self._message)
 
+
 class HelmChartBuildException(ChartBuilderException):
     '''Exception that occurs when Helm Chart fails to build.'''
 
@@ -39,16 +42,19 @@ class HelmChartBuildException(ChartBuilderException):
 
         super(HelmChartBuildException, self).__init__(self._message)
 
+
 class IgnoredFilesLoadException(ChartBuilderException):
     '''Exception that occurs when there is an error loading ignored files.'''
 
     message = 'An error occured while loading the ignored files in \
               .helmignore'
 
+
 class MetadataLoadException(ChartBuilderException):
     ''' Exception that occurs when metadata loading fails.'''
 
     message = 'Failed to load metadata from chart yaml file'
+
 
 class UnknownChartSourceException(ChartBuilderException):
     '''Exception for unknown chart source type.'''

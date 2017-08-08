@@ -42,6 +42,7 @@ class ArmadaApp(app.App):
         log.set_defaults(default_log_levels=CONF.default_log_levels)
         log.setup(CONF, 'armada')
 
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]

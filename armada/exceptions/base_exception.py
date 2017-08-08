@@ -21,6 +21,7 @@ DEFAULT_TIMEOUT = 3600
 CONF = cfg.CONF
 
 
+
 class ArmadaBaseException(Exception):
     '''Base class for Armada exception and error handling.'''
 

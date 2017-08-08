@@ -14,15 +14,18 @@
 
 import base_exception
 
+
 class TillerException(base_exception.ArmadaBaseException):
     '''Base class for Tiller exceptions and error handling.'''
 
     message = 'An unknown Tiller error occured.'
 
+
 class TillerServicesUnavailableException(TillerException):
     '''Exception for tiller services unavailable.'''
 
     message = 'Tiller services unavailable.'
+
 
 class ChartCleanupException(TillerException):
     '''Exception that occures during chart cleanup.'''
@@ -32,10 +35,12 @@ class ChartCleanupException(TillerException):
                                                      cleanup while removing \
                                                      the chart ' + chart_name)
 
+
 class ListChartsException(TillerException):
     '''Exception that occurs when listing charts'''
 
     message = 'There was an error listing the helm chart releases.'
+
 
 class PostUpdateJobDeleteException(TillerException):
     '''Exception that occurs when a job deletion'''
@@ -49,6 +54,7 @@ class PostUpdateJobDeleteException(TillerException):
 
         super(PostUpdateJobDeleteException, self).__init__(self._message)
 
+
 class PostUpdateJobCreateException(TillerException):
     '''Exception that occurs when a job creation fails.'''
 
@@ -60,6 +66,7 @@ class PostUpdateJobCreateException(TillerException):
                         self._namespace + ' namespace.'
 
         super(PostUpdateJobCreateException, self).__init__(self._message)
+
 
 class PreUpdateJobDeleteException(TillerException):
     '''Exception that occurs when a job deletion'''
@@ -73,6 +80,7 @@ class PreUpdateJobDeleteException(TillerException):
 
         super(PreUpdateJobDeleteException, self).__init__(self._message)
 
+
 class PreUpdateJobCreateException(TillerException):
     '''Exception that occurs when a job creation fails.'''
 
@@ -85,6 +93,7 @@ class PreUpdateJobCreateException(TillerException):
 
         super(PreUpdateJobCreateException, self).__init__(self._message)
 
+
 class ReleaseUninstallException(TillerException):
     '''Exception that occurs when a release fails to uninstall.'''
 
@@ -93,6 +102,7 @@ class ReleaseUninstallException(TillerException):
         self._message = 'Failed to uninstall release' + self._name + '.'
 
         super(ReleaseUninstallException, self).__init__(self._message)
+
 
 class ReleaseInstallException(TillerException):
     '''Exception that occurs when a release fails to install.'''
@@ -103,6 +113,7 @@ class ReleaseInstallException(TillerException):
 
         super(ReleaseInstallException, self).__init__(self._message)
 
+
 class ReleaseUpdateException(TillerException):
     '''Exception that occurs when a release fails to update.'''
 
@@ -111,6 +122,7 @@ class ReleaseUpdateException(TillerException):
         self._message = 'Failed to update release' + self._name + '.'
 
         super(ReleaseUpdateException, self).__init__(self._message)
+
 
 class ChannelException(TillerException):
     '''Exception that occurs during a failed GRPC channel creation'''
