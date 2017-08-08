@@ -56,7 +56,6 @@ Your output will look something like this:
     $ armada apply examples/openstack-helm.yaml 2017-02-10 09:42:36,753
       armada INFO Cloning git:
 
-.. _pygit2: http://www.pygit2.org/install.html#libgit2-within-a-virtual-environment
 .. _kubectl: https://kubernetes.io/docs/user-guide/kubectl/kubectl_config/
 
 .. |Docker Repository on Quay| image:: https://quay.io/repository/attcomdev/armada/status

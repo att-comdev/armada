@@ -1,24 +1,29 @@
-import pygit2
+import os
 import requests
 import tarfile
 import tempfile
 import shutil
+from git import Repo
 from os import path
 
 from ..exceptions import source_exceptions
 
 def git_clone(repo_url, branch='master'):
     '''
-    clones repo to a /tmp/ dir
+    :params repo_url - URL of git repo to clone
+    :params branch - branch of the repo to clone
+
+    Returns a path to the cloned repo
     '''
 
     if repo_url == '':
         raise source_exceptions.GitLocationException(repo_url)
 
+    os.environ['GIT_TERMINAL_PROMPT'] = '0'
     _tmp_dir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
 
     try:
-        pygit2.clone_repository(repo_url, _tmp_dir, checkout_branch=branch)
+        repo = Repo.clone_from(repo_url, _tmp_dir, **{'branch': branch})
     except Exception:
         raise source_exceptions.GitLocationException(repo_url)
 

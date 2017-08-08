@@ -303,7 +303,7 @@ class Armada(object):
         '''
         Operations to run after deployment process has terminated
         '''
-        # Delete git repos cloned for deployment
+        # Delete temp dirs used for deployment
         for group in self.config.get(KEYWORD_ARMADA).get(KEYWORD_GROUPS):
             for ch in group.get(KEYWORD_CHARTS):
                 if ch.get('chart').get('source').get('type') == 'git':
