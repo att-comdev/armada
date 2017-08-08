@@ -54,13 +54,11 @@ Usage
 
     docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
 
-
 3. Check that tiller is Available
 
 .. code:: bash
 
     docker exec armada armada tiller --status
-
 
 4. If tiller is up then we can start deploying our armada yamls
 

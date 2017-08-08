@@ -13,9 +13,9 @@ Tiller Exceptions
 +------------------------------------+--------------------------------------------------------------------------------------------+
 | Exception                          | Error Description                                                                          |
 +====================================+============================================================================================+
-|  ChartCleanupException             | An error occurred removing a chart.                                                        |
+| ChartCleanupException              | An error occurred removing a chart.                                                        |
 +------------------------------------+--------------------------------------------------------------------------------------------+
-|  ListChartsException               | An error occurred listing helm charts.                                                     |
+| ListChartsException                | An error occurred listing helm charts.                                                     |
 +------------------------------------+--------------------------------------------------------------------------------------------+
 | PostUpdateJobDeleteException       | An error occurred deleting a job after an update.                                          |
 +------------------------------------+--------------------------------------------------------------------------------------------+
@@ -29,7 +29,7 @@ Tiller Exceptions
 +------------------------------------+--------------------------------------------------------------------------------------------+
 | ReleaseInstallException            | A release failed to install.                                                               |
 +------------------------------------+--------------------------------------------------------------------------------------------+
-|  ReleaseUpdateException            | A release failed to update.                                                                |
+| ReleaseUpdateException             | A release failed to update.                                                                |
 +------------------------------------+--------------------------------------------------------------------------------------------+
 | TillerServicesUnavailableException | Occurs when Tiller services are unavailable.                                               |
 +------------------------------------+--------------------------------------------------------------------------------------------+
@@ -79,9 +79,9 @@ Lint Exceptions
 +----------------------------------+------------------------------+
 | InvalidChartNameException        | Chart name invalid.          |
 +----------------------------------+------------------------------+
-|  InvalidChartDefinitionException |  Chart definition invalid.   |
+| InvalidChartDefinitionException  |  Chart definition invalid.   |
 +----------------------------------+------------------------------+
 | InvalidReleaseException          | Release invalid.             |
 +----------------------------------+------------------------------+
-|  InvalidArmadaObjectException    |  Armada object not declared. |
+| InvalidArmadaObjectException     |  Armada object not declared. |
 +----------------------------------+------------------------------+
