@@ -11,6 +11,7 @@ requests==2.17.3
 sphinx_rtd_theme
 supermutes==0.2.5
 urllib3==1.21.1
+pygit2==0.25.0
 
 # API
 falcon==1.1.0
