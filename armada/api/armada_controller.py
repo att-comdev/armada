@@ -43,6 +43,7 @@ class Apply(object):
                          disable_update_post=opts['disable_update_post'],
                          enable_chart_cleanup=opts['enable_chart_cleanup'],
                          dry_run=opts['dry_run'],
+                         values=opts['values'],
                          wait=opts['wait'],
                          timeout=opts['timeout'])
 
