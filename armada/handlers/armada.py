@@ -19,8 +19,9 @@ from oslo_log import log as logging
 from supermutes.dot import dotify
 
 from armada.handlers.chartbuilder import ChartBuilder
-from armada.handlers.tiller import Tiller
 from armada.handlers.manifest import Manifest
+from armada.handlers.override import Override
+from armada.handlers.tiller import Tiller
 from armada.exceptions import armada_exceptions
 from armada.exceptions import source_exceptions
 from armada.exceptions import lint_exceptions
@@ -47,10 +48,12 @@ class Armada(object):
                  disable_update_post=False,
                  enable_chart_cleanup=False,
                  dry_run=False,
+                 set_ovr=None,
                  wait=False,
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
                  tiller_port=44134,
+                 values=None,
                  debug=False):
         '''
         Initialize the Armada Engine and establish
@@ -61,9 +64,11 @@ class Armada(object):
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
         self.dry_run = dry_run
+        self.overrides = set_ovr
         self.wait = wait
         self.timeout = timeout
         self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
+        self.values = values
         self.documents = list(yaml.safe_load_all(file))
         self.config = None
         self.debug = debug
@@ -89,18 +94,25 @@ class Armada(object):
         Perform a series of checks and operations to ensure proper deployment
         '''
 
-        # Ensure tiller is available and yaml is valid
+        # Ensure tiller is available and manifest is valid
         if not self.tiller.tiller_status():
             raise tiller_exceptions.TillerServicesUnavailableException()
+
         if not lint.validate_armada_documents(self.documents):
             raise lint_exceptions.InvalidManifestException()
 
+        # Override manifest values if --set flag is used
+        if self.overrides or self.values:
+            self.documents = Override(
+                self.documents, overrides=self.overrides,
+                values=self.values).update_manifests()
+
+        # Get config and validate
         self.config = self.get_armada_manifest()
 
         if not lint.validate_armada_object(self.config):
-            raise lint_exceptions.InvalidArmadaObjectExceptionl()
+            raise lint_exceptions.InvalidArmadaObjectException()
 
-        self.config = self.get_armada_manifest()
         # Purge known releases that have failed and are in the current yaml
         prefix = self.config.get(const.KEYWORD_ARMADA).get(
             const.KEYWORD_PREFIX)
@@ -219,8 +231,6 @@ class Armada(object):
                 pre_actions = {}
                 post_actions = {}
 
-                LOG.info('%s', chart.release)
-
                 if chart.release is None:
                     continue
 
@@ -231,8 +241,8 @@ class Armada(object):
                 chart_timeout = self.timeout
                 if chart_wait:
                     if chart_timeout == DEFAULT_TIMEOUT:
-                        chart_timeout = getattr(chart, 'timeout',
-                                                chart_timeout)
+                        chart_timeout = getattr(
+                            chart, 'timeout', DEFAULT_TIMEOUT)
 
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
