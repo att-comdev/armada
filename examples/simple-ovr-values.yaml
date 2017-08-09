@@ -1,0 +1,25 @@
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-1
+data:
+  release: chart-example
+  namespace: blog-blog
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-2
+data:
+  release: chart-example-2
+  namespace: blog-blog
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-group
+data:
+  description: Change value deploy
+  chart_group:
+    - blog-1
