@@ -22,6 +22,7 @@ from supermutes.dot import dotify
 from chartbuilder import ChartBuilder
 from tiller import Tiller
 from manifest import Manifest
+from override import Override
 
 from ..exceptions import armada_exceptions
 from ..exceptions import source_exceptions
@@ -52,6 +53,7 @@ class Armada(object):
                  disable_update_post=False,
                  enable_chart_cleanup=False,
                  dry_run=False,
+                 set_ovr=None,
                  wait=False,
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
@@ -66,6 +68,7 @@ class Armada(object):
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
         self.dry_run = dry_run
+        self.overrides = set_ovr
         self.wait = wait
         self.timeout = timeout
         self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
@@ -94,18 +97,24 @@ class Armada(object):
         Perform a series of checks and operations to ensure proper deployment
         '''
 
-        # Ensure tiller is available and yaml is valid
+        # Ensure tiller is available and manifest is valid
         if not self.tiller.tiller_status():
             raise tiller_exceptions.TillerServicesUnavailableException()
+
         if not lint.validate_armada_documents(self.documents):
             raise lint_exceptions.InvalidManifestException()
 
+        # Get config and validate
         self.config = self.get_armada_manifest()
 
         if not lint.validate_armada_object(self.config):
-            raise lint_exceptions.InvalidArmadaObjectExceptionl()
+            raise lint_exceptions.InvalidArmadaObjectException()
 
-        self.config = self.get_armada_manifest()
+        # Override manifest values if --set flag is used
+        if (self.overrides):
+            for override in self.overrides:
+                self.config = Override(self.config, override).get_manifest()
+
         # Purge known releases that have failed and are in the current yaml
         prefix = self.config.get(KEYWORD_ARMADA).get(KEYWORD_PREFIX)
         failed_releases = self.get_releases_by_status(STATUS_FAILED)
