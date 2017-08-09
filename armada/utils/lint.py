@@ -31,7 +31,7 @@ def validate_armada_object(object):
 
     armada_object = object.get('armada')
 
-    if not isinstance(armada_object.get(KEYWORD_PREFIX), str):
+    if armada_object.get(KEYWORD_PREFIX, None) is None:
         raise Exception("Could not find {} keyword".format(KEYWORD_PREFIX))
 
     if not isinstance(armada_object.get(KEYWORD_GROUPS), list):
@@ -41,9 +41,9 @@ def validate_armada_object(object):
     for group in armada_object.get(KEYWORD_GROUPS):
         for chart in group.get(KEYWORD_CHARTS):
             chart_obj = chart.get('chart')
-            if not isinstance(chart_obj.get(KEYWORD_RELEASE), str):
+            if chart_obj.get(KEYWORD_RELEASE, None) is None:
                 raise Exception('Could not find {} in {}'.format(
-                    KEYWORD_RELEASE, chart_obj.get('name')))
+                    KEYWORD_RELEASE, chart_obj.get('release')))
 
     return True
 
