@@ -98,8 +98,12 @@ class Manifest(object):
                 if isinstance(group, dict):
                     continue
                 chart_grp = self.find_chart_group_document(group)
-                self.manifest['data']['chart_groups'][iter] = chart_grp.get(
-                    'data')
+
+                # Add name to chart group
+                ch_grp_data = chart_grp.get('data')
+                ch_grp_data['name'] = chart_grp.get('metadata').get('name')
+
+                self.manifest['data']['chart_groups'][iter] = ch_grp_data
         except Exception:
             raise Exception(
                 "Could not find chart group {} in {}".format(
