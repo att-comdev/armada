@@ -52,6 +52,7 @@ class Armada(object):
                  disable_update_post=False,
                  enable_chart_cleanup=False,
                  dry_run=False,
+                 set_ovr=None,
                  wait=False,
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
@@ -66,6 +67,7 @@ class Armada(object):
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
         self.dry_run = dry_run
+        self.overrides = set_ovr
         self.wait = wait
         self.timeout = timeout
         self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
@@ -79,7 +81,7 @@ class Armada(object):
             logging.basicConfig(level=logging.DEBUG)
 
     def get_armada_manifest(self):
-        return Manifest(self.documents).get_manifest()
+        return Manifest(self.documents, self.overrides).get_manifest()
 
     def find_release_chart(self, known_releases, name):
         '''

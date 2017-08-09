@@ -15,12 +15,13 @@
 from ..const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
 
 class Manifest(object):
-    def __init__(self, documents):
+    def __init__(self, documents, overrides):
         self.config = None
         self.documents = documents
         self.charts = []
         self.groups = []
         self.manifest = None
+        self.overrides = overrides
         self.get_documents()
 
     def get_documents(self):
@@ -31,6 +32,20 @@ class Manifest(object):
                 self.groups.append(document)
             if document.get('schema') == DOCUMENT_MANIFEST:
                 self.manifest = document
+
+    def get_overrides(self):
+        new_value = self.overrides.split('=')[1]
+        keywords = self.overrides.split('=')[0].split('.')
+        chart_name = keywords[0]
+
+        for ch in self.charts:
+            if ch['metadata']['name'] == chart_name: 
+                value = ch
+
+                for attr in keywords[1:-1]:
+                    value = value[attr]
+
+                value[keywords[-1]] = new_value
 
     def find_chart_document(self, name):
         try:
@@ -108,6 +123,9 @@ class Manifest(object):
     def get_manifest(self):
         self.build_charts_deps()
         self.build_chart_groups()
+
+        if self.overrides:
+            self.get_overrides()
         self.build_armada_manifest()
 
         return {
