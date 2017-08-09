@@ -23,6 +23,7 @@ def applyCharts(args):
                     args.disable_update_post,
                     args.enable_chart_cleanup,
                     args.dry_run,
+                    args.set,
                     args.wait,
                     args.timeout,
                     args.tiller_host,
@@ -45,6 +46,8 @@ class ApplyChartsCommand(cmd.Command):
                             default=False, help='Disable post upgrade actions')
         parser.add_argument('--enable-chart-cleanup', action='store_true',
                             default=False, help='Enable Chart Clean Up')
+        parser.add_argument('--set', action='store', help='Override Armada'
+                                                          'manifest values.')
         parser.add_argument('--wait', action='store_true',
                             default=False, help='Wait until all charts'
                                                 'have been deployed')
