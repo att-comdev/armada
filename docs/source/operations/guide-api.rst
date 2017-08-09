@@ -14,6 +14,7 @@ Armada Endpoints
     :>json boolean disable_update_post
     :>json boolean enable_chart_cleanup
     :>json boolean skip_pre_flight
+    :>json object values Override manifest values
     :>json boolean dry_run
     :>json boolean wait
     :>json float timeout
@@ -36,7 +37,6 @@ Armada Endpoints
             "timeout": false
         }
     }
-
 
 ::
 

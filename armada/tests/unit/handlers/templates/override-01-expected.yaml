@@ -1,0 +1,16 @@
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-1
+data:
+  chart_name: blog-1
+  release: blog-1
+  namespace: blog-blog
+  values: {}
+  source:
+    type: dev
+    location: https://github.com/namespace/hello-world-chart
+    subpath: .
+    reference: master
+  dependencies: []
