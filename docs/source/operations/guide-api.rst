@@ -14,6 +14,7 @@ Armada Endpoints
     :>json boolean disable_update_post
     :>json boolean enable_chart_cleanup
     :>json boolean skip_pre_flight
+    :>json object values Override manifest values
     :>json boolean dry_run
     :>json boolean wait
     :>json float timeout
@@ -33,7 +34,16 @@ Armada Endpoints
     		"skip_pre_flight": false,
     		"dry_run": false,
     		"wait": false,
-    		"timeout": false
+    		"timeout": false,
+                "values": {
+                    chart: {
+                        "blog-1": {
+                            "source": {
+                                "location": "http://github.com/user/repo"
+                            }
+                        }
+                    }
+                }
     	}
     }
 
