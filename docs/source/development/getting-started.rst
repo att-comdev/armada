@@ -38,6 +38,15 @@ From the directory of the forked repository:
     pip install -r test-requirements.txt
     pip install -e .
 
+    # Testing your armada code
+    # The tox command will execute lint, bandit, cover
+    tox
+
+    # For targeted test
+    tox -e lint
+    tox -e bandit
+    tox -e cover
+
 .. note::
 
     If building from source, Armada requires that git be installed on
