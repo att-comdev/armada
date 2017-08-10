@@ -15,7 +15,7 @@ To use the docker containter to develop:
 
     docker build . -t armada/latest
 
-    docker run -d --name armada -v ~/.kube/config:/root/.kube/config -v $(pwd)/examples/:/examples armada/latest
+    docker run -d --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/examples/:/examples armada/latest
 
 .. note::
 
