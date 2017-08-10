@@ -135,8 +135,7 @@ class Armada(object):
     def tag_cloned_repo(self, ch, repos):
         location = ch.get('chart').get('source').get('location')
         ct_type = ch.get('chart').get('source').get('type')
-        reference = ch.get('chart').get('source').get('reference')
-        subpath = ch.get('chart').get('source').get('subpath')
+        subpath = ch.get('chart').get('source').get('subpath', '.')
 
         if ct_type == 'local':
             ch.get('chart')['source_dir'] = (location, subpath)
@@ -145,16 +144,22 @@ class Armada(object):
             tarball_dir = source.get_tarball(location)
             ch.get('chart')['source_dir'] = (tarball_dir, subpath)
         elif ct_type == 'git':
-            if location not in repos.keys():
+            reference = ch.get('chart').get('source').get('reference',
+                                                          'master')
+            repo_branch = (location, reference)
+
+            if repo_branch not in repos.keys():
                 try:
-                    LOG.info('Cloning repo: %s', location)
-                    repo_dir = source.git_clone(location, reference)
+                    LOG.info('Cloning repo: %s branch: %s', *repo_branch)
+                    repo_dir = source.git_clone(*repo_branch)
                 except Exception:
-                    raise source_exceptions.GitLocationException(location)
-                repos[location] = repo_dir
+                    raise source_exceptions.GitLocationException(
+                        '{} branch: {}'.format(*repo_branch))
+                repos[repo_branch] = repo_dir
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
             else:
-                ch.get('chart')['source_dir'] = (repos.get(location), subpath)
+                ch.get('chart')['source_dir'] = (repos.get(repo_branch),
+                                                 subpath)
         else:
             chart_name = ch.get('chart').get('chart_name')
             raise source_exceptions.ChartSourceException(ct_type, chart_name)
