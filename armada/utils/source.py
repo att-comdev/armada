@@ -20,7 +20,7 @@ def git_clone(repo_url, branch='master'):
         raise source_exceptions.GitLocationException(repo_url)
 
     os.environ['GIT_TERMINAL_PROMPT'] = '0'
-    _tmp_dir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
+    _tmp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
         Repo.clone_from(repo_url, _tmp_dir, **{'branch': branch})
@@ -38,7 +38,7 @@ def download_tarball(tarball_url):
     Downloads a tarball to /tmp and returns the path
     '''
     try:
-        tarball_filename = tempfile.mkstemp(prefix='armada', dir='/tmp')[1]
+        tarball_filename = tempfile.mkstemp(prefix='armada')[1]
         response = requests.get(tarball_url)
         with open(tarball_filename, 'wb') as f:
             f.write(response.content)
@@ -53,7 +53,7 @@ def extract_tarball(tarball_path):
     if not path.exists(tarball_path):
         raise source_exceptions.InvalidPathException(tarball_path)
 
-    _tmp_dir = tempfile.mkdtemp(prefix='armada', dir='/tmp')
+    _tmp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
         file = tarfile.open(tarball_path)
