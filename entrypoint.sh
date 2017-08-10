@@ -13,4 +13,9 @@ if [ "$1" = 'tiller' ] || [ "$1" = 'apply' ]; then
     exec $CMD "$@"
 fi
 
+
+if [ "$1" = 'test' ]; then
+    exec $(pwd)/tools/tests/unit-test.sh
+fi
+
 exec "$@"
