@@ -88,9 +88,10 @@ class PreUpdateJobCreateException(TillerException):
 class ReleaseUninstallException(TillerException):
     '''Exception that occurs when a release fails to uninstall.'''
 
-    def __init__(self, name, namespace):
+    def __init__(self, name):
         self._name = name
-        self._message = 'Failed to uninstall release' + self._name + '.'
+
+        self._message = 'Failed to uninstall release ' + self._name + '.'
 
         super(ReleaseUninstallException, self).__init__(self._message)
 
@@ -99,7 +100,10 @@ class ReleaseInstallException(TillerException):
 
     def __init__(self, name, namespace):
         self._name = name
-        self._message = 'Failed to install release' + self._name + '.'
+        self._namespace = namespace
+
+        self._message = 'Failed to install release' + self._name + ' in ' + \
+                        self._namespace + ' namespace.'
 
         super(ReleaseInstallException, self).__init__(self._message)
 
@@ -108,7 +112,10 @@ class ReleaseUpdateException(TillerException):
 
     def __init__(self, name, namespace):
         self._name = name
-        self._message = 'Failed to update release' + self._name + '.'
+        self._namespace = namespace
+
+        self._message = 'Failed to update release' + self._name + ' in ' + \
+                        self._namespace + ' namespace.'
 
         super(ReleaseUpdateException, self).__init__(self._message)
 
