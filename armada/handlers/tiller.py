@@ -122,6 +122,25 @@ class Tiller(object):
 
         return False
 
+    def list_charts(self):
+        '''
+        List Helm Charts from Latest Releases
+
+        Returns a list of tuples in the form:
+        (name, version, chart, values, status)
+        '''
+        charts = []
+        for latest_release in self.list_releases():
+            try:
+                charts.append(
+                    (latest_release.name, latest_release.version,
+                     latest_release.chart, latest_release.config.raw,
+                     latest_release.info.status.Code.Name(
+                         latest_release.info.status.code)))
+            except AttributeError:
+                continue
+        return charts
+
     def list_releases(self):
         '''
         List Helm Releases
@@ -262,25 +281,6 @@ class Tiller(object):
         except Exception:
             raise tiller_exceptions.PreUpdateJobCreateException()
             LOG.debug("POST: Could not create anything, please check yaml")
-
-    def list_charts(self):
-        '''
-        List Helm Charts from Latest Releases
-
-        Returns a list of tuples in the form:
-        (name, version, chart, values, status)
-        '''
-        charts = []
-        for latest_release in self.list_releases():
-            try:
-                charts.append(
-                    (latest_release.name, latest_release.version,
-                     latest_release.chart, latest_release.config.raw,
-                     latest_release.info.status.Code.Name(
-                         latest_release.info.status.code)))
-            except IndexError:
-                continue
-        return charts
 
     def update_release(self, chart, release, namespace,
                        dry_run=False,
