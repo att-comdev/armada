@@ -49,32 +49,35 @@ def testService(args):
             LOG.info("FAILED: %s", args.release)
 
     if args.file:
-        documents = yaml.safe_load_all(open(args.file).read())
-        armada_obj = Manifest(documents).get_manifest()
-        prefix = armada_obj.get(const.KEYWORD_ARMADA).get(const.KEYWORD_PREFIX)
+        with open(args.file) as f:
+            documents = yaml.safe_load_all(f.read())
+            armada_obj = Manifest(documents).get_manifest()
+            prefix = armada_obj.get(const.KEYWORD_ARMADA).get(
+                const.KEYWORD_PREFIX)
 
-        for group in armada_obj.get(const.KEYWORD_ARMADA).get(
-                const.KEYWORD_GROUPS):
-            for ch in group.get(const.KEYWORD_CHARTS):
-                release_name = release_prefix(
-                    prefix, ch.get('chart').get('chart_name'))
+            for group in armada_obj.get(const.KEYWORD_ARMADA).get(
+                    const.KEYWORD_GROUPS):
+                for ch in group.get(const.KEYWORD_CHARTS):
+                    release_name = release_prefix(
+                        prefix, ch.get('chart').get('chart_name'))
 
-                if release_name in known_release_names:
-                    LOG.info('RUNNING: %s tests', release_name)
-                    resp = tiller.testing_release(release_name)
+                    if release_name in known_release_names:
+                        LOG.info('RUNNING: %s tests', release_name)
+                        resp = tiller.testing_release(release_name)
 
-                    if not resp:
-                        continue
+                        if not resp:
+                            continue
 
-                    test_status = getattr(resp.info.status,
-                                          'last_test_suite_run', 'FAILED')
-                    if test_status.results[0].status:
-                        LOG.info("PASSED: %s", release_name)
+                        test_status = getattr(resp.info.status,
+                                              'last_test_suite_run', 'FAILED')
+                        if test_status.results[0].status:
+                            LOG.info("PASSED: %s", release_name)
+                        else:
+                            LOG.info("FAILED: %s", release_name)
+
                     else:
-                        LOG.info("FAILED: %s", release_name)
-
-                else:
-                    LOG.info('Release %s not found - SKIPPING', release_name)
+                        LOG.info('Release %s not found - SKIPPING',
+                                 release_name)
 
 
 class TestServerCommand(cmd.Command):

@@ -100,7 +100,6 @@ class Armada(object):
         if not lint.validate_armada_object(self.config):
             raise lint_exceptions.InvalidArmadaObjectExceptionl()
 
-        self.config = self.get_armada_manifest()
         # Purge known releases that have failed and are in the current yaml
         prefix = self.config.get(const.KEYWORD_ARMADA).get(
             const.KEYWORD_PREFIX)
