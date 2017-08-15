@@ -27,3 +27,6 @@ KEYWORD_RELEASE = 'release'
 # Statuses
 STATUS_DEPLOYED = 'DEPLOYED'
 STATUS_FAILED = 'FAILED'
+
+# Label
+LABEL_KEY = 'armada-release'

@@ -22,6 +22,7 @@ from hapi.chart.config_pb2 import Config
 from supermutes.dot import dotify
 
 from ..exceptions import chartbuilder_exceptions
+from ..utils import parser
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -167,12 +168,25 @@ class ChartBuilder(object):
                 if self.ignore_file(tname):
                     LOG.debug('Ignoring file %s', tname)
                     continue
+                data = open(os.path.join(root, tpl_file), 'r').read()
+
+                # Add release name label to pods for lifecycle management
+                if self.is_labelable(data):
+                    data = parser.insert_label(data, 'armada-release: {}'.format(self.chart.release))
 
                 templates.append(
                     Template(
                         name=tname,
-                        data=open(os.path.join(root, tpl_file), 'r').read()))
+                        data=data))
+
         return templates
+
+    def is_labelable(self, data):
+        data_lines = data.splitlines()
+        return ('kind: Deployment' in data_lines or
+                'kind: StatefulSet' in data_lines or
+                'kind: DaemonSet' in data_lines or
+                'kind: Job' in data_lines)
 
     def get_helm_chart(self):
         '''
@@ -200,7 +214,8 @@ class ChartBuilder(object):
                 dependencies=dependencies,
                 values=self.get_values(),
                 files=self.get_files())
-        except Exception:
+        except Exception as e:
+            LOG.info(e)
             chart_name = self.chart.chart_name
             raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
 

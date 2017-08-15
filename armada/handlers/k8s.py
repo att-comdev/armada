@@ -16,6 +16,8 @@ import re
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 
+from ..const import LABEL_KEY
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -173,3 +175,41 @@ class K8s(object):
                         LOG.info('New pod %s deployed', new_pod_name)
 
                         w.stop()
+
+    def wait_for_all_pods_ready(self, release_names, namespace):
+        '''
+        :params release_labels - list of labels to identify relevant pods
+        :params namespace - namespace in which to search for pods
+
+        Returns after waiting for all pods to enter Ready state
+        '''
+        pods_found = []
+
+        w = watch.Watch()
+        for pod in w.stream(self.client.list_namespaced_pod, namespace):
+            pod_release_name = pod['object'].metadata.labels.get(LABEL_KEY, '')
+            if not pod_release_name in release_names:
+                continue
+
+            # found a relevant pod
+            pod_name = pod['object'].metadata.name
+            pod_conditions = pod['object'].status.conditions
+            LOG.info('found %s with %s', pod_name, pod['type'])
+            if pod['type'] == 'ADDED':
+                pods_found.append(pod_name)
+            elif pod_name in pods_found:
+                for condition in pod_conditions:
+                    if (condition.type == 'Ready'
+                            and condition.status == 'True'):
+                        LOG.debug('Pod %s deployed', pod_name)
+                        pods_found.remove(pod_name)
+
+            if not pods_found:
+                w.stop()
+
+    def _pod_contains_any_label(self, pod_labels, labels):
+        LOG.info('is %s in %s?', labels, pod_labels)
+        for pod_label in pod_labels:
+            if pod_label in labels:
+                return True
+        return False
