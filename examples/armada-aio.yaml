@@ -354,6 +354,7 @@ metadata:
 data:
   description: "OpenStack Infra Services"
   sequenced: False
+  wait: True
   chart_group:
     - etcd
     - rabbitmq
@@ -367,6 +368,7 @@ metadata:
 data:
   description: "OpenStack Components"
   sequenced: False
+  wait: True
   chart_group:
     - keystone
     - horizon
