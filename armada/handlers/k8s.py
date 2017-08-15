@@ -173,3 +173,43 @@ class K8s(object):
                         LOG.info('New pod %s deployed', new_pod_name)
 
                         w.stop()
+
+    def wait_for_all_pods_ready(self, release_names, namespace):
+        '''
+        :params release_names - list of prefixes of expected pods
+        :params namespace - namespace of releases in which to search for pods
+
+        Note: in order to wait for all pods of multiple releases in more than
+              one namespace, this method must be called separately for each
+              namespace
+
+        Returns after waiting for all pods to enter Ready state
+        '''
+        base_pod_pattern = re.compile('^([a-zA-Z0-9]+)-.+$')
+        first_pod_deployed = False
+        pods_found = []
+
+        w = watch.Watch()
+        for pod in w.stream(self.client.list_namespaced_pod, namespace):
+            pod_name = pod['object'].metadata.name
+            release_match = base_pod_pattern.match(pod_name)
+            if not release_match or not release_match.group(1) in release_names:
+                continue
+
+            # found a relevant pod
+            #
+            # ASSUMES PODS WILL ALL BE CREATED BEFORE ANY BECOME READY - TEST
+            pod_conditions = pod['object'].status.conditions
+            if pod['type'] == 'ADDED':
+                pods_found.append(pod_name)
+            elif pod_name in pods_found:
+                for condition in pod_conditions:
+                    if (condition.type == 'Ready'
+                            and condition.status == 'True'):
+                        LOG.debug('Pod %s deployed', pod_name)
+                        pods_found.remove(pod_name)
+                        if not first_pod_deployed:
+                            first_pod_deployed = True
+
+            if first_pod_deployed and not pods_found:
+                w.stop()
