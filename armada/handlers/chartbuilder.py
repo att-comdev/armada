@@ -168,11 +168,66 @@ class ChartBuilder(object):
                     LOG.debug('Ignoring file %s', tname)
                     continue
 
+                # Add release name label to pods for lifecycle management
+                if self.is_deployment(os.path.join(root, tpl_file)):
+                    self.add_label(os.path.join(root, tpl_file), 'release: armada-something')
+
                 templates.append(
                     Template(
                         name=tname,
                         data=open(os.path.join(root, tpl_file), 'r').read()))
+
         return templates
+
+    def is_deployment(self, filename):
+        content = []
+        with open(filename) as f:
+            content = f.readlines()
+        return 'kind: Deployment\n' in content or 'kind: StatefulSet\n' in content
+
+    def add_label(self, filename, label):
+        content = ''
+        with open(filename) as fin:
+            tpl = self._parse_and_insert_label(fin, label)
+            for line in tpl:
+                content += line
+        with open(filename, 'w') as fout:
+            fout.write(content)
+
+    def _parse_and_insert_label(self, file_in, label):
+        stack = []
+        current_indent = -1
+        label_location = ['spec:', 'template:', 'metadata:', 'labels:']
+        label_inserted = False
+        for line in file_in:
+            yield line
+            if label_inserted:
+                continue
+
+            stripped_line = line.lstrip(' ')
+            if stripped_line.startswith('#') or stripped_line.startswith('{{'):
+                continue
+            
+            new_indent = len(line) - len(stripped_line)
+            while new_indent <= current_indent:
+                stack.pop()
+                if stack:
+                    current_indent = stack[len(stack) - 1][1]
+                else:
+                    current_indent = -1
+            current_indent = new_indent
+            stack.append((stripped_line.rstrip(), current_indent))
+    
+            if label_location == [entry[0] for entry in stack]:
+                next_line = file_in.next()
+                next_indent = len(next_line) - len(next_line.lstrip(' '))
+                if next_indent > current_indent:
+                    current_indent = next_indent
+                else:
+                    current_indent += 2
+                yield '{}{}\n'.format(' ' * current_indent, label)
+                yield next_line
+                label_inserted = True
 
     def get_helm_chart(self):
         '''
@@ -200,7 +255,8 @@ class ChartBuilder(object):
                 dependencies=dependencies,
                 values=self.get_values(),
                 files=self.get_files())
-        except Exception:
+        except Exception as e:
+            LOG.info(e)
             chart_name = self.chart.chart_name
             raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
 

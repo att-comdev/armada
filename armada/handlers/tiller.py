@@ -16,7 +16,8 @@ import grpc
 import yaml
 
 from hapi.services.tiller_pb2 import ReleaseServiceStub, ListReleasesRequest, \
-    InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest
+    InstallReleaseRequest, UpdateReleaseRequest, UninstallReleaseRequest, \
+    GetReleaseStatusRequest, GetReleaseContentRequest, TestReleaseRequest
 from hapi.chart.config_pb2 import Config
 
 from k8s import K8s
@@ -323,7 +324,11 @@ class Tiller(object):
 
         self._post_update_actions(post_actions, namespace)
 
+    def gen_install_stub(self):
+        return ReleaseServiceStub(self.channel)
+
     def install_release(self, chart, release, namespace,
+                        stub=None,
                         dry_run=False,
                         values=None,
                         wait=False,
@@ -341,7 +346,8 @@ class Tiller(object):
 
         # build release install request
         try:
-            stub = ReleaseServiceStub(self.channel)
+            if stub is None:
+                stub = ReleaseServiceStub(self.channel)
             release_request = InstallReleaseRequest(
                 chart=chart,
                 dry_run=dry_run,
@@ -354,7 +360,8 @@ class Tiller(object):
             return stub.InstallRelease(
                 release_request, self.timeout, metadata=self.metadata)
 
-        except Exception:
+        except Exception as e:
+            LOG.info(e)
             raise tiller_exceptions.ReleaseInstallException(release, namespace)
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
@@ -376,6 +383,46 @@ class Tiller(object):
 
         except Exception:
             raise tiller_exceptions.ReleaseUninstallException(release)
+
+    def get_release_status(self, release):
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = GetReleaseStatusRequest(
+                name=release, version=1)
+
+            return stub.GetReleaseStatus(
+                release_request, self.timeout, metadata=self.metadata)
+
+        except Exception as e:
+            LOG.info(e)
+            raise e
+
+    def get_release_content(self, release):
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = GetReleaseContentRequest(
+                name=release, version=1)
+
+            return stub.GetReleaseContent(
+                release_request, self.timeout, metadata=self.metadata)
+
+        except Exception as e:
+            LOG.info(e)
+            raise e
+
+    def test_release(self, release, timeout=60, cleanup=False):
+        try:
+            stub = ReleaseServiceStub(self.channel)
+            release_request = TestReleaseRequest(name=release, timeout=timeout, cleanup=cleanup)
+
+            resp = stub.RunReleaseTest(
+                release_request, self.timeout, metadata=self.metadata)
+
+            return resp
+
+        except Exception as e:
+            LOG.info(e)
+            raise Exception('{}'.format(release))
 
     def chart_cleanup(self, prefix, charts):
         '''
