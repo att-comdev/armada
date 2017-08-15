@@ -50,7 +50,9 @@ armada/ChartGroup/v1
 +-----------------+----------+------------------------------------------------------------------------+
 | chart_group     | array    | reference to chart document                                            |
 +-----------------+----------+------------------------------------------------------------------------+
-| sequenced       | bool     | enables sequenced chart deployment in a group                          |
+| sequenced       | bool     | enables sequenced chart deployment in a group (wait for each chart)    |
++-----------------+----------+------------------------------------------------------------------------+
+| wait            | bool     | enables waiting for chart group deployment before proceeding           |
 +-----------------+----------+------------------------------------------------------------------------+
 
 Example
@@ -66,6 +68,7 @@ Example
     data:
         description: Deploys Simple Service
         sequenced: False
+        wait: True
         chart_group:
             - chart
             - chart
@@ -260,6 +263,7 @@ Simple Example
     data:
       description: Deploys Simple Service
       sequenced: False
+      wait: False
       chart_group:
         - blog-1
     ---
@@ -330,6 +334,7 @@ Multichart Example
     data:
       description: Deploys Simple Service
       sequenced: False
+      wait: False
       chart_group:
         - blog-2
     ---
@@ -340,6 +345,7 @@ Multichart Example
     data:
       description: Deploys Simple Service
       sequenced: False
+      wait: False
       chart_group:
         - blog-1
         - blog-3

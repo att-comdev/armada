@@ -319,7 +319,7 @@ class Tiller(object):
             stub.UpdateRelease(
                 release_request, self.timeout, metadata=self.metadata)
         except Exception:
-            raise tiller_exceptions.ReleaseInstallException(release, namespace)
+            raise tiller_exceptions.ReleaseUpdateException(release, namespace)
 
         self._post_update_actions(post_actions, namespace)
 
@@ -354,7 +354,9 @@ class Tiller(object):
             return stub.InstallRelease(
                 release_request, self.timeout, metadata=self.metadata)
 
-        except Exception:
+        except Exception as e:
+            LOG.info(e)
+            LOG.info(chart.templates)
             raise tiller_exceptions.ReleaseInstallException(release, namespace)
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
