@@ -209,9 +209,11 @@ class Armada(object):
             desc = entry.get('description', 'A Chart Group')
             chart_group = entry.get(KEYWORD_CHARTS, [])
             test_charts = entry.get('test_charts', False)
+            group_wait = chart_group.get('wait', False)
+            individual_wait = self.wait
 
-            if entry.get('sequenced', False) or test_charts:
-                chart_wait = True
+            if chart_group.get('sequenced', False) or test_charts:
+                individual_wait = True
 
             LOG.info('Deploying: %s', desc)
 
@@ -232,10 +234,9 @@ class Armada(object):
 
                 # retrieve appropriate timeout value if 'wait' is specified
                 chart_timeout = self.timeout
-                if chart_wait:
+                if individual_wait:
                     if chart_timeout == DEFAULT_TIMEOUT:
-                        chart_timeout = getattr(chart, 'timeout',
-                                                chart_timeout)
+                        chart_timeout = chart.get('timeout', chart_timeout)
 
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
@@ -256,7 +257,7 @@ class Armada(object):
                         known_releases, prefix_chart)
 
                     LOG.info("Checking Pre/Post Actions")
-                    upgrade = gchart.get('chart', {}).get('upgrade', False)
+                    upgrade = chart.get('chart', {}).get('upgrade', False)
 
                     if upgrade:
                         if not self.disable_update_pre and upgrade.get(
@@ -291,7 +292,7 @@ class Armada(object):
                                                disable_hooks=chart.
                                                upgrade.no_hooks,
                                                values=yaml.safe_dump(values),
-                                               wait=chart_wait,
+                                               wait=individual_wait,
                                                timeout=chart_timeout)
 
                     msg['upgraded'].append(prefix_chart)
@@ -304,7 +305,7 @@ class Armada(object):
                                                 chart.namespace,
                                                 dry_run=self.dry_run,
                                                 values=yaml.safe_dump(values),
-                                                wait=chart_wait,
+                                                wait=individual_wait,
                                                 timeout=chart_timeout)
 
                     msg['installed'].append(prefix_chart)
@@ -322,6 +323,25 @@ class Armada(object):
                         LOG.info("PASSED: %s", prefix_chart)
                     else:
                         LOG.info("FAILED: %s", prefix_chart)
+
+            # end of chart group deployment
+            # if specified, wait for full group to deploy
+            if group_wait:
+                namespaces = [ch.get('chart').get('namespace')
+                              for ch in chart_group.get(KEYWORD_CHARTS)]
+                namespaces = list(set(namespaces))  # remove duplicates
+                for namespace in namespaces:
+                    LOG.info('Waiting for group: %s in namespace: %s',
+                             desc, namespace)
+                    release_names = []
+
+                    for chart in chart_group.get(KEYWORD_CHARTS):
+                        if chart.get('chart').get('namespace') == namespace:
+                            name = chart.get('chart').get('release')
+                            release_names.append(name)
+
+                    self.tiller.k8s \
+                        .wait_for_all_pods_ready(release_names, namespace)
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()
