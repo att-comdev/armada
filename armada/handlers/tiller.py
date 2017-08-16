@@ -194,11 +194,6 @@ class Tiller(object):
 
                 self.delete_resources(
                     release_name, name, action_type, labels, namespace)
-
-                # Ensure pods get deleted when job is deleted
-                if 'job' in action_type:
-                    self.delete_resources(
-                        release_name, name, 'pod', labels, namespace)
         except Exception:
             raise tiller_exceptions.PreUpdateJobDeleteException(name,
                                                                 namespace)
@@ -216,39 +211,6 @@ class Tiller(object):
             raise tiller_exceptions.PreUpdateJobCreateException(name,
                                                                 namespace)
             LOG.debug("PRE: Could not create anything, please check yaml")
-
-    def delete_resource(self, release_name, resource_name, resource_type,
-                        resource_labels, namespace):
-        '''
-        :params release_name - release name the specified resource is under
-        :params resource_name - name of specific resource
-        :params resource_type - type of resource e.g. job, pod, etc.
-        :params resource_labels - labels by which to identify the resource
-        :params namespace - namespace of the resource
-
-        Apply deletion logic based on type of resource
-        '''
-
-        label_selector = 'release_name={}'.format(release_name)
-        for label in resource_labels:
-            label_selector += ', {}={}'.format(label.keys()[0],
-                                               label.values()[0])
-
-        if 'job' in resource_type:
-            LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
-            self.k8s.delete_job_action(resource_name, namespace)
-        elif 'pod' in resource_type:
-            release_pods = self.k8s.get_namespace_pod(namespace,
-                                                      label_selector)
-            for pod in release_pods.items:
-                pod_name = pod.metadata.name
-                LOG.info("Deleting %s in namespace: %s",
-                         pod_name, namespace)
-                self.k8s.delete_namespace_pod(pod_name, namespace)
-                self.k8s.wait_for_pod_redeployment(pod_name, namespace)
-        else:
-            LOG.error("Unable to execute name: %s type: %s ",
-                      resource_name, resource_type)
 
     def _post_update_actions(self, actions, namespace):
         try:
@@ -408,41 +370,44 @@ class Tiller(object):
         :params resource_labels - labels by which to identify the resource
         :params namespace - namespace of the resource
 
-        Apply deletion logic based on type of resource
+        Apply deletion logic based on type of resource and
+         return list of names of deleted resources
         '''
 
         label_selector = ''
 
-        if not resource_type == 'job':
-            label_selector = 'release_name={}'.format(release_name)
+        # TODO would like something like the following if/when we add release
+        #  label to all resources
+        #label_selector = 'release_group={}'.format(release_name)
 
-        if resource_labels is not None:
-            for label in resource_labels:
-                if label_selector == '':
-                    label_selector = '{}={}'.format(label.keys()[0],
-                                                    label.values()[0])
-                    continue
-
-                label_selector += ', {}={}'.format(label.keys()[0],
-                                                   label.values()[0])
+        for index, label in enumerate(resource_labels):
+            label_selector += '{}={}'.format(label.keys()[0],
+                                             label.values()[0])
+            if not index == len(resource_labels) - 1:
+                label_selector += ', '
 
         if 'job' in resource_type:
-            LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
-            get_jobs = self.k8s.get_namespace_job(namespace, label_selector)
-            for jb in get_jobs.items:
-                jb_name = jb.metadata.name
+            jobs = self.k8s.get_namespace_job(namespace, label_selector)
+            for job in jobs.items:
+                job_name = job.metadata.name
+                LOG.info("Deleting job %s in namespace: %s", job_name, namespace)
+                self.k8s.delete_job_action(job_name, namespace)
 
-                self.k8s.delete_job_action(jb_name, namespace)
+                # Ensure all related pods get deleted after job deletion
+                deleted_pods = self.delete_resources(release_name, resource_name,
+                                                     'pod', resource_labels, namespace)
+
+            return [job.metadata.name for job in jobs.items]
 
         elif 'pod' in resource_type:
-            release_pods = self.k8s.get_namespace_pod(
-                namespace, label_selector)
+            pods = self.k8s.get_namespace_pod(namespace, label_selector)
 
-            for pod in release_pods.items:
+            for pod in pods.items:
                 pod_name = pod.metadata.name
-                LOG.info("Deleting %s in namespace: %s", pod_name, namespace)
+                LOG.info("Deleting pod %s in namespace: %s", pod_name, namespace)
                 self.k8s.delete_namespace_pod(pod_name, namespace)
-                self.k8s.wait_for_pod_redeployment(pod_name, namespace)
+
+            return [pod.metadata.name for pod in pods.items]
         else:
             LOG.error("Unable to execute name: %s type: %s ",
                       resource_name, resource_type)
