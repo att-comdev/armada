@@ -118,10 +118,14 @@ data:
     no_hooks: false
     pre:
       delete:
-        - name: keystone-db-sync
-          type: job
         - name: keystone-db-init
           type: job
+          labels:
+            - job-name: keystone-db-init
+        - name: keystone-db-sync
+          type: job
+          labels:
+            - job-name: keystone-db-sync
   values:
     replicas: 2
   source:
