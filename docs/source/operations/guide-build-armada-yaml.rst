@@ -76,27 +76,27 @@ armada/Chart/v1
 Chart
 ^^^^^
 
-+-----------------+----------+------------------------------------------------------------------------+
-| keyword         | type     | action                                                                 |
-+=================+==========+========================================================================+
-| chart\_name     | string   | name for the chart                                                     |
-+-----------------+----------+------------------------------------------------------------------------+
-| release\_name   | string   | name of the release                                                    |
-+-----------------+----------+------------------------------------------------------------------------+
-| namespace       | string   | namespace of your chart                                                |
-+-----------------+----------+------------------------------------------------------------------------+
-| timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set |
-+-----------------+----------+------------------------------------------------------------------------+
-| install         | object   | install the chart into your Kubernetes cluster                         |
-+-----------------+----------+------------------------------------------------------------------------+
-| update          | object   | update the chart managed by the armada yaml                            |
-+-----------------+----------+------------------------------------------------------------------------+
-| values          | object   | override any default values in the charts                              |
-+-----------------+----------+------------------------------------------------------------------------+
-| source          | object   | provide a path to a ``git repo`` or ``local dir`` deploy chart.        |
-+-----------------+----------+------------------------------------------------------------------------+
-| dependencies    | object   | reference any chart dependencies before install                        |
-+-----------------+----------+------------------------------------------------------------------------+
++-----------------+----------+---------------------------------------------------------------------------+
+| keyword         | type     | action                                                                    |
++=================+==========+===========================================================================+
+| chart\_name     | string   | name for the chart                                                        |
++-----------------+----------+---------------------------------------------------------------------------+
+| release\_name   | string   | name of the release                                                       |
++-----------------+----------+---------------------------------------------------------------------------+
+| namespace       | string   | namespace of your chart                                                   |
++-----------------+----------+---------------------------------------------------------------------------+
+| timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set    |
++-----------------+----------+---------------------------------------------------------------------------+
+| install         | object   | install the chart into your Kubernetes cluster                            |
++-----------------+----------+---------------------------------------------------------------------------+
+| update          | object   | update the chart managed by the armada yaml                               |
++-----------------+----------+---------------------------------------------------------------------------+
+| values          | object   | override any default values in the charts                                 |
++-----------------+----------+---------------------------------------------------------------------------+
+| source          | object   | provide a path to a ``git repo``, ``local dir``, or ``tarball url`` chart |
++-----------------+----------+---------------------------------------------------------------------------+
+| dependencies    | object   | reference any chart dependencies before install                           |
++-----------------+----------+---------------------------------------------------------------------------+
 
 Update - Pre or Post
 ^^^^^^^^^^^^^^^^^^^^
@@ -148,17 +148,17 @@ Update - Actions - Update/Delete
 Source
 ^^^^^^
 
-+-------------+----------+---------------------------------------------------------------+
-| keyword     | type     | action                                                        |
-+=============+==========+===============================================================+
-| type        | string   | source to build the chart: ``git``, ``local``, or ``tar``     |
-+-------------+----------+---------------------------------------------------------------+
-| location    | string   | ``url`` or ``path`` to the chart's parent directory           |
-+-------------+----------+---------------------------------------------------------------+
-| subpath     | string   | relative path to target chart from parent                     |
-+-------------+----------+---------------------------------------------------------------+
-| reference   | string   | branch of the repo                                            |
-+-------------+----------+---------------------------------------------------------------+
++-------------+----------+-------------------------------------------------------------------------------+
+| keyword     | type     | action                                                                        |
++=============+==========+===============================================================================+
+| type        | string   | source to build the chart: ``git``, ``local``, or ``tar``                     |
++-------------+----------+-------------------------------------------------------------------------------+
+| location    | string   | ``url`` or ``path`` to the chart's parent directory                           |
++-------------+----------+-------------------------------------------------------------------------------+
+| subpath     | string   | (optional) relative path to target chart from parent (``.`` if not specified) |
++-------------+----------+-------------------------------------------------------------------------------+
+| reference   | string   | (optional) branch of the repo (``master`` if not specified)                   |
++-------------+----------+-------------------------------------------------------------------------------+
 
 Example
 ~~~~~~~
@@ -247,10 +247,10 @@ Simple Example
       namespace: default
       values: {}
       source:
-        type: tar
-        location: http://localhost:8879/namespace/repo
-        subpath: blog-2
-        reference: master
+        type: git
+        location: http://github.com/namespace/repo
+        subpath: blog-1
+        reference: new-feat
       dependencies: []
     ---
     schema: armada/ChartGroup/v1
@@ -290,7 +290,7 @@ Multichart Example
       source:
         type: git
         location: https://github.com/namespace/repo
-        subpath: .
+        subpath: blog1
         reference: master
       dependencies: []
     ---
@@ -304,10 +304,23 @@ Multichart Example
       namespace: default
       values: {}
       source:
-        type: git
-        location: https://github.com/namespace/repo
-        subpath: .
-        reference: master
+        type: tar
+        location: https://github.com/namespace/repo/blog2.tgz
+        subpath: blog2
+      dependencies: []
+    ---
+    schema: armada/Chart/v1
+    metadata:
+      schema: metadata/Document/v1
+      name: blog-3
+    data:
+      chart_name: blog-3
+      release: blog-3
+      namespace: default
+      values: {}
+      source:
+        type: local
+        location: /home/user/namespace/repo/blog3
       dependencies: []
     ---
     schema: armada/ChartGroup/v1
@@ -329,6 +342,7 @@ Multichart Example
       sequenced: False
       chart_group:
         - blog-1
+        - blog-3
     ---
     schema: armada/Manifest/v1
     metadata:
