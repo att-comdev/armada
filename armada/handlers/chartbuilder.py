@@ -109,7 +109,7 @@ class ChartBuilder(object):
 
         try:
             chart_yaml = dotify(
-                yaml.load(
+                yaml.safe_load(
                     open(os.path.join(self.source_directory, 'Chart.yaml'))
                     .read()))
         except Exception:

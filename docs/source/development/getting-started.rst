@@ -36,7 +36,17 @@ From the directory of the forked repository:
 
     pip install -r requirements.txt
     pip install -r test-requirements.txt
-    pip install -e .
+
+    pip install .
+
+    # Testing your armada code
+    # The tox command will execute lint, bandit, cover
+    tox
+
+    # For targeted test
+    tox -e pep8
+    tox -e bandit
+    tox -e cover
 
 .. note::
 
