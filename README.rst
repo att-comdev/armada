@@ -1,7 +1,10 @@
 Armada
 ======
 
-|Docker Repository on Quay| |Build Status| |Doc Status|
+|Docker Repository on Quay| |Build Status| |Doc Status| |Code Coverage|
+
+
+
 
 Armada is a tool for managing multiple helm charts with dependencies by centralizing
 all configurations in a single Armada yaml and providing lifecycle
@@ -64,3 +67,5 @@ Your output will look something like this:
    :target: https://travis-ci.org/att-comdev/armada
 .. |Doc Status| image:: https://readthedocs.org/projects/armada-helm/badge/?version=latest
    :target: http://armada-helm.readthedocs.io/
+.. |Code Coverage| image:: https://codecov.io/gh/att-comdev/armada/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/att-comdev/armada
