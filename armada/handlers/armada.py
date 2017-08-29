@@ -213,6 +213,7 @@ class Armada(object):
             for gchart in chart_group:
                 chart = dotify(gchart['chart'])
                 values = gchart.get('chart').get('values', {})
+                test_chart = gchart.get('chart', {}).get('test', False)
                 pre_actions = {}
                 post_actions = {}
                 LOG.info('%s', chart.release)
@@ -271,6 +272,7 @@ class Armada(object):
                         continue
 
                     # do actual update
+                    LOG.info('wait: %s', chart_wait)
                     self.tiller.update_release(protoc_chart,
                                                prefix_chart,
                                                chart.namespace,
@@ -286,6 +288,7 @@ class Armada(object):
                 # process install
                 else:
                     LOG.info("Installing release %s", chart.release)
+                    LOG.info('wait: %s', chart_wait)
                     self.tiller.install_release(protoc_chart,
                                                 prefix_chart,
                                                 chart.namespace,
@@ -294,8 +297,17 @@ class Armada(object):
                                                 wait=chart_wait,
                                                 timeout=chart_timeout)
 
+
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
+
+                if test_chart:
+                    LOG.info('Testing: %s', prefix_chart)
+                    resp = self.tiller.testing_release(prefix_chart)
+                    if resp is None:
+                        LOG.info("PASSED: %s", prefix_chart)
+                    else:
+                        LOG.info("FAILED: %s", prefix_chart)
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()

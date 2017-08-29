@@ -23,28 +23,25 @@ LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
 
-def tillerServer(args):
+def testService(args):
 
     tiller = Tiller()
 
-    if args.status:
-        resp = tiller.tiller_version()
-        LOG.info('Tiller Service: %s', tiller.tiller_status())
-        LOG.info('Tiller Version: %s', getattr(resp.Version, 'sem_ver', False))
+    LOG.info("RUNNING: %s tests", args.release)
+    if tiller.testing_release(args.release) is None:
+        LOG.info("PASSED: %s", args.release)
+    else:
+        LOG.info("FAILED: %s", args.release)
 
-    if args.releases:
-        for release in tiller.list_releases():
-            LOG.info("Release: %s ( namespace= %s )", release.name,
-                     release.namespace)
 
-class TillerServerCommand(cmd.Command):
+
+class TestServerCommand(cmd.Command):
     def get_parser(self, prog_name):
-        parser = super(TillerServerCommand, self).get_parser(prog_name)
-        parser.add_argument('--status', action='store_true',
-                            default=False, help='Check Tiller service')
-        parser.add_argument('--releases', action='store_true',
-                            default=False, help='List Tiller Releases')
+        parser = super(TestServerCommand, self).get_parser(prog_name)
+        parser.add_argument('--release', action='store',
+                            default=True, help='Test Armada Manifest')
+
         return parser
 
     def take_action(self, parsed_args):
-        tillerServer(parsed_args)
+        testService(parsed_args)
