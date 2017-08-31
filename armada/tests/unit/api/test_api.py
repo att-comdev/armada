@@ -17,14 +17,19 @@ import mock
 import unittest
 
 from falcon import testing
+from oslo_config import fixture as config_fixture
 
+from armada import conf as cfg
 from armada.api import server
+
+CONF = cfg.CONF
+
 
 class APITestCase(testing.TestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
-
         self.app = server.create(middleware=False)
+
 
 class TestAPI(APITestCase):
     @unittest.skip('this is incorrectly tested')

@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import json
-from falcon import HTTP_200
 
+import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from armada.common import policy
 from armada.handlers.armada import Armada as Handler
 
 LOG = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ class Apply(object):
     apply armada endpoint service
     '''
 
+    @policy.enforce('armada:create_endpoints')
     def on_post(self, req, resp):
 
         # Load data from request and get options
@@ -50,4 +52,4 @@ class Apply(object):
 
         resp.data = json.dumps({'message': 'Success'})
         resp.content_type = 'application/json'
-        resp.status = HTTP_200
+        resp.status = falcon.HTTP_200
