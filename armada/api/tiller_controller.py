@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import json
-from falcon import HTTP_200
 
+import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from armada.common import policy
 from armada.handlers.tiller import Tiller as tillerHandler
 
 LOG = logging.getLogger(__name__)
@@ -25,6 +26,8 @@ CONF = cfg.CONF
 
 
 class Status(object):
+
+    @policy.enforce('tiller:get_status')
     def on_get(self, req, resp):
         '''
         get tiller status
@@ -38,9 +41,12 @@ class Status(object):
             LOG.info('Tiller Server is Not Present.')
 
         resp.content_type = 'application/json'
-        resp.status = HTTP_200
+        resp.status = falcon.HTTP_200
+
 
 class Release(object):
+
+    @policy.enforce('tiller:get_release')
     def on_get(self, req, resp):
         '''
         get tiller releases
@@ -54,4 +60,4 @@ class Release(object):
 
         resp.data = json.dumps({'releases': releases})
         resp.content_type = 'application/json'
-        resp.status = HTTP_200
+        resp.status = falcon.HTTP_200
