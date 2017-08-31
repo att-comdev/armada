@@ -16,15 +16,21 @@ import json
 import mock
 import unittest
 
+import falcon
 from falcon import testing
+from oslo_config import fixture as config_fixture
 
+from armada import conf as cfg
 from armada.api import server
+
+CONF = cfg.CONF
+
 
 class APITestCase(testing.TestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
-
         self.app = server.create(middleware=False)
+
 
 class TestAPI(APITestCase):
     @unittest.skip('this is incorrectly tested')
@@ -62,7 +68,14 @@ class TestAPI(APITestCase):
         doc = {u'message': u'Tiller Server is Active'}
 
         result = self.simulate_get('/tiller/status')
-        self.assertEqual(result.json, doc)
+
+        # TODO(lamt) This should be HTTP_401 if no auth is happening, but auth
+        # is not implemented currently, so it falls back to a policy check
+        # failure, thus a 403.  Change this once it is completed
+        self.assertEqual(falcon.HTTP_403, result.status)
+
+        # FIXME(lamt) Need authentication - mock, fixture
+        # self.assertEqual(result.json, doc)
 
     @mock.patch('armada.api.tiller_controller.tillerHandler')
     def test_tiller_releases(self, mock_tiller):
@@ -76,4 +89,11 @@ class TestAPI(APITestCase):
         doc = {u'releases': {}}
 
         result = self.simulate_get('/tiller/releases')
-        self.assertEqual(result.json, doc)
+
+        # TODO(lamt) This should be HTTP_401 if no auth is happening, but auth
+        # is not implemented currently, so it falls back to a policy check
+        # failure, thus a 403.  Change this once it is completed
+        self.assertEqual(falcon.HTTP_403, result.status)
+
+        # FIXME(lamt) Need authentication - mock, fixture
+        # self.assertEqual(result.json, doc)

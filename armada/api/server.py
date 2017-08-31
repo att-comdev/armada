@@ -17,8 +17,10 @@ import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from armada.common import policy
 import armada.conf as configs
 
+from armada.api import request
 from armada_controller import Apply
 from middleware import AuthMiddleware
 from middleware import RoleMiddleware
@@ -29,16 +31,20 @@ LOG = logging.getLogger(__name__)
 configs.set_app_default_configs()
 CONF = cfg.CONF
 
+
 # Build API
 def create(middleware=CONF.middleware):
     logging.register_options(CONF)
     logging.set_defaults(default_log_levels=CONF.default_log_levels)
     logging.setup(CONF, 'armada')
 
+    policy.setup_policy()
+
     if middleware:
-        api = falcon.API(middleware=[AuthMiddleware(), RoleMiddleware()])
+        api = falcon.API(request_type=request.Request,
+                         middleware=[AuthMiddleware(), RoleMiddleware()])
     else:
-        api = falcon.API()
+        api = falcon.API(request_type=request.Request)
 
     # Configure API routing
     url_routes = (

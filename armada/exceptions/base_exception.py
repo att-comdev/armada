@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
+
+from armada.common.i18n import _
 
 LOG = logging.getLogger(__name__)
 
@@ -27,3 +30,21 @@ class ArmadaBaseException(Exception):
     def __init__(self, message=None):
         self.message = message or self.message
         super(ArmadaBaseException, self).__init__(self.message)
+
+
+class ArmadaAPIException(falcon.HTTPError):
+    status = falcon.HTTP_500
+    message = "unknown error"
+    title = "Internal Server Error"
+
+    def __init__(self, message=None, **kwargs):
+        self.message = message or self.message
+        super(ArmadaAPIException, self).__init__(
+            self.status, self.title, self.message, **kwargs
+        )
+
+
+class ActionForbidden(ArmadaAPIException):
+    status = falcon.HTTP_403
+    message = _("Insufficient privilege to perform action.")
+    title = _("Action Forbidden")
