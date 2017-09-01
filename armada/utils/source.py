@@ -18,11 +18,13 @@ import requests
 import shutil
 import tarfile
 import tempfile
+import urllib3
 
 from git import Repo
 from git import Git
 
 from ..exceptions import source_exceptions
+
 
 def git_clone(repo_url, branch='master'):
     '''
@@ -56,8 +58,9 @@ def download_tarball(tarball_url):
     Downloads a tarball to /tmp and returns the path
     '''
     try:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         tarball_filename = tempfile.mkstemp(prefix='armada')[1]
-        response = requests.get(tarball_url)
+        response = requests.get(tarball_url, verify=False)
         with open(tarball_filename, 'wb') as f:
             f.write(response.content)
     except Exception:
