@@ -25,6 +25,7 @@ from armada.cli.validate import validate_manifest
 from armada.common.client import ArmadaClient
 from armada.common.session import ArmadaSession
 
+
 CONF = cfg.CONF
 
 

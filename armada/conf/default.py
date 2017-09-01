@@ -31,6 +31,13 @@ default_options = [
         help=utils.fmt('The default Keystone authentication url.')),
 
     cfg.StrOpt(
+        'certs',
+        default=None,
+        help=utils.fmt("""
+Absolute path to the certificate file to use for chart registries
+""")),
+
+    cfg.StrOpt(
         'kubernetes_config_path',
         default='/home/user/.kube/',
         help=utils.fmt('Path to Kubernetes configurations.')),
