@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import path
 import os
-import requests
 import shutil
 import tarfile
 import tempfile
+from os import path
 
-from git import Repo
+import requests
 from git import Git
+from git import Repo
+from requests.packages import urllib3
 
 from armada.exceptions import source_exceptions
 
@@ -50,23 +51,28 @@ def git_clone(repo_url, ref='master'):
     return _tmp_dir
 
 
-def get_tarball(tarball_url):
-    tarball_path = download_tarball(tarball_url)
+def get_tarball(tarball_url, verify=False):
+    tarball_path = download_tarball(tarball_url, verify=verify)
     return extract_tarball(tarball_path)
 
 
-def download_tarball(tarball_url):
+def download_tarball(tarball_url, verify=False):
     '''
     Downloads a tarball to /tmp and returns the path
     '''
     try:
+        if not verify:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         tarball_filename = tempfile.mkstemp(prefix='armada')[1]
-        response = requests.get(tarball_url)
+        response = requests.get(tarball_url, verify=verify)
+
         with open(tarball_filename, 'wb') as f:
             f.write(response.content)
+
+        return tarball_filename
     except Exception:
         raise source_exceptions.TarballDownloadException(tarball_url)
-    return tarball_filename
 
 
 def extract_tarball(tarball_path):
