@@ -15,6 +15,7 @@
 import difflib
 import yaml
 
+from oslo_config import cfg
 from oslo_log import log as logging
 from supermutes.dot import dotify
 
@@ -31,7 +32,7 @@ from armada.utils import lint
 from armada import const
 
 LOG = logging.getLogger(__name__)
-
+CONF = cfg.CONF
 DEFAULT_TIMEOUT = 3600
 
 
@@ -139,7 +140,12 @@ class Armada(object):
             ch.get('chart')['source_dir'] = (location, subpath)
         elif ct_type == 'tar':
             LOG.info('Downloading tarball from: %s', location)
-            tarball_dir = source.get_tarball(location)
+
+            if CONF.certs == '<None>':
+                tarball_dir = source.get_tarball(location, verify=False)
+            else:
+                tarball_dir = source.get_tarball(location, verify=CONF.cert)
+
             ch.get('chart')['source_dir'] = (tarball_dir, subpath)
         elif ct_type == 'git':
             reference = ch.get('chart').get('source').get(
