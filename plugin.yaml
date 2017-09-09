@@ -1,0 +1,11 @@
+name: "armada"
+version: "0.0.1"
+usage: "Helm access to armada"
+description: |-
+  This plugin provides helm access to armada.
+  usage:
+    $ helm armada tiller --status
+    $ helm armada apply /examples/openstack-helm.yaml
+ignoreFlags: false
+useTunnel: false
+command: "docker exec armada armada"
