@@ -28,8 +28,7 @@ RUN apt-get update && \
     \
     apt-get purge --auto-remove -y \
       build-essential \
-      curl \
-      python-all-dev && \
+      curl && \
     apt-get clean -y && \
     rm -rf \
       /root/.cache \
