@@ -10,7 +10,8 @@ Operations Guide
    :maxdepth: 2
    :caption: Contents:
 
-   guide-troubleshooting.rst
-   guide-build-armada-yaml.rst
-   guide-use-armada.rst
    guide-api.rst
+   guide-build-armada-yaml.rst
+   guide-configure.rst
+   guide-troubleshooting.rst
+   guide-use-armada.rst

@@ -22,7 +22,7 @@ metadata:
 data:
   chart_name: mariadb
   release: mariadb
-  namespace: undercloud
+  namespace: openstack
   timeout: 3600
   install:
     no_hooks: false
@@ -44,7 +44,7 @@ metadata:
 data:
   chart_name: memcached
   release: memcached
-  namespace: undercloud
+  namespace: openstack
   timeout: 100
   install:
     no_hooks: false
@@ -62,55 +62,11 @@ data:
 schema: armada/Chart/v1
 metadata:
   schema: metadata/Document/v1
-  name: etcd
-data:
-  chart_name: etcd
-  release: etcd
-  namespace: undercloud
-  timeout: 3600
-  install:
-    no_hooks: false
-  upgrade:
-    no_hooks: false
-  values: {}
-  source:
-    type: git
-    location: git://github.com/openstack/openstack-helm
-    subpath: etcd
-    reference: master
-  dependencies:
-    - helm-toolkit
----
-schema: armada/Chart/v1
-metadata:
-  schema: metadata/Document/v1
-  name: rabbitmq
-data:
-  chart_name: rabbitmq
-  release: rabbitmq
-  namespace: undercloud
-  timeout: 100
-  install:
-    no_hooks: false
-  upgrade:
-    no_hooks: false
-  values: {}
-  source:
-    type: git
-    location: git://github.com/openstack/openstack-helm
-    subpath: rabbitmq
-    reference: master
-  dependencies:
-    - helm-toolkit
----
-schema: armada/Chart/v1
-metadata:
-  schema: metadata/Document/v1
   name: keystone
 data:
   chart_name: keystone
   release: keystone
-  namespace: undercloud
+  namespace: openstack
   timeout: 100
   install:
     no_hooks: false
@@ -135,14 +91,12 @@ data:
 schema: armada/ChartGroup/v1
 metadata:
   schema: metadata/Document/v1
-  name: openstack-infra-services
+  name: keystone-infra-services
 data:
-  description: "OpenStack Infra Services"
+  description: "Keystone Infra Services"
   sequenced: True
   chart_group:
     - mariadb
-    - etcd
-    - rabbitmq
     - memcached
 ---
 schema: armada/ChartGroup/v1
@@ -162,5 +116,5 @@ metadata:
 data:
   release_prefix: armada
   chart_groups:
-    - openstack-infra-services
+    - keystone-infra-services
     - openstack-keystone
