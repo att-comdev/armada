@@ -13,41 +13,47 @@
 # limitations under the License.
 
 import json
-from falcon import HTTP_200
 
-from oslo_config import cfg
+import falcon
 from oslo_log import log as logging
 
-from armada.handlers.armada import Armada as Handler
+from armada import api
+from armada.handlers.armada import Armada
 
 LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
 
-
-class Apply(object):
+class Apply(api.BaseResource):
     '''
     apply armada endpoint service
     '''
 
     def on_post(self, req, resp):
+        try:
 
-        # Load data from request and get options
-        data = json.load(req.stream)
-        opts = data['options']
+            # Load data from request and get options
+            data = self.req_json(req)
+            opts = {}
+            # opts = data['options']
 
-        # Encode filename
-        data['file'] = data['file'].encode('utf-8')
+            # Encode filename
+            # data['file'] = data['file'].encode('utf-8')
+            armada = Armada(
+                data,
+                disable_update_pre=opts.get('disable_update_pre', False),
+                disable_update_post=opts.get('disable_update_post', False),
+                enable_chart_cleanup=opts.get('enable_chart_cleanup', False),
+                dry_run=opts.get('dry_run', False),
+                wait=opts.get('wait', False),
+                timeout=opts.get('timeout', False))
 
-        armada = Handler(open('../../' + data['file']),
-                         disable_update_pre=opts['disable_update_pre'],
-                         disable_update_post=opts['disable_update_post'],
-                         enable_chart_cleanup=opts['enable_chart_cleanup'],
-                         dry_run=opts['dry_run'],
-                         wait=opts['wait'],
-                         timeout=opts['timeout'])
+            msg = armada.sync()
 
-        armada.sync()
+            resp.data = json.dumps({'message': msg})
 
-        resp.data = json.dumps({'message': 'Success'})
-        resp.content_type = 'application/json'
-        resp.status = HTTP_200
+            resp.content_type = 'application/json'
+            resp.status = falcon.HTTP_200
+        except Exception as e:
+            self.error(req.context, "Failed to apply manifest")
+            self.return_error(
+                resp, falcon.HTTP_500,
+                message="Failed to install manifest: {} {}".format(e, data))
