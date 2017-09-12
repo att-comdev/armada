@@ -6,7 +6,7 @@ PORT="8000"
 set -e
 
 if [ "$1" = 'server' ]; then
-    exec gunicorn server:api -b :$PORT --chdir armada/api
+    exec uwsgi --http 0.0.0.0:${PORT} --paste config:$(pwd)/etc/armada/api-paste.ini --enable-threads -L --pyargv " --config-file $(pwd)/etc/armada/armada.conf" --honour-stdin
 fi
 
 if [ "$1" = 'tiller' ] || [ "$1" = 'apply' ]; then
