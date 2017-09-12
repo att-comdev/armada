@@ -1,0 +1,21 @@
+#
+#"admin_required": "role:admin or is_admin:1"
+
+#
+#"service_or_admin": "rule:admin_required or rule:service_role"
+
+#
+#"service_role": "role:service"
+
+# Get tiller status
+# POST  /armada/apply/
+#"armada:create_endpoints": "rule:admin_required"
+
+# Get tiller status
+# GET  /tiller/status/
+#"tiller:get_status": "rule:admin_required"
+
+# Get tiller release
+# GET  /tiller/releases/
+#"tiller:get_release": "rule:admin_required"
+

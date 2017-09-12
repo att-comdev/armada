@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import falcon
+import re
 
-from keystoneauth1 import session
-from keystoneauth1.identity import v3
 from oslo_config import cfg
 from oslo_log import log as logging
+
+from armada.common import policy
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -25,75 +25,80 @@ CONF = cfg.CONF
 
 class AuthMiddleware(object):
 
+    # Authentication
     def process_request(self, req, resp):
+        ctx = req.context
 
-        # Validate token and get user session
-        token = req.get_header('X-Auth-Token')
-        req.context['session'] = self._get_user_session(token)
+        ctx.set_policy_engine(policy.policy_engine)
 
-        # Add token roles to request context
-        req.context['roles'] = self._get_roles(req.context['session'])
+        for k, v in req.headers.items():
+            LOG.debug("Request with header %s: %s" % (k, v))
 
-    def _get_roles(self, session):
+        auth_status = req.get_header('X-SERVICE-IDENTITY-STATUS')
+        service = True
 
-        # Get roles IDs associated with user
-        request_url = CONF.auth_url + '/role_assignments'
-        resp = self._session_request(session=session, request_url=request_url)
+        if auth_status is None:
+            auth_status = req.get_header('X-IDENTITY-STATUS')
+            service = False
 
-        json_resp = resp.json()['role_assignments']
-        role_ids = [r['role']['id'].encode('utf-8') for r in json_resp]
+        if auth_status == 'Confirmed':
+            # Process account and roles
+            ctx.authenticated = True
+            ctx.user = req.get_header(
+                'X-SERVICE-USER-NAME') if service else req.get_header(
+                    'X-USER-NAME')
+            ctx.user_id = req.get_header(
+                'X-SERVICE-USER-ID') if service else req.get_header(
+                    'X-USER-ID')
+            ctx.user_domain_id = req.get_header(
+                'X-SERVICE-USER-DOMAIN-ID') if service else req.get_header(
+                    'X-USER-DOMAIN-ID')
+            ctx.project_id = req.get_header(
+                'X-SERVICE-PROJECT-ID') if service else req.get_header(
+                    'X-PROJECT-ID')
+            ctx.project_domain_id = req.get_header(
+                'X-SERVICE-PROJECT-DOMAIN-ID') if service else req.get_header(
+                    'X-PROJECT-DOMAIN-NAME')
+            if service:
+                ctx.add_roles(req.get_header('X-SERVICE-ROLES').split(','))
+            else:
+                ctx.add_roles(req.get_header('X-ROLES').split(','))
 
-        # Get role names associated with role IDs
-        roles = []
-        for role_id in role_ids:
-            request_url = CONF.auth_url + '/roles/' + role_id
-            resp = self._session_request(session=session,
-                                         request_url=request_url)
+            if req.get_header('X-IS-ADMIN-PROJECT') == 'True':
+                ctx.is_admin_project = True
+            else:
+                ctx.is_admin_project = False
 
-            role = resp.json()['role']['name'].encode('utf-8')
-            roles.append(role)
+            LOG.debug(
+                'Request from authenticated user %s with roles %s' %
+                (ctx.user, ','.join(ctx.roles)))
+        else:
+            ctx.authenticated = False
 
-        return roles
 
-    def _get_user_session(self, token):
-
-        # Get user session from token
-        auth = v3.Token(auth_url=CONF.auth_url,
-                        project_name=CONF.project_name,
-                        project_domain_name=CONF.project_domain_name,
-                        token=token)
-
-        return session.Session(auth=auth)
-
-    def _session_request(self, session, request_url):
-        try:
-            return session.get(request_url)
-        except:
-            raise falcon.HTTPUnauthorized('Authentication required',
-                                          ('Authentication token is invalid.'))
-
-class RoleMiddleware(object):
+class ContextMiddleware(object):
+    def __init__(self):
+        # Setup validation pattern for external marker
+        UUIDv4_pattern = '^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$'
+        self.marker_re = re.compile(UUIDv4_pattern, re.I)
 
     def process_request(self, req, resp):
-        endpoint = req.path
-        roles = req.context['roles']
+        ctx = req.context
 
-        # Verify roles have sufficient permissions for request endpoint
-        if not (self._verify_roles(endpoint, roles)):
-            raise falcon.HTTPUnauthorized('Insufficient permissions',
-                                          ('Token role insufficient.'))
+        ext_marker = req.get_header('X-Context-Marker')
 
-    def _verify_roles(self, endpoint, roles):
+        if ext_marker is not None and self.marker_re.fullmatch(ext_marker):
+            ctx.set_external_marker(ext_marker)
 
-        # Compare the verified roles listed in the config with the user's
-        # associated roles
-        if endpoint == '/armada/apply':
-            approved_roles = CONF.armada_apply_roles
-        elif endpoint == '/tiller/releases':
-            approved_roles = CONF.tiller_release_roles
-        elif endpoint == '/tiller/status':
-            approved_roles = CONF.tiller_status_roles
 
-        verified_roles = set(roles).intersection(approved_roles)
+class LoggingMiddleware(object):
 
-        return bool(verified_roles)
+    def process_response(self, req, resp, resource, req_succeeded):
+        ctx = req.context
+        extra = {
+            'user': ctx.user,
+            'req_id': ctx.request_id,
+            'external_ctx': ctx.external_marker,
+        }
+        resp.append_header('X-Drydock-Req', ctx.request_id)
+        LOG.info("%s - %s" % (req.uri, resp.status), extra=extra)
