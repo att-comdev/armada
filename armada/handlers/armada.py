@@ -15,7 +15,6 @@
 import difflib
 import yaml
 
-from oslo_config import cfg
 from oslo_log import log as logging
 from supermutes.dot import dotify
 
@@ -37,7 +36,6 @@ from ..const import KEYWORD_ARMADA, KEYWORD_GROUPS, KEYWORD_CHARTS,\
 LOG = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 3600
-CONF = cfg.CONF
 
 
 class Armada(object):
@@ -183,6 +181,12 @@ class Armada(object):
         Syncronize Helm with the Armada Config(s)
         '''
 
+        msg = {
+            'installed': [],
+            'upgraded': [],
+            'diff': []
+        }
+
         # TODO: (gardlt) we need to break up this func into
         # a more cleaner format
         LOG.info("Performing Pre-Flight Operations")
@@ -262,9 +266,9 @@ class Armada(object):
                     # TODO(alanmeadows) account for .files differences
                     # once we support those
 
-                    upgrade_diff = self.show_diff(chart, apply_chart,
-                                                  apply_values,
-                                                  chartbuilder.dump(), values)
+                    upgrade_diff = self.show_diff(
+                        chart, apply_chart, apply_values, chartbuilder.dump(),
+                        values, msg)
 
                     if not upgrade_diff:
                         LOG.info("There are no updates found in this chart")
@@ -283,6 +287,8 @@ class Armada(object):
                                                wait=chart_wait,
                                                timeout=chart_timeout)
 
+                    msg['upgraded'].append(prefix_chart)
+
                 # process install
                 else:
                     LOG.info("Installing release %s", chart.release)
@@ -294,6 +300,8 @@ class Armada(object):
                                                 wait=chart_wait,
                                                 timeout=chart_timeout)
 
+                    msg['installed'].append(prefix_chart)
+
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
 
@@ -303,6 +311,8 @@ class Armada(object):
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(
                 prefix, self.config[KEYWORD_ARMADA][KEYWORD_GROUPS])
+
+        return msg
 
     def post_flight_ops(self):
         '''
@@ -315,7 +325,7 @@ class Armada(object):
                     source.source_cleanup(ch.get('chart').get('source_dir')[0])
 
     def show_diff(self, chart, installed_chart, installed_values, target_chart,
-                  target_values):
+                  target_values, msg):
         '''
         Produce a unified diff of the installed chart vs our intention
 
@@ -324,19 +334,32 @@ class Armada(object):
         '''
 
         chart_diff = list(
-            difflib.unified_diff(installed_chart.SerializeToString()
-                                 .split('\n'), target_chart.split('\n')))
+            difflib.unified_diff(
+                installed_chart.SerializeToString().split('\n'),
+                target_chart.split('\n')))
+
         if len(chart_diff) > 0:
             LOG.info("Chart Unified Diff (%s)", chart.release)
+            diff_msg = []
             for line in chart_diff:
+                diff_msg.append(line)
                 LOG.debug(line)
+
+            msg['diff'].append({'chart': diff_msg})
+
         values_diff = list(
             difflib.unified_diff(
                 installed_values.split('\n'),
                 yaml.safe_dump(target_values).split('\n')))
+
         if len(values_diff) > 0:
             LOG.info("Values Unified Diff (%s)", chart.release)
+            diff_msg = []
             for line in values_diff:
+                diff_msg.append(line)
                 LOG.debug(line)
+                msg['diff'].append({'values': diff_msg})
 
-        return (len(chart_diff) > 0) or (len(values_diff) > 0)
+        result = (len(chart_diff) > 0) or (len(values_diff) > 0)
+
+        return result
