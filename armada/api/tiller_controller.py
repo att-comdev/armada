@@ -13,45 +13,64 @@
 # limitations under the License.
 
 import json
-from falcon import HTTP_200
 
+import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from armada.handlers.tiller import Tiller as tillerHandler
+from armada import api
+from armada.common import policy
+from armada.handlers.tiller import Tiller
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
-class Status(object):
+class Status(api.BaseResource):
+    @policy.enforce('tiller:get_status')
     def on_get(self, req, resp):
         '''
         get tiller status
         '''
-        message = "Tiller Server is {}"
-        if tillerHandler().tiller_status():
-            resp.data = json.dumps({'message': message.format('Active')})
-            LOG.info('Tiller Server is Active.')
-        else:
-            resp.data = json.dumps({'message': message.format('Not Present')})
-            LOG.info('Tiller Server is Not Present.')
+        try:
+            message = {'tiller': Tiller().tiller_status()}
 
-        resp.content_type = 'application/json'
-        resp.status = HTTP_200
+            if message.get('tiller', False):
+                resp.data = json.dumps(message)
+                resp.status = falcon.HTTP_200
+                LOG.info('Tiller Server %s', message.get('tiller', False))
+            else:
+                resp.data = json.dumps(message.get('tiller', False))
+                resp.status = falcon.HTTP_503
+                LOG.info('Tiller Server %s', message.get('tiller', False))
 
-class Release(object):
+            resp.content_type = 'application/json'
+
+        except Exception:
+            self.error(req.context, "Unable to find resources")
+            self.return_error(
+                resp, falcon.HTTP_500, message="Unable to find resource")
+
+
+class Release(api.BaseResource):
+    @policy.enforce('tiller:get_release')
     def on_get(self, req, resp):
         '''
         get tiller releases
         '''
-        # Get tiller releases
-        handler = tillerHandler()
+        try:
+            # Get tiller releases
+            handler = Tiller()
 
-        releases = {}
-        for release in handler.list_releases():
-            releases[release.name] = release.namespace
+            releases = {}
+            for release in handler.list_releases():
+                releases[release.name] = release.namespace
 
-        resp.data = json.dumps({'releases': releases})
-        resp.content_type = 'application/json'
-        resp.status = HTTP_200
+            resp.data = json.dumps({'releases': releases})
+            resp.content_type = 'application/json'
+            resp.status = falcon.HTTP_200
+
+        except Exception:
+            self.error(req.context, "Unable to find resources")
+            self.return_error(
+                resp, falcon.HTTP_500, message="Unable to find Armada Release")

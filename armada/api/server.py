@@ -17,38 +17,57 @@ import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
 
-import armada.conf as configs
+from armada.common import policy
+from armada import conf
 
+from armada.api import ArmadaRequest
 from armada_controller import Apply
 from middleware import AuthMiddleware
-from middleware import RoleMiddleware
+from middleware import ContextMiddleware
+from middleware import LoggingMiddleware
 from tiller_controller import Release
 from tiller_controller import Status
+from validation_controller import Validate
 
 LOG = logging.getLogger(__name__)
-configs.set_app_default_configs()
+conf.set_app_default_configs()
 CONF = cfg.CONF
+
 
 # Build API
 def create(middleware=CONF.middleware):
-    logging.register_options(CONF)
-    logging.set_defaults(default_log_levels=CONF.default_log_levels)
-    logging.setup(CONF, 'armada')
+    # logging.register_options(CONF)
+    # logging.set_defaults(default_log_levels=CONF.default_log_levels)
+    # logging.setup(CONF, 'armada')
+
+    policy.setup_policy()
 
     if middleware:
-        api = falcon.API(middleware=[AuthMiddleware(), RoleMiddleware()])
+        api = falcon.API(
+            request_type=ArmadaRequest,
+            middleware=[
+                AuthMiddleware(),
+                LoggingMiddleware(),
+                ContextMiddleware()
+            ])
     else:
-        api = falcon.API()
+        api = falcon.API(request_type=falcon.Request)
 
     # Configure API routing
-    url_routes = (
-        ('/tiller/status', Status()),
-        ('/tiller/releases', Release()),
-        ('/armada/apply/', Apply())
-    )
+    url_routes_v1 = (('apply', Apply()),
+                     ('releases', Release()),
+                     ('status', Status()),
+                     ('validate', Validate()))
 
-    for route, service in url_routes:
-        api.add_route(route, service)
+    for route, service in url_routes_v1:
+        api.add_route("/v1.0/{}".format(route), service)
+
+    return api
+
+
+def paste_start_armada(global_conf, **kwargs):
+    # At this time just ignore everything in  the paste configuration
+    # and rely on olso_config
 
     return api
 
