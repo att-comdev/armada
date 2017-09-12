@@ -1,5 +1,4 @@
 gitpython==2.1.5
-grpc==0.3.post19
 grpcio==1.6.0rc1
 grpcio-tools==1.6.0rc1
 keystoneauth1==2.21.0
