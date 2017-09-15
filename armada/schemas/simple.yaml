@@ -1,0 +1,56 @@
+# simple deploy
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-1
+data:
+  chart_name: blog-1
+  release: blog-1
+  namespace: default
+  values: {}
+  source:
+    type: git
+    location: https://github.com/gardlt/hello-world-chart
+    subpath: .
+    reference: master
+  dependencies: []
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-2
+data:
+  chart_name: blog-2
+  release: blog-2
+  namespace: default
+  values:
+    some: value
+  upgrade:
+    no_hooks: false
+  source:
+    type: git
+    location: https://github.com/gardlt/hello-world-chart
+    subpath: .
+    reference: master
+  dependencies: []
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-group
+data:
+  description: Deploys Simple Service
+  sequenced: False
+  chart_group:
+    - blog-1
+    - blog-2
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: simple-armada
+data:
+  release_prefix: armada
+  chart_groups:
+    - blog-group
