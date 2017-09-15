@@ -1,0 +1,153 @@
+---
+schema: deckhand/DataSchema/v1
+metadata:
+    name: chart
+    schema: armada/Chart/v1
+data:
+    $schema: http://json-schema.org/schema#
+    definitions:
+        chart_name:
+            type: string
+        release:
+            type: string
+        namespace:
+            type: string
+        dependecies:
+            type: array
+        type:
+            type: string
+        location:
+            type: string
+        subpath:
+            type: string
+        reference:
+            type: string
+
+    type: object
+    properties:
+        chart_name:
+            $ref: '#/definitions/chart_name'
+        release:
+            $ref: '#/definitions/release'
+        namespace:
+            $ref: '#/definitions/namespace'
+        values:
+            type: object
+        dependencies:
+            $ref: '#/definitions/dependecies'
+        source:
+            type: object
+            properties:
+                type:
+                    $ref: '#/definitions/type'
+                location:
+                    $ref: '#/definitions/location'
+                subpath:
+                    $ref: '#/definitions/subpath'
+                reference::
+                    $ref: '#/definitions/reference'
+            required:
+                - location
+                - subpath
+                - type
+        install:
+            type: object
+            properties:
+                no_hooks:
+                    type: boolean
+            required:
+                - no_hooks
+        upgrade:
+            type: object
+            properties:
+                no_hooks:
+                    type: boolean
+                pre:
+                    type: object
+                    properties:
+                        delete:
+                            type: array
+                            properties:
+                                name:
+                                    type: string
+                                type:
+                                    type: string
+                                labels:
+                                    type: array
+                            required:
+                                - name
+                                - type
+                                - labels
+                            additionalProperties: false
+                        update:
+                            type: array
+                            properties:
+                                name:
+                                    type: string
+                                type:
+                                    type: string
+                                labels:
+                                    type: array
+                            required:
+                                - name
+                                - type
+                                - labels
+                            additionalProperties: false
+            required:
+                - no_hooks
+    required:
+        - dependencies
+        - install
+        - namespace
+        - release
+        - source
+        - upgrade
+    additionalProperties: false
+---
+schema: deckhand/DataSchema/v1
+metadata:
+    name: chart_group
+    schema: armada/ChartGroup/v1
+data:
+    $schema: http://json-schema.org/schema#
+    definitions:
+        description:
+            type: string
+        sequenced:
+            type: boolean
+        chart_group:
+            type: array
+    properties:
+        description:
+            $ref: '#/definitions/description'
+        sequenced:
+            $ref: '#/definitions/sequenced'
+        chart_group:
+            $ref: '#/definitions/chart_group'
+    required:
+        - chart_group
+    additionalProperties: false
+---
+schema: deckhand/DataSchema/v1
+metadata:
+    name: manifest
+    schema: armada/Manifest/v1
+data:
+    $schema: http://json-schema.org/schema#
+    definitions:
+        release_prefix:
+            type: string
+        chart_groups:
+            type: array
+            items:
+                type: string
+    properties:
+        release_prefix:
+            type: string
+        chart_groups:
+            $ref: '#/definitions/chart_groups'
+    required:
+        - chart_groups
+        - release_prefix
+    additionalProperties: false
+...
