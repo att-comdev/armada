@@ -1,6 +1,6 @@
 # simple deploy
 ---
-schema: armada/Chart/v1
+schema: armada/Charts/v1
 metadata:
   schema: metadata/Document/v1
   name: blog-1

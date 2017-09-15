@@ -29,7 +29,7 @@ from armada.exceptions import lint_exceptions
 from armada.exceptions import tiller_exceptions
 from armada.utils.release import release_prefix
 from armada.utils import source
-from armada.utils import lint
+from armada.utils import validate
 from armada import const
 
 LOG = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class Armada(object):
         self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
         self.values = values
         self.documents = file
-        self.config = None
+        self.config = self.get_armada_manifest()
 
     def get_armada_manifest(self):
         return Manifest(self.documents).get_manifest()
@@ -92,8 +92,13 @@ class Armada(object):
         if not self.tiller.tiller_status():
             raise tiller_exceptions.TillerServicesUnavailableException()
 
-        if not lint.validate_armada_documents(self.documents):
-            raise lint_exceptions.InvalidManifestException()
+        error_messages = validate.validate_armada_documents(self.documents)
+
+        if error_messages:
+            for error_message in error_messages:
+                LOG.error(error_message)
+            raise lint_exceptions.InvalidManifestException(
+                error_messages=error_messages)
 
         # Override manifest values if --set flag is used
         if self.overrides or self.values:
@@ -104,8 +109,9 @@ class Armada(object):
         # Get config and validate
         self.config = self.get_armada_manifest()
 
-        if not lint.validate_armada_object(self.config):
-            raise lint_exceptions.InvalidArmadaObjectException()
+        result, message = validate.validate_armada_object(self.config)
+        if not result:
+            raise lint_exceptions.InvalidArmadaObjectException(details=message)
 
         # Purge known releases that have failed and are in the current yaml
         prefix = self.config.get(const.KEYWORD_ARMADA).get(
@@ -115,9 +121,8 @@ class Armada(object):
             for group in self.config.get(const.KEYWORD_ARMADA).get(
                     const.KEYWORD_GROUPS):
                 for ch in group.get(const.KEYWORD_CHARTS):
-                    ch_release_name = release_prefix(prefix,
-                                                     ch.get('chart')
-                                                     .get('chart_name'))
+                    ch_release_name = release_prefix(
+                        prefix, ch.get('chart').get('chart_name'))
                     if release[0] == ch_release_name:
                         LOG.info('Purging failed release %s '
                                  'before deployment', release[0])
