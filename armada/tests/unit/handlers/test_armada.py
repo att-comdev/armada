@@ -135,10 +135,10 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
             }
         }
 
-        self.assertTrue(hasattr(armada_obj, 'config'))
-        self.assertIsInstance(armada_obj.config, dict)
-        self.assertIn('armada', armada_obj.config)
-        self.assertEqual(expected_config, armada_obj.config)
+        self.assertTrue(hasattr(armada_obj, 'manifest'))
+        self.assertIsInstance(armada_obj.manifest, dict)
+        self.assertIn('armada', armada_obj.manifest)
+        self.assertEqual(expected_config, armada_obj.manifest)
 
     @mock.patch.object(armada, 'source')
     @mock.patch('armada.handlers.armada.Tiller')
@@ -174,7 +174,7 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
 
         armada_obj.post_flight_ops()
 
-        for group in armada_obj.config['armada']['chart_groups']:
+        for group in armada_obj.manifest['armada']['chart_groups']:
             for counter, chart in enumerate(group.get('chart_group')):
                 if chart.get('chart').get('source').get('type') == 'git':
                     mock_source.source_cleanup.assert_called_with(
@@ -192,7 +192,8 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
         yaml_documents = list(yaml.safe_load_all(TEST_YAML))
         armada_obj = armada.Armada(yaml_documents)
 
-        charts = armada_obj.config['armada']['chart_groups'][0]['chart_group']
+        charts = armada_obj.manifest['armada']['chart_groups'][0][
+            'chart_group']
         chart_1 = charts[0]['chart']
         chart_2 = charts[1]['chart']
 
@@ -207,7 +208,7 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
         method_calls = [
             mock.call(
                 mock_chartbuilder().get_helm_chart(),
-                "{}-{}".format(armada_obj.config['armada']['release_prefix'],
+                "{}-{}".format(armada_obj.manifest['armada']['release_prefix'],
                                chart_1['release']),
                 chart_1['namespace'],
                 dry_run=armada_obj.dry_run,
@@ -216,7 +217,7 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                 timeout=armada_obj.timeout),
             mock.call(
                 mock_chartbuilder().get_helm_chart(),
-                "{}-{}".format(armada_obj.config['armada']['release_prefix'],
+                "{}-{}".format(armada_obj.manifest['armada']['release_prefix'],
                                chart_2['release']),
                 chart_2['namespace'],
                 dry_run=armada_obj.dry_run,

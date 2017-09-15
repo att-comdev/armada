@@ -29,7 +29,7 @@ from armada.exceptions import lint_exceptions
 from armada.exceptions import tiller_exceptions
 from armada.utils.release import release_prefix
 from armada.utils import source
-from armada.utils import lint
+from armada.utils import validate
 from armada import const
 
 LOG = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class Armada(object):
     '''
 
     def __init__(self,
-                 file,
+                 documents,
                  disable_update_pre=False,
                  disable_update_post=False,
                  enable_chart_cleanup=False,
@@ -60,7 +60,7 @@ class Armada(object):
         '''
         Initialize the Armada engine and establish a connection to Tiller.
 
-        :param List[dict] file: Armada documents.
+        :param List[dict] documents: Armada documents.
         :param bool disable_update_pre: Disable pre-update Tiller operations.
         :param bool disable_update_post: Disable post-update Tiller
             operations.
@@ -90,9 +90,9 @@ class Armada(object):
             tiller_host=tiller_host, tiller_port=tiller_port,
             tiller_namespace=tiller_namespace)
         self.values = values
-        self.documents = file
+        self.documents = documents
         self.target_manifest = target_manifest
-        self.config = self.get_armada_manifest()
+        self.manifest = self.get_armada_manifest()
 
     def get_armada_manifest(self):
         return Manifest(
@@ -109,16 +109,22 @@ class Armada(object):
                 return chart, values
 
     def pre_flight_ops(self):
-        '''
-        Perform a series of checks and operations to ensure proper deployment
-        '''
+        """Perform a series of checks and operations to ensure proper
+        deployment.
+        """
+        LOG.info("Performing pre-flight operations.")
 
-        # Ensure tiller is available and manifest is valid
+        # Ensure Tiller is available and manifest is valid
         if not self.tiller.tiller_status():
             raise tiller_exceptions.TillerServicesUnavailableException()
 
-        if not lint.validate_armada_documents(self.documents):
-            raise lint_exceptions.InvalidManifestException()
+        error_messages = validate.validate_armada_documents(self.documents)
+
+        if error_messages:
+            for error_message in error_messages:
+                LOG.error(error_message)
+            raise lint_exceptions.InvalidManifestException(
+                error_messages=error_messages)
 
         # Override manifest values if --set flag is used
         if self.overrides or self.values:
@@ -126,20 +132,20 @@ class Armada(object):
                 self.documents, overrides=self.overrides,
                 values=self.values).update_manifests()
 
-        if not lint.validate_armada_object(self.config):
-            raise lint_exceptions.InvalidArmadaObjectException()
+        result, message = validate.validate_armada_manifest(self.manifest)
+        if not result:
+            raise lint_exceptions.InvalidArmadaObjectException(details=message)
 
         # Purge known releases that have failed and are in the current yaml
-        prefix = self.config.get(const.KEYWORD_ARMADA).get(
+        prefix = self.manifest.get(const.KEYWORD_ARMADA).get(
             const.KEYWORD_PREFIX)
         failed_releases = self.get_releases_by_status(const.STATUS_FAILED)
         for release in failed_releases:
-            for group in self.config.get(const.KEYWORD_ARMADA).get(
+            for group in self.manifest.get(const.KEYWORD_ARMADA).get(
                     const.KEYWORD_GROUPS):
                 for ch in group.get(const.KEYWORD_CHARTS):
-                    ch_release_name = release_prefix(prefix,
-                                                     ch.get('chart')
-                                                     .get('chart_name'))
+                    ch_release_name = release_prefix(
+                        prefix, ch.get('chart').get('chart_name'))
                     if release[0] == ch_release_name:
                         LOG.info('Purging failed release %s '
                                  'before deployment', release[0])
@@ -150,7 +156,7 @@ class Armada(object):
         # We only support a git source type right now, which can also
         # handle git:// local paths as well
         repos = {}
-        for group in self.config.get(const.KEYWORD_ARMADA).get(
+        for group in self.manifest.get(const.KEYWORD_ARMADA).get(
                 const.KEYWORD_GROUPS):
             for ch in group.get(const.KEYWORD_CHARTS):
                 self.tag_cloned_repo(ch, repos)
@@ -223,12 +229,11 @@ class Armada(object):
 
         # TODO: (gardlt) we need to break up this func into
         # a more cleaner format
-        LOG.info("Performing Pre-Flight Operations")
         self.pre_flight_ops()
 
         # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
-        prefix = self.config.get(const.KEYWORD_ARMADA).get(
+        prefix = self.manifest.get(const.KEYWORD_ARMADA).get(
             const.KEYWORD_PREFIX)
 
         if known_releases is None:
@@ -238,7 +243,7 @@ class Armada(object):
             LOG.debug("Release %s, Version %s found on tiller", release[0],
                       release[1])
 
-        for entry in self.config[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
+        for entry in self.manifest[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
 
             chart_wait = self.wait
             desc = entry.get('description', 'A Chart Group')
@@ -388,7 +393,7 @@ class Armada(object):
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(
                 prefix,
-                self.config[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS])
+                self.manifest[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS])
 
         return msg
 
@@ -397,7 +402,7 @@ class Armada(object):
         Operations to run after deployment process has terminated
         '''
         # Delete temp dirs used for deployment
-        for group in self.config.get(const.KEYWORD_ARMADA).get(
+        for group in self.manifest.get(const.KEYWORD_ARMADA).get(
                 const.KEYWORD_GROUPS):
             for ch in group.get(const.KEYWORD_CHARTS):
                 if ch.get('chart').get('source').get('type') == 'git':
