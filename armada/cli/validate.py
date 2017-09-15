@@ -16,8 +16,8 @@ import click
 import yaml
 
 from armada.cli import CliAction
-from armada.utils.lint import validate_armada_documents
-from armada.utils.lint import validate_armada_object
+from armada.utils.validate import validate_armada_documents
+from armada.utils.validate import validate_armada_object
 from armada.handlers.manifest import Manifest
 from armada.handlers.document import ReferenceResolver
 
