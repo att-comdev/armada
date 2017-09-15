@@ -94,8 +94,8 @@ data:
         - name: keystone-bootstrap
           type: job
           labels:
-            application: keystone
-            component: bootstrap
+            - application: keystone
+            - component: bootstrap
   values:
     replicas: 3
   source:

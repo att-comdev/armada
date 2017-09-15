@@ -18,7 +18,7 @@ import yaml
 
 from armada import const
 from armada.exceptions import override_exceptions
-from armada.utils import lint
+from armada.utils import validate
 
 
 class Override(object):
@@ -150,7 +150,7 @@ class Override(object):
                 self.override_manifest_value(doc_path, data_path, new_value)
 
         try:
-            lint.validate_armada_documents(self.documents)
+            validate.validate_armada_documents(self.documents)
         except Exception:
             raise override_exceptions.InvalidOverrideValueException(
                 self.overrides)
