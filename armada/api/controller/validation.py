@@ -18,30 +18,32 @@ import falcon
 
 from armada import api
 from armada.common import policy
-from armada.utils.lint import validate_armada_documents
+from armada.utils.validate import validate_armada_documents
 
 
 class Validate(api.BaseResource):
-    '''
-    apply armada endpoint service
-    '''
+    """Controller for validating Armada manifests."""
 
     @policy.enforce('armada:validate_manifest')
     def on_post(self, req, resp):
         try:
-            manifest = self.req_yaml(req)
-            documents = list(manifest)
+            documents = list(self.req_yaml(req))
+            valid, errors = validate_armada_documents(documents)
 
-            message = {
-                'valid': validate_armada_documents(documents)
+            resp_body = {
+                'valid': valid,
+                'errors': errors
             }
 
             resp.status = falcon.HTTP_200
-            resp.body = json.dumps(message)
+            resp.body = json.dumps(resp_body)
             resp.content_type = 'application/json'
 
         except Exception:
-            err_message = 'Failed to validate Armada Manifest'
+            err_message = {
+                'reason': 'Failed to validate Armada Manifest',
+                'errors': errors
+            }
             self.error(req.context, err_message)
             self.return_error(
                 resp, falcon.HTTP_400, message=err_message)
