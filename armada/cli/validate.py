@@ -17,9 +17,7 @@ import click
 import yaml
 
 from armada.cli import CliAction
-from armada.utils.lint import validate_armada_documents
-from armada.utils.lint import validate_armada_object
-from armada.handlers.manifest import Manifest
+from armada.utils.validate import validate_armada_documents
 
 
 @click.group()
@@ -57,17 +55,16 @@ class ValidateManifest(CliAction):
 
     def invoke(self):
         if not self.ctx.obj.get('api', False):
-            documents = yaml.safe_load_all(open(self.filename).read())
-            manifest_obj = Manifest(documents).get_manifest()
-            obj_check = validate_armada_object(manifest_obj)
-            doc_check = validate_armada_documents(documents)
-
-            try:
-                if doc_check and obj_check:
+            with open(self.filename) as f:
+                documents = list(yaml.safe_load_all(f.read()))
+                valid, errors = validate_armada_documents(documents)
+                if valid:
                     self.logger.info(
                         'Successfully validated: %s', self.filename)
-            except Exception:
-                raise Exception('Failed to validate: %s', self.filename)
+                else:
+                    self.logger.error('Invalid Manifest: %s', self.filename)
+                    for err in errors:
+                        self.logger.error(err)
         else:
             client = self.ctx.obj.get('CLIENT')
             with open(self.filename, 'r') as f:
@@ -77,3 +74,5 @@ class ValidateManifest(CliAction):
                         'Successfully validated: %s', self.filename)
                 else:
                     self.logger.error("Failed to validate: %s", self.filename)
+                    for err in resp.get('errors', []):
+                        self.logger.error(err)
