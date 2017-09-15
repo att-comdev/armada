@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from copy import deepcopy
 
 from oslo_log import log as logging
 
@@ -47,8 +48,7 @@ class Manifest(object):
             are not found or if the document types are missing required
             properties.
         """
-        self.config = None
-        self.documents = documents
+        self.documents = deepcopy(documents)
         self.charts, self.groups, manifests = self._find_documents(
             target_manifest)
 
@@ -66,9 +66,8 @@ class Manifest(object):
             error = ('Documents must be a list of documents with at least one '
                      'of each of the following schemas: %s and only one '
                      'manifest' % expected_schemas)
-            LOG.error(error, expected_schemas)
-            raise exceptions.ManifestException(
-                details=error % expected_schemas)
+            LOG.error(error)
+            raise exceptions.ManifestException(details=error)
 
     def _find_documents(self, target_manifest=None):
         """Returns the chart documents, chart group documents,

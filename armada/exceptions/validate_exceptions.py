@@ -15,13 +15,13 @@
 from armada.exceptions import base_exception
 
 
-class LintException(base_exception.ArmadaBaseException):
+class ValidateException(base_exception.ArmadaBaseException):
     '''Base class for linting exceptions and errors.'''
 
     message = 'An unknown linting error occurred.'
 
 
-class InvalidManifestException(LintException):
+class InvalidManifestException(ValidateException):
     '''
     Exception for invalid manifests.
 
@@ -29,28 +29,29 @@ class InvalidManifestException(LintException):
     *Coming Soon*
     '''
 
-    message = 'Armada manifest invalid.'
+    message = ('Armada manifest(s) failed validation. Details: '
+               '%(error_messages)s.')
 
 
-class InvalidChartNameException(LintException):
+class InvalidChartNameException(ValidateException):
     '''Exception that occurs when an invalid filename is encountered.'''
 
     message = 'Chart name must be a string.'
 
 
-class InvalidChartDefinitionException(LintException):
+class InvalidChartDefinitionException(ValidateException):
     '''Exception when invalid chart definition is encountered.'''
 
     message = 'Invalid chart definition. Chart definition must be array.'
 
 
-class InvalidReleaseException(LintException):
+class InvalidReleaseException(ValidateException):
     '''Exception that occurs when a release is invalid.'''
 
     message = 'Release needs to be a string.'
 
 
-class InvalidArmadaObjectException(LintException):
+class InvalidArmadaObjectException(ValidateException):
     '''
     Exception that occurs when an Armada object is not declared.
 
@@ -58,4 +59,5 @@ class InvalidArmadaObjectException(LintException):
     *Coming Soon*
     '''
 
-    message = 'An Armada object was not declared.'
+    message = ('An Armada object failed internal validation. Details: '
+               '%(details)s.')
