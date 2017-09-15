@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import mock
+import yaml
 
+import mock
 from oslo_config import cfg
 
 from armada.handlers import armada
@@ -25,14 +25,29 @@ CONF = cfg.CONF
 
 class ArmadaControllerTest(base.BaseControllerTest):
 
-    @mock.patch.object(armada, 'lint')
+    @mock.patch.object(armada, 'validate')
     @mock.patch.object(armada, 'Manifest')
     @mock.patch.object(armada, 'Tiller')
     def test_armada_apply_resource(self, mock_tiller, mock_manifest,
-                                   mock_lint):
+                                   mock_validate):
         """Tests the POST /api/v1.0/apply endpoint."""
         rules = {'armada:create_endpoints': '@'}
         self.policy.set_rules(rules)
+
+        manifest_file = """
+        schema: armada/Manifest/v1
+        metadata:
+            schema: metadata/Document/v1
+            name: example-manifest
+        data:
+            release_prefix: example
+            chart_groups:
+                - example-group
+        """
+        manifest_obj = yaml.load(manifest_file)
+
+        mock_validate.validate_armada_documents.return_value = []
+        mock_validate.validate_armada_manifest.return_value = True, None
 
         options = {'debug': 'true',
                    'disable_update_pre': 'false',
@@ -42,17 +57,18 @@ class ArmadaControllerTest(base.BaseControllerTest):
                    'dry_run': 'false',
                    'wait': 'false',
                    'timeout': '100'}
-        payload = {'file': '', 'options': options}
-        body = json.dumps(payload)
         expected = {'message': {'diff': [], 'install': [], 'upgrade': []}}
 
-        result = self.app.simulate_post(path='/api/v1.0/apply', body=body)
-        self.assertEqual(result.json, expected)
+        result = self.app.simulate_post(
+            path='/api/v1.0/apply', body=manifest_file, params=options)
+        self.assertEqual(expected, result.json)
         self.assertEqual('application/json', result.headers['content-type'])
 
         mock_tiller.assert_called_once_with(tiller_host=None,
                                             tiller_port=44134)
-        mock_manifest.assert_called_once_with([payload])
-        mock_lint.validate_armada_documents.assert_called_once_with([payload])
+        mock_manifest.assert_called_with([manifest_obj])
+        mock_validate.validate_armada_documents.assert_called_once_with(
+            [manifest_obj])
         fake_manifest = mock_manifest.return_value.get_manifest.return_value
-        mock_lint.validate_armada_object.assert_called_once_with(fake_manifest)
+        mock_validate.validate_armada_manifest.assert_called_once_with(
+            fake_manifest)
