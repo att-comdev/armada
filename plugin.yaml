@@ -1,0 +1,11 @@
+name: "fleet"
+version: "0.0.2"
+usage: "Helm access to armada"
+description: |-
+  This plugin provides helm access to armada. A tool for managing multiple helm charts with dependencies by centralizing all configurations in a single Armada yaml and providing lifecycle hooks for all helm releases
+  usage:
+    $ helm fleet tiller --status
+    $ helm fleet apply /examples/openstack-helm.yaml
+ignoreFlags: false
+useTunnel: false
+command: "sh $HELM_PLUGIN_DIR/controller.sh"
