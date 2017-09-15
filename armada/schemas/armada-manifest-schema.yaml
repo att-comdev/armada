@@ -1,0 +1,142 @@
+---
+schema: deckhand/DataSchema/v1
+metadata:
+  name: armada/Chart/v1
+  schema: metadata/Control/v1
+data:
+  $schema: http://json-schema.org/schema#
+  type: object
+  properties:
+    chart_name:
+      type: string
+    release:
+      type: string
+    namespace:
+      type: string
+    values:
+      type: object
+    dependencies:
+      type: array
+      items:
+        type: string
+    test:
+      type: boolean
+    timeout:
+      type: integer
+    wait:
+      type: object
+      properties:
+        timeout:
+          type: integer
+        labels:
+          type: object
+      additionalProperties: false
+    source:
+      type: object
+      properties:
+        type:
+          type: string
+        location:
+          type: string
+        subpath:
+          type: string
+        reference::
+          type: string
+      required:
+        - location
+        - subpath
+        - type
+    install:
+      type: object
+      properties:
+        no_hooks:
+          type: boolean
+      required:
+        - no_hooks
+    upgrade:
+      type: object
+      properties:
+        no_hooks:
+          type: boolean
+        pre:
+          type: object
+          properties:
+            delete:
+              type: array
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                labels:
+                  type: object
+              required:
+                - name
+                - type
+                - labels
+              additionalProperties: false
+            update:
+              type: array
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                labels:
+                  type: object
+              required:
+                - name
+                - type
+                - labels
+              additionalProperties: false
+      required:
+        - no_hooks
+      additionalProperties: false
+  required:
+    - dependencies
+    - install
+    - namespace
+    - release
+    - source
+    - upgrade
+  additionalProperties: false
+---
+schema: deckhand/DataSchema/v1
+metadata:
+  name: armada/ChartGroup/v1
+  schema: metadata/Control/v1
+data:
+  $schema: http://json-schema.org/schema#
+  properties:
+    description:
+      type: string
+    sequenced:
+      type: boolean
+    test_charts:
+      type: boolean
+    chart_group:
+      type: array
+      items:
+        type: string
+  required:
+    - chart_group
+  additionalProperties: false
+---
+schema: deckhand/DataSchema/v1
+metadata:
+  name: armada/Manifest/v1
+  schema: metadata/Control/v1
+data:
+  $schema: http://json-schema.org/schema#
+  properties:
+    release_prefix:
+      type: string
+    chart_groups:
+      type: array
+      items:
+          type: string
+  required:
+    - chart_groups
+    - release_prefix
+  additionalProperties: false
+...

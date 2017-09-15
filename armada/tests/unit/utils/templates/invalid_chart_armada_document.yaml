@@ -25,7 +25,6 @@ metadata:
   name: mariadb
 data:
   chart_name: mariadb
-  release: mariadb
   namespace: openstack
   timeout: 3600
   wait:
