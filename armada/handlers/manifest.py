@@ -47,7 +47,6 @@ class Manifest(object):
             are not found or if the document types are missing required
             properties.
         """
-        self.config = None
         self.documents = documents
         self.charts, self.groups, manifests = self._find_documents(
             target_manifest)
