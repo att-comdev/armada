@@ -17,9 +17,7 @@ import click
 import yaml
 
 from armada.cli import CliAction
-from armada.utils.lint import validate_armada_documents
-from armada.utils.lint import validate_armada_object
-from armada.handlers.manifest import Manifest
+from armada.utils.validate import validate_armada_documents
 
 
 @click.group()
@@ -32,7 +30,7 @@ def validate():
 DESC = """
 This command validates Armada Manifest
 
-The validate argument must be a relative path to Armada manifest
+The validate argument must be a relative path to an Armada manifest file.
 
     $ armada validate examples/simple.yaml
 
@@ -57,17 +55,16 @@ class ValidateManifest(CliAction):
 
     def invoke(self):
         if not self.ctx.obj.get('api', False):
-            documents = yaml.safe_load_all(open(self.filename).read())
-            manifest_obj = Manifest(documents).get_manifest()
-            obj_check = validate_armada_object(manifest_obj)
-            doc_check = validate_armada_documents(documents)
-
-            try:
-                if doc_check and obj_check:
+            with open(self.filename) as f:
+                documents = list(yaml.safe_load_all(f.read()))
+                error_messages = validate_armada_documents(documents)
+                if not error_messages:
                     self.logger.info(
-                        'Successfully validated: %s', self.filename)
-            except Exception:
-                raise Exception('Failed to validate: %s', self.filename)
+                        'Successfully validated manifest: %s.', self.filename)
+                else:
+                    self.logger.error('Invalid manifest: %s.', self.filename)
+                    for error_message in error_messages:
+                        self.logger.error(error_message)
         else:
             client = self.ctx.obj.get('CLIENT')
             with open(self.filename, 'r') as f:
@@ -76,4 +73,7 @@ class ValidateManifest(CliAction):
                     self.logger.info(
                         'Successfully validated: %s', self.filename)
                 else:
-                    self.logger.error("Failed to validate: %s", self.filename)
+                    self.logger.error("Failed to validate manifest: %s.",
+                                      self.filename)
+                    for error in resp.get('errors', []):
+                        self.logger.error(error)
