@@ -16,8 +16,8 @@ import click
 import yaml
 
 from armada.cli import CliAction
-from armada.utils.lint import validate_armada_documents
-from armada.utils.lint import validate_armada_object
+from armada.utils.validate import validate_armada_documents
+from armada.utils.validate import validate_armada_manifest
 from armada.handlers.manifest import Manifest
 from armada.handlers.document import ReferenceResolver
 
@@ -65,7 +65,7 @@ class ValidateManifest(CliAction):
                 documents.extend(list(yaml.safe_load_all(d.decode())))
 
             manifest_obj = Manifest(documents).get_manifest()
-            obj_check = validate_armada_object(manifest_obj)
+            obj_check = validate_armada_manifest(manifest_obj)
             doc_check = validate_armada_documents(documents)
 
             try:
