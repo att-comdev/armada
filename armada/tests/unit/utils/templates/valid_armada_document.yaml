@@ -1,31 +1,12 @@
 ---
-schema: armada/Manifest/v1
-metadata:
-  schema: metadata/Document/v1
-  name: example-manifest
-data:
-  release_prefix: example
-  chart_groups:
-    - example-group
----
-schema: armada/ChartGroup/v1
-metadata:
-  schema: metadata/Document/v1
-  name: example-group
-data:
-  description: "OpenStack Infra Services"
-  chart_group:
-    - example-chart
----
 schema: armada/Chart/v1
 metadata:
   schema: metadata/Document/v1
-  name: example-chart
+  name: helm-toolkit
 data:
-  name: keystone
-  release: keystone
-  namespace: undercloud
-  timeout: 100
+  chart_name: helm-toolkit
+  release: helm-toolkit
+  namespace: helm-tookit
   install:
     no_hooks: false
   upgrade:
@@ -33,24 +14,126 @@ data:
   values: {}
   source:
     type: git
-    location: git://github.com/example/example
-    subpath: example-chart
+    location: https://git.openstack.org/openstack/openstack-helm
+    subpath: helm-toolkit
     reference: master
-  dependencies:
-    - dep-chart
+  dependencies: []
 ---
 schema: armada/Chart/v1
 metadata:
   schema: metadata/Document/v1
-  name: dep-chart
+  name: mariadb
 data:
-  name: dep-chart
-  release: null
-  namespace: null
+  chart_name: mariadb
+  release: mariadb
+  namespace: openstack
+  timeout: 3600
+  wait:
+    timeout: 3600
+    labels:
+      release_group: armada-mariadb
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
   values: {}
   source:
     type: git
-    location: git://github.com/example/example
-    subpath: dep-chart
+    location: https://git.openstack.org/openstack/openstack-helm
+    subpath: mariadb
     reference: master
-  dependencies: []
+  dependencies:
+    - helm-toolkit
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: memcached
+data:
+  chart_name: memcached
+  release: memcached
+  namespace: openstack
+  timeout: 100
+  wait:
+    timeout: 100
+    labels:
+      release_group: armada-memcached
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+  values: {}
+  source:
+    type: git
+    location: https://git.openstack.org/openstack/openstack-helm
+    subpath: memcached
+    reference: master
+  dependencies:
+    - helm-toolkit
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: keystone
+data:
+  chart_name: keystone
+  test: true
+  release: keystone
+  namespace: openstack
+  timeout: 100
+  wait:
+    timeout: 100
+    labels:
+      release_group: armada-keystone
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+        - name: keystone-bootstrap
+          type: job
+          labels:
+            - application: keystone
+            - component: bootstrap
+  values:
+    replicas: 3
+  source:
+    type: git
+    location: https://git.openstack.org/openstack/openstack-helm
+    subpath: keystone
+    reference: master
+  dependencies:
+    - helm-toolkit
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: keystone-infra-services
+data:
+  description: "Keystone Infra Services"
+  sequenced: True
+  chart_group:
+    - mariadb
+    - memcached
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: openstack-keystone
+data:
+  description: "Deploying OpenStack Keystone"
+  sequenced: True
+  test_charts: False
+  chart_group:
+    - keystone
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: armada-manifest
+data:
+  release_prefix: armada
+  chart_groups:
+    - keystone-infra-services
+    - openstack-keystone
