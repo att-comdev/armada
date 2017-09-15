@@ -3,7 +3,8 @@ language: python
 sudo: required
 
 python:
-  - "2.7"
+  - "3.6"
+  - "3.5"
 
 before_install:
     - pip install -r test-requirements.txt
@@ -14,9 +15,4 @@ install:
     - pip install -e .
 
 script:
-    - flake8
-    - armada -h
-    - nosetests -w armada/tests/unit --cover-package=armada --with-coverage --cover-tests
-
-# after_success:
-#     - codecov
+    - tox
