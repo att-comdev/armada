@@ -20,6 +20,7 @@ import tarfile
 import tempfile
 
 from git import Repo
+from git import Git
 
 from ..exceptions import source_exceptions
 
@@ -38,7 +39,9 @@ def git_clone(repo_url, branch='master'):
     _tmp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
-        Repo.clone_from(repo_url, _tmp_dir, **{'branch': branch})
+        repo = Repo.clone_from(repo_url, _tmp_dir, **{'branch': 'master'})
+        g = Git(repo.working_dir)
+        g.checkout(branch)
     except Exception:
         raise source_exceptions.GitLocationException(repo_url)
 
