@@ -18,7 +18,7 @@ import yaml
 
 from armada import api
 from armada.common import policy
-from armada.utils.lint import validate_armada_documents
+from armada.utils.validate import validate_armada_documents
 from armada.handlers.document import ReferenceResolver
 
 
