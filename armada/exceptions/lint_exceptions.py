@@ -24,7 +24,7 @@ class LintException(base_exception.ArmadaBaseException):
 class InvalidManifestException(LintException):
     '''Exception for invalid manifests.'''
 
-    message = 'Armada manifest invalid.'
+    message = 'Armada manifest invalid'
 
 
 class InvalidChartNameException(LintException):

@@ -25,7 +25,6 @@ metadata:
   name: mariadb
 data:
   chart_name: mariadb
-  release: mariadb
   namespace: openstack
   timeout: 3600
   wait:
@@ -94,8 +93,8 @@ data:
         - name: keystone-bootstrap
           type: job
           labels:
-            application: keystone
-            component: bootstrap
+            - application: keystone
+            - component: bootstrap
   values:
     replicas: 3
   source:
