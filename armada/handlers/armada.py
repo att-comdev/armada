@@ -29,7 +29,7 @@ from armada.exceptions import lint_exceptions
 from armada.exceptions import tiller_exceptions
 from armada.utils.release import release_prefix
 from armada.utils import source
-from armada.utils import lint
+from armada.utils import validate
 from armada import const
 
 LOG = logging.getLogger(__name__)
@@ -92,7 +92,12 @@ class Armada(object):
         if not self.tiller.tiller_status():
             raise tiller_exceptions.TillerServicesUnavailableException()
 
-        if not lint.validate_armada_documents(self.documents):
+        result = validate.validate_armada_documents(self.documents)
+
+        if type(result) is list:
+            for err in result:
+                LOG.error(err)
+
             raise lint_exceptions.InvalidManifestException()
 
         # Override manifest values if --set flag is used
@@ -104,7 +109,7 @@ class Armada(object):
         # Get config and validate
         self.config = self.get_armada_manifest()
 
-        if not lint.validate_armada_object(self.config):
+        if not validate.validate_armada_object(self.config):
             raise lint_exceptions.InvalidArmadaObjectException()
 
         # Purge known releases that have failed and are in the current yaml
