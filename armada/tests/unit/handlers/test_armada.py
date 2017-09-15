@@ -1,179 +1,227 @@
+# Copyright 2017 AT&T Intellectual Property.  All other rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import mock
-import unittest
 import yaml
 
-from armada.handlers.armada import Armada
-from armada.handlers.manifest import Manifest
+import testtools
+
+from armada.handlers import armada
 
 
-class ArmadaTestCase(unittest.TestCase):
-    test_yaml = """
-    ---
-    schema: armada/Manifest/v1
-    metadata:
-      schema: metadata/Document/v1
-      name: example-manifest
-    data:
-      release_prefix: armada
-      chart_groups:
-        - example-group
-    ---
-    schema: armada/ChartGroup/v1
-    metadata:
-      schema: metadata/Document/v1
-      name: example-group
-    data:
-      description: this is a test
-      sequenced: False
-      chart_group:
-        - example-chart-1
-        - example-chart-2
-    ---
-    schema: armada/Chart/v1
-    metadata:
-      schema: metadata/Document/v1
-      name: example-chart-2
-    data:
-        name: test_chart_2
-        release_name: test_chart_2
-        namespace: test
-        values: {}
-        source:
-          type: local
-          location: /tmp/dummy/armada
-          subpath: chart_2
-          reference: null
-        dependencies: []
-        timeout: 5
-    ---
-    schema: armada/Chart/v1
-    metadata:
-      schema: metadata/Document/v1
-      name: example-chart-1
-    data:
-        name: test_chart_1
-        release_name: test_chart_1
-        namespace: test
-        values: {}
-        source:
-          type: git
-          location: git://github.com/dummy/armada
-          subpath: chart_1
-          reference: master
-        dependencies: []
-        timeout: 50
-    """
+TEST_YAML = """
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: example-manifest
+data:
+  release_prefix: armada
+  chart_groups:
+    - example-group
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: example-group
+data:
+  description: this is a test
+  sequenced: False
+  chart_group:
+    - example-chart-1
+    - example-chart-2
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: example-chart-2
+data:
+    chart_name: test_chart_2
+    release: test_chart_2
+    namespace: test
+    values: {}
+    source:
+      type: local
+      location: /tmp/dummy/armada
+      subpath: chart_2
+      reference: null
+    dependencies: []
+    timeout: 5
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: example-chart-1
+data:
+    chart_name: test_chart_1
+    release: test_chart_1
+    namespace: test
+    values: {}
+    source:
+      type: git
+      location: git://github.com/dummy/armada
+      subpath: chart_1
+      reference: master
+    dependencies: []
+    timeout: 50
+"""
 
-    @unittest.skip('temp')
-    @mock.patch('armada.handlers.armada.git')
-    @mock.patch('armada.handlers.armada.lint')
+CHART_SOURCES = [('git://github.com/dummy/armada', 'chart_1'),
+                 ('/tmp/dummy/armada', 'chart_2')]
+
+
+class ArmadaHandlerTestCase(testtools.TestCase):
+
+    def _test_pre_flight_ops(self, armada_obj):
+        armada_obj.pre_flight_ops()
+
+        expected_config = {
+            'armada': {
+                'release_prefix': 'armada',
+                'chart_groups': [
+                    {
+                        'chart_group': [
+                            {
+                                'chart': {
+                                    'dependencies': [],
+                                    'chart_name': 'test_chart_1',
+                                    'namespace': 'test',
+                                    'release': 'test_chart_1',
+                                    'source': {
+                                        'location': (
+                                            'git://github.com/dummy/armada'),
+                                        'reference': 'master',
+                                        'subpath': 'chart_1',
+                                        'type': 'git'
+                                    },
+                                    'source_dir': CHART_SOURCES[0],
+                                    'timeout': 50,
+                                    'values': {}
+                                }
+                            },
+                            {
+                                'chart': {
+                                    'dependencies': [],
+                                    'chart_name': 'test_chart_2',
+                                    'namespace': 'test',
+                                    'release': 'test_chart_2',
+                                    'source': {
+                                        'location': '/tmp/dummy/armada',
+                                        'reference': None,
+                                        'subpath': 'chart_2',
+                                        'type': 'local'
+                                    },
+                                    'source_dir': CHART_SOURCES[1],
+                                    'timeout': 5,
+                                    'values': {}
+                                }
+                            }
+                        ],
+                        'description': 'this is a test',
+                        'name': 'example-group',
+                        'sequenced': False
+                    }
+                ]
+            }
+        }
+
+        self.assertTrue(hasattr(armada_obj, 'config'))
+        self.assertIsInstance(armada_obj.config, dict)
+        self.assertIn('armada', armada_obj.config)
+        self.assertEqual(expected_config, armada_obj.config)
+
+    @mock.patch.object(armada, 'source')
     @mock.patch('armada.handlers.armada.Tiller')
-    def test_pre_flight_ops(self, mock_tiller, mock_lint, mock_git):
-        '''Test pre-flight checks and operations'''
-        armada = Armada('')
-        armada.tiller = mock_tiller
-        armada.documents = yaml.safe_load_all(self.test_yaml)
-        armada.config = Manifest(armada.documents).get_manifest()
+    def test_pre_flight_ops(self, mock_tiller, mock_source):
+        """Test pre-flight checks and operations."""
+        yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+        armada_obj = armada.Armada(yaml_documents)
 
-        CHART_SOURCES = [('git://github.com/dummy/armada', 'chart_1'),
-                         ('/tmp/dummy/armada', 'chart_2')]
-
-        # mock methods called by pre_flight_ops()
+        # Mock methods called by `pre_flight_ops()`.
         mock_tiller.tiller_status.return_value = True
-        mock_lint.valid_manifest.return_value = True
-        mock_git.git_clone.return_value = CHART_SOURCES[0][0]
+        mock_source.git_clone.return_value = CHART_SOURCES[0][0]
 
-        armada.pre_flight_ops()
+        self._test_pre_flight_ops(armada_obj)
 
-        mock_git.git_clone.assert_called_once_with(CHART_SOURCES[0][0],
-                                                   'master')
-        for group in armada.config.get('armada').get('charts'):
-            for counter, chart in enumerate(group.get('chart_group')):
-                self.assertEqual(
-                    chart.get('chart').get('source_dir')[0],
-                    CHART_SOURCES[counter][0])
-                self.assertEqual(
-                    chart.get('chart').get('source_dir')[1],
-                    CHART_SOURCES[counter][1])
+        mock_tiller.assert_called_once_with(tiller_host=None,
+                                            tiller_port=44134)
+        mock_source.git_clone.assert_called_once_with(
+            'git://github.com/dummy/armada', 'master')
 
-    @unittest.skip('temp')
-    @mock.patch('armada.handlers.armada.git')
-    @mock.patch('armada.handlers.armada.lint')
+    @mock.patch.object(armada, 'source')
     @mock.patch('armada.handlers.armada.Tiller')
-    def test_post_flight_ops(self, mock_tiller, mock_lint, mock_git):
-        '''Test post-flight operations'''
-        armada = Armada('')
-        armada.tiller = mock_tiller
-        tmp_doc = yaml.safe_load_all(self.test_yaml)
-        armada.config = Manifest(tmp_doc).get_manifest()
+    def test_post_flight_ops(self, mock_tiller, mock_source):
+        """Test post-flight operations."""
+        yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+        armada_obj = armada.Armada(yaml_documents)
 
-        CHART_SOURCES = [('git://github.com/dummy/armada', 'chart_1'),
-                         ('/tmp/dummy/armada', 'chart_2')]
-
-        # mock methods called by pre_flight_ops()
+        # Mock methods called by `pre_flight_ops()`.
         mock_tiller.tiller_status.return_value = True
-        mock_lint.valid_manifest.return_value = True
-        mock_git.git_clone.return_value = CHART_SOURCES[0][0]
-        armada.pre_flight_ops()
+        mock_source.git_clone.return_value = CHART_SOURCES[0][0]
 
-        armada.post_flight_ops()
+        self._test_pre_flight_ops(armada_obj)
 
-        for group in yaml.load(self.test_yaml).get('armada').get('charts'):
+        armada_obj.post_flight_ops()
+
+        for group in armada_obj.config['armada']['chart_groups']:
             for counter, chart in enumerate(group.get('chart_group')):
                 if chart.get('chart').get('source').get('type') == 'git':
-                    mock_git.source_cleanup \
-                            .assert_called_with(CHART_SOURCES[counter][0])
+                    mock_source.source_cleanup.assert_called_with(
+                        CHART_SOURCES[counter][0])
 
-    @unittest.skip('temp')
-    @mock.patch.object(Armada, 'post_flight_ops')
-    @mock.patch.object(Armada, 'pre_flight_ops')
+    @mock.patch.object(armada.Armada, 'post_flight_ops')
+    @mock.patch.object(armada.Armada, 'pre_flight_ops')
     @mock.patch('armada.handlers.armada.ChartBuilder')
     @mock.patch('armada.handlers.armada.Tiller')
     def test_install(self, mock_tiller, mock_chartbuilder, mock_pre_flight,
                      mock_post_flight):
         '''Test install functionality from the sync() method'''
 
-        # instantiate Armada and Tiller objects
-        armada = Armada('', wait=True, timeout=1000)
-        armada.tiller = mock_tiller
-        tmp_doc = yaml.safe_load_all(self.test_yaml)
-        armada.config = Manifest(tmp_doc).get_manifest()
+        # Instantiate Armada object.
+        yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+        armada_obj = armada.Armada(yaml_documents)
 
-        charts = armada.config['armada']['charts'][0]['chart_group']
+        charts = armada_obj.config['armada']['chart_groups'][0]['chart_group']
         chart_1 = charts[0]['chart']
         chart_2 = charts[1]['chart']
 
-        # mock irrelevant methods called by armada.sync()
+        # Mock irrelevant methods called by `armada.sync()`.
         mock_tiller.list_charts.return_value = []
         mock_chartbuilder.get_source_path.return_value = None
         mock_chartbuilder.get_helm_chart.return_value = None
 
-        armada.sync()
+        armada_obj.sync()
 
-        # check params that should be passed to tiller.install_release()
+        # Check params that should be passed to `tiller.install_release()`.
         method_calls = [
             mock.call(
                 mock_chartbuilder().get_helm_chart(),
-                "{}-{}".format(armada.config['armada']['release_prefix'],
-                               chart_1['release_name']),
+                "{}-{}".format(armada_obj.config['armada']['release_prefix'],
+                               chart_1['release']),
                 chart_1['namespace'],
-                dry_run=armada.dry_run,
+                dry_run=armada_obj.dry_run,
                 values=yaml.safe_dump(chart_1['values']),
-                wait=armada.wait,
-                timeout=1000),
+                wait=armada_obj.wait,
+                timeout=armada_obj.timeout),
             mock.call(
                 mock_chartbuilder().get_helm_chart(),
-                "{}-{}".format(armada.config['armada']['release_prefix'],
-                               chart_2['release_name']),
+                "{}-{}".format(armada_obj.config['armada']['release_prefix'],
+                               chart_2['release']),
                 chart_2['namespace'],
-                dry_run=armada.dry_run,
+                dry_run=armada_obj.dry_run,
                 values=yaml.safe_dump(chart_2['values']),
-                wait=armada.wait,
-                timeout=1000)
+                wait=armada_obj.wait,
+                timeout=armada_obj.timeout)
         ]
-        mock_tiller.install_release.assert_has_calls(method_calls)
-
-    @unittest.skip('skipping update')
-    def test_upgrade(self):
-        '''Test upgrade functionality from the sync() method'''
-        # TODO
+        mock_tiller.return_value.install_release.assert_has_calls(method_calls)
