@@ -18,8 +18,6 @@ import mock
 from oslo_config import cfg
 
 from armada.api.controller import armada as armada_api
-from armada.common.policies import base as policy_base
-from armada.tests import test_utils
 from armada.tests.unit.api import base
 
 CONF = cfg.CONF
@@ -101,16 +99,3 @@ class ArmadaControllerTest(base.BaseControllerTest):
                                         },
                                         params=options)
         self.assertEqual(result.status_code, 400)
-
-
-class ArmadaControllerNegativeRbacTest(base.BaseControllerTest):
-
-    @test_utils.attr(type=['negative'])
-    def test_armada_apply_resource_insufficient_permissions(self):
-        """Tests the POST /api/v1.0/apply endpoint returns 403 following failed
-        authorization.
-        """
-        rules = {'armada:create_endpoints': policy_base.RULE_ADMIN_REQUIRED}
-        self.policy.set_rules(rules)
-        resp = self.app.simulate_post('/api/v1.0/apply')
-        self.assertEqual(403, resp.status_code)
