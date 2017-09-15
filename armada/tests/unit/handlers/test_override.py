@@ -17,6 +17,7 @@ import yaml
 import os
 
 from armada.handlers.override import Override
+from armada.handlers.manifest import Manifest
 from armada.exceptions import override_exceptions
 from armada import const
 
@@ -76,8 +77,9 @@ class OverrideTestCase(testtools.TestCase):
             ovr = Override(doc_obj, override)
             ovr.update_manifests()
             ovr_doc = ovr.find_manifest_document(doc_path)
-            expect_doc = list(yaml.load_all(e.read()))[0]
-            self.assertEqual(expect_doc, ovr_doc)
+            target_docs = list(yaml.load_all(e.read()))
+            expected_doc = [x for x in target_docs if x.get('schema') == 'armada/Manifest/v1'][0]
+            self.assertEqual(expected_doc.get('armada'), ovr_doc.get('data'))
 
     def test_find_manifest_document_valid(self):
         expected = "{}/templates/override-{}-expected.yaml".format(

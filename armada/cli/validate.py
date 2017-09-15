@@ -16,9 +16,7 @@ import click
 import yaml
 
 from armada.cli import CliAction
-from armada.utils.lint import validate_armada_documents
-from armada.utils.lint import validate_armada_object
-from armada.handlers.manifest import Manifest
+from armada.utils.validate import validate_armada_documents
 from armada.handlers.document import ReferenceResolver
 
 
@@ -64,14 +62,17 @@ class ValidateManifest(CliAction):
             for d in doc_data:
                 documents.extend(list(yaml.safe_load_all(d.decode())))
 
-            manifest_obj = Manifest(documents).get_manifest()
-            obj_check = validate_armada_object(manifest_obj)
-            doc_check = validate_armada_documents(documents)
-
             try:
-                if doc_check and obj_check:
+                valid, details = validate_armada_documents(documents)
+
+                if valid:
                     self.logger.info('Successfully validated: %s',
                                      self.locations)
+                else:
+                    self.logger.info('Validation failed: %s', self.locations)
+
+                for m in details:
+                    self.logger.info('Validation details: %s', str(m))
             except Exception:
                 raise Exception('Failed to validate: %s', self.locations)
         else:
@@ -88,4 +89,7 @@ class ValidateManifest(CliAction):
             if resp.get('code') == 200:
                 self.logger.info('Successfully validated: %s', self.locations)
             else:
-                self.logger.error("Failed to validate: %s", self.locations)
+                self.logger.error("Validation failed: %s", self.locations)
+
+            for m in resp.get('details', {}).get('messageList', []):
+                self.logger.info("Validation details: %s", str(m))
