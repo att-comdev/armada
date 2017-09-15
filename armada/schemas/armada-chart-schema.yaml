@@ -1,0 +1,125 @@
+# Copyright 2017 AT&T Intellectual Property.  All other rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# JSON schema for validating Armada charts.
+---
+schema: deckhand/DataSchema/v1
+metadata:
+  name: armada/Chart/v1
+  schema: metadata/Control/v1
+data:
+  $schema: http://json-schema.org/schema#
+  definitions:
+    labels:
+      type: object
+      patternProperties:
+        ^.*$:
+          type: string
+  type: object
+  properties:
+    release:
+      type: string
+    chart_name:
+      type: string
+    namespace:
+      type: string
+    values:
+      type: object
+    dependencies:
+      type: array
+      items:
+        type: string
+    test:
+      type: boolean
+    timeout:
+      type: integer
+    wait:
+      type: object
+      properties:
+        timeout:
+          type: integer
+        labels:
+          $ref: '#/definitions/labels'
+      additionalProperties: false
+    source:
+      type: object
+      properties:
+        type:
+          type: string
+        location:
+          type: string
+        subpath:
+          type: string
+        reference:
+          type:
+            - string
+            - "null"
+      required:
+        - location
+        - subpath
+        - type
+    install:
+      type: object
+      properties:
+        no_hooks:
+          type: boolean
+      required:
+        - no_hooks
+    upgrade:
+      type: object
+      properties:
+        no_hooks:
+          type: boolean
+        pre:
+          type: object
+          properties:
+            delete:
+              type: array
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                labels:
+                  $ref: '#/definitions/labels'
+              required:
+                - name
+                - type
+                - labels
+              additionalProperties: false
+            update:
+              type: array
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                labels:
+                  $ref: '#/definitions/labels'
+              required:
+                - name
+                - type
+                - labels
+              additionalProperties: false
+      required:
+        - no_hooks
+      additionalProperties: false
+  required:
+    - dependencies
+    - namespace
+    - chart_name
+    - release
+    - source
+  additionalProperties: false
+...
