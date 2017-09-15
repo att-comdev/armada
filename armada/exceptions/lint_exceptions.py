@@ -24,7 +24,8 @@ class LintException(base_exception.ArmadaBaseException):
 class InvalidManifestException(LintException):
     '''Exception for invalid manifests.'''
 
-    message = 'Armada manifest invalid.'
+    message = ('Armada manifest(s) failed validation. Details: '
+               '%(error_messages)s.')
 
 
 class InvalidChartNameException(LintException):
@@ -48,4 +49,5 @@ class InvalidReleaseException(LintException):
 class InvalidArmadaObjectException(LintException):
     '''Exception that occurs when an Armada object is not declared.'''
 
-    message = 'An Armada object was not declared.'
+    message = ('An Armada object failed internal validation. Details: '
+               '%(details)s.')
