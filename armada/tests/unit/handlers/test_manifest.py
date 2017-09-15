@@ -21,6 +21,7 @@ import testtools
 from armada import const
 from armada import exceptions
 from armada.handlers import manifest
+from armada.utils import validate
 
 
 class ManifestTestCase(testtools.TestCase):
@@ -411,30 +412,22 @@ class ManifestNegativeTestCase(testtools.TestCase):
         """Validate that attempting to build a chart that points to
         a missing dependency fails.
         """
-        armada_manifest = manifest.Manifest(self.documents)
         self.documents[1]['data']['dependencies'] = ['missing-dependency']
-        test_chart = armada_manifest.find_chart_document('mariadb')
-        self.assertRaises(exceptions.ManifestException,
-                          armada_manifest.build_chart_deps,
-                          test_chart)
+        valid, details = validate.validate_armada_documents(self.documents)
+        self.assertFalse(valid)
 
     def test_build_chart_group_with_missing_chart_grp_fails(self):
         """Validate that attempting to build a chart group document with
         missing chart group fails.
         """
-        armada_manifest = manifest.Manifest(self.documents)
         self.documents[5]['data']['chart_group'] = ['missing-chart-group']
-        test_chart_group = armada_manifest.find_chart_group_document(
-            'openstack-keystone')
-        self.assertRaises(exceptions.ManifestException,
-                          armada_manifest.build_chart_group,
-                          test_chart_group)
+        valid, details = validate.validate_armada_documents(self.documents)
+        self.assertFalse(valid)
 
     def test_build_armada_manifest_with_missing_chart_grps_fails(self):
         """Validate that attempting to build a manifest with missing
         chart groups fails.
         """
-        armada_manifest = manifest.Manifest(self.documents)
         self.documents[6]['data']['chart_groups'] = ['missing-chart-groups']
-        self.assertRaises(exceptions.ManifestException,
-                          armada_manifest.build_armada_manifest)
+        valid, details = validate.validate_armada_documents(self.documents)
+        self.assertFalse(valid)

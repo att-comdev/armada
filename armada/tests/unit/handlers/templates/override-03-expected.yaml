@@ -8,3 +8,55 @@ data:
   chart_groups:
     - blog-group3
     - blog-group4
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-3
+data:
+  chart_name: blog-3
+  release: blog-3
+  namespace: default
+  values: {}
+  source:
+    type: git
+    location: https://github.com/namespace/hello-world-chart
+    subpath: .
+    reference: master
+  dependencies: []
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-group3
+data:
+  description: Deploys Simple Service
+  sequenced: False
+  chart_group:
+    - blog-3
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-4
+data:
+  chart_name: blog-4
+  release: blog-4
+  namespace: default
+  values: {}
+  source:
+    type: git
+    location: https://github.com/namespace/hello-world-chart
+    subpath: .
+    reference: master
+  dependencies: []
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: blog-group4
+data:
+  description: Deploys Simple Service
+  sequenced: False
+  chart_group:
+    - blog-4

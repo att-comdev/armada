@@ -18,7 +18,7 @@ import yaml
 
 from armada import api
 from armada.common import policy
-from armada.utils.lint import validate_armada_documents
+from armada.utils.validate import validate_armada_documents
 from armada.handlers.document import ReferenceResolver
 
 
@@ -50,7 +50,7 @@ class Validate(api.BaseResource):
             self.logger.debug("Validating set of %d documents."
                               % len(documents))
 
-            result = validate_armada_documents(documents)
+            result, details = validate_armada_documents(documents)
 
             resp.content_type = 'application/json'
             resp_body = {
@@ -58,11 +58,13 @@ class Validate(api.BaseResource):
                 'apiVersion': 'v1.0',
                 'metadata': {},
                 'reason': 'Validation',
-                'details': {
-                    'errorCount': 0,
-                    'messageList': []
-                },
+                'details': {},
             }
+
+            error_details = [m for m in details if m.get('error', False)]
+
+            resp_body['details']['errorCount'] = len(error_details)
+            resp_body['details']['messageList'] = details
 
             if result:
                 resp.status = falcon.HTTP_200
@@ -74,9 +76,6 @@ class Validate(api.BaseResource):
                 resp_body['status'] = 'Failure'
                 resp_body['message'] = 'Armada validations failed'
                 resp_body['code'] = 400
-                resp_body['details']['errorCount'] = 1
-                resp_body['details']['messageList'].\
-                    append(dict(message='Validation failed.', error=True))
 
             resp.body = json.dumps(resp_body)
         except Exception as ex:
