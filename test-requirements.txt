@@ -2,7 +2,8 @@
 tox
 
 # Docs
-Sphinx
+reno>=2.5.0 # Apache-2.0
+sphinx>=1.6.2 # BSD%
 
 # Testing
 flake8==3.3.0
