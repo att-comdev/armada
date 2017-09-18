@@ -18,11 +18,13 @@ import unittest
 
 import falcon
 from falcon import testing
+from oslo_config import cfg
 
-from armada import conf as cfg
+from armada import conf
 from armada.api import server
 
 CONF = cfg.CONF
+conf.set_app_default_configs()
 
 
 class APITestCase(testing.TestCase):
