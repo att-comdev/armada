@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
+from armada.const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
 
 
 class Manifest(object):
