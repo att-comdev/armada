@@ -22,9 +22,9 @@ RUN apt-get update && \
     chown -R armada:users /armada && \
     \
     cd /armada && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    pip install . && \
+    pip3 install --upgrade pip && \
+    pip3 install -r requirements.txt && \
+    pip3 install . && \
     \
     apt-get purge --auto-remove -y \
       build-essential \
