@@ -48,7 +48,7 @@ def list_opts():
 
 def _tupleize(d):
     """Convert a dict of options to the 2-tuple format."""
-    return [(key, value) for key, value in d.items()]
+    return [(key, value) for key, value in list(d.items())]
 
 
 def _list_module_names():
@@ -93,5 +93,5 @@ def _append_config_options(imported_modules, config_options):
         # functions have been updated to return dicts.
         if not isinstance(configs, dict):
             configs = _process_old_opts(configs)
-        for key, val in configs.items():
+        for key, val in list(configs.items()):
             config_options[key].extend(val)

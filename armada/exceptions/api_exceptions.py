@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base_exception as base
+from . import base_exception as base
 
 class ApiException(base.ArmadaBaseException):
     '''Base class for API exceptions and error handling.'''

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from builtins import str
+from builtins import object
 from uuid import UUID
 
 from oslo_config import cfg
@@ -27,7 +29,7 @@ class AuthMiddleware(object):
     def process_request(self, req, resp):
         ctx = req.context
 
-        for k, v in req.headers.items():
+        for k, v in list(req.headers.items()):
             LOG.debug("Request with header %s: %s" % (k, v))
 
         auth_status = req.get_header('X-SERVICE-IDENTITY-STATUS')
