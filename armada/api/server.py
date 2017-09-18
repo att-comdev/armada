@@ -19,11 +19,11 @@ from oslo_log import log as logging
 
 import armada.conf as configs
 
-from armada_controller import Apply
-from middleware import AuthMiddleware
-from middleware import RoleMiddleware
-from tiller_controller import Release
-from tiller_controller import Status
+from .armada_controller import Apply
+from .middleware import AuthMiddleware
+from .middleware import RoleMiddleware
+from .tiller_controller import Release
+from .tiller_controller import Status
 
 LOG = logging.getLogger(__name__)
 configs.set_app_default_configs()

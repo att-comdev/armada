@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from builtins import object
 import difflib
 import yaml
 
@@ -19,9 +20,9 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from supermutes.dot import dotify
 
-from chartbuilder import ChartBuilder
-from tiller import Tiller
-from manifest import Manifest
+from .chartbuilder import ChartBuilder
+from .tiller import Tiller
+from .manifest import Manifest
 
 from ..exceptions import armada_exceptions
 from ..exceptions import source_exceptions
@@ -148,7 +149,7 @@ class Armada(object):
                                                           'master')
             repo_branch = (location, reference)
 
-            if repo_branch not in repos.keys():
+            if repo_branch not in list(repos.keys()):
                 try:
                     LOG.info('Cloning repo: %s branch: %s', *repo_branch)
                     repo_dir = source.git_clone(*repo_branch)
@@ -323,9 +324,9 @@ class Armada(object):
         unified diff output and avoid the use of print
         '''
 
-        chart_diff = list(
-            difflib.unified_diff(installed_chart.SerializeToString()
-                                 .split('\n'), target_chart.split('\n')))
+        source = str(installed_chart.SerializeToString()).split('\n')
+        chart_diff = list(difflib.unified_diff(source, str(target_chart).split('\n')))
+
         if len(chart_diff) > 0:
             LOG.info("Chart Unified Diff (%s)", chart.release)
             for line in chart_diff:

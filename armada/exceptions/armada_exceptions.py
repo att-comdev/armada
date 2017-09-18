@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base_exception
+from . import base_exception
 
 class ArmadaException(base_exception.ArmadaBaseException):
     '''Base class for Armada handler exception and error handling.'''

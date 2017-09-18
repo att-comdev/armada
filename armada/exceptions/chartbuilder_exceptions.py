@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base_exception
+from . import base_exception
 
 class ChartBuilderException(base_exception.ArmadaBaseException):
     '''Base class for the Chartbuilder handler exception and error handling.'''
