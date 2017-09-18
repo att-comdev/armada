@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from builtins import object
 import os
 import yaml
 
@@ -110,8 +111,8 @@ class ChartBuilder(object):
         try:
             chart_yaml = dotify(
                 yaml.safe_load(
-                    open(os.path.join(self.source_directory, 'Chart.yaml'))
-                    .read()))
+                    open(os.path.join(self.source_directory,
+                                      'Chart.yaml')).read().encode('utf-8')))
         except Exception:
             raise chartbuilder_exceptions.MetadataLoadException()
 
@@ -171,7 +172,8 @@ class ChartBuilder(object):
                 templates.append(
                     Template(
                         name=tname,
-                        data=open(os.path.join(root, tpl_file), 'r').read()))
+                        data=open(os.path.join(root,
+                                               tpl_file)).read().encode()))
         return templates
 
     def get_helm_chart(self):
