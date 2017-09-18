@@ -23,12 +23,14 @@ class GitTestCase(unittest.TestCase):
 
     SOURCE_UTILS_LOCATION = 'armada.utils.source'
 
+    @mock.patch('armada.utils.source.Git')
     @mock.patch('armada.utils.source.tempfile')
     @mock.patch('armada.utils.source.Repo')
-    def test_git_clone_good_url(self, mock_git_repo, mock_temp):
+    def test_git_clone_good_url(self, mock_git_repo, mock_temp, mock_git_lib):
         mock_temp.mkdtemp.return_value = '/tmp/armada'
-        mock_git_repo.clone_from.return_value = "Repository"
+        mock_git_lib.checkout.return_value = "Repository"
         url = 'http://github.com/att-comdev/armada'
+
         dir = source.git_clone(url)
 
         self.assertIsNotNone(dir)
