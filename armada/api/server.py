@@ -12,23 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import falcon
 import os
 
+import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from armada.common import policy
+from .armada_controller import Apply
+from .middleware import AuthMiddleware
+from .middleware import ContextMiddleware
+from .middleware import LoggingMiddleware
+from .tiller_controller import Release
+from .tiller_controller import Status
+from .validation_controller import Validate
 from armada import conf
-
 from armada.api import ArmadaRequest
-from armada_controller import Apply
-from middleware import AuthMiddleware
-from middleware import ContextMiddleware
-from middleware import LoggingMiddleware
-from tiller_controller import Release
-from tiller_controller import Status
-from validation_controller import Validate
+from armada.common import policy
 
 LOG = logging.getLogger(__name__)
 conf.set_app_default_configs()
