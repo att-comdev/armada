@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from base_exception import ArmadaBaseException as ex
+from armada.exceptions.base_exception import ArmadaBaseException as ex
 
 
 class TillerException(ex):

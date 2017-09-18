@@ -10,13 +10,12 @@ requests==2.17.3
 sphinx_rtd_theme
 supermutes==0.2.5
 urllib3==1.21.1
-uwsgi>=2.0.15
 Paste>=2.0.3
 PasteDeploy>=1.5.2
 
 # API
 falcon==1.1.0
-gunicorn==19.7.1
+uwsgi>=2.0.15
 
 # CLI
 cliff==2.7.0

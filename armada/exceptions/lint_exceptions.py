@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base_exception
+from armada.exceptions import base_exception
 
 
 class LintException(base_exception.ArmadaBaseException):
