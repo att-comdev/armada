@@ -18,20 +18,17 @@ import yaml
 from oslo_log import log as logging
 from supermutes.dot import dotify
 
-from chartbuilder import ChartBuilder
-from tiller import Tiller
-from manifest import Manifest
-
-from ..exceptions import armada_exceptions
-from ..exceptions import source_exceptions
-from ..exceptions import lint_exceptions
-from ..exceptions import tiller_exceptions
-
-from ..utils.release import release_prefix
-from ..utils import source
-from ..utils import lint
-from ..const import KEYWORD_ARMADA, KEYWORD_GROUPS, KEYWORD_CHARTS,\
-    KEYWORD_PREFIX, STATUS_FAILED
+from armada.handlers.chartbuilder import ChartBuilder
+from armada.handlers.tiller import Tiller
+from armada.handlers.manifest import Manifest
+from armada.exceptions import armada_exceptions
+from armada.exceptions import source_exceptions
+from armada.exceptions import lint_exceptions
+from armada.exceptions import tiller_exceptions
+from armada.utils.release import release_prefix
+from armada.utils import source
+from armada.utils import lint
+from armada import const
 
 LOG = logging.getLogger(__name__)
 
@@ -105,11 +102,13 @@ class Armada(object):
 
         self.config = self.get_armada_manifest()
         # Purge known releases that have failed and are in the current yaml
-        prefix = self.config.get(KEYWORD_ARMADA).get(KEYWORD_PREFIX)
-        failed_releases = self.get_releases_by_status(STATUS_FAILED)
+        prefix = self.config.get(const.KEYWORD_ARMADA).get(
+            const.KEYWORD_PREFIX)
+        failed_releases = self.get_releases_by_status(const.STATUS_FAILED)
         for release in failed_releases:
-            for group in self.config.get(KEYWORD_ARMADA).get(KEYWORD_GROUPS):
-                for ch in group.get(KEYWORD_CHARTS):
+            for group in self.config.get(const.KEYWORD_ARMADA).get(
+                    const.KEYWORD_GROUPS):
+                for ch in group.get(const.KEYWORD_CHARTS):
                     ch_release_name = release_prefix(prefix,
                                                      ch.get('chart')
                                                      .get('chart_name'))
@@ -123,8 +122,9 @@ class Armada(object):
         # We only support a git source type right now, which can also
         # handle git:// local paths as well
         repos = {}
-        for group in self.config.get(KEYWORD_ARMADA).get(KEYWORD_GROUPS):
-            for ch in group.get(KEYWORD_CHARTS):
+        for group in self.config.get(const.KEYWORD_ARMADA).get(
+                const.KEYWORD_GROUPS):
+            for ch in group.get(const.KEYWORD_CHARTS):
                 self.tag_cloned_repo(ch, repos)
 
                 for dep in ch.get('chart').get('dependencies'):
@@ -142,11 +142,11 @@ class Armada(object):
             tarball_dir = source.get_tarball(location)
             ch.get('chart')['source_dir'] = (tarball_dir, subpath)
         elif ct_type == 'git':
-            reference = ch.get('chart').get('source').get('reference',
-                                                          'master')
+            reference = ch.get('chart').get('source').get(
+                'reference', 'master')
             repo_branch = (location, reference)
 
-            if repo_branch not in repos.keys():
+            if repo_branch not in repos:
                 try:
                     LOG.info('Cloning repo: %s branch: %s', *repo_branch)
                     repo_dir = source.git_clone(*repo_branch)
@@ -181,11 +181,7 @@ class Armada(object):
         Syncronize Helm with the Armada Config(s)
         '''
 
-        msg = {
-            'installed': [],
-            'upgraded': [],
-            'diff': []
-        }
+        msg = {'installed': [], 'upgraded': [], 'diff': []}
 
         # TODO: (gardlt) we need to break up this func into
         # a more cleaner format
@@ -194,7 +190,8 @@ class Armada(object):
 
         # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
-        prefix = self.config.get(KEYWORD_ARMADA).get(KEYWORD_PREFIX)
+        prefix = self.config.get(const.KEYWORD_ARMADA).get(
+            const.KEYWORD_PREFIX)
 
         if known_releases is None:
             raise armada_exceptions.KnownReleasesException()
@@ -203,11 +200,11 @@ class Armada(object):
             LOG.debug("Release %s, Version %s found on tiller", release[0],
                       release[1])
 
-        for entry in self.config[KEYWORD_ARMADA][KEYWORD_GROUPS]:
+        for entry in self.config[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
             chart_wait = self.wait
 
             desc = entry.get('description', 'A Chart Group')
-            chart_group = entry.get(KEYWORD_CHARTS, [])
+            chart_group = entry.get(const.KEYWORD_CHARTS, [])
             test_charts = entry.get('test_charts', False)
 
             if entry.get('sequenced', False) or test_charts:
@@ -273,8 +270,8 @@ class Armada(object):
                     # once we support those
 
                     upgrade_diff = self.show_diff(
-                        chart, apply_chart, apply_values, chartbuilder.dump(),
-                        values, msg)
+                        chart, apply_chart, apply_values,
+                        chartbuilder.dump(), values, msg)
 
                     if not upgrade_diff:
                         LOG.info("There are no updates found in this chart")
@@ -282,30 +279,31 @@ class Armada(object):
 
                     # do actual update
                     LOG.info('wait: %s', chart_wait)
-                    self.tiller.update_release(protoc_chart,
-                                               prefix_chart,
-                                               chart.namespace,
-                                               pre_actions=pre_actions,
-                                               post_actions=post_actions,
-                                               dry_run=self.dry_run,
-                                               disable_hooks=chart.
-                                               upgrade.no_hooks,
-                                               values=yaml.safe_dump(values),
-                                               wait=chart_wait,
-                                               timeout=chart_timeout)
+                    self.tiller.update_release(
+                        protoc_chart,
+                        prefix_chart,
+                        chart.namespace,
+                        pre_actions=pre_actions,
+                        post_actions=post_actions,
+                        dry_run=self.dry_run,
+                        disable_hooks=chart.upgrade.no_hooks,
+                        values=yaml.safe_dump(values),
+                        wait=chart_wait,
+                        timeout=chart_timeout)
 
                     msg['upgraded'].append(prefix_chart)
 
                 # process install
                 else:
                     LOG.info("Installing release %s", chart.release)
-                    self.tiller.install_release(protoc_chart,
-                                                prefix_chart,
-                                                chart.namespace,
-                                                dry_run=self.dry_run,
-                                                values=yaml.safe_dump(values),
-                                                wait=chart_wait,
-                                                timeout=chart_timeout)
+                    self.tiller.install_release(
+                        protoc_chart,
+                        prefix_chart,
+                        chart.namespace,
+                        dry_run=self.dry_run,
+                        values=yaml.safe_dump(values),
+                        wait=chart_wait,
+                        timeout=chart_timeout)
 
                     msg['installed'].append(prefix_chart)
 
@@ -328,7 +326,8 @@ class Armada(object):
 
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(
-                prefix, self.config[KEYWORD_ARMADA][KEYWORD_GROUPS])
+                prefix,
+                self.config[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS])
 
         return msg
 
@@ -337,8 +336,9 @@ class Armada(object):
         Operations to run after deployment process has terminated
         '''
         # Delete temp dirs used for deployment
-        for group in self.config.get(KEYWORD_ARMADA).get(KEYWORD_GROUPS):
-            for ch in group.get(KEYWORD_CHARTS):
+        for group in self.config.get(const.KEYWORD_ARMADA).get(
+                const.KEYWORD_GROUPS):
+            for ch in group.get(const.KEYWORD_CHARTS):
                 if ch.get('chart').get('source').get('type') == 'git':
                     source.source_cleanup(ch.get('chart').get('source_dir')[0])
 
@@ -351,10 +351,9 @@ class Armada(object):
         unified diff output and avoid the use of print
         '''
 
+        source = str(installed_chart.SerializeToString()).split('\n')
         chart_diff = list(
-            difflib.unified_diff(
-                installed_chart.SerializeToString().split('\n'),
-                target_chart.split('\n')))
+            difflib.unified_diff(source, str(target_chart).split('\n')))
 
         if len(chart_diff) > 0:
             LOG.info("Chart Unified Diff (%s)", chart.release)

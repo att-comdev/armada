@@ -10,21 +10,21 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
       netbase \
-      python-all \
-      python-pip \
-      python-setuptools && \
+      python3-pip && \
     apt-get install -y \
       build-essential \
       curl \
       git \
-      python-all-dev && \
+      python3-minimal \
+      python3-setuptools \
+      python3-dev && \
     useradd -u 1000 -g users -d /armada armada && \
     chown -R armada:users /armada && \
     \
     cd /armada && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    pip install . && \
+    pip3 install --upgrade pip && \
+    pip3 install -r requirements.txt && \
+    python3 setup.py install && \
     \
     apt-get purge --auto-remove -y \
       build-essential \

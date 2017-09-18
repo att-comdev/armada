@@ -15,13 +15,13 @@
 import os
 import yaml
 
-from hapi.chart.template_pb2 import Template
 from hapi.chart.chart_pb2 import Chart
-from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.config_pb2 import Config
+from hapi.chart.metadata_pb2 import Metadata
+from hapi.chart.template_pb2 import Template
 from supermutes.dot import dotify
 
-from ..exceptions import chartbuilder_exceptions
+from armada.exceptions import chartbuilder_exceptions
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -108,10 +108,9 @@ class ChartBuilder(object):
         # extract Chart.yaml to construct metadata
 
         try:
-            chart_yaml = dotify(
-                yaml.safe_load(
-                    open(os.path.join(self.source_directory, 'Chart.yaml'))
-                    .read()))
+            with open(os.path.join(self.source_directory, 'Chart.yaml')) as f:
+                chart_yaml = dotify(yaml.safe_load(f.read().encode('utf-8')))
+
         except Exception:
             raise chartbuilder_exceptions.MetadataLoadException()
 
@@ -136,8 +135,8 @@ class ChartBuilder(object):
 
         # create config object representing unmarshaled values.yaml
         if os.path.exists(os.path.join(self.source_directory, 'values.yaml')):
-            raw_values = open(
-                os.path.join(self.source_directory, 'values.yaml')).read()
+            with open(os.path.join(self.source_directory, 'values.yaml')) as f:
+                raw_values = f.read()
         else:
             LOG.warn("No values.yaml in %s, using empty values",
                      self.source_directory)
@@ -168,10 +167,10 @@ class ChartBuilder(object):
                     LOG.debug('Ignoring file %s', tname)
                     continue
 
-                templates.append(
-                    Template(
-                        name=tname,
-                        data=open(os.path.join(root, tpl_file), 'r').read()))
+                with open(os.path.join(root, tpl_file)) as f:
+                    templates.append(
+                        Template(name=tname, data=f.read().encode()))
+
         return templates
 
     def get_helm_chart(self):

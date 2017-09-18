@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import yaml
 import grpc
+import yaml
 
 from hapi.chart.config_pb2 import Config
 from hapi.services.tiller_pb2 import GetReleaseContentRequest
@@ -28,10 +28,10 @@ from hapi.services.tiller_pb2 import UpdateReleaseRequest
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from ..const import STATUS_DEPLOYED, STATUS_FAILED
-from ..exceptions import tiller_exceptions as ex
-from ..utils.release import release_prefix
-from k8s import K8s
+from armada.const import STATUS_DEPLOYED, STATUS_FAILED
+from armada.exceptions import tiller_exceptions as ex
+from armada.handlers.k8s import K8s
+from armada.utils.release import release_prefix
 
 
 TILLER_PORT = 44134
@@ -238,8 +238,8 @@ class Tiller(object):
 
         label_selector = 'release_name={}'.format(release_name)
         for label in resource_labels:
-            label_selector += ', {}={}'.format(label.keys()[0],
-                                               label.values()[0])
+            label_selector += ', {}={}'.format(list(label.keys())[0],
+                                               list(label.values())[0])
 
         if 'job' in resource_type:
             LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
