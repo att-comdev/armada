@@ -53,8 +53,7 @@ class Armada(object):
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
                  tiller_port=44134,
-                 values=None,
-                 debug=False):
+                 values=None):
         '''
         Initialize the Armada Engine and establish
         a connection to Tiller
@@ -69,14 +68,8 @@ class Armada(object):
         self.timeout = timeout
         self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
         self.values = values
-        self.documents = list(yaml.safe_load_all(file))
+        self.documents = file
         self.config = None
-        self.debug = debug
-
-        # Set debug value
-        # Define a default handler at INFO logging level
-        if self.debug:
-            logging.basicConfig(level=logging.DEBUG)
 
     def get_armada_manifest(self):
         return Manifest(self.documents).get_manifest()
@@ -193,7 +186,7 @@ class Armada(object):
         Syncronize Helm with the Armada Config(s)
         '''
 
-        msg = {'installed': [], 'upgraded': [], 'diff': []}
+        msg = {'install': [], 'upgrade': [], 'diff': []}
 
         # TODO: (gardlt) we need to break up this func into
         # a more cleaner format
@@ -304,7 +297,7 @@ class Armada(object):
                         wait=chart_wait,
                         timeout=chart_timeout)
 
-                    msg['upgraded'].append(prefix_chart)
+                    msg['upgrade'].append(prefix_chart)
 
                 # process install
                 else:
@@ -318,7 +311,7 @@ class Armada(object):
                         wait=chart_wait,
                         timeout=chart_timeout)
 
-                    msg['installed'].append(prefix_chart)
+                    msg['install'].append(prefix_chart)
 
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)

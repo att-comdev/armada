@@ -24,6 +24,8 @@ from armada.api.armada_controller import Apply
 from armada.api.middleware import AuthMiddleware
 from armada.api.middleware import ContextMiddleware
 from armada.api.middleware import LoggingMiddleware
+from armada.api.test_controller import Test
+from armada.api.test_controller import Tests
 from armada.api.tiller_controller import Release
 from armada.api.tiller_controller import Status
 from armada.api.validation_controller import Validate
@@ -55,13 +57,17 @@ def create(middleware=CONF.middleware):
         api = falcon.API(request_type=ArmadaRequest)
 
     # Configure API routing
-    url_routes_v1 = (('apply', Apply()),
-                     ('releases', Release()),
-                     ('status', Status()),
-                     ('validate', Validate()))
+    url_routes_v1 = (
+        ('apply', Apply()),
+        ('releases', Release()),
+        ('status', Status()),
+        ('tests', Tests()),
+        ('test/{release}', Test()),
+        ('validate', Validate()),
+    )
 
     for route, service in url_routes_v1:
-        api.add_route("/v1.0/{}".format(route), service)
+        api.add_route("/api/v1.0/{}".format(route), service)
 
     return api
 

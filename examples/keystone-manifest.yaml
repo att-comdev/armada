@@ -74,7 +74,7 @@ data:
   upgrade:
     no_hooks: false
   values:
-    replicas: 2
+    replicas: 3
   source:
     type: git
     location: git://github.com/openstack/openstack-helm

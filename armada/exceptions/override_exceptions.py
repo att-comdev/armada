@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base_exception
+from armada.exceptions import base_exception
+
 
 class OverrideException(base_exception.ArmadaBaseException):
     '''
@@ -20,6 +21,7 @@ class OverrideException(base_exception.ArmadaBaseException):
     '''
 
     message = 'An unknown Override handler error occured.'
+
 
 class InvalidOverrideTypeException(OverrideException):
     '''
@@ -32,6 +34,7 @@ class InvalidOverrideTypeException(OverrideException):
 
         super(InvalidOverrideTypeException, self).__init__(self._message)
 
+
 class InvalidOverrideFileException(OverrideException):
     '''
     Exception that occurs when an invalid override file is provided.
@@ -41,6 +44,7 @@ class InvalidOverrideFileException(OverrideException):
         self._message = '{} is not a valid override file.'.format(filename)
 
         super(InvalidOverrideFileException, self).__init__(self._message)
+
 
 class InvalidOverrideValueException(OverrideException):
     '''
@@ -52,6 +56,7 @@ class InvalidOverrideValueException(OverrideException):
                         override_command)
 
         super(InvalidOverrideValueException, self).__init__(self._message)
+
 
 class UnknownDocumentOverrideException(OverrideException):
     '''

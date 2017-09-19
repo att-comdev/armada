@@ -7,11 +7,28 @@ Commands
 
 .. code:: bash
 
-    Usage: armada test
+    Usage: armada test [OPTIONS]
+
+      This command test deployed charts
+
+      The tiller command uses flags to obtain information from tiller services.
+      The test command will run the release chart tests either via a the
+      manifest or by targetings a relase.
+
+      To obtain armada deployed releases:
+
+          $ armada test --file example/simple.yaml
+
+      To obtain tiller service status/information:
+
+          $ armada tiller --release blog-1
 
     Options:
-
-    [-h] [--release RELEASE] [--file FILE]
+      --file TEXT            armada manifest
+      --release TEXT         helm release
+      --tiller-host TEXT     Tiller Host IP
+      --tiller-port INTEGER  Tiller host Port
+      --help                 Show this message and exit.
 
 
 Synopsis
