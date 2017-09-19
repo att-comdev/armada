@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import re
+
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 
@@ -33,7 +34,10 @@ class K8s(object):
         '''
         Initialize connection to Kubernetes
         '''
-        config.load_kube_config()
+        try:
+            config.load_incluster_config()
+        except:
+            config.load_kube_config()
 
         self.client = client.CoreV1Api()
         self.batch_api = client.BatchV1Api()
