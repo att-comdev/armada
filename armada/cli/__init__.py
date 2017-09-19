@@ -11,3 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from oslo_config import cfg
+from oslo_log import log as logging
+
+CONF = cfg.CONF
+
+LOG = logging.getLogger(__name__)
+
+
+class CliAction(object):
+
+    def __init__(self):
+        self.logger = LOG
+        logging.register_options(CONF)
+        logging.set_defaults(default_log_levels=CONF.default_log_levels)
+        logging.setup(CONF, 'armada')
+
+    def invoke(self):
+        raise Exception()

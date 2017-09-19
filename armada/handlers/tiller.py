@@ -349,8 +349,9 @@ class Tiller(object):
         try:
 
             stub = ReleaseServiceStub(self.channel)
-            release_request = TestReleaseRequest(name=release, timeout=timeout,
-                                                 cleanup=cleanup)
+
+            release_request = TestReleaseRequest(
+                name=release, timeout=timeout, cleanup=cleanup)
 
             content = self.get_release_content(release)
 
