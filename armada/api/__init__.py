@@ -10,22 +10,32 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
+# limitations under the License
 
 import json
-import uuid
 import logging as log
+import os
+import uuid
+import yaml
 
 import falcon
+from oslo_config import cfg
 from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
+from armada import const
+
+CONF = cfg.CONF
 
 
 class BaseResource(object):
 
     def __init__(self):
-        self.logger = LOG
+        if not (os.path.exists(const.CONFIG_PATH)):
+            logging.register_options(CONF)
+            logging.set_defaults(default_log_levels=CONF.default_log_levels)
+            logging.setup(CONF, 'armada')
+
+        self.logger = logging.getLogger(__name__)
 
     def on_options(self, req, resp):
         self_attrs = dir(self)
@@ -39,29 +49,23 @@ class BaseResource(object):
         resp.headers['Allow'] = ','.join(allowed_methods)
         resp.status = falcon.HTTP_200
 
-    def req_json(self, req):
+    def req_yaml(self, req):
         if req.content_length is None or req.content_length == 0:
             return None
 
-        if req.content_type is not None and req.content_type.lower(
-        ) == 'application/json':
-            raw_body = req.stream.read(req.content_length or 0)
+        raw_body = req.stream.read(req.content_length or 0)
 
-            if raw_body is None:
-                return None
+        if raw_body is None:
+            return None
 
-            try:
-                # json_body = json.loads(raw_body.decode('utf-8'))
-                # return json_body
-                return raw_body
-            except json.JSONDecodeError as jex:
-                self.error(
-                    req.context,
-                    "Invalid JSON in request: \n%s" % raw_body.decode('utf-8'))
-                raise json.JSONDecodeError("%s: Invalid JSON in body: %s" %
-                                           (req.path, jex))
-        else:
-            raise json.JSONDecodeError("Requires application/json payload")
+        try:
+            return yaml.safe_load_all(raw_body.decode('utf-8'))
+        except yaml.YAMLError as jex:
+            self.error(
+                req.context,
+                "Invalid YAML in request: \n%s" % raw_body.decode('utf-8'))
+            raise Exception(
+                "%s: Invalid YAML in body: %s" % (req.path, jex))
 
     def return_error(self, resp, status_code, message="", retry=False):
         resp.body = json.dumps({

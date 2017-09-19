@@ -309,9 +309,6 @@ class Tiller(object):
 
         LOG.info("Wait: %s, Timeout: %s", wait, timeout)
 
-        if timeout > self.timeout:
-            self.timeout = timeout
-
         if values is None:
             values = Config(raw='')
         else:
@@ -349,8 +346,9 @@ class Tiller(object):
         try:
 
             stub = ReleaseServiceStub(self.channel)
-            release_request = TestReleaseRequest(name=release, timeout=timeout,
-                                                 cleanup=cleanup)
+
+            release_request = TestReleaseRequest(
+                name=release, timeout=timeout, cleanup=cleanup)
 
             content = self.get_release_content(release)
 
@@ -417,8 +415,10 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             release_request = GetVersionRequest()
 
-            return stub.GetVersion(
+            tiller_version = stub.GetVersion(
                 release_request, self.timeout, metadata=self.metadata)
+
+            return getattr(tiller_version.Version, 'sem_ver', None)
 
         except Exception:
             raise ex.TillerVersionException()
