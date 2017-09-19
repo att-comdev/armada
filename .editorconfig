@@ -16,3 +16,6 @@ spaces_around_operators = true
 spaces_around_brackets = true
 indent_brace_style = K&R
 
+[*.yaml]
+indent_size = 2
+tab_width = 2
