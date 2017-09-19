@@ -33,7 +33,17 @@ class Status(api.BaseResource):
         get tiller status
         '''
         try:
-            message = {'tiller': Tiller().tiller_status()}
+            tiller = Tiller()
+            tiller_version = tiller.tiller_version()
+            ver_resp = getattr(tiller_version.Version, 'sem_ver', None)
+            message = {
+                'tiller': {
+                    'state': tiller.tiller_status(),
+                    'version': ver_resp
+                }
+            }
+
+            self.logger.info(message)
 
             if message.get('tiller', False):
                 resp.status = falcon.HTTP_200

@@ -7,15 +7,42 @@ Commands
 
 .. code:: bash
 
-    Usage: armada apply FILE
+    Usage: armada apply [OPTIONS] FILENAME
 
+      This command install and updates charts defined in armada manifest
+
+      The apply argument must be relative path to Armada Manifest. Executing
+      apply commnad once will install all charts defined in manifest. Re-
+      executing apply commnad will execute upgrade.
+
+      To see how to create an Armada manifest:     http://armada-
+      helm.readthedocs.io/en/latest/operations/
+
+      To obtain install/upgrade charts:
+
+          $ armada apply example/simple.yaml
+
+      To obtain override manifest:
+
+          $ armada apply example/simple.yaml --set manifest:simple-armada:relase_name="wordpress"
+
+          or
+
+          $ armada apply example/simple.yaml --values examples/simple-ovr-values.yaml
 
     Options:
-
-    [-h] [--dry-run] [--debug-logging] [--disable-update-pre]
-    [--disable-update-post] [--enable-chart-cleanup] [--wait]
-    [--timeout TIMEOUT]
-
+      --api                   Contacts service endpoint
+      --disable-update-post   run charts without install
+      --disable-update-pre    run charts without install
+      --dry-run               run charts without install
+      --enable-chart-cleanup  Clean up Unmanaged Charts
+      --set TEXT
+      --tiller-host TEXT      Tiller host ip
+      --tiller-port INTEGER   Tiller host port
+      --timeout INTEGER       specifies time to wait for charts
+      -f, --values TEXT
+      --wait                  wait until all charts deployed
+      --help                  Show this message and exit.
 
 Synopsis
 --------

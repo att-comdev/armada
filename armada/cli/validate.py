@@ -12,39 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cliff import command as cmd
+
+import click
 import yaml
 
-from armada.utils.lint import validate_armada_documents, validate_armada_object
+from armada.cli import CliAction
+from armada.utils.lint import validate_armada_documents
+from armada.utils.lint import validate_armada_object
 from armada.handlers.manifest import Manifest
 
-from oslo_config import cfg
-from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
+@click.group()
+def validate():
+    """ Test Manifest Charts
 
-CONF = cfg.CONF
-
-
-def validateYaml(args):
-    documents = yaml.safe_load_all(open(args.file).read())
-    manifest_obj = Manifest(documents).get_manifest()
-    obj_check = validate_armada_object(manifest_obj)
-    doc_check = validate_armada_documents(documents)
-
-    try:
-        if doc_check and obj_check:
-            LOG.info('Successfully validated: %s', args.file)
-    except Exception:
-        raise Exception('Failed to validate: %s', args.file)
+    """
 
 
-class ValidateYamlCommand(cmd.Command):
-    def get_parser(self, prog_name):
-        parser = super(ValidateYamlCommand, self).get_parser(prog_name)
-        parser.add_argument('file', type=str, metavar='FILE',
-                            help='Armada yaml file to validate')
-        return parser
+DESC = """
+This command validates Armada Manifest
 
-    def take_action(self, parsed_args):
-        validateYaml(parsed_args)
+The validate argument must be a relative path to Armada manifest
+
+    $ armada validate examples/simple.yaml
+
+
+"""
+
+SHORT_DESC = "command validates Armada Manifest"
+
+
+@validate.command(name='validate', help=DESC, short_help=SHORT_DESC)
+@click.argument('filename')
+@click.pass_context
+def validate_manifest(ctx, filename):
+    ValidateManifest(ctx, filename).invoke()
+
+
+class ValidateManifest(CliAction):
+
+    def __init__(self, ctx, filename):
+        super(ValidateManifest, self).__init__()
+        self.ctx = ctx
+        self.filename = filename
+
+    def invoke(self):
+        if not self.ctx.obj.get('api', False):
+            self.logger.debug("NOT API action")
+            documents = yaml.safe_load_all(open(self.filename).read())
+            manifest_obj = Manifest(documents).get_manifest()
+            obj_check = validate_armada_object(manifest_obj)
+            doc_check = validate_armada_documents(documents)
+
+            try:
+                if doc_check and obj_check:
+                    self.logger.info(
+                        'Successfully validated: %s', self.filename)
+            except Exception:
+                raise Exception('Failed to validate: %s', self.filename)
+        else:
+            self.logger.debug("API action")
+            client = self.ctx.obj.get('CLIENT')
+            with open(self.filename, 'r') as f:
+                resp = client.post_validate(f.read())
+                if resp.get('valid', False):
+                    self.logger.info(
+                        'Successfully validated: %s', self.filename)
+                else:
+                    self.logger.error("Failed to validate: %s", self.filename)

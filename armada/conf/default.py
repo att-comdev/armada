@@ -14,6 +14,8 @@
 
 from oslo_config import cfg
 
+from keystoneauth1 import loading
+
 from armada.conf import utils
 
 default_options = [
@@ -71,7 +73,12 @@ The Keystone project domain name used for authentication.
 
 def register_opts(conf):
     conf.register_opts(default_options)
+    conf.register_opts(
+        loading.get_auth_plugin_conf_options('password'),
+        group='keystone_authtoken')
 
 
 def list_opts():
-    return {'DEFAULT': default_options}
+    return {
+        'DEFAULT': default_options,
+        'keystone_authtoken': loading.get_auth_plugin_conf_options('password')}

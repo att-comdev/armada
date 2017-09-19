@@ -17,12 +17,13 @@ import os
 from oslo_config import cfg
 
 from armada.conf import default
+from armada import const
 
 CONF = cfg.CONF
 
 # Load config file if exists
-if (os.path.exists('etc/armada/armada.conf')):
-    CONF(['--config-file', 'etc/armada/armada.conf'])
+if (os.path.exists(const.CONFIG_PATH)):
+    CONF(['--config-file', const.CONFIG_PATH])
 
 
 def set_app_default_configs():

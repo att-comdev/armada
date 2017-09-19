@@ -17,18 +17,20 @@ from uuid import UUID
 from oslo_config import cfg
 from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
 class AuthMiddleware(object):
+
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
 
     # Authentication
     def process_request(self, req, resp):
         ctx = req.context
 
         for k, v in req.headers.items():
-            LOG.debug("Request with header %s: %s" % (k, v))
+            self.logger.debug("Request with header %s: %s" % (k, v))
 
         auth_status = req.get_header('X-SERVICE-IDENTITY-STATUS')
         service = True
@@ -65,8 +67,9 @@ class AuthMiddleware(object):
             else:
                 ctx.is_admin_project = False
 
-            LOG.debug('Request from authenticated user %s with roles %s' %
-                      (ctx.user, ','.join(ctx.roles)))
+            self.logger.debug(
+                'Request from authenticated user %s with roles %s' %
+                (ctx.user, ','.join(ctx.roles)))
         else:
             ctx.authenticated = False
 
@@ -91,6 +94,9 @@ class ContextMiddleware(object):
 
 
 class LoggingMiddleware(object):
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
     def process_response(self, req, resp, resource, req_succeeded):
         ctx = req.context
         extra = {
@@ -99,4 +105,4 @@ class LoggingMiddleware(object):
             'external_ctx': ctx.external_marker,
         }
         resp.append_header('X-Armada-Req', ctx.request_id)
-        LOG.info("%s - %s" % (req.uri, resp.status), extra=extra)
+        self.logger.info("%s - %s" % (req.uri, resp.status), extra=extra)

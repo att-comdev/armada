@@ -3,6 +3,9 @@ FROM ubuntu:16.04
 MAINTAINER Armada Team
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL=C
 
 COPY . /armada
 
@@ -33,6 +36,8 @@ RUN apt-get update && \
     rm -rf \
       /root/.cache \
       /var/lib/apt/lists/*
+
+RUN apt update && apt install curl -y
 
 EXPOSE 8000
 
