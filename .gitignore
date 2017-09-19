@@ -24,6 +24,9 @@ var/
 .installed.cfg
 *.egg
 etc/*.sample
+etc/hostname
+etc/hosts
+etc/resolv.conf
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -89,3 +92,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+AUTHORS
+ChangeLog
+etc/armada/armada.conf
+etc/armada/policy.yaml
+.editorconfig

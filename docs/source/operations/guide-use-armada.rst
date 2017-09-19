@@ -33,8 +33,7 @@ Usage
 
     Build:
 
-    git clone https://github.com/att-comdev/armada
-    cd armada/
+    git clone https://github.com/att-comdev/armada && cd armada/
     docker build . -t quay.io/attcomdev/armada:latest
 
 2. Run Armada docker container
@@ -52,7 +51,8 @@ Usage
 
 .. code:: bash
 
-    docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
+    docker run -d --net host -p 8000:8000 --name armada -v $(pwd)/etc/:/etc/ -v ~/.kube/:/armada/.kube/ -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
+    docker exec armada armada --help
 
 3. Check that tiller is Available
 
@@ -64,20 +64,30 @@ Usage
 
 .. code:: bash
 
-    docker exec armada armada apply /examples/openstack-helm.yaml [ --debug-logging ]
+    docker exec armada armada apply /examples/openstack-helm.yaml [ --debug ]
 
 5. Upgrading charts: modify the armada yaml or chart source code and run ``armada
    apply`` above
 
 .. code:: bash
 
-    docker exec armada armada apply /examples/openstack-helm.yaml [ --debug-logging ]
+    docker exec armada armada apply /examples/openstack-helm.yaml [ --debug ]
 
 6. To check deployed releases:
 
 .. code:: bash
 
    docker exec armada armada tiller --releases
+
+7. Testing Releases:
+
+.. code:: bash
+
+    docker exec armada armada test --release=armada-keystone
+
+    OR
+
+    docker exec armada armada test --file=/examples/openstack-helm.yaml
 
 Overriding Manifest Values
 --------------------------
@@ -89,6 +99,11 @@ specified first, with the target values following in this manner:
 
     armada apply --set [ document_type ]:[ document_name ]:[ data_value ]=[ value ]
 
+    Example:
+
+    armada apply --set chart:blog-1:release="new-blog"
+    armada apply --set chart:blog-1:values.blog.new="welcome"
+
 .. note::
 
     When overriding values using the set flag, new values will be inserted if
@@ -97,8 +112,8 @@ specified first, with the target values following in this manner:
 
 There are three types of override types that can be specified:
 - chart
-- chart_soure
-- release_prefix
+- chart_group
+- manifest
 
 An example of overriding the location of a chart:
 
