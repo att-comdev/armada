@@ -33,21 +33,32 @@ class Status(api.BaseResource):
         get tiller status
         '''
         try:
-            message = {'tiller': Tiller().tiller_status()}
+            opts = req.params
+            tiller = Tiller(
+                tiller_host=opts.get('tiller_host', None),
+                tiller_port=opts.get('tiller_port', None))
+            tiller_version = tiller.tiller_version()
+            ver_resp = getattr(tiller_version.Version, 'sem_ver', None)
+            message = {
+                'tiller': {
+                    'state': tiller.tiller_status(),
+                    'version': ver_resp
+                }
+            }
 
             if message.get('tiller', False):
                 resp.status = falcon.HTTP_200
             else:
                 resp.status = falcon.HTTP_503
 
-            resp.data = json.dumps(message)
+            resp.body = json.dumps(message)
             resp.content_type = 'application/json'
 
         except Exception as e:
-            self.error(req.context, "Unable to find resources")
+            err_message = 'Failed to get Tiller Status: {}'.format(e)
+            self.error(req.context, err_message)
             self.return_error(
-                resp, falcon.HTTP_500,
-                message="Unable to get status: {}".format(e))
+                resp, falcon.HTTP_500, message=err_message)
 
 
 class Release(api.BaseResource):
@@ -58,21 +69,23 @@ class Release(api.BaseResource):
         '''
         try:
             # Get tiller releases
-            handler = Tiller()
+            opts = req.params
+            tiller = Tiller(tiller_host=opts.get('tiller_host', None),
+                            tiller_port=opts.get('tiller_port', None))
 
             releases = {}
-            for release in handler.list_releases():
+            for release in tiller.list_releases():
                 if not releases.get(release.namespace, None):
                     releases[release.namespace] = []
 
                 releases[release.namespace].append(release.name)
 
-            resp.data = json.dumps({'releases': releases})
+            resp.body = json.dumps({'releases': releases})
             resp.content_type = 'application/json'
             resp.status = falcon.HTTP_200
 
         except Exception as e:
-            self.error(req.context, "Unable to find resources")
+            err_message = 'Unable to find Tiller Releases: {}'.format(e)
+            self.error(req.context, err_message)
             self.return_error(
-                resp, falcon.HTTP_500,
-                message="Unable to find Releases: {}".format(e))
+                resp, falcon.HTTP_500, message=err_message)

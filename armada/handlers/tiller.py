@@ -380,8 +380,9 @@ class Tiller(object):
         try:
 
             stub = ReleaseServiceStub(self.channel)
-            release_request = TestReleaseRequest(name=release, timeout=timeout,
-                                                 cleanup=cleanup)
+
+            release_request = TestReleaseRequest(
+                name=release, timeout=timeout, cleanup=cleanup)
 
             content = self.get_release_content(release)
 
@@ -517,12 +518,12 @@ class Tiller(object):
         if resource_labels is not None:
             for label in resource_labels:
                 if label_selector == '':
-                    label_selector = '{}={}'.format(label.keys()[0],
-                                                    label.values()[0])
+                    label_selector = '{}={}'.format(list(label.keys())[0],
+                                                    list(label.values())[0])
                     continue
 
-                label_selector += ', {}={}'.format(label.keys()[0],
-                                                   label.values()[0])
+                label_selector += ', {}={}'.format(list(label.keys())[0],
+                                                   list(label.values())[0])
 
         if 'job' in resource_type:
             LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
@@ -559,8 +560,8 @@ class Tiller(object):
 
             if labels is not None:
                 for label in labels:
-                    label_selector += ', {}={}'.format(label.keys()[0],
-                                                       label.values()[0])
+                    label_selector += ', {}={}'.format(list(label.keys())[0],
+                                                       list(label.values())[0])
 
             get_daemonset = self.k8s.get_namespace_daemonset(
                 namespace=namespace, label=label_selector)
