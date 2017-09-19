@@ -9,6 +9,7 @@ file can be generated via tox
 .. code-block:: bash
 
     $ tox -e genconfig
+    $ tox -e genpolicy
 
 Customize your configuration based on the information below
 
@@ -20,9 +21,9 @@ tokens
 
 .. note::
 
-    If you do not have a keystone already deploy, then armada can deploy a keystone service.
+    If you do not have a keystone already deploy, then armada can deploy a keystone services:
 
-    armada apply keystone-manifest.yaml
+    $ armada apply keystone-manifest.yaml
 
 .. code-block:: bash
 
@@ -40,13 +41,13 @@ The service account must then be included in the armada.conf
 .. code-block:: ini
 
     [keystone_authtoken]
+    auth_type = password
     auth_uri = https://<keystone-api>:5000/
+    auth_url = https://<keystone-api>:35357/
     auth_version = 3
     delay_auth_decision = true
-    auth_type = password
-    auth_url = https://<keystone-api>:35357/
-    project_name = service
-    project_domain_name = ucp
-    user_name = armada
-    user_domain_name = ucp
     password = armada
+    project_domain_name = ucp
+    project_name = service
+    user_domain_name = ucp
+    user_name = armada

@@ -1,4 +1,4 @@
-gitpython==2.1.5
+gitpython
 grpcio==1.6.0rc1
 grpcio-tools==1.6.0rc1
 keystoneauth1==2.21.0
@@ -6,18 +6,17 @@ keystonemiddleware==4.9.1
 kubernetes>=1.0.0
 protobuf>=3.4.0
 PyYAML==3.12
-requests==2.17.3
+requests
 supermutes==0.2.5
-urllib3==1.21.1
 Paste>=2.0.3
 PasteDeploy>=1.5.2
 
 # API
-falcon==1.1.0
+falcon
 uwsgi>=2.0.15
 
 # CLI
-cliff==2.7.0
+click>=6.7
 
 # Oslo
 oslo.cache>=1.5.0 # Apache-2.0
