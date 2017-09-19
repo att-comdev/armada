@@ -7,11 +7,16 @@ Commands
 
 .. code:: bash
 
-    Usage: armada validate FILE
+    Usage: armada validate [OPTIONS] FILENAME
+
+      This command validates Armada Manifest
+
+      The validate argument must be a relative path to Armada manifest
+
+          $ armada validate examples/simple.yaml
 
     Options:
-
-    [-h]
+      --help  Show this message and exit.
 
 Synopsis
 --------
