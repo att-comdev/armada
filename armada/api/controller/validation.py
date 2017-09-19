@@ -13,16 +13,12 @@
 # limitations under the License.
 
 import json
-import yaml
 
 import falcon
-from oslo_log import log as logging
 
 from armada import api
 from armada.common import policy
 from armada.utils.lint import validate_armada_documents
-
-LOG = logging.getLogger(__name__)
 
 
 class Validate(api.BaseResource):
@@ -33,24 +29,19 @@ class Validate(api.BaseResource):
     @policy.enforce('armada:validate_manifest')
     def on_post(self, req, resp):
         try:
+            manifest = self.req_yaml(req)
+            documents = list(manifest)
 
             message = {
-                'valid':
-                validate_armada_documents(
-                    list(yaml.safe_load_all(self.req_json(req))))
+                'valid': validate_armada_documents(documents)
             }
 
-            if message.get('valid', False):
-                resp.status = falcon.HTTP_200
-            else:
-                resp.status = falcon.HTTP_400
-
-            resp.data = json.dumps(message)
+            resp.status = falcon.HTTP_200
+            resp.body = json.dumps(message)
             resp.content_type = 'application/json'
 
         except Exception:
-            self.error(req.context, "Failed: Invalid Armada Manifest")
+            err_message = 'Failed to validate Armada Manifest'
+            self.error(req.context, err_message)
             self.return_error(
-                resp,
-                falcon.HTTP_400,
-                message="Failed: Invalid Armada Manifest")
+                resp, falcon.HTTP_400, message=err_message)
