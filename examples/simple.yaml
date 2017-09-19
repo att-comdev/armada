@@ -8,6 +8,10 @@ data:
   chart_name: blog-1
   release: blog-1
   namespace: default
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
   values: {}
   source:
     type: git
@@ -26,6 +30,8 @@ data:
   namespace: default
   values:
     some: value
+  install:
+    no_hooks: false
   upgrade:
     no_hooks: false
   source:
