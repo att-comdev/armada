@@ -19,7 +19,7 @@ falcon==1.1.0
 gunicorn==19.7.1
 
 # CLI
-cliff==2.7.0
+click>=6.7
 
 # Oslo
 oslo.cache>=1.5.0 # Apache-2.0

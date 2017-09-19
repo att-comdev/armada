@@ -18,6 +18,7 @@ import falcon
 from oslo_log import log as logging
 
 from armada import api
+from armada.common import policy
 from armada.handlers.armada import Armada
 
 LOG = logging.getLogger(__name__)
@@ -26,17 +27,15 @@ class Apply(api.BaseResource):
     '''
     apply armada endpoint service
     '''
-
+    @policy.enforce('armada:create_endpoints')
     def on_post(self, req, resp):
         try:
 
             # Load data from request and get options
-            data = self.req_json(req)
+            data = list(self.req_yaml(req))
             opts = {}
-            # opts = data['options']
 
             # Encode filename
-            # data['file'] = data['file'].encode('utf-8')
             armada = Armada(
                 data,
                 disable_update_pre=opts.get('disable_update_pre', False),
@@ -44,11 +43,19 @@ class Apply(api.BaseResource):
                 enable_chart_cleanup=opts.get('enable_chart_cleanup', False),
                 dry_run=opts.get('dry_run', False),
                 wait=opts.get('wait', False),
-                timeout=opts.get('timeout', False))
+                timeout=opts.get('timeout', False),
+                tiller_host=opts.get('tiller_host', None),
+                tiller_port=opts.get('tiller_port', 44134),
+                set_ovr=opts.get('set', [])
+            )
 
             msg = armada.sync()
 
-            resp.data = json.dumps({'message': msg})
+            resp.data = json.dumps(
+                {
+                    'message': msg,
+                }
+            )
 
             resp.content_type = 'application/json'
             resp.status = falcon.HTTP_200
@@ -56,4 +63,4 @@ class Apply(api.BaseResource):
             self.error(req.context, "Failed to apply manifest")
             self.return_error(
                 resp, falcon.HTTP_500,
-                message="Failed to install manifest: {} {}".format(e, data))
+                message="Failed to install manifest: {} {}".format(e))

@@ -12,37 +12,85 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
+import os
 
+import click
 from oslo_config import cfg
 from oslo_log import log
-from cliff import app
-from cliff import commandmanager as cm
+from urlparse import urlparse
 
-import armada
+from armada.common.client import ArmadaClient
+from armada.common.session import ArmadaSession
+from armada.cli.apply import apply_create
+from armada.cli.test import test_charts
+from armada.cli.tiller import tiller_service
+from armada.cli.validate import validate_manifest
 
 CONF = cfg.CONF
 
-class ArmadaApp(app.App):
-    def __init__(self, **kwargs):
-        super(ArmadaApp, self).__init__(
-            description='Armada - Upgrade and deploy your charts',
-            version=armada.__version__,
-            command_manager=cm.CommandManager('armada'),
-            **kwargs)
+@click.group()
+@click.option(
+    '--debug/--no-debug', help='Enable or disable debugging', default=False)
+@click.option(
+    '--api/--no-api', help='Execute service endpoints. (requires url option)',
+    default=False)
+@click.option(
+    '--url', help='Armada service endpoint', default=None)
+@click.option(
+    '--token', help='Armada service endpoint', default=None)
+@click.pass_context
+def main(ctx, debug, api, url, token):
+    """
+    Multi Helm Chart Deployment Manager
 
-    def build_option_parser(self, description, version, argparse_kwargs=None):
-        parser = super(ArmadaApp, self).build_option_parser(
-            description, version, argparse_kwargs)
-        return parser
+    Common actions from this point include:
 
-    def configure_logging(self):
-        super(ArmadaApp, self).configure_logging()
-        log.register_options(CONF)
-        log.set_defaults(default_log_levels=CONF.default_log_levels)
-        log.setup(CONF, 'armada')
+    $ armada apply
+    $ armada test
+    $ armada tiller
+    $ armada validate
 
-def main(argv=None):
-    if argv is None:
-        argv = sys.argv[1:]
-    return ArmadaApp().run(argv)
+    Environment:
+
+        $TOKEN set auth token
+
+        $HOST  set service host endpoint
+
+    This tool will communicate with deployed Tiller in your Kubernetes cluster.
+    """
+
+    if not ctx.obj:
+        ctx.obj = {}
+
+    if api:
+        if not url:
+            url = os.environ.get('HOST')
+        if not token:
+            token = os.environ.get('TOKEN')
+
+        ctx.obj['api'] = api
+        if url:
+            parsed_url = urlparse(url)
+            ctx.obj['CLIENT'] = ArmadaClient(
+                ArmadaSession(
+                    host=parsed_url.netloc,
+                    scheme=parsed_url.scheme,
+                    token=token)
+            )
+        else:
+            raise Exception(
+                'When api option is enable user needs to pass url')
+
+    log.register_options(CONF)
+
+    if debug:
+        CONF.debug = debug
+
+    log.set_defaults(default_log_levels=CONF.default_log_levels)
+    log.setup(CONF, 'armada')
+
+
+main.add_command(apply_create)
+main.add_command(test_charts)
+main.add_command(tiller_service)
+main.add_command(validate_manifest)
