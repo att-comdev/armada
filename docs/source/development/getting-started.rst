@@ -13,8 +13,7 @@ To use the docker containter to develop:
 
 .. code-block:: bash
 
-    git clone http://github.com/att-comdev/armada.git
-    cd armada
+    git clone http://github.com/att-comdev/armada.git && cd armada
 
     pip install tox
 
@@ -23,7 +22,7 @@ To use the docker containter to develop:
 
     docker build . -t armada/latest
 
-    docker run -d --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/etc:/armada/etc armada:local
+    docker run -d --name armada -v ~/.kube/:/armada/.kube/ -v $(pwd)/etc:/etc armada:local
 
 .. note::
 
@@ -45,7 +44,8 @@ From the directory of the forked repository:
 
 
     git clone http://github.com/att-comdev/armada.git && cd armada
-    virtualenv venv
+
+    virtualenv -p python3 venv
 
     pip install -r requirements.txt -r test-requirements.txt
 
@@ -53,13 +53,13 @@ From the directory of the forked repository:
 
     # Testing your armada code
     # The tox command will execute lint, bandit, cover
+    pip install tox
     tox
 
     # For targeted test
     tox -e pep8
     tox -e bandit
     tox -e cover
-
 
     # policy and config are used in order to use and configure Armada API
     tox -e genconfig
