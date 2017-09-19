@@ -31,3 +31,21 @@ class ApiJsonException(ApiException):
     '''Exception that occurs during chart cleanup.'''
 
     message = 'There was an error listing the helm chart releases.'
+
+
+class ClientUnauthorizedError(ApiException):
+    '''Exception that occurs during chart cleanup.'''
+
+    message = 'There was an error listing the helm chart releases.'
+
+
+class ClientForbiddenError(ApiException):
+    '''Exception that occurs during chart cleanup.'''
+
+    message = 'There was an error listing the helm chart releases.'
+
+
+class ClientError(ApiException):
+    '''Exception that occurs during chart cleanup.'''
+
+    message = 'There was an error listing the helm chart releases.'

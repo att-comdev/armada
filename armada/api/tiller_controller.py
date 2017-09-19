@@ -33,14 +33,25 @@ class Status(api.BaseResource):
         get tiller status
         '''
         try:
-            message = {'tiller': Tiller().tiller_status()}
+            self.logger.info("i am here")
+            tiller = Tiller()
+            tiller_version = tiller.tiller_version()
+            ver_resp = getattr(tiller_version.Version, 'sem_ver', None)
+            message = {
+                'tiller': {
+                    'state': tiller.tiller_status(),
+                    'version': ver_resp
+                }
+            }
+
+            self.logger.info(message)
 
             if message.get('tiller', False):
                 resp.status = falcon.HTTP_200
             else:
                 resp.status = falcon.HTTP_503
 
-            resp.data = json.dumps(message)
+            resp.body = json.dumps(message)
             resp.content_type = 'application/json'
 
         except Exception as e:
@@ -67,7 +78,7 @@ class Release(api.BaseResource):
 
                 releases[release.namespace].append(release.name)
 
-            resp.data = json.dumps({'releases': releases})
+            resp.body = json.dumps({'releases': releases})
             resp.content_type = 'application/json'
             resp.status = falcon.HTTP_200
 
