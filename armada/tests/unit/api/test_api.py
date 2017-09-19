@@ -52,7 +52,7 @@ class TestAPI(APITestCase):
 
         doc = {u'message': u'Success'}
 
-        result = self.simulate_post(path='/armada/apply', body=body)
+        result = self.simulate_post(path='/api/v1.0/apply', body=body)
         self.assertEqual(result.json, doc)
 
     @mock.patch('armada.api.tiller_controller.Tiller')
@@ -64,13 +64,15 @@ class TestAPI(APITestCase):
         # Mock tiller status value
         mock_tiller.tiller_status.return_value = 'Active'
 
-        doc = {u'message': u'Tiller Server is Active'}
+        # doc = {u'message': u'Tiller Server is Active'}
 
-        result = self.simulate_get('/v1.0/status')
+        result = self.simulate_get('/api/v1.0/status')
 
         # TODO(lamt) This should be HTTP_401 if no auth is happening, but auth
         # is not implemented currently, so it falls back to a policy check
         # failure, thus a 403.  Change this once it is completed
+
+        # Fails due to invalid access
         self.assertEqual(falcon.HTTP_403, result.status)
 
         # FIXME(lamt) Need authentication - mock, fixture
@@ -85,9 +87,9 @@ class TestAPI(APITestCase):
         # Mock tiller status value
         mock_tiller.list_releases.return_value = None
 
-        doc = {u'releases': {}}
+        # doc = {u'releases': {}}
 
-        result = self.simulate_get('/v1.0/releases')
+        result = self.simulate_get('/api/v1.0/releases')
 
         # TODO(lamt) This should be HTTP_401 if no auth is happening, but auth
         # is not implemented currently, so it falls back to a policy check

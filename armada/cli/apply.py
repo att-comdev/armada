@@ -12,59 +12,160 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cliff import command as cmd
+import yaml
 
+import click
+
+from armada.cli import CliAction
 from armada.handlers.armada import Armada
 
-def applyCharts(args):
+@click.group()
+def apply():
+    """ Apply manifest to cluster
 
-    armada = Armada(open(args.file).read(),
-                    args.disable_update_pre,
-                    args.disable_update_post,
-                    args.enable_chart_cleanup,
-                    args.dry_run,
-                    args.set,
-                    args.wait,
-                    args.timeout,
-                    args.tiller_host,
-                    args.tiller_port,
-                    args.values,
-                    args.debug_logging)
-    armada.sync()
+    """
 
-class ApplyChartsCommand(cmd.Command):
-    def get_parser(self, prog_name):
-        parser = super(ApplyChartsCommand, self).get_parser(prog_name)
-        parser.add_argument('file', type=str, metavar='FILE',
-                            help='Armada yaml file')
-        parser.add_argument('--dry-run', action='store_true',
-                            default=False, help='Run charts with dry run')
-        parser.add_argument('--debug-logging', action='store_true',
-                            default=False, help='Show debug logs')
-        parser.add_argument('--disable-update-pre', action='store_true',
-                            default=False, help='Disable pre upgrade actions')
-        parser.add_argument('--disable-update-post', action='store_true',
-                            default=False, help='Disable post upgrade actions')
-        parser.add_argument('--enable-chart-cleanup', action='store_true',
-                            default=False, help='Enable Chart Clean Up')
-        parser.add_argument('--set', action='append', help='Override Armada'
-                                                           'manifest values.')
-        parser.add_argument('--wait', action='store_true',
-                            default=False, help='Wait until all charts'
-                                                'have been deployed')
-        parser.add_argument('--timeout', action='store', type=int,
-                            default=3600, help='Specifies time to wait'
-                                                ' for charts to deploy')
-        parser.add_argument('--tiller-host', action='store', type=str,
-                            help='Specify the tiller host')
 
-        parser.add_argument('--tiller-port', action='store', type=int,
-                            default=44134, help='Specify the tiller port')
+DESC = """
+This command install and updates charts defined in armada manifest
 
-        parser.add_argument('--values', action='append',
-                            help='Override manifest values with a yaml file')
+The apply argument must be relative path to Armada Manifest. Executing apply
+commnad once will install all charts defined in manifest. Re-executing apply
+commnad will execute upgrade.
 
-        return parser
+To see how to create an Armada manifest:
+    http://armada-helm.readthedocs.io/en/latest/operations/
 
-    def take_action(self, parsed_args):
-        applyCharts(parsed_args)
+To obtain install/upgrade charts:
+
+    $ armada apply example/simple.yaml
+
+To obtain override manifest:
+
+    $ armada apply example/simple.yaml
+--set manifest:simple-armada:relase_name="wordpress"
+
+    or
+
+    $ armada apply example/simple.yaml --values examples/simple-ovr-values.yaml
+
+"""
+
+SHORT_DESC = "command install manifest charts"
+
+@apply.command(name='apply', help=DESC, short_help=SHORT_DESC)
+@click.argument('filename')
+@click.option('--api', help="Contacts service endpoint", is_flag=True)
+@click.option(
+    '--disable-update-post', help="run charts without install", is_flag=True)
+@click.option(
+    '--disable-update-pre', help="run charts without install", is_flag=True)
+@click.option('--dry-run', help="run charts without install", is_flag=True)
+@click.option(
+    '--enable-chart-cleanup', help="Clean up Unmanaged Charts", is_flag=True)
+@click.option('--set', multiple=True, default=[])
+@click.option('--tiller-host', help="Tiller host ip")
+@click.option(
+    '--tiller-port', help="Tiller host port", type=int, default=44134)
+@click.option(
+    '--timeout', help="specifies time to wait for charts", type=int,
+    default=3600)
+@click.option('--values', '-f', multiple=True, default=[])
+@click.option(
+    '--wait', help="wait until all charts deployed", is_flag=True)
+@click.pass_context
+def apply_create(ctx,
+                 filename,
+                 api,
+                 disable_update_post,
+                 disable_update_pre,
+                 dry_run,
+                 enable_chart_cleanup,
+                 set,
+                 tiller_host,
+                 tiller_port,
+                 timeout,
+                 values,
+                 wait):
+
+    ApplyManifest(
+        ctx,
+        filename,
+        api,
+        disable_update_post,
+        disable_update_pre,
+        dry_run,
+        enable_chart_cleanup,
+        set,
+        tiller_host,
+        tiller_port,
+        timeout,
+        values,
+        wait).invoke()
+
+
+class ApplyManifest(CliAction):
+    def __init__(self,
+                 ctx,
+                 filename,
+                 api,
+                 disable_update_post,
+                 disable_update_pre,
+                 dry_run,
+                 enable_chart_cleanup,
+                 set,
+                 tiller_host,
+                 tiller_port,
+                 timeout,
+                 values,
+                 wait):
+        super(ApplyManifest, self).__init__()
+        self.ctx = ctx
+        self.filename = filename
+        self.api = api
+        self.disable_update_post = disable_update_post
+        self.disable_update_pre = disable_update_pre
+        self.dry_run = dry_run
+        self.enable_chart_cleanup = enable_chart_cleanup
+        self.set = set
+        self.tiller_host = tiller_host
+        self.tiller_port = tiller_port
+        self.timeout = timeout
+        self.values = values
+        self.wait = wait
+
+    def invoke(self):
+
+        if not self.ctx.obj.get('api', False):
+            with open(self.filename) as f:
+                armada = Armada(
+                    list(yaml.safe_load_all(f.read())),
+                    self.disable_update_pre,
+                    self.disable_update_post,
+                    self.enable_chart_cleanup,
+                    self.dry_run,
+                    self.set,
+                    self.wait,
+                    self.timeout,
+                    self.tiller_host,
+                    self.tiller_port,
+                    self.values)
+
+                armada.sync()
+        else:
+            query = {
+                'disable_update_post': self.disable_update_post,
+                'disable_update_pre': self.disable_update_pre,
+                'dry_run': self.dry_run,
+                'enable_chart_cleanup': self.enable_chart_cleanup,
+                'tiller_host': self.tiller_host,
+                'tiller_port': self.tiller_port,
+                'timeout': self.timeout,
+                'wait': self.wait
+            }
+
+            client = self.ctx.obj.get('CLIENT')
+
+            with open(self.filename, 'r') as f:
+                resp = client.post_apply(manifest=f.read(), query=query)
+                self.logger.info(resp)
