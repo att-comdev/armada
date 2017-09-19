@@ -16,9 +16,9 @@ import collections
 import json
 import yaml
 
-from ..const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
-from ..exceptions import override_exceptions
-from ..utils import lint
+from armada import const
+from armada.exceptions import override_exceptions
+from armada.utils import lint
 
 
 class Override(object):
@@ -38,7 +38,7 @@ class Override(object):
             raise override_exceptions.InvalidOverrideFileException(doc)
 
     def update(self, d, u):
-        for k, v in u.iteritems():
+        for k, v in u.items():
             if isinstance(v, collections.Mapping):
                 r = self.update(d.get(k, {}), v)
                 d[k] = r
@@ -49,11 +49,11 @@ class Override(object):
     def find_document_type(self, alias):
         try:
             if alias == 'chart_group':
-                return DOCUMENT_GROUP
+                return const.DOCUMENT_GROUP
             if alias == 'chart':
-                return DOCUMENT_CHART
+                return const.DOCUMENT_CHART
             if alias == 'manifest':
-                return DOCUMENT_MANIFEST
+                return const.DOCUMENT_MANIFEST
             else:
                 raise
         except Exception:
@@ -73,6 +73,15 @@ class Override(object):
                 doc_path[0], doc_path[1])
 
     def array_to_dict(self, data_path, new_value):
+        def convert(data):
+            if isinstance(data, str):
+                return str(data)
+            elif isinstance(data, collections.Mapping):
+                return dict(map(convert, data.items()))
+            elif isinstance(data, collections.Iterable):
+                return type(data)(map(convert, data))
+            else:
+                return data
 
         if new_value is '':
             return
@@ -90,8 +99,9 @@ class Override(object):
             t = t.setdefault(part, {})
 
         string = json.dumps(tree).replace('null', '"{}"'.format(new_value))
+        data_obj = convert(json.loads(string, encoding='utf-8'))
 
-        return json.loads(string)
+        return data_obj
 
     def override_manifest_value(self, doc_path, data_path, new_value):
         document = self.find_manifest_document(doc_path)
@@ -101,30 +111,30 @@ class Override(object):
     def update_document(self, merging_values):
 
         for doc in merging_values:
-            if doc.get('schema') == DOCUMENT_CHART:
+            if doc.get('schema') == const.DOCUMENT_CHART:
                 self.update_chart_document(doc)
-            if doc.get('schema') == DOCUMENT_GROUP:
+            if doc.get('schema') == const.DOCUMENT_GROUP:
                 self.update_chart_group_document(doc)
-            if doc.get('schema') == DOCUMENT_MANIFEST:
+            if doc.get('schema') == const.DOCUMENT_MANIFEST:
                 self.update_armada_manifest(doc)
 
     def update_chart_document(self, ovr):
         for doc in self.documents:
-            if doc.get('schema') == DOCUMENT_CHART and doc.get('metadata').get(
-                    'name') == ovr.get('metadata').get('name'):
+            if doc.get('schema') == const.DOCUMENT_CHART and doc.get(
+                    'metadata').get('name') == ovr.get('metadata').get('name'):
                 self.update(doc.get('data'), ovr.get('data'))
                 return
 
     def update_chart_group_document(self, ovr):
         for doc in self.documents:
-            if doc.get('schema') == DOCUMENT_GROUP and doc.get('metadata').get(
-                    'name') == ovr.get('metadata').get('name'):
+            if doc.get('schema') == const.DOCUMENT_GROUP and doc.get(
+                    'metadata').get('name') == ovr.get('metadata').get('name'):
                 self.update(doc.get('data'), ovr.get('data'))
                 return
 
     def update_armada_manifest(self, ovr):
         for doc in self.documents:
-            if doc.get('schema') == DOCUMENT_MANIFEST and doc.get(
+            if doc.get('schema') == const.DOCUMENT_MANIFEST and doc.get(
                     'metadata').get('name') == ovr.get('metadata').get('name'):
                 self.update(doc.get('data'), ovr.get('data'))
                 return
