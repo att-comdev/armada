@@ -18,6 +18,16 @@ from armada.conf import utils
 
 default_options = [
 
+    cfg.StrOpt(
+        'bind_host',
+        default='0.0.0.0'
+    ),
+
+    cfg.PortOpt(
+        'bind_port',
+        default=8000
+    ),
+
     cfg.ListOpt(
         'armada_apply_roles',
         default=['admin'],

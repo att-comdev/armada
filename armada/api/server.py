@@ -62,7 +62,7 @@ def create(middleware=CONF.middleware):
                      ('validate', Validate()))
 
     for route, service in url_routes_v1:
-        api.add_route("/v1.0/{}".format(route), service)
+        api.add_route("/api/v1.0/{}".format(route), service)
 
     return api
 
