@@ -1,0 +1,33 @@
+#
+#"admin_required": "role:admin"
+
+#
+#"service_or_admin": "rule:admin_required or rule:service_role"
+
+#
+#"service_role": "role:service"
+
+# install manifest charts
+# POST  api/v1.0/apply/
+#"armada:create_endpoints": "rule:admin_required"
+
+# validate installed manifest
+# POST  /api/v1.0/validate/
+#"armada:validate_manifest": "rule:admin_required"
+
+# validate install manifest
+# GET  /api/v1.0/test/{release}
+#"armada:test_release": "rule:admin_required"
+
+# validate install manifest
+# POST  /api/v1.0/tests/
+#"armada:test_manifest": "rule:admin_required"
+
+# Get tiller status
+# GET  /api/v1.0/status/
+#"tiller:get_status": "rule:admin_required"
+
+# Get tiller release
+# GET  /api/v1.0/releases/
+#"tiller:get_release": "rule:admin_required"
+

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import json
-import yaml
 
 import falcon
 from oslo_log import log as logging
@@ -33,18 +32,14 @@ class Validate(api.BaseResource):
     @policy.enforce('armada:validate_manifest')
     def on_post(self, req, resp):
         try:
+            manifest = self.req_yaml(req)
+            documents = list(manifest)
 
             message = {
-                'valid':
-                validate_armada_documents(
-                    list(yaml.safe_load_all(self.req_json(req))))
+                'valid': validate_armada_documents(documents)
             }
 
-            if message.get('valid', False):
-                resp.status = falcon.HTTP_200
-            else:
-                resp.status = falcon.HTTP_400
-
+            resp.status = falcon.HTTP_200
             resp.data = json.dumps(message)
             resp.content_type = 'application/json'
 
