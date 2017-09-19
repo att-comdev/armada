@@ -10,7 +10,7 @@ data:
   values: {}
   source:
     type: git
-    location: git://github.com/openstack/openstack-helm
+    location: https://git.openstack.org/openstack/openstack-helm
     subpath: helm-toolkit
     reference: master
   dependencies: []
@@ -31,7 +31,7 @@ data:
   values: {}
   source:
     type: git
-    location: git://github.com/openstack/openstack-helm
+    location: https://git.openstack.org/openstack/openstack-helm
     subpath: mariadb
     reference: master
   dependencies:
@@ -53,7 +53,7 @@ data:
   values: {}
   source:
     type: git
-    location: git://github.com/openstack/openstack-helm
+    location: https://git.openstack.org/openstack/openstack-helm
     subpath: memcached
     reference: master
   dependencies:
@@ -74,10 +74,10 @@ data:
   upgrade:
     no_hooks: false
   values:
-    replicas: 2
+    replicas: 3
   source:
     type: git
-    location: git://github.com/openstack/openstack-helm
+    location: https://git.openstack.org/openstack/openstack-helm
     subpath: keystone
     reference: master
   dependencies:
