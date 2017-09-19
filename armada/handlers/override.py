@@ -73,6 +73,15 @@ class Override(object):
                 doc_path[0], doc_path[1])
 
     def array_to_dict(self, data_path, new_value):
+        def convert(data):
+            if isinstance(data, basestring):
+                return str(data)
+            elif isinstance(data, collections.Mapping):
+                return dict(map(convert, data.iteritems()))
+            elif isinstance(data, collections.Iterable):
+                return type(data)(map(convert, data))
+            else:
+                return data
 
         if new_value is '':
             return
@@ -90,8 +99,9 @@ class Override(object):
             t = t.setdefault(part, {})
 
         string = json.dumps(tree).replace('null', '"{}"'.format(new_value))
+        data_obj = convert(json.loads(string, encoding='utf-8'))
 
-        return json.loads(string)
+        return data_obj
 
     def override_manifest_value(self, doc_path, data_path, new_value):
         document = self.find_manifest_document(doc_path)

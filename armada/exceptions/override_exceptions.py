@@ -14,12 +14,14 @@
 
 import base_exception
 
+
 class OverrideException(base_exception.ArmadaBaseException):
     '''
     Base class for Override handler exception and error handling.
     '''
 
     message = 'An unknown Override handler error occured.'
+
 
 class InvalidOverrideTypeException(OverrideException):
     '''
@@ -32,6 +34,7 @@ class InvalidOverrideTypeException(OverrideException):
 
         super(InvalidOverrideTypeException, self).__init__(self._message)
 
+
 class InvalidOverrideFileException(OverrideException):
     '''
     Exception that occurs when an invalid override file is provided.
@@ -41,6 +44,7 @@ class InvalidOverrideFileException(OverrideException):
         self._message = '{} is not a valid override file.'.format(filename)
 
         super(InvalidOverrideFileException, self).__init__(self._message)
+
 
 class InvalidOverrideValueException(OverrideException):
     '''
@@ -52,6 +56,7 @@ class InvalidOverrideValueException(OverrideException):
                         override_command)
 
         super(InvalidOverrideValueException, self).__init__(self._message)
+
 
 class UnknownDocumentOverrideException(OverrideException):
     '''

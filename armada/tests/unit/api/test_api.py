@@ -36,7 +36,7 @@ class TestAPI(APITestCase):
     @mock.patch('armada.api.armada_controller.Handler')
     def test_armada_apply(self, mock_armada):
         '''
-        Test /armada/apply endpoint
+        Test /api/v1.0/apply endpoint
         '''
         mock_armada.sync.return_value = None
 
@@ -52,13 +52,14 @@ class TestAPI(APITestCase):
 
         doc = {u'message': u'Success'}
 
-        result = self.simulate_post(path='/armada/apply', body=body)
+        result = self.simulate_post(path='/api/v1.0/apply', body=body)
         self.assertEqual(result.json, doc)
 
     @mock.patch('armada.api.tiller_controller.Tiller')
     def test_tiller_status(self, mock_tiller):
         '''
         Test /status endpoint
+        Test /api/v1.0/status endpoint
         '''
 
         # Mock tiller status value
@@ -67,11 +68,13 @@ class TestAPI(APITestCase):
         # FIXME(lamt) This variable is unused.  Uncomment when it is.
         # doc = {u'message': u'Tiller Server is Active'}
 
-        result = self.simulate_get('/v1.0/status')
+        result = self.simulate_get('/api/v1.0/status')
 
         # TODO(lamt) This should be HTTP_401 if no auth is happening, but auth
         # is not implemented currently, so it falls back to a policy check
         # failure, thus a 403.  Change this once it is completed
+
+        # Fails due to invalid access
         self.assertEqual(falcon.HTTP_403, result.status)
 
         # FIXME(lamt) Need authentication - mock, fixture
@@ -80,7 +83,7 @@ class TestAPI(APITestCase):
     @mock.patch('armada.api.tiller_controller.Tiller')
     def test_tiller_releases(self, mock_tiller):
         '''
-        Test /tiller/releases endpoint
+        Test /api/v1.0/releases endpoint
         '''
 
         # Mock tiller status value
@@ -89,7 +92,7 @@ class TestAPI(APITestCase):
         # FIXME(lamt) This variable is unused. Uncomment when it is.
         # doc = {u'releases': {}}
 
-        result = self.simulate_get('/v1.0/releases')
+        result = self.simulate_get('/api/v1.0/releases')
 
         # TODO(lamt) This should be HTTP_401 if no auth is happening, but auth
         # is not implemented currently, so it falls back to a policy check
