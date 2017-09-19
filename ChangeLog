@@ -1,0 +1,88 @@
+CHANGES
+=======
+
+* [WIP]feat(cli): using-click-framework
+* feat(manifest): ability to override manifest value
+* feat(api): policy enforcement and api standard
+* feat(armada): adding helm testing framework
+* feat(source): checkout via reference
+* docs(CONTRIBUTING.rst): add contribution guide
+* fix(docker): armada own directory in container
+* Fix tox/bandit tests
+* Update grpc dependency to 1.6.0rc1
+* Update grpc version
+* [feat] adding-tox-testing
+* Add gitreview file
+* Fix cloning only single repo branch bug
+* Update docs to new Dockerfile format
+* Migrate from pygit2 to GitPython
+* Fix oslo\_config and oslo\_log configurations
+* update volume mount in docs to account for container user change & fix helm typo
+* Dockerfile cleanup
+* [Feat] Support remote tarball as chart source
+* [Docs] Update development guide - Add new build/run instructions
+* [feat] upgrading daemonsets
+* Update armada handler to new manifest syntax
+* [bug] fixing repo delete
+* [Feat] Add common error/exception handling - Add main exception handler - Add more detailed, individual exceptions for common Armada failure points - Add exception documentation
+* Remove duplciate instantiation of Tiller handler
+* [bug] get armada object after valid document
+* Fix post-flight crash due to new manifest
+* [feat] adding standard armada manifest
+* Use COPY instead of git clone
+* [feat] Add tiller-host and -port options to apply
+* [docs] how to perform updates
+* Modify upgrade deletion to delete by labels
+* Revert "Modify upgrade deletion to delete by labels"
+* Revert "[WIP] Wait for new pod after deletion"
+* [WIP] Wait for new pod after deletion
+* Modify upgrade deletion to delete by labels
+* Redeploy failed charts on 'apply'
+* [Bug] Update API Entrypoint - server.py is now located in the API folder
+* [Feat] Add API support for core features
+* Add support for .helmignore
+* Fix chart cleanup bug
+* Allow Armada to clone OpenStack infra repos
+* [Bug] Update default timeout and logic - Change default timeout to 3600 - Timeout specified with CLI has priority - Timeout specified with yaml has second priority
+* [Docs] Update Armada yaml Docs - Change charts\_group to chart\_group
+* Fixes bug where tiller always passes 'wait'
+* [docs] update readme
+* [feat] adding sequenced deployments
+* Implement \`validate\` cmd to validate yaml files
+* Update theme to sphinx\_rtd
+* [Bug] Adds required Oslo configuration to API and unit tests - Register Oslo logging configurations in server.py, test\_armada.py, test\_chartbuilder.py, and test\_tiller.py - Add mock to test-requirements.txt - Update .travis.yml - Add mock case for tiller IP
+* testing-utils-lib
+* [Feat] Add support for Oslo logging configuration - Adds Oslo logging libraries - Enables logging configuration with a config file - Enables debug logging with --trace flag - Supports Docker logs - Adds logging for tiller
+* Implement native tiller timeout support
+* Increase gRPC message size defaults
+* [feat] update tiller services to 2.4.0
+* Implement wait for timeout feature and unit test
+* [feature] Adds setup for Armada configuration file
+* [bug] pre-post-not-check-correctly
+* [bug] preflight-prevent-actions-dep-tiller-states
+* [WIP][Feat] Add support for Oslo logging capabilities
+* Update documentation
+* Update documentation
+* Update example .yaml file in README
+* fix missing requests dependency
+* [feature] restructure-clean-up-project
+* add git clone for armada repo
+* [feature] implement-api-service
+* [bug] fixing-chart-diff-check
+* [feature] creating-api-service
+* allow the user variable to be leveraged
+* [bug] removing-used-section (#47)
+* [feature] adding-pre-post-actions-to-yaml (#44)
+* [feature] adding-delete-cleanup-functions (#45)
+* [feature] check-chart-diff-before-upgrade (#43)
+* [feature] chartbuilder-use-branchs-to-deploy (#41)
+* [docs] getting-started-guide
+* [script] installing-libgit2-deps (#22)
+* adding dockerfile
+* [bug] fix-pep8-linting-issues
+* Updated example file
+* [bug] removing-unused-function (#8)
+* [Feature] [Docs] owners-list-and-issue-standards
+* [travis-ci] adding-pipeline-for-testing
+* Initial Armada Commit (#1)
+* Initial commit
