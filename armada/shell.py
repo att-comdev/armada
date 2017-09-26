@@ -38,32 +38,8 @@ CONF = cfg.CONF
     '--url', help='Armada service endpoint', default=None)
 @click.option(
     '--token', help='Armada service endpoint', default=None)
-@click.option(
-    '--os-project-domain-name', help='Armada service endpoint', default=None)
-@click.option(
-    '--os-user-domain-name', help='Armada service endpoint', default=None)
-@click.option(
-    '--os-project-name', help='Armada service endpoint', default=None)
-@click.option(
-    '--os-username', help='Armada service endpoint', default=None)
-@click.option(
-    '--os-password', help='Armada service endpoint', default=None)
-@click.option(
-    '--os-auth-url', help='Armada service endpoint', default=None)
-@click.option(
-    '--os-identity-api-version', help='Armada service endpoint', default='v3')
-@click.option(
-    '--os-image-api-version', help='Armada service endpoint', default=None)
 @click.pass_context
-def main(ctx, debug, api, url, token,
-         os_project_domain_name,
-         os_user_domain_name,
-         os_project_name,
-         os_username,
-         os_password,
-         os_auth_url,
-         os_identify_api_version,
-         os_image_api_version):
+def main(ctx, debug, api, url, token):
     """
     Multi Helm Chart Deployment Manager
 
@@ -78,14 +54,6 @@ def main(ctx, debug, api, url, token,
 
         $TOKEN set auth token
         $HOST  set armada service host endpoint
-        $OS_PROJECT_DOMAIN_NAME keystone project domain name
-        $OS_USER_DOMAIN_NAME keystone user domain name
-        $OS_PROJECT_NAME keystone project name
-        $OS_USERNAME keystone service username
-        $OS_PASSWORD keystone service password
-        $OS_AUTH_URL keystone service endpoint
-        $OS_IDENTITY_API_VERSION keystone service endpoint version
-        $OS_IMAGE_API_VERSION keystone service image api version
 
     This tool will communicate with deployed Tiller in your Kubernetes cluster.
     """
@@ -96,27 +64,7 @@ def main(ctx, debug, api, url, token,
     if api:
         if not url:
             url = os.environ.get('HOST')
-        if not token or os.environ.get('TOKEN'):
             token = os.environ.get('TOKEN')
-        else:
-            if not os_project_domain_name:
-                os_project_domain_name = os.environ.get(
-                    'os_project_domain_name')
-            if not os_user_domain_name:
-                os_user_domain_name = os.environ.get('os_user_domain_name')
-            if not os_project_name:
-                os_project_name = os.environ.get('os_project_name')
-            if not os_username:
-                os_username = os.environ.get('os_username')
-            if not os_password:
-                os_password = os.environ.get('os_password')
-            if not os_auth_url:
-                os_auth_url = os.environ.get('os_project_domain_name')
-            if not os_identify_api_version:
-                os_identify_api_version = os.environ.get(
-                    'os_identify_api_version')
-            if not os_image_api_version:
-                os_image_api_version = os.environ.get('os_image_api_version')
 
         ctx.obj['api'] = api
         if url:

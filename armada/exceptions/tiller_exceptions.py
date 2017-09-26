@@ -95,9 +95,9 @@ class ChannelException(TillerException):
 class GetReleaseStatusException(TillerException):
     '''Exception that occurs during a failed Release Testing'''
 
-    def __init__(self, release, version):
-        message = 'Failed to get {} status {} version'.format(
-            release, version)
+    def __init__(self, release, log):
+        message = 'Failed to get {} status Tiller-log: \n {}'.format(
+            release, log)
 
         super(GetReleaseStatusException, self).__init__(message)
 

@@ -17,6 +17,7 @@ import click
 
 from armada.cli import CliAction
 from armada.handlers.tiller import Tiller
+from armada.handlers.k8s import K8s
 
 @click.group()
 def tiller():
@@ -48,25 +49,29 @@ SHORT_DESC = "command gets tiller infromation"
     '--tiller-port', help="Tiller host port", type=int, default=44134)
 @click.option('--releases', help="list of deployed releses", is_flag=True)
 @click.option('--status', help="Status of Armada services", is_flag=True)
+@click.option('--log', help="extract log of tiller pod", is_flag=True)
 @click.pass_context
-def tiller_service(ctx, tiller_host, tiller_port, releases, status):
-    TillerServices(ctx, tiller_host, tiller_port, releases, status).invoke()
+def tiller_service(ctx, tiller_host, tiller_port, releases, status, log):
+    TillerServices(
+        ctx, tiller_host, tiller_port, releases, status, log).invoke()
 
 
 class TillerServices(CliAction):
 
-    def __init__(self, ctx, tiller_host, tiller_port, releases, status):
+    def __init__(self, ctx, tiller_host, tiller_port, releases, status, log):
         super(TillerServices, self).__init__()
         self.ctx = ctx
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
         self.releases = releases
         self.status = status
+        self.log = log
 
     def invoke(self):
 
         tiller = Tiller(
             tiller_host=self.tiller_host, tiller_port=self.tiller_port)
+        k8s = K8s()
 
         if self.status:
             if not self.ctx.obj.get('api', False):
@@ -98,3 +103,7 @@ class TillerServices(CliAction):
                         self.logger.info(
                             'Release %s in namespace: %s', release,
                             namespace)
+
+        if self.log:
+            pod_log = k8s.get_tiller_pod_log()
+            self.logger.info(pod_log)

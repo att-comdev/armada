@@ -420,7 +420,8 @@ class Tiller(object):
                 status_request, self.timeout, metadata=self.metadata)
 
         except Exception:
-            raise ex.GetReleaseStatusException(release, version)
+            tiller_log = self.k8s.get_tiller_pod_log()
+            raise ex.GetReleaseStatusException(release, tiller_log)
 
     def get_release_content(self, release, version=0):
         '''

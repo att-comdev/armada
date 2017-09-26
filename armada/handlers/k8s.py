@@ -93,6 +93,18 @@ class K8s(object):
         return self.client.list_pod_for_all_namespaces(
             label_selector=label_selector)
 
+    def get_tiller_pod_log(self, tail_lines=30):
+        label = 'app=helm,name=tiller'
+        pods = self.get_all_pods(label)
+
+        for pod in pods.items:
+            p_name = pod.metadata.name
+            p_namespace = pod.metadata.namespace
+
+            if 'tiller-deploy' in p_name:
+                return self.client.read_namespaced_pod_log(
+                    p_name, p_namespace, tail_lines=tail_lines)
+
     def get_namespace_daemonset(self, namespace='default', label=''):
         '''
         :param namespace - namespace of target deamonset
