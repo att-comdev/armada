@@ -168,8 +168,8 @@ class K8s(object):
                 new_pod_name = event_name
             elif new_pod_name:
                 for condition in pod_conditions:
-                    if (condition.type == 'Ready'
-                            and condition.status == 'True'):
+                    if (condition.type == 'Ready' and
+                            condition.status == 'True'):
                         LOG.info('New pod %s deployed', new_pod_name)
 
                         w.stop()

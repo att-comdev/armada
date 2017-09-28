@@ -22,6 +22,7 @@ from armada.handlers.armada import Armada
 
 LOG = logging.getLogger(__name__)
 
+
 class Apply(api.BaseResource):
     '''
     apply armada endpoint service
