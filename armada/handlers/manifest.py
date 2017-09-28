@@ -14,6 +14,7 @@
 
 from ..const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
 
+
 class Manifest(object):
     def __init__(self, documents):
         self.config = None

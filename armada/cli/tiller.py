@@ -23,6 +23,7 @@ LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
 
+
 def tillerServer(args):
 
     tiller = Tiller()
@@ -36,6 +37,7 @@ def tillerServer(args):
         for release in tiller.list_releases():
             LOG.info("Release: %s ( namespace= %s )", release.name,
                      release.namespace)
+
 
 class TillerServerCommand(cmd.Command):
     def get_parser(self, prog_name):

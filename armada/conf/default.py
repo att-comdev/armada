@@ -68,8 +68,10 @@ The Keystone project domain name used for authentication.
         help=utils.fmt('IDs of approved API access roles.'))
 ]
 
+
 def register_opts(conf):
     conf.register_opts(default_options)
+
 
 def list_opts():
     return {'DEFAULT': default_options}

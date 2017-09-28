@@ -64,7 +64,8 @@ class TestAPI(APITestCase):
         # Mock tiller status value
         mock_tiller.tiller_status.return_value = 'Active'
 
-        doc = {u'message': u'Tiller Server is Active'}
+        # FIXME(lamt) This variable is unused.  Uncomment when it is.
+        # doc = {u'message': u'Tiller Server is Active'}
 
         result = self.simulate_get('/v1.0/status')
 
@@ -85,7 +86,8 @@ class TestAPI(APITestCase):
         # Mock tiller status value
         mock_tiller.list_releases.return_value = None
 
-        doc = {u'releases': {}}
+        # FIXME(lamt) This variable is unused. Uncomment when it is.
+        # doc = {u'releases': {}}
 
         result = self.simulate_get('/v1.0/releases')
 

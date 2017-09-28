@@ -23,6 +23,7 @@ import armada
 
 CONF = cfg.CONF
 
+
 class ArmadaApp(app.App):
     def __init__(self, **kwargs):
         super(ArmadaApp, self).__init__(
@@ -41,6 +42,7 @@ class ArmadaApp(app.App):
         log.register_options(CONF)
         log.set_defaults(default_log_levels=CONF.default_log_levels)
         log.setup(CONF, 'armada')
+
 
 def main(argv=None):
     if argv is None:

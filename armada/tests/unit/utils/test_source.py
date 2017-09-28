@@ -19,6 +19,7 @@ from armada.exceptions import source_exceptions
 
 from armada.utils import source
 
+
 class GitTestCase(unittest.TestCase):
 
     SOURCE_UTILS_LOCATION = 'armada.utils.source'

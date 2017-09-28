@@ -16,6 +16,7 @@ from cliff import command as cmd
 
 from armada.handlers.armada import Armada
 
+
 def applyCharts(args):
 
     armada = Armada(open(args.file).read(),
@@ -29,6 +30,7 @@ def applyCharts(args):
                     args.tiller_port,
                     args.debug_logging)
     armada.sync()
+
 
 class ApplyChartsCommand(cmd.Command):
     def get_parser(self, prog_name):

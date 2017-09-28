@@ -14,10 +14,12 @@
 
 import base_exception
 
+
 class SourceException(base_exception.ArmadaBaseException):
     '''Base class for Git exceptions and error handling.'''
 
     message = 'An unknown error occured while accessing a chart source'
+
 
 class GitLocationException(SourceException):
     '''Exception that occurs when an error occurs cloning a Git repository.'''
@@ -28,6 +30,7 @@ class GitLocationException(SourceException):
 
         super(GitLocationException, self).__init__(self._message)
 
+
 class SourceCleanupException(SourceException):
     '''Exception that occurs for an invalid dir.'''
 
@@ -36,6 +39,7 @@ class SourceCleanupException(SourceException):
         self._message = self._target_dir + ' is not a valid directory.'
 
         super(SourceCleanupException, self).__init__(self._message)
+
 
 class TarballDownloadException(SourceException):
     '''Exception that occurs when the tarball cannot be downloaded
@@ -48,6 +52,7 @@ class TarballDownloadException(SourceException):
 
         super(TarballDownloadException, self).__init__(self._message)
 
+
 class TarballExtractException(SourceException):
     '''Exception that occurs when extracting the tarball fails'''
 
@@ -56,6 +61,7 @@ class TarballExtractException(SourceException):
         self._message = 'Unable to extract ' + self._tarball_dir
 
         super(TarballExtractException, self).__init__(self._message)
+
 
 class InvalidPathException(SourceException):
     '''Exception that occurs when a nonexistant path is accessed'''
