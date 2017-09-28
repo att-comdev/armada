@@ -18,6 +18,7 @@ import os
 
 from armada.utils import lint
 
+
 class LintTestCase(unittest.TestCase):
 
     def setUp(self):

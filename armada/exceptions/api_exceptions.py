@@ -14,6 +14,7 @@
 
 import base_exception as base
 
+
 class ApiException(base.ArmadaBaseException):
     '''Base class for API exceptions and error handling.'''
 

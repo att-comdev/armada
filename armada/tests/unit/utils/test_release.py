@@ -16,6 +16,7 @@ import unittest
 
 from armada.utils import release as rel
 
+
 class ReleaseTestCase(unittest.TestCase):
 
     def test_release_prefix_pass(self):

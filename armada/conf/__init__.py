@@ -24,5 +24,6 @@ CONF = cfg.CONF
 if (os.path.exists('etc/armada/armada.conf')):
     CONF(['--config-file', 'etc/armada/armada.conf'])
 
+
 def set_app_default_configs():
     default.register_opts(CONF)

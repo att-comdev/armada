@@ -14,15 +14,18 @@
 
 from base_exception import ArmadaBaseException as ex
 
+
 class TillerException(ex):
     '''Base class for Tiller exceptions and error handling.'''
 
     message = 'An unknown Tiller error occured.'
 
+
 class TillerServicesUnavailableException(TillerException):
     '''Exception for tiller services unavailable.'''
 
     message = 'Tiller services unavailable.'
+
 
 class ChartCleanupException(TillerException):
     '''Exception that occures during chart cleanup.'''
@@ -32,10 +35,12 @@ class ChartCleanupException(TillerException):
             chart_name)
         super(ChartCleanupException, self).__init__(message)
 
+
 class ListChartsException(TillerException):
     '''Exception that occurs when listing charts'''
 
     message = 'There was an error listing the helm chart releases.'
+
 
 class PostUpdateJobDeleteException(TillerException):
     '''Exception that occurs when a job deletion'''
@@ -47,6 +52,7 @@ class PostUpdateJobDeleteException(TillerException):
 
         super(PostUpdateJobDeleteException, self).__init__(message)
 
+
 class PostUpdateJobCreateException(TillerException):
     '''Exception that occurs when a job creation fails.'''
 
@@ -56,6 +62,7 @@ class PostUpdateJobCreateException(TillerException):
             name, namespace)
 
         super(PostUpdateJobCreateException, self).__init__(message)
+
 
 class PreUpdateJobDeleteException(TillerException):
     '''Exception that occurs when a job deletion'''
@@ -67,6 +74,7 @@ class PreUpdateJobDeleteException(TillerException):
 
         super(PreUpdateJobDeleteException, self).__init__(message)
 
+
 class PreUpdateJobCreateException(TillerException):
     '''Exception that occurs when a job creation fails.'''
 
@@ -76,6 +84,7 @@ class PreUpdateJobCreateException(TillerException):
             name, namespace)
 
         super(PreUpdateJobCreateException, self).__init__(message)
+
 
 class ReleaseException(TillerException):
     '''Exception that occurs when a release fails to install.'''
@@ -87,10 +96,12 @@ class ReleaseException(TillerException):
 
         super(ReleaseException, self).__init__(message)
 
+
 class ChannelException(TillerException):
     '''Exception that occurs during a failed GRPC channel creation'''
 
     message = 'Failed to create GRPC channel.'
+
 
 class GetReleaseStatusException(TillerException):
     '''Exception that occurs during a failed Release Testing'''
@@ -101,6 +112,7 @@ class GetReleaseStatusException(TillerException):
 
         super(GetReleaseStatusException, self).__init__(message)
 
+
 class GetReleaseContentException(TillerException):
     '''Exception that occurs during a failed Release Testing'''
 
@@ -109,6 +121,7 @@ class GetReleaseContentException(TillerException):
             release, version)
 
         super(GetReleaseContentException, self).__init__(message)
+
 
 class TillerVersionException(TillerException):
     '''Exception that occurs during a failed Release Testing'''

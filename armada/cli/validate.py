@@ -25,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
 
+
 def validateYaml(args):
     documents = yaml.safe_load_all(open(args.file).read())
     manifest_obj = Manifest(documents).get_manifest()
@@ -36,6 +37,7 @@ def validateYaml(args):
             LOG.info('Successfully validated: %s', args.file)
     except Exception:
         raise Exception('Failed to validate: %s', args.file)
+
 
 class ValidateYamlCommand(cmd.Command):
     def get_parser(self, prog_name):
