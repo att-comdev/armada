@@ -65,7 +65,9 @@ metadata:
   name: keystone
 data:
   chart_name: keystone
-  test: true
+  test:
+    enabled: true
+    output: true
   release: keystone
   namespace: openstack
   timeout: 100

@@ -367,9 +367,11 @@ class Tiller(object):
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Install')
 
-    def testing_release(self, release, timeout=300, cleanup=True):
+    def testing_release(self, release,
+                        output=True, timeout=300, cleanup=True):
         '''
         :param release - name of release to test
+        :param output - output the pod log
         :param timeout - runtime before exiting
         :param cleanup - removes testing pod created
 
@@ -383,7 +385,6 @@ class Tiller(object):
 
             release_request = TestReleaseRequest(
                 name=release, timeout=timeout, cleanup=cleanup)
-
             content = self.get_release_content(release)
 
             if not len(content.release.hooks):
@@ -391,13 +392,24 @@ class Tiller(object):
                 return False
 
             if content.release.hooks[0].events[0] == RUNTEST_SUCCESS:
-                test = stub.RunReleaseTest(
-                    release_request, self.timeout, metadata=self.metadata)
+                content_release = content.release.hooks[0].name
 
-                if test.running():
-                    self.k8s.wait_get_completed_podphase(release)
+                if not self.k8s.find_pod(content_release):
+                    test = stub.RunReleaseTest(
+                            release_request, self.timeout,
+                            metadata=self.metadata)
 
-                test.cancel()
+                    if test.running():
+                        LOG.debug('GRPC call successful')
+                    else:
+                        raise Exception("GRPC call failing")
+
+                self.k8s.wait_get_running_podphase(content_release)
+                LOG.info("Test Running")
+                out_log = self.k8s.get_test_pod_log(release, follow=True)
+
+                if output:
+                    LOG.info(content_release, out_log)
 
                 return self.get_release_status(release)
 
