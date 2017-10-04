@@ -54,7 +54,7 @@ def create(middleware=CONF.middleware):
         ('releases', Release()),
         ('status', Status()),
         ('tests', Tests()),
-        ('test/{release}', Test()),
+        ('tests/{release}', Test()),
         ('validate', Validate()),
     )
 
