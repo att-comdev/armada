@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
+from urllib.parser import urlparse
+
 from armada.const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
 from armada.const import KEYWORD_ARMADA, KEYWORD_PREFIX, KEYWORD_GROUPS, \
     KEYWORD_CHARTS, KEYWORD_RELEASE
@@ -93,3 +97,13 @@ def validate_chart_document(documents):
                         KEYWORD_RELEASE, document.get('metadata').get('name')))
 
     return True
+
+
+def validate_url(value):
+    o = urlparse(value)
+    if o.scheme:
+        return False
+
+
+def validate_local_file(value):
+    return os.path.isfile(value)

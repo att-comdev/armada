@@ -19,6 +19,7 @@ from oslo_config import cfg
 
 from armada.cli import CliAction
 from armada.handlers.armada import Armada
+from armada.utils import source
 
 CONF = cfg.CONF
 
@@ -169,22 +170,32 @@ class ApplyManifest(CliAction):
     def invoke(self):
 
         if not self.ctx.obj.get('api', False):
-            with open(self.filename) as f:
-                armada = Armada(
-                    list(yaml.safe_load_all(f.read())),
-                    self.disable_update_pre,
-                    self.disable_update_post,
-                    self.enable_chart_cleanup,
-                    self.dry_run,
-                    self.set,
-                    self.wait,
-                    self.timeout,
-                    self.tiller_host,
-                    self.tiller_port,
-                    self.values)
+            value, err = source.get_url_manifest(self.filename)
 
-                resp = armada.sync()
-                self.output(resp)
+            if not err:
+                document = list(yaml.safe_load_all(value))
+            else:
+                try:
+                    with open(self.filename) as f:
+                        document = list(yaml.safe_load_all(f.read()))
+                except Exception as e:
+                    self.logger.error(e)
+
+            armada = Armada(
+                document,
+                self.disable_update_pre,
+                self.disable_update_post,
+                self.enable_chart_cleanup,
+                self.dry_run,
+                self.set,
+                self.wait,
+                self.timeout,
+                self.tiller_host,
+                self.tiller_port,
+                self.values)
+
+            resp = armada.sync()
+            self.output(resp)
         else:
             query = {
                 'disable_update_post': self.disable_update_post,

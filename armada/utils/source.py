@@ -92,3 +92,10 @@ def source_cleanup(target_dir):
     '''
     if path.exists(target_dir):
         shutil.rmtree(target_dir)
+
+
+def get_url_manifest(value):
+    try:
+        return requests.get(value), None
+    except requests.HTTPError as e:
+        return value, e
