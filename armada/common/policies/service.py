@@ -27,15 +27,12 @@ armada_policies = [
         description='validate installed manifest',
         operations=[{'path': '/api/v1.0/validate/', 'method': 'POST'}]),
     policy.DocumentedRuleDefault(
-        name=base.ARMADA % 'test_release',
+        name=base.ARMADA % 'test_releases',
         check_str=base.RULE_ADMIN_REQUIRED,
-        description='validate install manifest',
-        operations=[{'path': '/api/v1.0/test/{release}', 'method': 'GET'}]),
-    policy.DocumentedRuleDefault(
-        name=base.ARMADA % 'test_manifest',
-        check_str=base.RULE_ADMIN_REQUIRED,
-        description='validate install manifest',
-        operations=[{'path': '/api/v1.0/tests/', 'method': 'POST'}]),
+        description='test helm releases',
+        operations=[
+            {'path': '/api/v1.0/tests/', 'method': 'POST'},
+            {'path': '/api/v1.0/tests/{release}', 'method': 'GET'}]),
 ]
 
 
