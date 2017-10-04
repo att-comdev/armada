@@ -71,7 +71,9 @@ metadata:
   name: keystone
 data:
   chart_name: keystone
-  test: true
+  test:
+    enabled: true
+    output: true
   release: keystone
   namespace: openstack
   wait:
@@ -117,7 +119,9 @@ metadata:
 data:
   description: "Deploying OpenStack Keystone"
   sequenced: True
-  test_charts: False
+  test_charts:
+    enabled: False
+    output: False
   chart_group:
     - keystone
 ---

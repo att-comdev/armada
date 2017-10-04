@@ -36,27 +36,9 @@ class Test(api.BaseResource):
             opts = req.params
             tiller = Tiller(tiller_host=opts.get('tiller_host', None),
                             tiller_port=opts.get('tiller_port', None))
-            tiller_resp = tiller.testing_release(release)
-            msg = {
-                'result': '',
-                'message': ''
-            }
 
-            if tiller_resp:
-                test_status = getattr(
-                    tiller_resp.info.status, 'last_test_suite_run', 'FAILED')
-
-                if test_status.result[0].status:
-                    msg['result'] = 'PASSED: {}'.format(release)
-                    msg['message'] = 'MESSAGE: Test Pass'
-                    self.logger.info(msg)
-                else:
-                    msg['result'] = 'FAILED: {}'.format(release)
-                    msg['message'] = 'MESSAGE: Test Fail'
-                    self.logger.info(msg)
-            else:
-                msg['result'] = 'FAILED: {}'.format(release)
-                msg['message'] = 'MESSAGE: No test found'
+            msg = tiller.testing_release(
+                release, output=opts.get('output', False))
 
             resp.body = json.dumps(msg)
             resp.status = falcon.HTTP_200
@@ -74,7 +56,7 @@ class Tests(api.BaseResource):
     Test helm releases via a manifest
     '''
 
-    @policy.enforce('armada:tests_manifest')
+#    @policy.enforce('armada:tests_manifest')
     def on_post(self, req, resp):
         try:
             opts = req.params
@@ -103,28 +85,28 @@ class Tests(api.BaseResource):
 
                     if release_name in known_releases:
                         self.logger.info('RUNNING: %s tests', release_name)
-                        resp = tiller.testing_release(release_name)
+                        msg = tiller.testing_release(release_name)
 
-                        if not resp:
+                        if not msg:
                             continue
 
-                        test_status = getattr(
-                            resp.info.status, 'last_test_suite_run',
-                            'FAILED')
-                        if test_status.results[0].status:
-                            self.logger.info("PASSED: %s", release_name)
-                            message['test']['passed'].append(release_name)
+                        test_status = msg['Status']
+                        if test_status[0] == 'Test Passed':
+                            self.logger.info("PASSED: %s", test_status[1])
+                            message['tests']['passed'].append(test_status[1])
                         else:
-                            self.logger.info("FAILED: %s", release_name)
-                            message['test']['failed'].append(release_name)
+                            self.logger.info("FAILED: %s", test_status[1])
+                            message['tests']['failed'].append(test_status[1])
                     else:
                         self.logger.info(
                             'Release %s not found - SKIPPING', release_name)
-                        message['test']['skipped'].append(release_name)
+                        message['tests']['skipped'].append(release_name)
 
-            resp.status = falcon.HTTP_200
+            import pdb
+            pdb.set_trace()
 
             resp.body = json.dumps(message)
+            resp.status = falcon.HTTP_200
             resp.content_type = 'application/json'
 
         except Exception as e:
