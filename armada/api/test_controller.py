@@ -40,27 +40,9 @@ class Test(api.BaseResource):
             opts = req.params
             tiller = Tiller(tiller_host=opts.get('tiller_host', None),
                             tiller_port=opts.get('tiller_port', None))
-            tiller_resp = tiller.testing_release(release)
-            msg = {
-                'result': '',
-                'message': ''
-            }
 
-            if tiller_resp:
-                test_status = getattr(
-                    tiller_resp.info.status, 'last_test_suite_run', 'FAILED')
-
-                if test_status.result[0].status:
-                    msg['result'] = 'PASSED: {}'.format(release)
-                    msg['message'] = 'MESSAGE: Test Pass'
-                    self.logger.info(msg)
-                else:
-                    msg['result'] = 'FAILED: {}'.format(release)
-                    msg['message'] = 'MESSAGE: Test Fail'
-                    self.logger.info(msg)
-            else:
-                msg['result'] = 'FAILED: {}'.format(release)
-                msg['message'] = 'MESSAGE: No test found'
+            msg = tiller.testing_release(
+                    release, output=opts.get('output', False))
 
             resp.body = json.dumps(msg)
             resp.status = falcon.HTTP_200
@@ -113,10 +95,8 @@ class Tests(api.BaseResource):
                         if not resp:
                             continue
 
-                        test_status = getattr(
-                            resp.info.status, 'last_test_suite_run',
-                            'FAILED')
-                        if test_status.results[0].status:
+                        test_status = resp['Status']
+                        if test_status[0] == 'Test Passed':
                             self.logger.info("PASSED: %s", release_name)
                             message['test']['passed'].append(release_name)
                         else:

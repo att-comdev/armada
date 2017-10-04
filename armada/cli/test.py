@@ -29,7 +29,6 @@ def test():
 
     """
 
-
 DESC = """
 This command test deployed charts
 
@@ -52,22 +51,24 @@ SHORT_DESC = "command test releases"
 
 @test.command(name='test', help=DESC, short_help=SHORT_DESC)
 @click.option('--file', help='armada manifest', type=str)
+@click.option('--output', help='pod output log', is_flag=True)
 @click.option('--release', help='helm release', type=str)
 @click.option('--tiller-host', help="Tiller Host IP")
 @click.option(
     '--tiller-port', help="Tiller host Port", type=int, default=44134)
 @click.pass_context
-def test_charts(ctx, file, release, tiller_host, tiller_port):
+def test_charts(ctx, file, output, release, tiller_host, tiller_port):
     TestChartManifest(
-        ctx, file, release, tiller_host, tiller_port).invoke()
+        ctx, file, output, release, tiller_host, tiller_port).invoke()
 
 
 class TestChartManifest(CliAction):
-    def __init__(self, ctx, file, release, tiller_host, tiller_port):
+    def __init__(self, ctx, file, output, release, tiller_host, tiller_port):
 
         super(TestChartManifest, self).__init__()
         self.ctx = ctx
         self.file = file
+        self.output = output
         self.release = release
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
@@ -79,22 +80,17 @@ class TestChartManifest(CliAction):
 
         if self.release:
             if not self.ctx.obj.get('api', False):
-                self.logger.info("RUNNING: %s tests", self.release)
-                resp = tiller.testing_release(self.release)
+                resp = tiller.testing_release(
+                        self.release, output=self.output)
 
                 if not resp:
                     self.logger.info("FAILED: %s", self.release)
                     return
-
-                test_status = getattr(resp.info.status, 'last_test_suite_run',
-                                      'FAILED')
-                if test_status.results[0].status:
-                    self.logger.info("PASSED: %s", self.release)
-                else:
-                    self.logger.info("FAILED: %s", self.release)
+                test_status = resp['Status']
             else:
                 client = self.ctx.obj.get('CLIENT')
                 query = {
+                    'output': self.output,
                     'tiller_host': self.tiller_host,
                     'tiller_port': self.tiller_port
                 }
@@ -124,10 +120,8 @@ class TestChartManifest(CliAction):
                             if not resp:
                                 continue
 
-                            test_status = getattr(
-                                resp.info.status, 'last_test_suite_run',
-                                'FAILED')
-                            if test_status.results[0].status:
+                            test_status = resp['Status']
+                            if test_status[0] == 'Test Passed':
                                 self.logger.info("PASSED: %s", release_name)
                             else:
                                 self.logger.info("FAILED: %s", release_name)
@@ -139,6 +133,7 @@ class TestChartManifest(CliAction):
             else:
                 client = self.ctx.obj.get('CLIENT')
                 query = {
+                    'output': self.output,
                     'tiller_host': self.tiller_host,
                     'tiller_port': self.tiller_port
                 }
