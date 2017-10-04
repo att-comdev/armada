@@ -190,3 +190,19 @@ class K8s(object):
                 if pod_state == 'Succeeded':
                     w.stop()
                     break
+
+    def get_test_pod_log(self, release, tail_lines=30, label_selector=''):
+        '''
+        :param tail_lines - number of log lines to output
+        :param release - pod release
+        :param label - pod label
+        '''
+
+        pods = self.get_all_pods(label_selector=label_selector)
+        for pod in pods.items:
+            p_name = pod.metadata.name
+            p_namespace = pod.metadata.namespace
+
+            if release in p_name:
+                return self.client.read_namespaced_pod_log(
+                        p_name, p_namespace, tail_lines = tail_lines)

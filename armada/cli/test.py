@@ -27,6 +27,8 @@ LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
 
+# armada test --release
+# \ --timeout --tail=[INT] --log=[Boolean]
 
 def testService(args):
 

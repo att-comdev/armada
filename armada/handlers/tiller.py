@@ -367,7 +367,8 @@ class Tiller(object):
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Install')
 
-    def testing_release(self, release, timeout=300, cleanup=True):
+    def testing_release(self, release,
+            log=False, tail_lines=30, timeout=300, cleanup=True):
         '''
         :param release - name of release to test
         :param timeout - runtime before exiting
@@ -395,6 +396,11 @@ class Tiller(object):
 
                 if test.running():
                     self.k8s.wait_get_completed_podphase(release)
+
+                if log:
+                    out_log = self.k8s.get_test_pod_log(
+                            release, tail_lines=tail_lines)
+                    LOG.info(out_log)
 
                 test.cancel()
 
