@@ -52,25 +52,34 @@ SHORT_DESC = "command test releases"
 
 @test.command(name='test', help=DESC, short_help=SHORT_DESC)
 @click.option('--file', help='armada manifest', type=str)
+@click.option('--output', help='pod output log', is_flag=True)
 @click.option('--release', help='helm release', type=str)
 @click.option('--tiller-host', help="Tiller Host IP")
 @click.option(
     '--tiller-port', help="Tiller host Port", type=int, default=44134)
 @click.pass_context
-def test_charts(ctx, file, release, tiller_host, tiller_port):
+def test_charts(ctx, file, output, release, tiller_host, tiller_port):
     TestChartManifest(
-        ctx, file, release, tiller_host, tiller_port).invoke()
+        ctx, file, output, release, tiller_host, tiller_port).invoke()
 
 
 class TestChartManifest(CliAction):
-    def __init__(self, ctx, file, release, tiller_host, tiller_port):
+    def __init__(self, ctx, file, output, release, tiller_host, tiller_port):
 
         super(TestChartManifest, self).__init__()
         self.ctx = ctx
         self.file = file
+        self.output = output
         self.release = release
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+
+    def pod_log_output(self, resp, output=False):
+        if output:
+            self.logger.info(resp.get('output', ''))
+
+        for k, v in resp.get('status').items():
+            self.logger.info("Test %s: %s", k, v)
 
     def invoke(self):
         tiller = Tiller(
@@ -79,37 +88,33 @@ class TestChartManifest(CliAction):
 
         if self.release:
             if not self.ctx.obj.get('api', False):
-                self.logger.info("RUNNING: %s tests", self.release)
-                resp = tiller.testing_release(self.release)
+                resp = tiller.testing_release(
+                    self.release, output=self.output)
+                self.pod_log_output(resp, self.output)
 
-                if not resp:
-                    self.logger.info("FAILED: %s", self.release)
-                    return
-
-                test_status = getattr(resp.info.status, 'last_test_suite_run',
-                                      'FAILED')
-                if test_status.results[0].status:
-                    self.logger.info("PASSED: %s", self.release)
-                else:
-                    self.logger.info("FAILED: %s", self.release)
             else:
                 client = self.ctx.obj.get('CLIENT')
                 query = {
+                    'output': self.output,
                     'tiller_host': self.tiller_host,
                     'tiller_port': self.tiller_port
                 }
                 resp = client.get_test_release(release=self.release,
                                                query=query)
-
-                self.logger.info(resp.get('result'))
-                self.logger.info(resp.get('message'))
+                self.pod_log_output(resp, self.output)
 
         if self.file:
-            if not self.ctx.obj.get('api', False):
-                documents = yaml.safe_load_all(open(self.file).read())
+            with open(self.file, 'r') as f:
+                file_read = f.read()
+                try:
+                    documents = yaml.safe_load_all(file_read)
+                except yaml.YAMLError:
+                    documents = []
+                    self.logger.error("Error loading manifest")
                 armada_obj = Manifest(documents).get_manifest()
                 prefix = armada_obj.get(const.KEYWORD_ARMADA).get(
                     const.KEYWORD_PREFIX)
+                relout = {}
 
                 for group in armada_obj.get(const.KEYWORD_ARMADA).get(
                         const.KEYWORD_GROUPS):
@@ -117,38 +122,38 @@ class TestChartManifest(CliAction):
                         release_name = release_prefix(
                             prefix, ch.get('chart').get('chart_name'))
 
+                        output = self.output
+                        if not output:
+                            output = ch.get('chart').get('test', {}).get(
+                                'output', False)
+                        relout[release_name] = output
+
+                if not self.ctx.obj.get('api', False):
+                    for release_name in relout:
                         if release_name in known_release_names:
+                            output = relout[release_name]
                             self.logger.info('RUNNING: %s tests', release_name)
-                            resp = tiller.testing_release(release_name)
+                            resp = tiller.testing_release(release_name, output)
 
-                            if not resp:
-                                continue
-
-                            test_status = getattr(
-                                resp.info.status, 'last_test_suite_run',
-                                'FAILED')
-                            if test_status.results[0].status:
-                                self.logger.info("PASSED: %s", release_name)
-                            else:
-                                self.logger.info("FAILED: %s", release_name)
+                            self.pod_log_output(resp, output=output)
 
                         else:
                             self.logger.info(
                                 'Release %s not found - SKIPPING',
                                 release_name)
-            else:
-                client = self.ctx.obj.get('CLIENT')
-                query = {
-                    'tiller_host': self.tiller_host,
-                    'tiller_port': self.tiller_port
-                }
+                else:
+                    client = self.ctx.obj.get('CLIENT')
+                    query = {
+                        'output': self.output,
+                        'tiller_host': self.tiller_host,
+                        'tiller_port': self.tiller_port
+                    }
 
-                with open(self.filename, 'r') as f:
-                    resp = client.get_test_manifest(manifest=f.read(),
-                                                    query=query)
-                    for test in resp.get('tests'):
-                        self.logger.info('Test State: %s', test)
-                        for item in test.get('tests').get(test):
-                            self.logger.info(item)
+                    resp = client.post_test_manifest(manifest=file_read,
+                                                     query=query)
+                    for result in resp.get('results', ''):
+                        self.pod_log_output(
+                            result, output=relout[release_name])
 
-                    self.logger.info(resp)
+                    if resp.get('info', ''):
+                        self.logger.info(resp['info'])
