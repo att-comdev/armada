@@ -23,6 +23,7 @@ data:
   chart_name: mariadb
   release: mariadb
   namespace: openstack
+  timeout: 3600
   wait:
     timeout: 3600
     labels:
@@ -48,6 +49,7 @@ data:
   chart_name: memcached
   release: memcached
   namespace: openstack
+  timeout: 100
   wait:
     timeout: 100
     labels:
@@ -71,9 +73,12 @@ metadata:
   name: keystone
 data:
   chart_name: keystone
-  test: true
+  test:
+    enabled: true
+    output: true
   release: keystone
   namespace: openstack
+  timeout: 100
   wait:
     timeout: 100
     labels:
@@ -117,7 +122,9 @@ metadata:
 data:
   description: "Deploying OpenStack Keystone"
   sequenced: True
-  test_charts: False
+  test_charts:
+    enabled: False
+    output: False
   chart_group:
     - keystone
 ---
