@@ -179,7 +179,7 @@ class K8s(object):
                         LOG.info('New pod %s deployed', new_pod_name)
                         w.stop()
 
-    def wait_get_completed_podphase(self, release, timeout=300):
+    def wait_get_running_podphase(self, release, timeout=300):
         '''
         :param release - part of namespace
         :param timeout - time before disconnecting stream
@@ -192,7 +192,7 @@ class K8s(object):
 
             if release in pod_name:
                 pod_state = event['object'].status.phase
-                if pod_state == 'Succeeded':
+                if pod_state == 'Running':
                     w.stop()
                     break
 
@@ -275,3 +275,30 @@ class K8s(object):
             if not pods_found:
                 LOG.debug('Terminate wait')
                 w.stop()
+
+    def get_test_pod_log(self, release, follow=False, label_selector=''):
+        '''
+        :param tail_lines - number of log lines to output
+        :param release - pod release
+        :param label - pod label
+        '''
+
+        pods = self.get_all_pods(label_selector=label_selector)
+        for pod in pods.items:
+            p_name = pod.metadata.name
+            p_namespace = pod.metadata.namespace
+
+            if release in p_name:
+                return self.client.read_namespaced_pod_log(
+                    p_name, p_namespace, follow=follow)
+
+    def find_pod(self, name, label_selector=''):
+        pods = self.get_all_pods(label_selector=label_selector)
+
+        for pod in pods.items:
+            p_name = pod.metadata.name
+
+            if p_name == name:
+                return True
+
+        return False

@@ -29,9 +29,9 @@ data:
     labels:
       release_group: armada-mariadb
   install:
-    no_hooks: false
+    no_hooks: False
   upgrade:
-    no_hooks: false
+    no_hooks: False
   values: {}
   source:
     type: git
@@ -55,9 +55,9 @@ data:
     labels:
       release_group: armada-memcached
   install:
-    no_hooks: false
+    no_hooks: False
   upgrade:
-    no_hooks: false
+    no_hooks: False
   values: {}
   source:
     type: git
@@ -73,7 +73,9 @@ metadata:
   name: keystone
 data:
   chart_name: keystone
-  test: true
+  test:
+    enabled: True
+    output: True
   release: keystone
   namespace: openstack
   timeout: 100
@@ -82,9 +84,9 @@ data:
     labels:
       release_group: armada-keystone
   install:
-    no_hooks: false
+    no_hooks: False
   upgrade:
-    no_hooks: false
+    no_hooks: False
     pre:
       delete:
         - name: keystone-bootstrap
@@ -120,7 +122,9 @@ metadata:
 data:
   description: "Deploying OpenStack Keystone"
   sequenced: True
-  test_charts: False
+  test_charts:
+    enabled: False
+    output: False
   chart_group:
     - keystone
 ---
