@@ -53,6 +53,7 @@ class Armada(object):
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
                  tiller_port=44134,
+                 output=False,
                  values=None):
         '''
         Initialize the Armada Engine and establish
@@ -210,7 +211,13 @@ class Armada(object):
 
             desc = entry.get('description', 'A Chart Group')
             chart_group = entry.get(const.KEYWORD_CHARTS, [])
-            test_charts = entry.get('test_charts', False)
+
+            import pdb
+            pdb.set_trace()
+
+            test_charts = entry.get('test_charts', {}).get('enabled', False)
+            test_charts_output = entry.get('test_charts', {}).get(
+                    'output', False)
 
             if entry.get('sequenced', False) or test_charts:
                 chart_wait = True
@@ -220,7 +227,10 @@ class Armada(object):
             for gchart in chart_group:
                 chart = dotify(gchart['chart'])
                 values = gchart.get('chart').get('values', {})
-                test_chart = gchart.get('chart').get('test', False)
+                test_chart = gchart.get('chart').get('test', {}).get(
+                        'enabled', False)
+                test_chart_output = gchart.get('chart').get('test', {}).get(
+                        'output', False)
                 pre_actions = {}
                 post_actions = {}
 
@@ -318,7 +328,9 @@ class Armada(object):
 
                 if test_charts or test_chart:
                     LOG.info('Testing: %s', prefix_chart)
-                    resp = self.tiller.testing_release(prefix_chart)
+                    output = test_charts_output or test_chart_output
+                    resp = self.tiller.testing_release(
+                            prefix_chart, output=output)
                     test_status = getattr(resp.info.status,
                                           'last_test_suite_run', 'FAILED')
                     LOG.info("Test INFO: %s", test_status)

@@ -40,7 +40,8 @@ class Test(api.BaseResource):
             opts = req.params
             tiller = Tiller(tiller_host=opts.get('tiller_host', None),
                             tiller_port=opts.get('tiller_port', None))
-            tiller_resp = tiller.testing_release(release)
+            tiller_resp = tiller.testing_release(
+                    release, output=opts.get('output', False))
             msg = {
                 'result': '',
                 'message': ''
