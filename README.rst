@@ -12,7 +12,7 @@ Roadmap
 
 Detailed roadmap can be viewed `here <https://github.com/att-comdev/armada/milestones>`_
 
-Issues can be reported `here <https://github.com/att-comdev/armada/issues>`_
+Issues can be reported `on GitHub <https://github.com/att-comdev/armada/issues>`_
 
 Installation
 ------------
@@ -26,7 +26,7 @@ Using armada `docs <docs/source/operations/guide-use-armada.rst>`_
 Getting Started
 ---------------
 
-Get started guide can be found in our `docs <docs/source/development/getting-started.rst>`_
+Get started guide can be found in our `Getting Started docs <docs/source/development/getting-started.rst>`_
 
 Usage
 -----
