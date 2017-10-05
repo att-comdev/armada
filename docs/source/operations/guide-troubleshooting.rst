@@ -53,5 +53,5 @@ Issue
 -----
 
 If the issue that you are having does not appear here please check the aramda
-issues `here <https://github.com/att-comdev/armada/issues>`_. If the issue does
-not exist, please create an issue. 
+issues `section <https://github.com/att-comdev/armada/issues>`_. If the issue does
+not exist, please create an issue.
