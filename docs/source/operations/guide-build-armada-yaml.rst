@@ -25,7 +25,7 @@ armada/Manifest/v1
 +---------------------+--------+----------------------+
 
 Example
-~~~~~~~~
+^^^^^^^
 
 ::
 
@@ -56,7 +56,7 @@ armada/ChartGroup/v1
 +-----------------+----------+------------------------------------------------------------------------+
 
 Example
-~~~~~~~~
+^^^^^^^~
 
 ::
 
@@ -153,7 +153,7 @@ Update - Actions - Update/Delete
    Delete Actions only support type: 'job'
 
 Example
-~~~~~~~
+^^^^^^^
 
 ::
 
@@ -244,7 +244,7 @@ Source
 
 
 Example
-~~~~~~~
+^^^^^^^
 
 ::
 
@@ -323,7 +323,7 @@ Armada - Deploy Behavior
     the size of the chart definition will show example in multichart below
 
 Simple Example
-~~~~~~~~~~~~~~
+^^^^^^^~~~~~~~
 
 ::
 
@@ -364,7 +364,7 @@ Simple Example
         - blog-group
 
 Multichart Example
-~~~~~~~~~~~~~~~~~~
+^^^^^^^~~~~~~~~~~~
 
 ::
 

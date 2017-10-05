@@ -19,7 +19,7 @@ Armada Endpoints
     :>json float timeout
 
 
-.. code-block:: json
+::
 
     Request:
 
@@ -38,7 +38,7 @@ Armada Endpoints
     }
 
 
-.. code-block:: json
+::
 
     Results:
 
@@ -56,7 +56,7 @@ Tiller Endpoints
     Description: Retrieves tiller releases.
 
 
-.. code-block:: json
+::
 
     Results:
 
@@ -78,7 +78,7 @@ Tiller Endpoints
     Retrieves the status of the Tiller server.
 
 
-.. code-block:: json
+::
 
     Results:
 
