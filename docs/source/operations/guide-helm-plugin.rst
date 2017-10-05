@@ -1,5 +1,5 @@
 Armada Plugin
-============
+=============
 
 The armada plugin extends all the functionality of Armada to be used as a plugin with Helm.
 
