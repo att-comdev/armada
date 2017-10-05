@@ -2,7 +2,8 @@
 tox
 
 # Docs
-Sphinx
+sphinx>=1.6.2
+sphinx_rtd_theme==0.2.4
 
 # Testing
 flake8==3.3.0
