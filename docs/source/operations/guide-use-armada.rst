@@ -6,9 +6,9 @@ Prerequisites
 
 Kubernetes Cluster
 
-Tiller Service `here <http://github.com/kubernetes/helm>`_
+`Tiller Service <http://github.com/kubernetes/helm>`_
 
-Armada.yaml `here <guide-build-armada-yaml.rst>`_
+`Armada.yaml <guide-build-armada-yaml.rst>`_
 
 .. note::
 
