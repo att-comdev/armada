@@ -1,11 +1,11 @@
 import mock
+import pytest
 import unittest
 
 from armada.handlers.tiller import Tiller
 
 
 class TillerTestCase(unittest.TestCase):
-
     @mock.patch.object(Tiller, '_get_tiller_ip')
     @mock.patch('armada.handlers.tiller.K8s')
     @mock.patch('armada.handlers.tiller.grpc')
@@ -30,9 +30,14 @@ class TillerTestCase(unittest.TestCase):
         wait = False
         timeout = None
 
-        tiller.install_release(chart, name, namespace,
-                               dry_run=dry_run, values=initial_values,
-                               wait=wait, timeout=timeout)
+        tiller.install_release(
+            chart,
+            name,
+            namespace,
+            dry_run=dry_run,
+            values=initial_values,
+            wait=wait,
+            timeout=timeout)
 
         mock_stub.assert_called_with(tiller.channel)
         release_request = mock_install_request(
@@ -42,9 +47,36 @@ class TillerTestCase(unittest.TestCase):
             release=name,
             namespace=namespace,
             wait=wait,
-            timeout=timeout
-        )
-        (mock_stub(tiller.channel).InstallRelease
-         .assert_called_with(release_request,
-                             tiller.timeout,
-                             metadata=tiller.metadata))
+            timeout=timeout)
+        (mock_stub(tiller.channel).InstallRelease.assert_called_with(
+            release_request, tiller.timeout, metadata=tiller.metadata))
+
+
+@pytest.mark.parametrize("resource, release, labels, expected", [
+    ('job', 'helm-release', {}, ''),
+    ('deamonset', 'helm-release', {}, 'release_name=helm-release'),
+    ('job', 'helm-release', [{
+        'application': 'helm'
+    }, {
+        'component': 'helm'
+    }], 'application=helm, component=helm'),
+    ('deamonset', 'helm-release', [{
+        'application': 'helm'
+    }, {
+        'component': 'helm'
+    }], 'release_name=helm-release, application=helm, component=helm'),
+])
+def test_resource_labels(mocker, resource, release, labels,
+                         expected):
+
+    mocker.patch.object(Tiller, '_get_tiller_ip')
+    mocked_grpc = mocker.patch('armada.handlers.tiller.grpc')
+
+    Tiller._get_tiller_ip.return_value = '0.0.0.0'
+    mocked_grpc.return_value = '0.0.0.0'
+
+    tiller = Tiller()
+
+    actual = tiller._get_resource_labels(labels, resource, release)
+
+    assert actual == expected

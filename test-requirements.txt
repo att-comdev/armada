@@ -12,4 +12,5 @@ testtools==2.3.0
 codecov
 mock
 bandit
-pytest==3.2.1
+pytest>=3.2.1
+pytest-mock
