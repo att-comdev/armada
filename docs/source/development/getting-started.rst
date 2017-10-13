@@ -21,9 +21,9 @@ To use the docker containter to develop:
     tox -e genconfig
     tox -e genpolicy
 
-    docker build . -t armada/latest
+    docker build . -t armada:local
 
-    docker run -d --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/etc:/armada/etc armada:local
+    docker run -d --name armada -v ~/.kube/config:/var/lib/armada/.kube/config -v $(pwd)/etc:/var/lib/armada/etc armada:local
 
 .. note::
 
