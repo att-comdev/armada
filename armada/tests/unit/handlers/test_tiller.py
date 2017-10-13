@@ -48,3 +48,60 @@ class TillerTestCase(unittest.TestCase):
          .assert_called_with(release_request,
                              tiller.timeout,
                              metadata=tiller.metadata))
+
+    @mock.patch.object(Tiller, '_get_tiller_ip')
+    @mock.patch('armada.handlers.tiller.grpc')
+    def test_resource_labels(self, mock_grpc, mock_ip):
+
+        mock_grpc.insecure_channel.return_value = None
+        mock_ip.return_value = '0.0.0.0'
+        tiller = Tiller()
+
+        self.assertEqual(tiller._get_tiller_ip(), '0.0.0.0')
+
+        # Test 1 - empty labels with job type
+        resource_type = 'job'
+        release = 'helm-release'
+        labels = {}
+
+        actual = tiller._get_resource_labels(labels, resource_type, release)
+        expected = ''
+
+        self.assertEqual(actual, expected)
+
+        # Test 2 - labels with job type
+        resource_type = 'job'
+        release = 'helm-release'
+        labels = [
+            {'application': 'helm'},
+            {'component': 'helm'}
+        ]
+
+        actual = tiller._get_resource_labels(labels, resource_type, release)
+        expected = 'application=helm, component=helm'
+
+        self.assertEqual(actual, expected)
+
+        # Test 3 - not labels with type daemonset
+        resource_type = 'daemonset'
+        release = 'helm-release'
+        labels = {}
+
+        actual = tiller._get_resource_labels(labels, resource_type, release)
+        expected = 'release_name={}'.format(release)
+
+        self.assertEqual(actual, expected)
+
+        # Test 4 - labels with type daemonset
+        resource_type = 'daemonset'
+        release = 'helm-release'
+        labels = [
+            {'application': 'helm'},
+            {'component': 'helm'}
+        ]
+
+        actual = tiller._get_resource_labels(labels, resource_type, release)
+        expected = 'release_name={}, application=helm, component=helm'.format(
+            release)
+
+        self.assertEqual(actual, expected)

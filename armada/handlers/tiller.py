@@ -236,10 +236,8 @@ class Tiller(object):
         Apply deletion logic based on type of resource
         '''
 
-        label_selector = 'release_name={}'.format(release_name)
-        for label in resource_labels:
-            label_selector += ', {}={}'.format(list(label.keys())[0],
-                                               list(label.values())[0])
+        label_selector = self._get_resource_labels(
+            release_name, resource_type, release_name)
 
         if 'job' in resource_type:
             LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
@@ -509,20 +507,8 @@ class Tiller(object):
         Apply deletion logic based on type of resource
         '''
 
-        label_selector = ''
-
-        if not resource_type == 'job':
-            label_selector = 'release_name={}'.format(release_name)
-
-        if resource_labels is not None:
-            for label in resource_labels:
-                if label_selector == '':
-                    label_selector = '{}={}'.format(label.keys()[0],
-                                                    label.values()[0])
-                    continue
-
-                label_selector += ', {}={}'.format(label.keys()[0],
-                                                   label.values()[0])
+        label_selector = self._get_resource_labels(
+            release_name, resource_type, release_name)
 
         if 'job' in resource_type:
             LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
@@ -555,12 +541,8 @@ class Tiller(object):
         if action_type == 'daemonset':
 
             LOG.info('Updating: %s', action_type)
-            label_selector = 'release_name={}'.format(release_name)
-
-            if labels is not None:
-                for label in labels:
-                    label_selector += ', {}={}'.format(label.keys()[0],
-                                                       label.values()[0])
+            label_selector = self._get_resource_labels(
+                release_name, action_type, release_name)
 
             get_daemonset = self.k8s.get_namespace_daemonset(
                 namespace=namespace, label=label_selector)
@@ -590,3 +572,23 @@ class Tiller(object):
 
         elif action_type == 'statefulset':
             pass
+
+    def _get_resource_labels(self, labels, type, release):
+        label_selector = ''
+
+        if not type == 'job':
+            label_selector = 'release_name={}'.format(release)
+
+        import pdb
+        pdb.set_trace()
+        if labels is not None:
+            for label in labels:
+                if label_selector == '':
+                    label_selector = '{}={}'.format(
+                        list(label.keys())[0], list(label.values())[0])
+                    continue
+
+                label_selector += ', {}={}'.format(
+                    list(label.keys())[0], list(label.values())[0])
+
+        return label_selector
