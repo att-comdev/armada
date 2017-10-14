@@ -36,6 +36,11 @@ class GitTestCase(unittest.TestCase):
 
         self.assertIsNotNone(dir)
 
+    def test_git_clone_ref(self):
+        dir_ = source.git_clone('https://github.com/openstack/openstack-helm',
+                                'refs/changes/54/457754/73')
+        self.assertIsNotNone(dir_)
+
     def test_git_clone_empty_url(self):
         url = ''
 
