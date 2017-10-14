@@ -22,7 +22,7 @@ import tempfile
 from git import Repo
 from git import Git
 
-from ..exceptions import source_exceptions
+from armada.exceptions import source_exceptions
 
 
 def git_clone(repo_url, branch='master'):
@@ -40,9 +40,10 @@ def git_clone(repo_url, branch='master'):
     _tmp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
-        repo = Repo.clone_from(repo_url, _tmp_dir, **{'branch': 'master'})
+        repo = Repo.clone_from(repo_url, _tmp_dir)
+        repo.remotes.origin.fetch(branch)
         g = Git(repo.working_dir)
-        g.checkout(branch)
+        g.checkout('FETCH_HEAD')
     except Exception:
         raise source_exceptions.GitLocationException(repo_url)
 
