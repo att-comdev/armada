@@ -224,39 +224,6 @@ class Tiller(object):
 
             LOG.debug("PRE: Could not create anything, please check yaml")
 
-    def delete_resource(self, release_name, resource_name, resource_type,
-                        resource_labels, namespace):
-        '''
-        :params release_name - release name the specified resource is under
-        :params resource_name - name of specific resource
-        :params resource_type - type of resource e.g. job, pod, etc.
-        :params resource_labels - labels by which to identify the resource
-        :params namespace - namespace of the resource
-
-        Apply deletion logic based on type of resource
-        '''
-
-        label_selector = 'release_name={}'.format(release_name)
-        for label in resource_labels:
-            label_selector += ', {}={}'.format(list(label.keys())[0],
-                                               list(label.values())[0])
-
-        if 'job' in resource_type:
-            LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
-            self.k8s.delete_job_action(resource_name, namespace)
-        elif 'pod' in resource_type:
-            release_pods = self.k8s.get_namespace_pod(namespace,
-                                                      label_selector)
-            for pod in release_pods.items:
-                pod_name = pod.metadata.name
-                LOG.info("Deleting %s in namespace: %s",
-                         pod_name, namespace)
-                self.k8s.delete_namespace_pod(pod_name, namespace)
-                self.k8s.wait_for_pod_redeployment(pod_name, namespace)
-        else:
-            LOG.error("Unable to execute name: %s type: %s ",
-                      resource_name, resource_type)
-
     def _post_update_actions(self, actions, namespace):
         try:
             for action in actions.get('create', []):
@@ -515,14 +482,8 @@ class Tiller(object):
             label_selector = 'release_name={}'.format(release_name)
 
         if resource_labels is not None:
-            for label in resource_labels:
-                if label_selector == '':
-                    label_selector = '{}={}'.format(label.keys()[0],
-                                                    label.values()[0])
-                    continue
-
-                label_selector += ', {}={}'.format(label.keys()[0],
-                                                   label.values()[0])
+            label_selector = ",".join(
+                ["%s=%s" % (k, v) for k, v in resource_labels[0].items()])
 
         if 'job' in resource_type:
             LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
@@ -559,8 +520,8 @@ class Tiller(object):
 
             if labels is not None:
                 for label in labels:
-                    label_selector += ', {}={}'.format(label.keys()[0],
-                                                       label.values()[0])
+                    label_selector += ', {}={}'.format(label.keys(),
+                                                       label.values())
 
             get_daemonset = self.k8s.get_namespace_daemonset(
                 namespace=namespace, label=label_selector)
