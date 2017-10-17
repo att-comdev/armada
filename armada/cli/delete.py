@@ -12,20 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cliff import command as cmd
 import yaml
+
+from cliff import command as cmd
+from oslo_config import cfg
+from oslo_log import log as logging
 
 import armada.const as const
 from armada.handlers.manifest import Manifest
 from armada.utils.release import release_prefix
 from armada.handlers.tiller import Tiller
 
-from oslo_config import cfg
-from oslo_log import log as logging
-
 LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
+
 
 def delete_charts(args):
     '''
@@ -35,7 +36,8 @@ def delete_charts(args):
     known_release_names = [release[0] for release in tiller.list_charts()]
 
     if args.file:
-        documents = yaml.safe_load_all(open(args.file).read())
+        with open(args.file) as yaml_file:
+            documents = yaml.safe_load_all(yaml_file.read())
         manifest = Manifest(documents).get_manifest().get(const.KEYWORD_ARMADA)
         prefix = manifest.get(const.KEYWORD_PREFIX)
 
@@ -56,6 +58,7 @@ def delete_charts(args):
             tiller.uninstall_release(release_name)
         else:
             LOG.info('Release %s not found - SKIPPING', release_name)
+
 
 class DeleteChartsCommand(cmd.Command):
     def get_parser(self, prog_name):
