@@ -26,7 +26,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   serialized_pb=_b('\n\x16hapi/chart/chart.proto\x12\nhapi.chart\x1a\x17hapi/chart/config.proto\x1a\x19hapi/chart/metadata.proto\x1a\x19hapi/chart/template.proto\x1a\x19google/protobuf/any.proto\"\xca\x01\n\x05\x43hart\x12&\n\x08metadata\x18\x01 \x01(\x0b\x32\x14.hapi.chart.Metadata\x12\'\n\ttemplates\x18\x02 \x03(\x0b\x32\x14.hapi.chart.Template\x12\'\n\x0c\x64\x65pendencies\x18\x03 \x03(\x0b\x32\x11.hapi.chart.Chart\x12\"\n\x06values\x18\x04 \x01(\x0b\x32\x12.hapi.chart.Config\x12#\n\x05\x66iles\x18\x05 \x03(\x0b\x32\x14.google.protobuf.AnyB\x07Z\x05\x63hartb\x06proto3')
   ,
   dependencies=[hapi_dot_chart_dot_config__pb2.DESCRIPTOR,hapi_dot_chart_dot_metadata__pb2.DESCRIPTOR,hapi_dot_chart_dot_template__pb2.DESCRIPTOR,google_dot_protobuf_dot_any__pb2.DESCRIPTOR,])
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -95,6 +94,7 @@ _CHART.fields_by_name['dependencies'].message_type = _CHART
 _CHART.fields_by_name['values'].message_type = hapi_dot_chart_dot_config__pb2._CONFIG
 _CHART.fields_by_name['files'].message_type = google_dot_protobuf_dot_any__pb2._ANY
 DESCRIPTOR.message_types_by_name['Chart'] = _CHART
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Chart = _reflection.GeneratedProtocolMessageType('Chart', (_message.Message,), dict(
   DESCRIPTOR = _CHART,
@@ -110,10 +110,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 except ImportError:
   pass
 # @@protoc_insertion_point(module_scope)

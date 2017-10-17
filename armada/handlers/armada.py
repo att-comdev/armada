@@ -291,6 +291,12 @@ class Armada(object):
                         wait=chart_wait,
                         timeout=chart_timeout)
 
+                    if chart_wait:
+                        self.tiller.k8s.wait_until_ready(
+                            release=prefix_chart,
+                            namespace=chart.namespace,
+                            timeout=chart_timeout)
+
                     msg['upgraded'].append(prefix_chart)
 
                 # process install
@@ -305,10 +311,17 @@ class Armada(object):
                         wait=chart_wait,
                         timeout=chart_timeout)
 
+                    if chart_wait:
+                        self.tiller.k8s.wait_until_ready(
+                            release=prefix_chart,
+                            namespace=chart.namespace,
+                            timeout=chart_timeout)
+
                     msg['installed'].append(prefix_chart)
 
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
+
 
                 if test_charts or test_chart:
                     LOG.info('Testing: %s', prefix_chart)
@@ -320,6 +333,8 @@ class Armada(object):
                         LOG.info("PASSED: %s", prefix_chart)
                     else:
                         LOG.info("FAILED: %s", prefix_chart)
+
+            self.tiller.k8s.wait_until_ready(timeout=chart_timeout)
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()

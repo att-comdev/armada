@@ -21,7 +21,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_pb=_b('\n\x17hapi/chart/config.proto\x12\nhapi.chart\"\x87\x01\n\x06\x43onfig\x12\x0b\n\x03raw\x18\x01 \x01(\t\x12.\n\x06values\x18\x02 \x03(\x0b\x32\x1e.hapi.chart.Config.ValuesEntry\x1a@\n\x0bValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12 \n\x05value\x18\x02 \x01(\x0b\x32\x11.hapi.chart.Value:\x02\x38\x01\"\x16\n\x05Value\x12\r\n\x05value\x18\x01 \x01(\tB\x07Z\x05\x63hartb\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -136,6 +135,7 @@ _CONFIG_VALUESENTRY.containing_type = _CONFIG
 _CONFIG.fields_by_name['values'].message_type = _CONFIG_VALUESENTRY
 DESCRIPTOR.message_types_by_name['Config'] = _CONFIG
 DESCRIPTOR.message_types_by_name['Value'] = _VALUE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Config = _reflection.GeneratedProtocolMessageType('Config', (_message.Message,), dict(
 
@@ -168,10 +168,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 except ImportError:
   pass
 # @@protoc_insertion_point(module_scope)

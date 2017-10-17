@@ -4,7 +4,7 @@ grpcio-tools==1.6.0rc1
 keystoneauth1==2.21.0
 keystonemiddleware==4.9.1
 kubernetes>=1.0.0
-protobuf==3.2.0
+protobuf>=3.4.0
 PyYAML==3.12
 requests==2.17.3
 supermutes==0.2.5

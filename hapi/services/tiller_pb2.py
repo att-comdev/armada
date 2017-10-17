@@ -29,7 +29,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   serialized_pb=_b('\n\x1ahapi/services/tiller.proto\x12\x14hapi.services.tiller\x1a\x16hapi/chart/chart.proto\x1a\x17hapi/chart/config.proto\x1a\x1ahapi/release/release.proto\x1a\x17hapi/release/info.proto\x1a\x1bhapi/release/test_run.proto\x1a\x19hapi/release/status.proto\x1a\x1ahapi/version/version.proto\"\xfe\x01\n\x13ListReleasesRequest\x12\r\n\x05limit\x18\x01 \x01(\x03\x12\x0e\n\x06offset\x18\x02 \x01(\t\x12\x36\n\x07sort_by\x18\x03 \x01(\x0e\x32%.hapi.services.tiller.ListSort.SortBy\x12\x0e\n\x06\x66ilter\x18\x04 \x01(\t\x12<\n\nsort_order\x18\x05 \x01(\x0e\x32(.hapi.services.tiller.ListSort.SortOrder\x12/\n\x0cstatus_codes\x18\x06 \x03(\x0e\x32\x19.hapi.release.Status.Code\x12\x11\n\tnamespace\x18\x07 \x01(\t\"^\n\x08ListSort\"2\n\x06SortBy\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x08\n\x04NAME\x10\x01\x12\x11\n\rLAST_RELEASED\x10\x02\"\x1e\n\tSortOrder\x12\x07\n\x03\x41SC\x10\x00\x12\x08\n\x04\x44\x45SC\x10\x01\"k\n\x14ListReleasesResponse\x12\r\n\x05\x63ount\x18\x01 \x01(\x03\x12\x0c\n\x04next\x18\x02 \x01(\t\x12\r\n\x05total\x18\x03 \x01(\x03\x12\'\n\x08releases\x18\x04 \x03(\x0b\x32\x15.hapi.release.Release\"8\n\x17GetReleaseStatusRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\x05\"]\n\x18GetReleaseStatusResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x04info\x18\x02 \x01(\x0b\x32\x12.hapi.release.Info\x12\x11\n\tnamespace\x18\x03 \x01(\t\"9\n\x18GetReleaseContentRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\x05\"C\n\x19GetReleaseContentResponse\x12&\n\x07release\x18\x01 \x01(\x0b\x32\x15.hapi.release.Release\"\xfe\x01\n\x14UpdateReleaseRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x05\x63hart\x18\x02 \x01(\x0b\x32\x11.hapi.chart.Chart\x12\"\n\x06values\x18\x03 \x01(\x0b\x32\x12.hapi.chart.Config\x12\x0f\n\x07\x64ry_run\x18\x04 \x01(\x08\x12\x15\n\rdisable_hooks\x18\x05 \x01(\x08\x12\x10\n\x08recreate\x18\x06 \x01(\x08\x12\x0f\n\x07timeout\x18\x07 \x01(\x03\x12\x14\n\x0creset_values\x18\x08 \x01(\x08\x12\x0c\n\x04wait\x18\t \x01(\x08\x12\x14\n\x0creuse_values\x18\n \x01(\x08\x12\r\n\x05\x66orce\x18\x0b \x01(\x08\"?\n\x15UpdateReleaseResponse\x12&\n\x07release\x18\x01 \x01(\x0b\x32\x15.hapi.release.Release\"\x9f\x01\n\x16RollbackReleaseRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64ry_run\x18\x02 \x01(\x08\x12\x15\n\rdisable_hooks\x18\x03 \x01(\x08\x12\x0f\n\x07version\x18\x04 \x01(\x05\x12\x10\n\x08recreate\x18\x05 \x01(\x08\x12\x0f\n\x07timeout\x18\x06 \x01(\x03\x12\x0c\n\x04wait\x18\x07 \x01(\x08\x12\r\n\x05\x66orce\x18\x08 \x01(\x08\"A\n\x17RollbackReleaseResponse\x12&\n\x07release\x18\x01 \x01(\x0b\x32\x15.hapi.release.Release\"\xd9\x01\n\x15InstallReleaseRequest\x12 \n\x05\x63hart\x18\x01 \x01(\x0b\x32\x11.hapi.chart.Chart\x12\"\n\x06values\x18\x02 \x01(\x0b\x32\x12.hapi.chart.Config\x12\x0f\n\x07\x64ry_run\x18\x03 \x01(\x08\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x15\n\rdisable_hooks\x18\x05 \x01(\x08\x12\x11\n\tnamespace\x18\x06 \x01(\t\x12\x12\n\nreuse_name\x18\x07 \x01(\x08\x12\x0f\n\x07timeout\x18\x08 \x01(\x03\x12\x0c\n\x04wait\x18\t \x01(\x08\"@\n\x16InstallReleaseResponse\x12&\n\x07release\x18\x01 \x01(\x0b\x32\x15.hapi.release.Release\"^\n\x17UninstallReleaseRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\rdisable_hooks\x18\x02 \x01(\x08\x12\r\n\x05purge\x18\x03 \x01(\x08\x12\x0f\n\x07timeout\x18\x04 \x01(\x03\"P\n\x18UninstallReleaseResponse\x12&\n\x07release\x18\x01 \x01(\x0b\x32\x15.hapi.release.Release\x12\x0c\n\x04info\x18\x02 \x01(\t\"\x13\n\x11GetVersionRequest\"<\n\x12GetVersionResponse\x12&\n\x07Version\x18\x01 \x01(\x0b\x32\x15.hapi.version.Version\".\n\x11GetHistoryRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03max\x18\x02 \x01(\x05\"=\n\x12GetHistoryResponse\x12\'\n\x08releases\x18\x01 \x03(\x0b\x32\x15.hapi.release.Release\"D\n\x12TestReleaseRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07timeout\x18\x02 \x01(\x03\x12\x0f\n\x07\x63leanup\x18\x03 \x01(\x08\"P\n\x13TestReleaseResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\x12,\n\x06status\x18\x02 \x01(\x0e\x32\x1c.hapi.release.TestRun.Status2\xdb\x08\n\x0eReleaseService\x12i\n\x0cListReleases\x12).hapi.services.tiller.ListReleasesRequest\x1a*.hapi.services.tiller.ListReleasesResponse\"\x00\x30\x01\x12s\n\x10GetReleaseStatus\x12-.hapi.services.tiller.GetReleaseStatusRequest\x1a..hapi.services.tiller.GetReleaseStatusResponse\"\x00\x12v\n\x11GetReleaseContent\x12..hapi.services.tiller.GetReleaseContentRequest\x1a/.hapi.services.tiller.GetReleaseContentResponse\"\x00\x12j\n\rUpdateRelease\x12*.hapi.services.tiller.UpdateReleaseRequest\x1a+.hapi.services.tiller.UpdateReleaseResponse\"\x00\x12m\n\x0eInstallRelease\x12+.hapi.services.tiller.InstallReleaseRequest\x1a,.hapi.services.tiller.InstallReleaseResponse\"\x00\x12s\n\x10UninstallRelease\x12-.hapi.services.tiller.UninstallReleaseRequest\x1a..hapi.services.tiller.UninstallReleaseResponse\"\x00\x12\x61\n\nGetVersion\x12\'.hapi.services.tiller.GetVersionRequest\x1a(.hapi.services.tiller.GetVersionResponse\"\x00\x12p\n\x0fRollbackRelease\x12,.hapi.services.tiller.RollbackReleaseRequest\x1a-.hapi.services.tiller.RollbackReleaseResponse\"\x00\x12\x61\n\nGetHistory\x12\'.hapi.services.tiller.GetHistoryRequest\x1a(.hapi.services.tiller.GetHistoryResponse\"\x00\x12i\n\x0eRunReleaseTest\x12(.hapi.services.tiller.TestReleaseRequest\x1a).hapi.services.tiller.TestReleaseResponse\"\x00\x30\x01\x42\nZ\x08servicesb\x06proto3')
   ,
   dependencies=[hapi_dot_chart_dot_chart__pb2.DESCRIPTOR,hapi_dot_chart_dot_config__pb2.DESCRIPTOR,hapi_dot_release_dot_release__pb2.DESCRIPTOR,hapi_dot_release_dot_info__pb2.DESCRIPTOR,hapi_dot_release_dot_test__run__pb2.DESCRIPTOR,hapi_dot_release_dot_status__pb2.DESCRIPTOR,hapi_dot_version_dot_version__pb2.DESCRIPTOR,])
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -1082,6 +1081,7 @@ DESCRIPTOR.message_types_by_name['GetHistoryRequest'] = _GETHISTORYREQUEST
 DESCRIPTOR.message_types_by_name['GetHistoryResponse'] = _GETHISTORYRESPONSE
 DESCRIPTOR.message_types_by_name['TestReleaseRequest'] = _TESTRELEASEREQUEST
 DESCRIPTOR.message_types_by_name['TestReleaseResponse'] = _TESTRELEASERESPONSE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ListReleasesRequest = _reflection.GeneratedProtocolMessageType('ListReleasesRequest', (_message.Message,), dict(
   DESCRIPTOR = _LISTRELEASESREQUEST,
@@ -1233,14 +1233,119 @@ _sym_db.RegisterMessage(TestReleaseResponse)
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('Z\010services'))
+
+_RELEASESERVICE = _descriptor.ServiceDescriptor(
+  name='ReleaseService',
+  full_name='hapi.services.tiller.ReleaseService',
+  file=DESCRIPTOR,
+  index=0,
+  options=None,
+  serialized_start=2343,
+  serialized_end=3458,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='ListReleases',
+    full_name='hapi.services.tiller.ReleaseService.ListReleases',
+    index=0,
+    containing_service=None,
+    input_type=_LISTRELEASESREQUEST,
+    output_type=_LISTRELEASESRESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetReleaseStatus',
+    full_name='hapi.services.tiller.ReleaseService.GetReleaseStatus',
+    index=1,
+    containing_service=None,
+    input_type=_GETRELEASESTATUSREQUEST,
+    output_type=_GETRELEASESTATUSRESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetReleaseContent',
+    full_name='hapi.services.tiller.ReleaseService.GetReleaseContent',
+    index=2,
+    containing_service=None,
+    input_type=_GETRELEASECONTENTREQUEST,
+    output_type=_GETRELEASECONTENTRESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UpdateRelease',
+    full_name='hapi.services.tiller.ReleaseService.UpdateRelease',
+    index=3,
+    containing_service=None,
+    input_type=_UPDATERELEASEREQUEST,
+    output_type=_UPDATERELEASERESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='InstallRelease',
+    full_name='hapi.services.tiller.ReleaseService.InstallRelease',
+    index=4,
+    containing_service=None,
+    input_type=_INSTALLRELEASEREQUEST,
+    output_type=_INSTALLRELEASERESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UninstallRelease',
+    full_name='hapi.services.tiller.ReleaseService.UninstallRelease',
+    index=5,
+    containing_service=None,
+    input_type=_UNINSTALLRELEASEREQUEST,
+    output_type=_UNINSTALLRELEASERESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetVersion',
+    full_name='hapi.services.tiller.ReleaseService.GetVersion',
+    index=6,
+    containing_service=None,
+    input_type=_GETVERSIONREQUEST,
+    output_type=_GETVERSIONRESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RollbackRelease',
+    full_name='hapi.services.tiller.ReleaseService.RollbackRelease',
+    index=7,
+    containing_service=None,
+    input_type=_ROLLBACKRELEASEREQUEST,
+    output_type=_ROLLBACKRELEASERESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetHistory',
+    full_name='hapi.services.tiller.ReleaseService.GetHistory',
+    index=8,
+    containing_service=None,
+    input_type=_GETHISTORYREQUEST,
+    output_type=_GETHISTORYRESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RunReleaseTest',
+    full_name='hapi.services.tiller.ReleaseService.RunReleaseTest',
+    index=9,
+    containing_service=None,
+    input_type=_TESTRELEASEREQUEST,
+    output_type=_TESTRELEASERESPONSE,
+    options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_RELEASESERVICE)
+
+DESCRIPTOR.services_by_name['ReleaseService'] = _RELEASESERVICE
+
 try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 
 
   class ReleaseServiceStub(object):
