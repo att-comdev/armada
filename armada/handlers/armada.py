@@ -291,7 +291,13 @@ class Armada(object):
                         wait=chart_wait,
                         timeout=chart_timeout)
 
-                    msg['upgraded'].append(prefix_chart)
+                    if chart_wait:
+                        self.tiller.k8s.wait_until_ready(
+                            release=prefix_chart,
+                            namespace=chart.namespace,
+                            timeout=chart_timeout)
+
+                    msg['upgrade'].append(prefix_chart)
 
                 # process install
                 else:
@@ -305,10 +311,19 @@ class Armada(object):
                         wait=chart_wait,
                         timeout=chart_timeout)
 
-                    msg['installed'].append(prefix_chart)
+                    if chart_wait:
+                        self.tiller.k8s.wait_until_ready(
+                            release=prefix_chart,
+                            namespace=chart.namespace,
+                            timeout=chart_timeout)
+
+                    msg['install'].append(prefix_chart)
 
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
+
+                self.tiller.k8s.wait_until_ready(
+                    namespace=chart.namespace, timeout=chart_timeout)
 
                 if test_charts or test_chart:
                     LOG.info('Testing: %s', prefix_chart)

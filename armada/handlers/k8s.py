@@ -51,8 +51,7 @@ class K8s(object):
         except ApiException as e:
             LOG.error("Exception when deleting a job: %s", e)
 
-    def get_namespace_job(self, namespace="default",
-                          label_selector=''):
+    def get_namespace_job(self, namespace="default", label_selector=''):
         '''
         :params lables - of the job
         :params namespace - name of jobs
@@ -71,8 +70,7 @@ class K8s(object):
         '''
         LOG.debug(" %s in namespace: %s", name, namespace)
 
-    def get_namespace_pod(self, namespace="default",
-                          label_selector=''):
+    def get_namespace_pod(self, namespace="default", label_selector=''):
         '''
         :params namespace - namespace of the Pod
         :params label_selector - filters Pods by label
@@ -135,8 +133,7 @@ class K8s(object):
         if body is None:
             body = client.V1DeleteOptions()
 
-        return self.client.delete_namespaced_pod(
-            name, namespace, body)
+        return self.client.delete_namespaced_pod(name, namespace, body)
 
     def wait_for_pod_redeployment(self, old_pod_name, namespace):
         '''
@@ -168,10 +165,9 @@ class K8s(object):
                 new_pod_name = event_name
             elif new_pod_name:
                 for condition in pod_conditions:
-                    if (condition.type == 'Ready' and
-                            condition.status == 'True'):
+                    if (condition.type == 'Ready'
+                            and condition.status == 'True'):
                         LOG.info('New pod %s deployed', new_pod_name)
-
                         w.stop()
 
     def wait_get_completed_podphase(self, release, timeout=300):
@@ -181,8 +177,8 @@ class K8s(object):
         '''
 
         w = watch.Watch()
-        for event in w.stream(self.client.list_pod_for_all_namespaces,
-                              timeout_seconds=timeout):
+        for event in w.stream(
+                self.client.list_namespaced_pod, timeout_seconds=timeout):
             pod_name = event['object'].metadata.name
 
             if release in pod_name:
@@ -190,3 +186,49 @@ class K8s(object):
                 if pod_state == 'Succeeded':
                     w.stop()
                     break
+
+    def wait_until_ready(self, release=None, namespace='default', timeout=300):
+        '''
+        :param release - part of namespace
+        :param timeout - time before disconnecting stream
+        '''
+        LOG.info("Wait on %s for %s sec", namespace, timeout)
+
+        label_selector = ''
+        if release is not None:
+            label_selector = 'release_group={}'.format(release)
+
+        # pods_ready = False
+        # while not pods_ready:
+        pod_list = self.client.list_namespaced_pod(
+            namespace, label_selector=label_selector).items
+        for pod in pod_list:
+            p_name = pod.metadata.name
+            p_state = pod.status.phase
+            # import pdb
+            # pdb.set_trace()
+            p_labels = ",".join(["%s=%s" % (k, v) for k, v in pod.metadata.labels.items()])
+
+            for condition in pod.status.conditions:
+                if not p_state == 'Succeeded':
+                    LOG.info("%s %s %s %s", p_name, p_state, condition.type, condition.status)
+                    self.is_pod_ready(
+                        namespace=namespace,
+                        label_selector=p_labels,
+                        timeout=timeout)
+
+    def is_pod_ready(self, namespace='default', label_selector='', timeout=300):
+        w = watch.Watch()
+        for event in w.stream(self.client.list_namespaced_pod,
+                              namespace=namespace,
+                              label_selector=label_selector,
+                              timeout_seconds=timeout):
+
+            # pod_conditions = event['object'].status.conditions
+            p_name = event['object'].metadata.name
+            p_state = event['object'].status.phase
+            LOG.info("%s %s", p_name, p_state)
+            valid_state = ['Succeeded', 'Running']
+
+            if p_state in valid_state:
+                w.stop()

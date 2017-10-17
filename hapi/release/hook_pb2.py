@@ -23,7 +23,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   serialized_pb=_b('\n\x17hapi/release/hook.proto\x12\x0chapi.release\x1a\x1fgoogle/protobuf/timestamp.proto\"\x81\x03\n\x04Hook\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04kind\x18\x02 \x01(\t\x12\x0c\n\x04path\x18\x03 \x01(\t\x12\x10\n\x08manifest\x18\x04 \x01(\t\x12(\n\x06\x65vents\x18\x05 \x03(\x0e\x32\x18.hapi.release.Hook.Event\x12,\n\x08last_run\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06weight\x18\x07 \x01(\x05\"\xd4\x01\n\x05\x45vent\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0f\n\x0bPRE_INSTALL\x10\x01\x12\x10\n\x0cPOST_INSTALL\x10\x02\x12\x0e\n\nPRE_DELETE\x10\x03\x12\x0f\n\x0bPOST_DELETE\x10\x04\x12\x0f\n\x0bPRE_UPGRADE\x10\x05\x12\x10\n\x0cPOST_UPGRADE\x10\x06\x12\x10\n\x0cPRE_ROLLBACK\x10\x07\x12\x11\n\rPOST_ROLLBACK\x10\x08\x12\x18\n\x14RELEASE_TEST_SUCCESS\x10\t\x12\x18\n\x14RELEASE_TEST_FAILURE\x10\nB\tZ\x07releaseb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -163,6 +162,7 @@ _HOOK.fields_by_name['events'].enum_type = _HOOK_EVENT
 _HOOK.fields_by_name['last_run'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _HOOK_EVENT.containing_type = _HOOK
 DESCRIPTOR.message_types_by_name['Hook'] = _HOOK
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Hook = _reflection.GeneratedProtocolMessageType('Hook', (_message.Message,), dict(
   DESCRIPTOR = _HOOK,
@@ -178,10 +178,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 except ImportError:
   pass
 # @@protoc_insertion_point(module_scope)
