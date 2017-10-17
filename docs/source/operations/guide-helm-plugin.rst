@@ -5,13 +5,19 @@ The armada plugin extends all the functionality of Armada to be used as a plugin
 
 Install Plugin
 ---------------
+
+**Install directly from the repository**
+
 ::
 
-    To install the Armada plugin, all you have to do is copy the plugin directory into ~/.helm/plugins/
+  helm plugin install https://github.com/att-comdev/armada.git
 
-.. code-block:: bash
+**Clone and install locally**
 
-    git clone https://github.com/att-comdev/armada.git ~/.helm/plugins/
+::
+
+  git clone https://github.com/att-comdev/armada.git ~/.helm/plugins/
+  helm plugin install ~/.helm/plugins/armada
 
 Usage
 ------
