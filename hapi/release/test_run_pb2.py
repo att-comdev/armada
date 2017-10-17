@@ -23,7 +23,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   serialized_pb=_b('\n\x1bhapi/release/test_run.proto\x12\x0chapi.release\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf3\x01\n\x07TestRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12,\n\x06status\x18\x02 \x01(\x0e\x32\x1c.hapi.release.TestRun.Status\x12\x0c\n\x04info\x18\x03 \x01(\t\x12.\n\nstarted_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x30\n\x0c\x63ompleted_at\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"<\n\x06Status\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\x12\x0b\n\x07RUNNING\x10\x03\x42\tZ\x07releaseb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -122,6 +121,7 @@ _TESTRUN.fields_by_name['started_at'].message_type = google_dot_protobuf_dot_tim
 _TESTRUN.fields_by_name['completed_at'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _TESTRUN_STATUS.containing_type = _TESTRUN
 DESCRIPTOR.message_types_by_name['TestRun'] = _TESTRUN
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TestRun = _reflection.GeneratedProtocolMessageType('TestRun', (_message.Message,), dict(
   DESCRIPTOR = _TESTRUN,
@@ -137,10 +137,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 except ImportError:
   pass
 # @@protoc_insertion_point(module_scope)

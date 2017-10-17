@@ -28,7 +28,7 @@ class TillerTestCase(unittest.TestCase):
         initial_values = None
         updated_values = mock_config(raw=initial_values)
         wait = False
-        timeout = None
+        timeout = 3600
 
         tiller.install_release(chart, name, namespace,
                                dry_run=dry_run, values=initial_values,

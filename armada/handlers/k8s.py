@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import re
+import time
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 
@@ -51,8 +52,7 @@ class K8s(object):
         except ApiException as e:
             LOG.error("Exception when deleting a job: %s", e)
 
-    def get_namespace_job(self, namespace="default",
-                          label_selector=''):
+    def get_namespace_job(self, namespace="default", label_selector=''):
         '''
         :params lables - of the job
         :params namespace - name of jobs
@@ -71,8 +71,7 @@ class K8s(object):
         '''
         LOG.debug(" %s in namespace: %s", name, namespace)
 
-    def get_namespace_pod(self, namespace="default",
-                          label_selector=''):
+    def get_namespace_pod(self, namespace="default", label_selector=''):
         '''
         :params namespace - namespace of the Pod
         :params label_selector - filters Pods by label
@@ -135,8 +134,7 @@ class K8s(object):
         if body is None:
             body = client.V1DeleteOptions()
 
-        return self.client.delete_namespaced_pod(
-            name, namespace, body)
+        return self.client.delete_namespaced_pod(name, namespace, body)
 
     def wait_for_pod_redeployment(self, old_pod_name, namespace):
         '''
@@ -171,7 +169,6 @@ class K8s(object):
                     if (condition.type == 'Ready' and
                             condition.status == 'True'):
                         LOG.info('New pod %s deployed', new_pod_name)
-
                         w.stop()
 
     def wait_get_completed_podphase(self, release, timeout=300):
@@ -190,3 +187,74 @@ class K8s(object):
                 if pod_state == 'Succeeded':
                     w.stop()
                     break
+
+    def wait_until_ready(self,
+                         release=None,
+                         namespace='default',
+                         timeout=300,
+                         sleep=15):
+        '''
+        :param release - part of namespace
+        :param timeout - time before disconnecting stream
+        '''
+        LOG.debug("Wait on %s for %s sec", namespace, timeout)
+
+        label_selector = ''
+        # FIXME(gardlt): this requires a label schema from OSH
+        if release is not None:
+            label_selector = 'release_group={}'.format(release)
+
+        valid_state = ['Succeeded', 'Running']
+
+        wait_timeout = time.time() + 60 * timeout
+
+        while True:
+
+            self.is_pods_ready(label_selector=label_selector, timeout=timeout)
+
+            pod_ready = []
+            for pod in self.client.list_pod_for_all_namespaces(
+                    label_selector=label_selector).items:
+                p_state = pod.status.phase
+                if p_state in valid_state:
+                    pod_ready.append(True)
+                    continue
+
+                pod_ready.append(False)
+                LOG.debug('%s', p_state)
+
+            if time.time() > wait_timeout or all(pod_ready):
+                LOG.debug("Pod States %s", pod_ready)
+                break
+            else:
+                LOG.debug('time: %s pod %s', wait_timeout, pod_ready)
+
+    def is_pods_ready(self, label_selector='', timeout=100):
+        '''
+        :params release_labels - list of labels to identify relevant pods
+        :params namespace - namespace in which to search for pods
+
+        Returns after waiting for all pods to enter Ready state
+        '''
+        pods_found = []
+        valid_state = ['Succeeded', 'Running']
+
+        w = watch.Watch()
+        for pod in w.stream(self.client.list_pod_for_all_namespaces,
+                            label_selector=label_selector,
+                            timeout_seconds=timeout):
+
+            pod_name = pod['object'].metadata.name
+            pod_state = pod['object'].status.phase
+
+            if pod['type'] == 'ADDED' and pod_state not in valid_state:
+                LOG.debug("Pod %s in %s", pod_name, pod_state)
+                pods_found.append(pod_name)
+            elif pod_name in pods_found:
+                if pod_state in valid_state:
+                    pods_found.remove(pod_name)
+                    LOG.debug(pods_found)
+
+            if not pods_found:
+                LOG.debug('Terminate wait')
+                w.stop()
