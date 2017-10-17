@@ -21,7 +21,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_pb=_b('\n\x19hapi/chart/metadata.proto\x12\nhapi.chart\")\n\nMaintainer\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\"\xd0\x02\n\x08Metadata\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04home\x18\x02 \x01(\t\x12\x0f\n\x07sources\x18\x03 \x03(\t\x12\x0f\n\x07version\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x10\n\x08keywords\x18\x06 \x03(\t\x12+\n\x0bmaintainers\x18\x07 \x03(\x0b\x32\x16.hapi.chart.Maintainer\x12\x0e\n\x06\x65ngine\x18\x08 \x01(\t\x12\x0c\n\x04icon\x18\t \x01(\t\x12\x12\n\napiVersion\x18\n \x01(\t\x12\x11\n\tcondition\x18\x0b \x01(\t\x12\x0c\n\x04tags\x18\x0c \x01(\t\x12\x12\n\nappVersion\x18\r \x01(\t\x12\x12\n\ndeprecated\x18\x0e \x01(\x08\x12\x15\n\rtillerVersion\x18\x0f \x01(\t\" \n\x06\x45ngine\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05GOTPL\x10\x01\x42\x07Z\x05\x63hartb\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -219,6 +218,7 @@ _METADATA.fields_by_name['maintainers'].message_type = _MAINTAINER
 _METADATA_ENGINE.containing_type = _METADATA
 DESCRIPTOR.message_types_by_name['Maintainer'] = _MAINTAINER
 DESCRIPTOR.message_types_by_name['Metadata'] = _METADATA
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Maintainer = _reflection.GeneratedProtocolMessageType('Maintainer', (_message.Message,), dict(
   DESCRIPTOR = _MAINTAINER,
@@ -241,10 +241,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 except ImportError:
   pass
 # @@protoc_insertion_point(module_scope)
