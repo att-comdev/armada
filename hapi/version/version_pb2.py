@@ -21,7 +21,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_pb=_b('\n\x1ahapi/version/version.proto\x12\x0chapi.version\"F\n\x07Version\x12\x0f\n\x07sem_ver\x18\x01 \x01(\t\x12\x12\n\ngit_commit\x18\x02 \x01(\t\x12\x16\n\x0egit_tree_state\x18\x03 \x01(\tB\tZ\x07versionb\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -71,6 +70,7 @@ _VERSION = _descriptor.Descriptor(
 )
 
 DESCRIPTOR.message_types_by_name['Version'] = _VERSION
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Version = _reflection.GeneratedProtocolMessageType('Version', (_message.Message,), dict(
   DESCRIPTOR = _VERSION,
@@ -86,10 +86,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 except ImportError:
   pass
 # @@protoc_insertion_point(module_scope)

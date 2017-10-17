@@ -26,7 +26,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   serialized_pb=_b('\n\x1ahapi/release/release.proto\x12\x0chapi.release\x1a\x17hapi/release/hook.proto\x1a\x17hapi/release/info.proto\x1a\x17hapi/chart/config.proto\x1a\x16hapi/chart/chart.proto\"\xd8\x01\n\x07Release\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x04info\x18\x02 \x01(\x0b\x32\x12.hapi.release.Info\x12 \n\x05\x63hart\x18\x03 \x01(\x0b\x32\x11.hapi.chart.Chart\x12\"\n\x06\x63onfig\x18\x04 \x01(\x0b\x32\x12.hapi.chart.Config\x12\x10\n\x08manifest\x18\x05 \x01(\t\x12!\n\x05hooks\x18\x06 \x03(\x0b\x32\x12.hapi.release.Hook\x12\x0f\n\x07version\x18\x07 \x01(\x05\x12\x11\n\tnamespace\x18\x08 \x01(\tB\tZ\x07releaseb\x06proto3')
   ,
   dependencies=[hapi_dot_release_dot_hook__pb2.DESCRIPTOR,hapi_dot_release_dot_info__pb2.DESCRIPTOR,hapi_dot_chart_dot_config__pb2.DESCRIPTOR,hapi_dot_chart_dot_chart__pb2.DESCRIPTOR,])
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -115,6 +114,7 @@ _RELEASE.fields_by_name['chart'].message_type = hapi_dot_chart_dot_chart__pb2._C
 _RELEASE.fields_by_name['config'].message_type = hapi_dot_chart_dot_config__pb2._CONFIG
 _RELEASE.fields_by_name['hooks'].message_type = hapi_dot_release_dot_hook__pb2._HOOK
 DESCRIPTOR.message_types_by_name['Release'] = _RELEASE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Release = _reflection.GeneratedProtocolMessageType('Release', (_message.Message,), dict(
   DESCRIPTOR = _RELEASE,
@@ -130,10 +130,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 except ImportError:
   pass
 # @@protoc_insertion_point(module_scope)
