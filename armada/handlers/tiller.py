@@ -307,8 +307,10 @@ class Tiller(object):
         Create a Helm Release
         '''
 
-        LOG.debug("wait: %s", wait)
-        LOG.debug("timeout: %s", timeout)
+        LOG.info("Wait: %s, Timeout: %s", wait, timeout)
+
+        if timeout > self.timeout:
+            self.timeout = timeout
 
         if values is None:
             values = Config(raw='')
