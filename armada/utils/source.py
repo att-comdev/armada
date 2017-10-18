@@ -22,13 +22,13 @@ import tempfile
 from git import Repo
 from git import Git
 
-from ..exceptions import source_exceptions
+from armada.exceptions import source_exceptions
 
 
-def git_clone(repo_url, branch='master'):
+def git_clone(repo_url, ref='master'):
     '''
     :params repo_url - URL of git repo to clone
-    :params branch - branch of the repo to clone
+    :params ref - branch, commit or reference in the repo to clone
 
     Returns a path to the cloned repo
     '''
@@ -40,9 +40,10 @@ def git_clone(repo_url, branch='master'):
     _tmp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
-        repo = Repo.clone_from(repo_url, _tmp_dir, **{'branch': 'master'})
+        repo = Repo.clone_from(repo_url, _tmp_dir)
+        repo.remotes.origin.fetch(ref)
         g = Git(repo.working_dir)
-        g.checkout(branch)
+        g.checkout('FETCH_HEAD')
     except Exception:
         raise source_exceptions.GitLocationException(repo_url)
 

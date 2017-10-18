@@ -152,7 +152,7 @@ class Armada(object):
                     repo_dir = source.git_clone(*repo_branch)
                 except Exception:
                     raise source_exceptions.GitLocationException(
-                        '{} branch: {}'.format(*repo_branch))
+                        '{} reference: {}'.format(*repo_branch))
                 repos[repo_branch] = repo_dir
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
             else:
