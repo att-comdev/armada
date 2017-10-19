@@ -6,5 +6,6 @@
 bb404d136e4b2206880a90f3cad303f4c487770b	attcomdev-workflow
 c2f3f58c67a86c97d3a0c3a674ce4961174a8c91	attcomdev-ci-tool
 f84cac0126111346f33575c7a6b1a3c7359049a6	attcomdev-projectbootstrap
+global:Change-Owner                     	Change Owner
 global:Registered-Users                 	Registered Users
 user:jenkins-attcomdev                  	user/Jenkins (jenkins-attcomdev)
