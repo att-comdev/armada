@@ -89,3 +89,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Helm internals
+*.lock
+*/*.lock
+*.tgz
+**/*.tgz
+**/_partials.tpl
+**/_globals.tpl
