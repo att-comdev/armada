@@ -1,0 +1,85 @@
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.deployment_api }}
+{{- $envAll := . }}
+{{- $dependencies := .Values.dependencies.api }}
+{{- $mounts_armada_api := .Values.pod.mounts.armada_api.armada_api }}
+{{- $mounts_armada_api_init := .Values.pod.mounts.armada_api.init_container }}
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: armada-api
+spec:
+  replicas: {{ .Values.pod.replicas.api }}
+{{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "armada" "api" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+      annotations:
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+    spec:
+      affinity:
+{{ tuple $envAll "armada" "api" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
+      nodeSelector:
+        {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.api.timeout | default "30" }}
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_armada_api_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+      containers:
+        - name: armada-api
+          image: {{ .Values.images.tags.api }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.api | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          securityContext:
+            runAsUser: {{ .Values.pod.user.armada.uid }}
+          ports:
+            - containerPort: {{ .Values.conf.armada.armada_api.bind_port }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.conf.armada.armada_api.bind_port }}
+          volumeMounts:
+            - name: pod-etc-armada
+              mountPath: /etc/armada
+            - name: armada-etc
+              mountPath: /etc/armada/armada.conf
+              subPath: armada.conf
+              readOnly: true
+            - name: armada-etc
+              mountPath: /etc/armada/api-paste.ini
+              subPath: api-paste.ini
+              readOnly: true
+            - name: armada-etc
+              mountPath: /etc/armada/policy.json
+              subPath: policy.json
+              readOnly: true
+{{ if $mounts_armada_api.volumeMounts }}{{ toYaml $mounts_armada_api.volumeMounts | indent 12 }}{{ end }}
+      volumes:
+        - name: pod-etc-armada
+          emptyDir: {}
+        - name: armada-bin
+          configMap:
+            name: armada-bin
+            defaultMode: 0555
+        - name: armada-etc
+          configMap:
+            name: armada-etc
+            defaultMode: 0444
+{{ if $mounts_armada_api.volumes }}{{ toYaml $mounts_armada_api.volumes | indent 8 }}{{ end }}
+{{- end }}

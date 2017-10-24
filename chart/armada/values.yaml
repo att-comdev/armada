@@ -1,0 +1,221 @@
+# Copyright 2017 The Openstack-Helm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This file provides defaults for armada
+
+release_group: null
+
+labels:
+  node_selector_key: ucp-control-plane
+  node_selector_value: enabled
+
+images:
+  tags:
+    api: quay.io/attcomdev/armada:latest
+    dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
+    ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
+    ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
+    ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
+  pull_policy: "IfNotPresent"
+
+network:
+  api:
+    ingress:
+      public: true
+    node_port:
+      enabled: false
+      port: 31902
+
+dependencies:
+  ks_user:
+    services:
+    - service: identity
+      endpoint: internal
+  ks_service:
+    services:
+    - service: identity
+      endpoint: internal
+  ks_endpoints:
+    jobs:
+    - armada-ks-service
+    services:
+    - service: identity
+      endpoint: internal
+  armada:
+    jobs:
+    - armada-ks-endpoints
+    - armada-ks-user
+    services:
+    - service: identity
+      endpoint: internal
+
+# typically overriden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  cluster_domain_suffix: cluster.local
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
+    hosts:
+      default: keystone-api
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      admin:
+        default: 35357
+      api:
+        default: 80
+    host_fqdn_override:
+      default: null
+  armada:
+    name: armada
+    hosts:
+      default: armada-int
+      public: armada-api
+    port:
+      api:
+        default: 9000
+    path:
+      default: /api/v1.0
+    scheme:
+      default: http
+    host_fqdn_override:
+      default: null
+
+secrets:
+  identity:
+    admin: armada-keystone-admin
+    user: armada-keystone-user
+
+conf:
+  armada:
+    DEFAULT:
+    keystone_authtoken:
+      delay_auth_decision: true
+      auth_type: password
+      auth_version: v3
+      # memcache_security_strategy: ENCRYPT
+    oslo_policy:
+      policy_file: /etc/armada/policy.yaml
+    armada_api:
+      bind_port: 8000
+  paste:
+    app:armada_api:
+      paste: armada.api.server:paste_start_armada
+    pipeline:main:
+      pipeline: authtoken armada-api
+    filter:authtoken:
+      filter_factory: keystonemiddleware.auth_token:filter_factory
+  policy:
+    admin_required: "role:admin"
+    service_or_admin: "rule:admin_required or rule:service_role"
+    service_role: "role:service"
+    armada:create_endpoints: "rule:admin_required"
+    armada:validate_manifest: "rule:admin_required"
+    armada:test_release: "rule:admin_required"
+    armada:test_manifest: "rule:admin_required"
+    tiller:get_status: "rule:admin_required"
+    tiller:get_released: "rule:admin_required"
+
+pod:
+  mounts:
+    armada_api:
+      init_container: null
+  user:
+    armada:
+      uid: 1000
+  affinity:
+    anti:
+      type:
+        default: preferredDuringSchedulingIgnoredDuringExecution
+      topologyKey:
+        default: kubernetes.io/hostname
+  replicas:
+    api: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+  resources:
+    enabled: false
+    api:
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+    jobs:
+      ks_user:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+      ks_service:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+      ks_endpoints:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  ingress_api: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  secret_keystone: true
+  service_api: true
+  service_ingress_api: true
