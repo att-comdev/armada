@@ -87,7 +87,7 @@ Chart
 +-----------------+----------+---------------------------------------------------------------------------+
 | namespace       | string   | namespace of your chart                                                   |
 +-----------------+----------+---------------------------------------------------------------------------+
-| timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set    |
+| wait            | object   | contains wait information such as (timeout, lables)                       |
 +-----------------+----------+---------------------------------------------------------------------------+
 | test            | bool     | run pre-defined helm tests helm in a chart                                |
 +-----------------+----------+---------------------------------------------------------------------------+
@@ -167,7 +167,10 @@ Example
       chart_name: blog-1
       release_name: blog-1
       namespace: default
-      timeout: 100
+      wait:
+        timeout: 100
+        labels:
+         component: blog
       install:
         no_hook: false
       upgrade:
@@ -190,7 +193,8 @@ Example
       chart_name: blog-1
       release_name: blog-1
       namespace: default
-      timeout: 100
+      wait:
+        timeout: 100
       install:
         no_hook: false
       upgrade:
@@ -213,7 +217,8 @@ Example
       chart_name: blog-1
       release_name: blog-1
       namespace: default
-      timeout: 100
+      wait:
+        timeout: 100
       install:
         no_hook: false
       upgrade:
@@ -257,7 +262,8 @@ Example
       chart_name: blog-1
       release_name: blog-1
       namespace: default
-      timeout: 100
+      wait:
+        timeout: 100
       install:
         no_hook: false
       upgrade:
