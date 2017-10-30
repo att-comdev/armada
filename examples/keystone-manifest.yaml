@@ -23,7 +23,10 @@ data:
   chart_name: mariadb
   release: mariadb
   namespace: openstack
-  timeout: 3600
+  wait:
+    timeout: 3600
+    labels:
+      release_group: armada-mariadb
   install:
     no_hooks: false
   upgrade:
@@ -45,7 +48,10 @@ data:
   chart_name: memcached
   release: memcached
   namespace: openstack
-  timeout: 100
+  wait:
+    timeout: 100
+    labels:
+      release_group: armada-memcached
   install:
     no_hooks: false
   upgrade:
@@ -68,7 +74,10 @@ data:
   test: true
   release: keystone
   namespace: openstack
-  timeout: 100
+  wait:
+    timeout: 100
+    labels:
+      release_group: armada-keystone
   install:
     no_hooks: false
   upgrade:
