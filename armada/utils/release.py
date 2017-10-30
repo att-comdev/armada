@@ -18,3 +18,13 @@ def release_prefix(prefix, chart):
     how to attach prefix to chart
     '''
     return "{}-{}".format(prefix, chart)
+
+
+def label_selectors(labels):
+    """
+    :param labels: dictionary containing k, v
+
+    :return: string of k8s labels
+    """
+    return ",".join(
+        ["%s=%s" % (k, v) for k, v in labels.items()])

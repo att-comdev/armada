@@ -32,7 +32,7 @@ from armada.const import STATUS_DEPLOYED, STATUS_FAILED
 from armada.exceptions import tiller_exceptions as ex
 from armada.handlers.k8s import K8s
 from armada.utils.release import release_prefix
-
+from armada.utils.release import label_selectors
 
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.5.0'
@@ -479,13 +479,8 @@ class Tiller(object):
         '''
 
         label_selector = ''
-
-        if not resource_type == 'job':
-            label_selector = 'release_name={}'.format(release_name)
-
         if resource_labels is not None:
-            label_selector = ",".join(
-                ["%s=%s" % (k, v) for k, v in resource_labels.items()])
+            label_selector = label_selectors(resource_labels)
 
         if 'job' in resource_type:
             LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
@@ -509,7 +504,7 @@ class Tiller(object):
                       resource_name, resource_type)
 
     def rolling_upgrade_pod_deployment(self, name, release_name, namespace,
-                                       labels, action_type, chart,
+                                       resource_labels, action_type, chart,
                                        disable_hooks, values):
         '''
         update statefullsets (daemon, stateful)
@@ -518,11 +513,11 @@ class Tiller(object):
         if action_type == 'daemonset':
 
             LOG.info('Updating: %s', action_type)
-            label_selector = 'release_name={}'.format(release_name)
 
-            if labels is not None:
-                label_selector = ",".join(
-                    ["%s=%s" % (k, v) for k, v in labels.items()])
+            label_selector = ''
+
+            if resource_labels is not None:
+                label_selector = label_selectors(resource_labels)
 
             get_daemonset = self.k8s.get_namespace_daemonset(
                 namespace=namespace, label=label_selector)
@@ -547,8 +542,8 @@ class Tiller(object):
                         namespace=namespace, template=template)
 
                     # delete pods
-                    self.delete_resources(release_name, name, 'pod', labels,
-                                          namespace)
+                    self.delete_resources(release_name, name, 'pod',
+                                          resource_labels, namespace)
 
         elif action_type == 'statefulset':
             pass
