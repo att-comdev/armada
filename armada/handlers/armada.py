@@ -201,8 +201,8 @@ class Armada(object):
                       release[1])
 
         for entry in self.config[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
-            chart_wait = self.wait
 
+            chart_wait = self.wait
             desc = entry.get('description', 'A Chart Group')
             chart_group = entry.get(const.KEYWORD_CHARTS, [])
             test_charts = entry.get('test_charts', False)
@@ -215,6 +215,7 @@ class Armada(object):
             for gchart in chart_group:
                 chart = dotify(gchart['chart'])
                 values = gchart.get('chart').get('values', {})
+                wait_values = gchart.get('chart').get('wait', {})
                 test_chart = gchart.get('chart').get('test', False)
                 pre_actions = {}
                 post_actions = {}
@@ -231,8 +232,8 @@ class Armada(object):
                 chart_timeout = self.timeout
                 if chart_wait:
                     if chart_timeout == DEFAULT_TIMEOUT:
-                        chart_timeout = getattr(chart, 'timeout',
-                                                chart_timeout)
+                        chart_timeout = getattr(
+                            chart, 'timeout', chart_timeout)
 
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
@@ -292,10 +293,16 @@ class Armada(object):
                         timeout=chart_timeout)
 
                     if chart_wait:
+                        # TODO(gardlt): after v0.7.1 depricate timeout values
+                        if not wait_values.get('timeout', None):
+                            wait_values['timeout'] = chart_timeout
+
                         self.tiller.k8s.wait_until_ready(
                             release=prefix_chart,
+                            labels=wait_values.get('labels', ''),
                             namespace=chart.namespace,
-                            timeout=chart_timeout)
+                            timeout=wait_values.get('timeout', DEFAULT_TIMEOUT)
+                        )
 
                     msg['upgraded'].append(prefix_chart)
 
@@ -314,8 +321,9 @@ class Armada(object):
                     if chart_wait:
                         self.tiller.k8s.wait_until_ready(
                             release=prefix_chart,
+                            labels=wait_values.get('labels', ''),
                             namespace=chart.namespace,
-                            timeout=chart_timeout)
+                            timeout=wait_values.get('timeout', 3600))
 
                     msg['installed'].append(prefix_chart)
 
