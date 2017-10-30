@@ -14,11 +14,14 @@
 
 import re
 import time
+
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
-
 from oslo_config import cfg
 from oslo_log import log as logging
+
+from armada.utils.release import label_selectors
+
 
 LOG = logging.getLogger(__name__)
 
@@ -191,6 +194,7 @@ class K8s(object):
     def wait_until_ready(self,
                          release=None,
                          namespace='default',
+                         labels='',
                          timeout=300,
                          sleep=15):
         '''
@@ -200,9 +204,9 @@ class K8s(object):
         LOG.debug("Wait on %s for %s sec", namespace, timeout)
 
         label_selector = ''
-        # FIXME(gardlt): this requires a label schema from OSH
-        if release is not None:
-            label_selector = 'release_group={}'.format(release)
+
+        if labels:
+            label_selector = label_selectors(labels)
 
         valid_state = ['Succeeded', 'Running']
 
@@ -213,18 +217,26 @@ class K8s(object):
             self.is_pods_ready(label_selector=label_selector, timeout=timeout)
 
             pod_ready = []
+            not_ready = []
             for pod in self.client.list_pod_for_all_namespaces(
                     label_selector=label_selector).items:
                 p_state = pod.status.phase
+                p_name = pod.metadata.name
                 if p_state in valid_state:
                     pod_ready.append(True)
                     continue
 
                 pod_ready.append(False)
+                not_ready.append(p_name)
+
                 LOG.debug('%s', p_state)
 
             if time.time() > wait_timeout or all(pod_ready):
                 LOG.debug("Pod States %s", pod_ready)
+                break
+            if time.time() > wait_timeout and not all(pod_ready):
+                LOG.exception(
+                    'Failed to bring up release %s: %s', release, not_ready)
                 break
             else:
                 LOG.debug('time: %s pod %s', wait_timeout, pod_ready)
