@@ -23,6 +23,7 @@ data:
   chart_name: mariadb
   release: mariadb
   namespace: openstack
+  timeout: 3600
   wait:
     timeout: 3600
     labels:
@@ -48,6 +49,7 @@ data:
   chart_name: memcached
   release: memcached
   namespace: openstack
+  timeout: 100
   wait:
     timeout: 100
     labels:
@@ -74,6 +76,7 @@ data:
   test: true
   release: keystone
   namespace: openstack
+  timeout: 100
   wait:
     timeout: 100
     labels:
@@ -87,10 +90,10 @@ data:
         - name: keystone-bootstrap
           type: job
           labels:
-            - application: keystone
-            - component: bootstrap
+            application: keystone
+            component: bootstrap
   values:
-    replicas: 3
+    replicas: 5
   source:
     type: git
     location: https://git.openstack.org/openstack/openstack-helm
