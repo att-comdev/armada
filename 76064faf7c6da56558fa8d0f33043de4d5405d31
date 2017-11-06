@@ -19,6 +19,52 @@
     },
     {
       "key": {
+        "uuid": "1bc2ba38_8554bf76",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-06T23:36:47Z",
+      "side": 1,
+      "message": "these output parameters: some look like string other looks like boolean, can we rename these.",
+      "range": {
+        "startLine": 77,
+        "startChar": 35,
+        "endLine": 77,
+        "endChar": 41
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e127ff99_ff4eca44",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-06T23:36:47Z",
+      "side": 1,
+      "message": "is this function\u0027s job just to throw things into info log?  So if I set the server\u0027s log level to CRITICAL or WARN, then you don\u0027t even get these messages.",
+      "range": {
+        "startLine": 77,
+        "startChar": 9,
+        "endLine": 77,
+        "endChar": 21
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f51dcd36_651e1c6b",
         "filename": "armada/cli/test.py",
         "patchSetId": 9
@@ -30,6 +76,29 @@
       "writtenOn": "2017-11-06T23:33:04Z",
       "side": 1,
       "message": "Dead code, should be removed.",
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea3233ce_6e5a55dc",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-06T23:36:47Z",
+      "side": 1,
+      "message": "can remove",
+      "range": {
+        "startLine": 95,
+        "startChar": 15,
+        "endLine": 95,
+        "endChar": 66
+      },
       "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
@@ -52,6 +121,98 @@
         "startChar": 28,
         "endLine": 110,
         "endChar": 57
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d4ed53d_b1b3748b",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-06T23:36:47Z",
+      "side": 1,
+      "message": "this line doesn\u0027t get executed after a raise.",
+      "range": {
+        "startLine": 210,
+        "startChar": 12,
+        "endLine": 210,
+        "endChar": 74
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07a044b1_a826b4be",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-06T23:36:47Z",
+      "side": 1,
+      "message": "should raise something more specific than an Exception",
+      "range": {
+        "startLine": 406,
+        "startChar": 30,
+        "endLine": 406,
+        "endChar": 39
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b82a8bb_7416a42a",
+        "filename": "examples/keystone-manifest.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-06T23:36:47Z",
+      "side": 1,
+      "message": "nit: True.  the casing of these booleans should be consistent, now it is some true/false, and some True/False",
+      "range": {
+        "startLine": 77,
+        "startChar": 13,
+        "endLine": 77,
+        "endChar": 17
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ec6b34f_676e6c5c",
+        "filename": "examples/keystone-manifest.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-06T23:36:47Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 78,
+        "startChar": 12,
+        "endLine": 78,
+        "endChar": 16
       },
       "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
