@@ -281,6 +281,30 @@
     },
     {
       "key": {
+        "uuid": "12fac800_1d7670a8",
+        "filename": "examples/keystone-manifest.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-07T15:46:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b82a8bb_7416a42a",
+      "range": {
+        "startLine": 77,
+        "startChar": 13,
+        "endLine": 77,
+        "endChar": 17
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ec6b34f_676e6c5c",
         "filename": "examples/keystone-manifest.yaml",
         "patchSetId": 9
@@ -292,6 +316,30 @@
       "writtenOn": "2017-11-06T23:36:47Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 78,
+        "startChar": 12,
+        "endLine": 78,
+        "endChar": 16
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "046ff958_01f0c1e4",
+        "filename": "examples/keystone-manifest.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-07T15:46:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ec6b34f_676e6c5c",
       "range": {
         "startLine": 78,
         "startChar": 12,
