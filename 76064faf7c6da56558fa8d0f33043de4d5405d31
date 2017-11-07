@@ -131,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "77c89e2b_7e875995",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-11-07T21:30:54Z",
+      "side": 1,
+      "message": "A doc string or better named function is probably what I am asking for.  output_release sounds like it is a func that would output something all the time, not log something depending on the log level.  this looks like just a helper function, why not name it _log_output_status()?",
+      "parentUuid": "17c8c798_150c4637",
+      "range": {
+        "startLine": 77,
+        "startChar": 9,
+        "endLine": 77,
+        "endChar": 21
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f51dcd36_651e1c6b",
         "filename": "armada/cli/test.py",
         "patchSetId": 9
