@@ -83,6 +83,54 @@
     },
     {
       "key": {
+        "uuid": "a95975de_4ba30834",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-07T16:40:07Z",
+      "side": 1,
+      "message": "Could you please provide a suggestion, or a naming convention example I could follow to make these corrections?",
+      "parentUuid": "1bc2ba38_8554bf76",
+      "range": {
+        "startLine": 77,
+        "startChar": 35,
+        "endLine": 77,
+        "endChar": 41
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17c8c798_150c4637",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-07T16:40:07Z",
+      "side": 1,
+      "message": "I don\u0027t fully understand the concern here.  Could you work with me to better understand how to resolve this?  I personally wouldn\u0027t consider pod output logs a higher level than simply info...",
+      "parentUuid": "e127ff99_ff4eca44",
+      "range": {
+        "startLine": 77,
+        "startChar": 9,
+        "endLine": 77,
+        "endChar": 21
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f51dcd36_651e1c6b",
         "filename": "armada/cli/test.py",
         "patchSetId": 9
@@ -235,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "72a94e77_f14604c1",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-07T16:40:07Z",
+      "side": 1,
+      "message": "This isn\u0027t a part of the current patch set, please submit separate issue in Armada",
+      "parentUuid": "6d4ed53d_b1b3748b",
+      "range": {
+        "startLine": 210,
+        "startChar": 12,
+        "endLine": 210,
+        "endChar": 74
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07a044b1_a826b4be",
         "filename": "armada/handlers/tiller.py",
         "patchSetId": 9
@@ -246,6 +318,30 @@
       "writtenOn": "2017-11-06T23:36:47Z",
       "side": 1,
       "message": "should raise something more specific than an Exception",
+      "range": {
+        "startLine": 406,
+        "startChar": 30,
+        "endLine": 406,
+        "endChar": 39
+      },
+      "revId": "76064faf7c6da56558fa8d0f33043de4d5405d31",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f3b92d8e_7d77919b",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-07T16:40:07Z",
+      "side": 1,
+      "message": "Can you give an example? So far it doesn\u0027t appear grpc has it\u0027s own error handing within python.",
+      "parentUuid": "07a044b1_a826b4be",
       "range": {
         "startLine": 406,
         "startChar": 30,
