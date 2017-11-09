@@ -25,7 +25,7 @@ class Status(api.BaseResource):
     @policy.enforce('tiller:get_status')
     def on_get(self, req, resp):
         '''
-        get tiller status
+        GET: tiller status
         '''
         try:
             opts = req.params
@@ -55,7 +55,7 @@ class Release(api.BaseResource):
     @policy.enforce('tiller:get_release')
     def on_get(self, req, resp):
         '''
-        get tiller releases
+        GET: tiller releases
         '''
         try:
             # Get tiller releases
