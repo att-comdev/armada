@@ -35,7 +35,7 @@ from armada.utils.release import release_prefix
 from armada.utils.release import label_selectors
 
 TILLER_PORT = 44134
-TILLER_VERSION = b'2.5.0'
+TILLER_VERSION = b'2.7.0'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
 RUNTEST_SUCCESS = 9

@@ -79,8 +79,7 @@ clean:
 
 # testing checks
 .PHONY: test-all
-test-all: check-tox helm_lint
-	tox
+test-all: check-tox test-lint test-unit test-coverage test-bandit
 
 .PHONY: test-unit
 test-unit: check-tox
@@ -94,6 +93,10 @@ test-coverage: check-tox
 test-bandit: check-tox
 	tox -e bandit
 
+.PHONY: test-integration
+test-integration: check-tox
+	tox -e integration
+
 # style checks
 .PHONY: lint
 lint: test-pep8 helm_lint
@@ -102,15 +105,16 @@ lint: test-pep8 helm_lint
 test-pep8: check-tox
 	tox -e pep8
 
+.PHONY: test-functional
+test-functional: check-tox
+	@armada/tests/functional/client-armada.sh
+
 .PHONY: helm-lint
 helm_lint:
 	@tools/helm_tk.sh $(HELM)
 	$(HELM) lint $(CHART)
 
-
 .PHONY: charts
 charts: clean
 	$(HELM) dep up $(CHART)
 	$(HELM) package $(CHART)
-
-
