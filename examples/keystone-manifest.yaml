@@ -23,6 +23,7 @@ data:
   chart_name: mariadb
   release: mariadb
   namespace: openstack
+  timeout: 3600
   wait:
     timeout: 3600
     labels:
@@ -48,6 +49,7 @@ data:
   chart_name: memcached
   release: memcached
   namespace: openstack
+  timeout: 100
   wait:
     timeout: 100
     labels:
@@ -68,12 +70,43 @@ data:
 schema: armada/Chart/v1
 metadata:
   schema: metadata/Document/v1
+  name: armada
+data:
+  chart_name: armada
+  test: false
+  release: armada
+  namespace: openstack
+  timeout: 100
+  wait:
+    timeout: 100
+    labels:
+      release_group: armada-armada
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+  values:
+    images:
+      tags:
+        api: quay.io/attcomdev/armada:master
+  source:
+    type: git
+    location: https://github.com/att-comdev/armada
+    subpath: charts/armada
+    reference: master
+  dependencies:
+    - helm-toolkit
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
   name: keystone
 data:
   chart_name: keystone
   test: true
   release: keystone
   namespace: openstack
+  timeout: 100
   wait:
     timeout: 100
     labels:
@@ -87,8 +120,8 @@ data:
         - name: keystone-bootstrap
           type: job
           labels:
-            - application: keystone
-            - component: bootstrap
+            application: keystone
+            component: bootstrap
   values:
     replicas: 3
   source:
@@ -120,6 +153,7 @@ data:
   test_charts: False
   chart_group:
     - keystone
+    - armada
 ---
 schema: armada/Manifest/v1
 metadata:
