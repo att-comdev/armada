@@ -22,7 +22,7 @@ import tempfile
 from git import Repo
 from git import Git
 
-from armada.exceptions import source_exceptions
+from armada import errors as ex
 
 
 def git_clone(repo_url, ref='master'):
@@ -34,7 +34,9 @@ def git_clone(repo_url, ref='master'):
     '''
 
     if repo_url == '':
-        raise source_exceptions.GitLocationException(repo_url)
+        title = 'Invalid Git source'
+        description = 'please provide a vaild source location'
+        raise ex.SourceError(title=title, description=description)
 
     os.environ['GIT_TERMINAL_PROMPT'] = '0'
     _tmp_dir = tempfile.mkdtemp(prefix='armada')
@@ -44,10 +46,12 @@ def git_clone(repo_url, ref='master'):
         repo.remotes.origin.fetch(ref)
         g = Git(repo.working_dir)
         g.checkout('FETCH_HEAD')
-    except Exception:
-        raise source_exceptions.GitLocationException(repo_url)
 
-    return _tmp_dir
+        return _tmp_dir
+    except Exception:
+        title = 'Unable Git Clone'
+        description = 'could not clone repo {}'.format(repo_url)
+        raise ex.SourceError(title=title, description=description)
 
 
 def get_tarball(tarball_url):
@@ -62,11 +66,15 @@ def download_tarball(tarball_url):
     try:
         tarball_filename = tempfile.mkstemp(prefix='armada')[1]
         response = requests.get(tarball_url)
+
         with open(tarball_filename, 'wb') as f:
             f.write(response.content)
+
+        return tarball_filename
     except Exception:
-        raise source_exceptions.TarballDownloadException(tarball_url)
-    return tarball_filename
+        title = 'Unable to download Chart'
+        description = 'could not get {} from source'.format(tarball_url)
+        raise ex.SourceError(title=title, description=description)
 
 
 def extract_tarball(tarball_path):
@@ -74,16 +82,20 @@ def extract_tarball(tarball_path):
     Extracts a tarball to /tmp and returns the path
     '''
     if not path.exists(tarball_path):
-        raise source_exceptions.InvalidPathException(tarball_path)
-
-    _tmp_dir = tempfile.mkdtemp(prefix='armada')
+        title = 'Unable to extract Chart'
+        description = 'source path does not exist {}'.format(tarball_path)
+        raise ex.SourceError(title=title, description=description)
 
     try:
+        _tmp_dir = tempfile.mkdtemp(prefix='armada')
         file = tarfile.open(tarball_path)
         file.extractall(_tmp_dir)
+
+        return _tmp_dir
     except Exception:
-        raise source_exceptions.TarballExtractException(tarball_path)
-    return _tmp_dir
+        title = 'Unable to extract Chart'
+        description = 'could not get {}'.format(tarball_path)
+        raise ex.SourceError(title=title, description=description)
 
 
 def source_cleanup(target_dir):
@@ -92,3 +104,7 @@ def source_cleanup(target_dir):
     '''
     if path.exists(target_dir):
         shutil.rmtree(target_dir)
+    else:
+        title = 'Unable to perform clean up'
+        description = 'could not find path {}'.format(target_dir)
+        raise ex.SourceError(title=title, description=description)

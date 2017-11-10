@@ -23,7 +23,7 @@ from armada.handlers.manifest import Manifest
 from armada.handlers.override import Override
 from armada.handlers.tiller import Tiller
 from armada.exceptions import armada_exceptions
-from armada.exceptions import source_exceptions
+from armada import errors as ex
 from armada.exceptions import lint_exceptions
 from armada.exceptions import tiller_exceptions
 from armada.utils.release import release_prefix
@@ -156,16 +156,19 @@ class Armada(object):
                     LOG.info('Cloning repo: %s branch: %s', *repo_branch)
                     repo_dir = source.git_clone(*repo_branch)
                 except Exception:
-                    raise source_exceptions.GitLocationException(
-                        '{} reference: {}'.format(*repo_branch))
+                    title = "Unable clone source"
+                    description = 'not able to get repo {}'.format(repo_branch)
+                    raise ex.SourceError(title=title, description=description)
+
                 repos[repo_branch] = repo_dir
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
             else:
                 ch.get('chart')['source_dir'] = (repos.get(repo_branch),
                                                  subpath)
         else:
-            chart_name = ch.get('chart').get('chart_name')
-            raise source_exceptions.ChartSourceException(ct_type, chart_name)
+            title = 'Unkown source type'
+            description = 'unable to manage soure type {}'.format(ct_type)
+            raise ex.SourceError(title=title, description=description)
 
     def get_releases_by_status(self, status):
         '''
