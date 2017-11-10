@@ -65,7 +65,7 @@ class LintTestCase(unittest.TestCase):
             schema: metadata/Document/v1
             name: example-manifest
         data:
-            chart_groups:
+        chart_groups:
                 - example-group
         """
         document = yaml.safe_load_all(template_manifest)
@@ -152,3 +152,17 @@ class LintTestCase(unittest.TestCase):
         document = yaml.safe_load_all(template_manifest)
         with self.assertRaises(Exception):
             lint.validate_chart_document(document)
+
+    def test_lint_validate_manifest_url(self):
+        value = 'url'
+        assert lint.validate_manifest_url(value) is False
+        value = 'https://raw.githubusercontent.com/att-comdev/' \
+                'armada/master/examples/simple.yaml'
+        assert lint.validate_manifest_url(value) is True
+
+    def test_lint_validate_manifest_filepath(self):
+        value = 'filepath'
+        assert lint.validate_manifest_filepath(value) is False
+        value = '{}/templates/valid_armada_document.yaml'.format(
+            self.basepath)
+        assert lint.validate_manifest_filepath(value) is True
