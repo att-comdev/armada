@@ -13,12 +13,14 @@
 # limitations under the License.
 
 import yaml
+import requests
 
 import click
 from oslo_config import cfg
 
 from armada.cli import CliAction
 from armada.handlers.armada import Armada
+from armada.utils import lint
 
 CONF = cfg.CONF
 
@@ -167,24 +169,28 @@ class ApplyManifest(CliAction):
                     self.logger.info(ch)
 
     def invoke(self):
-
+        if lint.validate_manifest_filepath(self.filename):
+            documents = open(self.filename).read()
+        elif lint.validate_manifest_url(self.filename):
+            documents = requests.get(self.filename, '').text
+        else:
+            self.logger.error("Not a valid URL/filepath: %s", self.filename)
         if not self.ctx.obj.get('api', False):
-            with open(self.filename) as f:
-                armada = Armada(
-                    list(yaml.safe_load_all(f.read())),
-                    self.disable_update_pre,
-                    self.disable_update_post,
-                    self.enable_chart_cleanup,
-                    self.dry_run,
-                    self.set,
-                    self.wait,
-                    self.timeout,
-                    self.tiller_host,
-                    self.tiller_port,
-                    self.values)
+            armada = Armada(
+                list(yaml.safe_load_all(documents)),
+                self.disable_update_pre,
+                self.disable_update_post,
+                self.enable_chart_cleanup,
+                self.dry_run,
+                self.set,
+                self.wait,
+                self.timeout,
+                self.tiller_host,
+                self.tiller_port,
+                self.values)
 
-                resp = armada.sync()
-                self.output(resp)
+            resp = armada.sync()
+            self.output(resp)
         else:
             query = {
                 'disable_update_post': self.disable_update_post,
@@ -199,8 +205,7 @@ class ApplyManifest(CliAction):
 
             client = self.ctx.obj.get('CLIENT')
 
-            with open(self.filename, 'r') as f:
-                resp = client.post_apply(
-                    manifest=f.read(), values=self.values, set=self.set,
-                    query=query)
-                self.output(resp.get('message'))
+            resp = client.post_apply(
+                manifest=documents, values=self.values, set=self.set,
+                query=query)
+            self.output(resp.get('message'))

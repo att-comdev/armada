@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import requests
+
 from armada.const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
 from armada.const import KEYWORD_ARMADA, KEYWORD_PREFIX, KEYWORD_GROUPS, \
     KEYWORD_CHARTS, KEYWORD_RELEASE
@@ -93,3 +96,17 @@ def validate_chart_document(documents):
                         KEYWORD_RELEASE, document.get('metadata').get('name')))
 
     return True
+
+
+def validate_url_or_filepath(value):
+    isurl = validate_manifest_url(value)
+    isfp = validate_manifest_filepath(value)
+    return (isurl != isfp)
+
+
+def validate_manifest_url(value):
+    return (requests.get(value).status_code == 200)
+
+
+def validate_manifest_filepath(value):
+    return os.path.isfile(value)

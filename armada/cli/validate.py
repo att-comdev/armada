@@ -14,11 +14,14 @@
 
 
 import click
+import requests
 import yaml
 
 from armada.cli import CliAction
 from armada.utils.lint import validate_armada_documents
 from armada.utils.lint import validate_armada_object
+from armada.utils.lint import validate_manifest_url
+from armada.utils.lint import validate_manifest_filepath
 from armada.handlers.manifest import Manifest
 
 
@@ -56,8 +59,15 @@ class ValidateManifest(CliAction):
         self.filename = filename
 
     def invoke(self):
+        if validate_manifest_filepath(self.filename):
+            docs = open(self.filename).read()
+        elif validate_manifest_url(self.filename):
+            docs = requests.get(self.filename, '').text
+        else:
+            self.logger.error(
+                "Not a valid URL/filepath: %s", self.filename)
         if not self.ctx.obj.get('api', False):
-            documents = yaml.safe_load_all(open(self.filename).read())
+            documents = yaml.safe_load_all(docs)
             manifest_obj = Manifest(documents).get_manifest()
             obj_check = validate_armada_object(manifest_obj)
             doc_check = validate_armada_documents(documents)
@@ -70,10 +80,9 @@ class ValidateManifest(CliAction):
                 raise Exception('Failed to validate: %s', self.filename)
         else:
             client = self.ctx.obj.get('CLIENT')
-            with open(self.filename, 'r') as f:
-                resp = client.post_validate(f.read())
-                if resp.get('valid', False):
-                    self.logger.info(
-                        'Successfully validated: %s', self.filename)
-                else:
-                    self.logger.error("Failed to validate: %s", self.filename)
+            resp = client.post_validate(docs)
+            if resp.get('valid', False):
+                self.logger.info(
+                    'Successfully validated: %s', self.filename)
+            else:
+                self.logger.error("Failed to validate: %s", self.filename)
