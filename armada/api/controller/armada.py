@@ -13,12 +13,15 @@
 # limitations under the License.
 
 import json
+import yaml
 
 import falcon
 
 from armada import api
 from armada.common import policy
 from armada.handlers.armada import Armada
+from armada.handlers.document import ReferenceResolver
+from armada.handlers.override import Override
 
 
 class Apply(api.BaseResource):
@@ -30,17 +33,37 @@ class Apply(api.BaseResource):
         try:
 
             # Load data from request and get options
+            if req.content_type == 'application/x-yaml':
+                data = list(self.req_yaml(req))
+                if type(data[0]) is list:
+                    documents = list(data[0])
+                else:
+                    documents = data
+            elif req.content_type == 'application/json':
+                self.logger.debug("Applying manifest based on reference.")
+                req_body = self.req_json(req)
+                doc_ref = req_body.get('hrefs', None)
 
-            data = list(self.req_yaml(req))
+                if not doc_ref:
+                    self.logger.info("Request did not contain 'hrefs'.")
+                    resp.status = falcon.HTTP_400
+                    return
 
-            if type(data[0]) is list:
-                data = list(data[0])
+                data = ReferenceResolver.resolve_reference(doc_ref)
+                documents = list()
+                for d in data:
+                    documents.append(yaml.safe_load_all(d.decode()))
+
+                if req_body.get('overrides', None):
+                    overrides = Override(documents,
+                                         overrides=req_body.get('overrides'))
+                    documents = overrides.update_manifests()
 
             opts = req.params
 
             # Encode filename
             armada = Armada(
-                data,
+                documents,
                 disable_update_pre=req.get_param_as_bool(
                     'disable_update_pre'),
                 disable_update_post=req.get_param_as_bool(
