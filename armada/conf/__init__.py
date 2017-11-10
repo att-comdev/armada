@@ -24,6 +24,9 @@ CONF = cfg.CONF
 
 CONFIG_FILES = ['api-paste.ini', 'armada.conf']
 
+# Load oslo_log options prior to file/CLI parsing
+log.register_options(CONF)
+
 
 def _get_config_files(env=None):
     if env is None:

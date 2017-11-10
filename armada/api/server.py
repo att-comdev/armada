@@ -15,6 +15,7 @@
 import falcon
 from oslo_config import cfg
 from oslo_policy import policy
+from oslo_log import log as logging
 
 from armada import conf
 from armada.api import ArmadaRequest
@@ -52,6 +53,9 @@ def create(enable_middleware=CONF.middleware):
     else:
         api = falcon.API(request_type=ArmadaRequest)
 
+    logging.set_defaults(default_log_levels=CONF.default_log_levels)
+    logging.setup(CONF, 'armada')
+
     # Configure API routing
     url_routes_v1 = (
         ('health', Health()),
@@ -61,6 +65,7 @@ def create(enable_middleware=CONF.middleware):
         ('tests', Tests()),
         ('test/{release}', Test()),
         ('validate', Validate()),
+        ('validatedesign', Validate()),
     )
 
     for route, service in url_routes_v1:
