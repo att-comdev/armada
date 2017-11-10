@@ -17,7 +17,7 @@ import json
 import yaml
 
 from armada import const
-from armada.exceptions import override_exceptions
+from armada import errors as ex
 from armada.utils import lint
 
 
@@ -36,7 +36,7 @@ class Override(object):
             with open(doc) as f:
                 return list(yaml.safe_load_all(f.read()))
         except IOError:
-            raise override_exceptions.InvalidOverrideFileException(doc)
+            raise ex.InvalidOverrideFileException(doc)
 
     def update(self, d, u):
         for k, v in u.items():
@@ -64,7 +64,7 @@ class Override(object):
                     'name') == doc_path[1]:
                 return doc
 
-        raise override_exceptions.UnknownDocumentOverrideException(
+        raise ex.UnknownDocumentOverrideException(
             doc_path[0], doc_path[1])
 
     def array_to_dict(self, data_path, new_value):
@@ -152,7 +152,7 @@ class Override(object):
         try:
             lint.validate_armada_documents(self.documents)
         except Exception:
-            raise override_exceptions.InvalidOverrideValueException(
+            raise ex.InvalidOverrideValueException(
                 self.overrides)
 
         return self.documents

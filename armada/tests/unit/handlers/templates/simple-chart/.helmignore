@@ -1,0 +1,4 @@
+sample/*
+NOTES.txt
+*.py
+ignore_file.sh

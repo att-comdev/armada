@@ -22,10 +22,9 @@ from armada.handlers.chartbuilder import ChartBuilder
 from armada.handlers.manifest import Manifest
 from armada.handlers.override import Override
 from armada.handlers.tiller import Tiller
-from armada.exceptions import armada_exceptions
-from armada.exceptions import source_exceptions
-from armada.exceptions import lint_exceptions
-from armada.exceptions import tiller_exceptions
+from armada.exceptions import source_exceptions as se
+from armada.exceptions import lint_exceptions as le
+from armada import errors as ex
 from armada.utils.release import release_prefix
 from armada.utils import source
 from armada.utils import lint
@@ -89,10 +88,10 @@ class Armada(object):
 
         # Ensure tiller is available and manifest is valid
         if not self.tiller.tiller_status():
-            raise tiller_exceptions.TillerServicesUnavailableException()
+            raise ex.TillerServicesUnavailableException()
 
         if not lint.validate_armada_documents(self.documents):
-            raise lint_exceptions.InvalidManifestException()
+            raise le.InvalidManifestException()
 
         # Override manifest values if --set flag is used
         if self.overrides or self.values:
@@ -104,7 +103,7 @@ class Armada(object):
         self.config = self.get_armada_manifest()
 
         if not lint.validate_armada_object(self.config):
-            raise lint_exceptions.InvalidArmadaObjectException()
+            raise le.InvalidArmadaObjectException()
 
         # Purge known releases that have failed and are in the current yaml
         prefix = self.config.get(const.KEYWORD_ARMADA).get(
@@ -156,7 +155,7 @@ class Armada(object):
                     LOG.info('Cloning repo: %s branch: %s', *repo_branch)
                     repo_dir = source.git_clone(*repo_branch)
                 except Exception:
-                    raise source_exceptions.GitLocationException(
+                    raise se.GitLocationException(
                         '{} reference: {}'.format(*repo_branch))
                 repos[repo_branch] = repo_dir
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
@@ -165,7 +164,7 @@ class Armada(object):
                                                  subpath)
         else:
             chart_name = ch.get('chart').get('chart_name')
-            raise source_exceptions.ChartSourceException(ct_type, chart_name)
+            raise ex.ChartSourceException(ct_type, chart_name)
 
     def get_releases_by_status(self, status):
         '''
@@ -199,11 +198,12 @@ class Armada(object):
             const.KEYWORD_PREFIX)
 
         if known_releases is None:
-            raise armada_exceptions.KnownReleasesException()
+            raise ex.KnownReleasesException()
 
         for release in known_releases:
-            LOG.debug("Release %s, Version %s found on tiller", release[0],
-                      release[1])
+            LOG.debug(
+                "Release %s, Version %s found on tiller", release[0],
+                release[1])
 
         for entry in self.config[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
 
