@@ -18,7 +18,9 @@ import click
 from oslo_config import cfg
 
 from armada.cli import CliAction
+from armada.exceptions.source_exceptions import InvalidPathException
 from armada.handlers.armada import Armada
+from armada.handlers.document import ReferenceResolver
 
 CONF = cfg.CONF
 
@@ -64,7 +66,7 @@ SHORT_DESC = "command install manifest charts"
 
 
 @apply.command(name='apply', help=DESC, short_help=SHORT_DESC)
-@click.argument('filename')
+@click.argument('locations', nargs=-1)
 @click.option('--api', help="Contacts service endpoint", is_flag=True)
 @click.option(
     '--disable-update-post', help="run charts without install", is_flag=True)
@@ -78,66 +80,35 @@ SHORT_DESC = "command install manifest charts"
 @click.option(
     '--tiller-port', help="Tiller host port", type=int, default=44134)
 @click.option(
-    '--timeout', help="specifies time to wait for charts", type=int,
+    '--timeout',
+    help="specifies time to wait for charts",
+    type=int,
     default=3600)
 @click.option('--values', '-f', multiple=True, type=str, default=[])
-@click.option(
-    '--wait', help="wait until all charts deployed", is_flag=True)
+@click.option('--wait', help="wait until all charts deployed", is_flag=True)
 @click.option(
     '--debug/--no-debug', help='Enable or disable debugging', default=False)
 @click.pass_context
-def apply_create(ctx,
-                 filename,
-                 api,
-                 disable_update_post,
-                 disable_update_pre,
-                 dry_run,
-                 enable_chart_cleanup,
-                 set,
-                 tiller_host,
-                 tiller_port,
-                 timeout,
-                 values,
-                 wait,
-                 debug):
+def apply_create(ctx, locations, api, disable_update_post, disable_update_pre,
+                 dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
+                 timeout, values, wait, debug):
 
     if debug:
         CONF.debug = debug
 
-    ApplyManifest(
-        ctx,
-        filename,
-        api,
-        disable_update_post,
-        disable_update_pre,
-        dry_run,
-        enable_chart_cleanup,
-        set,
-        tiller_host,
-        tiller_port,
-        timeout,
-        values,
-        wait).invoke()
+    ApplyManifest(ctx, locations, api, disable_update_post, disable_update_pre,
+                  dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
+                  timeout, values, wait).invoke()
 
 
 class ApplyManifest(CliAction):
-    def __init__(self,
-                 ctx,
-                 filename,
-                 api,
-                 disable_update_post,
-                 disable_update_pre,
-                 dry_run,
-                 enable_chart_cleanup,
-                 set,
-                 tiller_host,
-                 tiller_port,
-                 timeout,
-                 values,
-                 wait):
+    def __init__(self, ctx, locations, api, disable_update_post,
+                 disable_update_pre, dry_run, enable_chart_cleanup, set,
+                 tiller_host, tiller_port, timeout, values, wait):
         super(ApplyManifest, self).__init__()
         self.ctx = ctx
-        self.filename = filename
+        # Filename can also be a URL reference
+        self.locations = locations
         self.api = api
         self.disable_update_post = disable_update_post
         self.disable_update_pre = disable_update_pre
@@ -153,8 +124,7 @@ class ApplyManifest(CliAction):
     def output(self, resp):
         for result in resp:
             if not resp[result] and not result == 'diff':
-                self.logger.info(
-                    'Did not performed chart %s(s)', result)
+                self.logger.info('Did not performed chart %s(s)', result)
             elif result == 'diff' and not resp[result]:
                 self.logger.info('No Relase changes detected')
 
@@ -167,25 +137,32 @@ class ApplyManifest(CliAction):
                     self.logger.info(ch)
 
     def invoke(self):
-
         if not self.ctx.obj.get('api', False):
-            with open(self.filename) as f:
-                armada = Armada(
-                    list(yaml.safe_load_all(f.read())),
-                    self.disable_update_pre,
-                    self.disable_update_post,
-                    self.enable_chart_cleanup,
-                    self.dry_run,
-                    self.set,
-                    self.wait,
-                    self.timeout,
-                    self.tiller_host,
-                    self.tiller_port,
-                    self.values)
+            try:
+                doc_data = ReferenceResolver.resolve_reference(self.locations)
+                documents = list()
+                for d in doc_data:
+                    documents.extend(yaml.safe_load_all(d.decode()))
+            except InvalidPathException as ex:
+                self.logger.error(str(ex))
+                return
+            except yaml.YAMLError as yex:
+                self.logger.error("Invalid YAML found: %s" % str(yex))
+                return
 
-                resp = armada.sync()
-                self.output(resp)
+            armada = Armada(
+                documents, self.disable_update_pre, self.disable_update_post,
+                self.enable_chart_cleanup, self.dry_run, self.set, self.wait,
+                self.timeout, self.tiller_host, self.tiller_port, self.values)
+
+            resp = armada.sync()
+            self.output(resp)
         else:
+            if len(self.values) > 0:
+                self.logger.error(
+                    "Cannot specify local values files when using the API.")
+                return
+
             query = {
                 'disable_update_post': self.disable_update_post,
                 'disable_update_pre': self.disable_update_pre,
@@ -199,8 +176,6 @@ class ApplyManifest(CliAction):
 
             client = self.ctx.obj.get('CLIENT')
 
-            with open(self.filename, 'r') as f:
-                resp = client.post_apply(
-                    manifest=f.read(), values=self.values, set=self.set,
-                    query=query)
-                self.output(resp.get('message'))
+            resp = client.post_apply(
+                manifest_ref=self.locations, set=self.set, query=query)
+            self.output(resp.get('message'))
