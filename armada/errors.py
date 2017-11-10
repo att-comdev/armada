@@ -237,3 +237,7 @@ class AppError(Exception):
             info_list=ex.info_list,
             error_type=ex.__class__.__name__,
             retry=ex.retry)
+
+
+class SourceError(AppError):
+    title = "GIT Failure"
