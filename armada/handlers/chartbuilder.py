@@ -21,7 +21,7 @@ from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.template_pb2 import Template
 from supermutes.dot import dotify
 
-from armada.exceptions import chartbuilder_exceptions
+from armada import errors as ex
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -75,16 +75,14 @@ class ChartBuilder(object):
         '''
         Load files from .helmignore if present
         '''
-        try:
-            ignored_files = []
-            if os.path.exists(os.path.join(self.source_directory,
-                                           '.helmignore')):
-                with open(os.path.join(self.source_directory,
-                                       '.helmignore')) as f:
-                    ignored_files = f.readlines()
-            return [filename.strip() for filename in ignored_files]
-        except Exception:
-            raise chartbuilder_exceptions.IgnoredFilesLoadException()
+        ignored_files = []
+        if os.path.exists(
+                os.path.join(self.source_directory, '.helmignore')):
+            with open(os.path.join(
+                    self.source_directory, '.helmignore')) as f:
+                ignored_files = f.readlines()
+
+        return [filename.strip() for filename in ignored_files]
 
     def ignore_file(self, filename):
         '''
@@ -93,6 +91,7 @@ class ChartBuilder(object):
         Returns true if file matches an ignored file wildcard or exact name,
          false otherwise
         '''
+
         for ignored_file in self.ignored_files:
             if (ignored_file.startswith('*') and
                     filename.endswith(ignored_file.strip('*'))):
@@ -111,8 +110,11 @@ class ChartBuilder(object):
             with open(os.path.join(self.source_directory, 'Chart.yaml')) as f:
                 chart_yaml = dotify(yaml.safe_load(f.read().encode('utf-8')))
 
-        except Exception:
-            raise chartbuilder_exceptions.MetadataLoadException()
+        except FileNotFoundError:
+            title = 'ChartBuilder'
+            description = 'Could not find "Chart.yaml" in {}'.format(
+                self.source_directory)
+            raise ex.HandlerError(title=title, description=description)
 
         # construct Metadata object
         return Metadata(
@@ -163,6 +165,7 @@ class ChartBuilder(object):
                 tname = os.path.relpath(
                     os.path.join(root, tpl_file),
                     os.path.join(self.source_directory, 'templates'))
+
                 if self.ignore_file(tname):
                     LOG.debug('Ignoring file %s', tname)
                     continue
@@ -180,8 +183,7 @@ class ChartBuilder(object):
 
         if self._helm_chart:
             return self._helm_chart
-        # dependencies
-        # [process_chart(x, is_dependency=True) for x in chart.dependencies]
+
         dependencies = []
         for dep in self.chart.dependencies:
             LOG.info("Building dependency chart %s for release %s",
@@ -190,7 +192,7 @@ class ChartBuilder(object):
                 dependencies.append(ChartBuilder(dep.chart).get_helm_chart())
             except Exception:
                 chart_name = self.chart.chart_name
-                raise chartbuilder_exceptions.DependencyException(chart_name)
+                raise ex.DependencyException(chart_name)
 
         try:
             helm_chart = Chart(
@@ -201,7 +203,7 @@ class ChartBuilder(object):
                 files=self.get_files())
         except Exception:
             chart_name = self.chart.chart_name
-            raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
+            raise ex.HelmChartBuildException(chart_name)
 
         self._helm_chart = helm_chart
         return helm_chart
