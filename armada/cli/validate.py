@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import click
 import yaml
 
@@ -20,6 +19,7 @@ from armada.cli import CliAction
 from armada.utils.lint import validate_armada_documents
 from armada.utils.lint import validate_armada_object
 from armada.handlers.manifest import Manifest
+from armada.handlers.document import ReferenceResolver
 
 
 @click.group()
@@ -42,38 +42,47 @@ SHORT_DESC = "command validates Armada Manifest"
 
 
 @validate.command(name='validate', help=DESC, short_help=SHORT_DESC)
-@click.argument('filename')
+@click.argument('locations', nargs=-1)
 @click.pass_context
-def validate_manifest(ctx, filename):
-    ValidateManifest(ctx, filename).invoke()
+def validate_manifest(ctx, locations):
+    ValidateManifest(ctx, locations).invoke()
 
 
 class ValidateManifest(CliAction):
-
-    def __init__(self, ctx, filename):
+    def __init__(self, ctx, locations):
         super(ValidateManifest, self).__init__()
         self.ctx = ctx
-        self.filename = filename
+        self.locations = locations
 
     def invoke(self):
         if not self.ctx.obj.get('api', False):
-            documents = yaml.safe_load_all(open(self.filename).read())
+            doc_data = ReferenceResolver(self.locations)
+            documents = list()
+            for d in doc_data:
+                documents.extend(yaml.safe_load_all(d.decode()))
+
             manifest_obj = Manifest(documents).get_manifest()
             obj_check = validate_armada_object(manifest_obj)
             doc_check = validate_armada_documents(documents)
 
             try:
                 if doc_check and obj_check:
-                    self.logger.info(
-                        'Successfully validated: %s', self.filename)
+                    self.logger.info('Successfully validated: %s',
+                                     self.locations)
             except Exception:
-                raise Exception('Failed to validate: %s', self.filename)
+                raise Exception('Failed to validate: %s', self.locations)
         else:
+            if len(self.locations) > 1:
+                self.logger.error(
+                    "Cannot specify multiple locations "
+                    "when using validate API."
+                )
+                return
+
             client = self.ctx.obj.get('CLIENT')
-            with open(self.filename, 'r') as f:
-                resp = client.post_validate(f.read())
-                if resp.get('valid', False):
-                    self.logger.info(
-                        'Successfully validated: %s', self.filename)
-                else:
-                    self.logger.error("Failed to validate: %s", self.filename)
+            resp = client.post_validate(self.locations[0])
+
+            if resp.get('code') == 200:
+                self.logger.info('Successfully validated: %s', self.locations)
+            else:
+                self.logger.error("Failed to validate: %s", self.locations)

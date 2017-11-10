@@ -31,7 +31,6 @@ class Override(object):
         '''
         Retrieve yaml file as a dictionary.
         '''
-
         try:
             with open(doc) as f:
                 return list(yaml.safe_load_all(f.read()))
