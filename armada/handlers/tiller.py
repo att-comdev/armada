@@ -28,11 +28,12 @@ from hapi.services.tiller_pb2 import UpdateReleaseRequest
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from armada.const import STATUS_DEPLOYED, STATUS_FAILED
-from armada.exceptions import tiller_exceptions as ex
+from armada import errors as ex
+from armada.const import STATUS_DEPLOYED
+from armada.const import STATUS_FAILED
 from armada.handlers.k8s import K8s
-from armada.utils.release import release_prefix
 from armada.utils.release import label_selectors
+from armada.utils.release import release_prefix
 
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.5.0'
@@ -86,16 +87,14 @@ class Tiller(object):
         '''
         tiller_ip = self._get_tiller_ip()
         tiller_port = self._get_tiller_port()
-        try:
-            return grpc.insecure_channel(
-                '%s:%s' % (tiller_ip, tiller_port),
-                options=[
-                    ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-                    ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
-                ]
-            )
-        except Exception:
-            raise ex.ChannelException()
+
+        return grpc.insecure_channel(
+            '%s:%s' % (tiller_ip, tiller_port),
+            options=[
+                ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
+            ]
+        )
 
     def _get_tiller_pod(self):
         '''
@@ -114,6 +113,11 @@ class Tiller(object):
             return self.tiller_host
         else:
             pod = self._get_tiller_pod()
+            if pod is None:
+                title = 'Tiller Service'
+                description = 'Could not find service (Check if service is up)'
+                raise ex.HandlerError(title=title, description=description)
+
             return pod.status.pod_ip
 
     def _get_tiller_port(self):
@@ -127,21 +131,20 @@ class Tiller(object):
         if self._get_tiller_ip():
             return True
 
-        return False
-
     def list_releases(self):
         '''
         List Helm Releases
         '''
         releases = []
         stub = ReleaseServiceStub(self.channel)
-        req = ListReleasesRequest(limit=RELEASE_LIMIT,
-                                  status_codes=[STATUS_DEPLOYED,
-                                                STATUS_FAILED],
-                                  sort_by='LAST_RELEASED',
-                                  sort_order='DESC')
-        release_list = stub.ListReleases(req, self.timeout,
-                                         metadata=self.metadata)
+        req = ListReleasesRequest(
+            limit=RELEASE_LIMIT,
+            status_codes=[STATUS_DEPLOYED, STATUS_FAILED],
+            sort_by='LAST_RELEASED',
+            sort_order='DESC')
+
+        release_list = stub.ListReleases(
+            req, self.timeout, metadata=self.metadata)
 
         for y in release_list:
             releases.extend(y.releases)
@@ -243,12 +246,15 @@ class Tiller(object):
         for latest_release in self.list_releases():
             try:
                 charts.append(
-                    (latest_release.name, latest_release.version,
-                     latest_release.chart, latest_release.config.raw,
+                    (latest_release.name,
+                     latest_release.version,
+                     latest_release.chart,
+                     latest_release.config.raw,
                      latest_release.info.status.Code.Name(
                          latest_release.info.status.code)))
             except IndexError:
                 continue
+
         return charts
 
     def update_release(self, chart, release, namespace,

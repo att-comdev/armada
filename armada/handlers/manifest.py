@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_log import log as logging
+
 from armada.const import DOCUMENT_CHART, DOCUMENT_GROUP, DOCUMENT_MANIFEST
+from armada import errors as ex
+
+LOG = logging.getLogger(__name__)
 
 
 class Manifest(object):
@@ -28,28 +33,32 @@ class Manifest(object):
         for document in self.documents:
             if document.get('schema') == DOCUMENT_CHART:
                 self.charts.append(document)
-            if document.get('schema') == DOCUMENT_GROUP:
+            elif document.get('schema') == DOCUMENT_GROUP:
                 self.groups.append(document)
-            if document.get('schema') == DOCUMENT_MANIFEST:
+            elif document.get('schema') == DOCUMENT_MANIFEST:
                 self.manifest = document
+            else:
+                LOG.error('This document is not supported')
 
     def find_chart_document(self, name):
-        try:
-            for chart in self.charts:
-                if chart.get('metadata').get('name') == name:
-                    return chart
-        except Exception:
-            raise Exception(
-                "Could not find {} in {}".format(name, DOCUMENT_CHART))
+        for chart in self.charts:
+            if chart.get('metadata').get('name') == name:
+                return chart
+
+        title = "Manifest Exception"
+        description = "Failed to find {}: {}".format(DOCUMENT_CHART, name)
+        raise ex.HandlerError(
+            title=title, description=description)
 
     def find_chart_group_document(self, name):
-        try:
-            for group in self.groups:
-                if group.get('metadata').get('name') == name:
-                    return group
-        except Exception:
-            raise Exception(
-                "Could not find {} in {}".format(name, DOCUMENT_GROUP))
+        for group in self.groups:
+            if group.get('metadata').get('name') == name:
+                return group
+
+        title = "Manifest Exception"
+        description = "Failed to find {}: {}".format(DOCUMENT_GROUP, name)
+        raise ex.HandlerError(
+            title=title, description=description)
 
     def build_charts_deps(self):
         for chart in self.charts:
