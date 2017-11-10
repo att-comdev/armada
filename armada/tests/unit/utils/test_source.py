@@ -18,7 +18,7 @@ import shutil
 import mock
 import unittest
 
-from armada.exceptions import source_exceptions
+from armada import errors as ex
 from armada.utils import source
 
 
@@ -55,18 +55,17 @@ class GitTestCase(unittest.TestCase):
 
     def test_git_clone_empty_url(self):
         url = ''
-        error_re = '%s is not a valid git repository.' % url
+        error_re = 'Invalid Git source : '
+        'please provide a valid source location'
 
-        with self.assertRaisesRegexp(
-                source_exceptions.GitLocationException, error_re):
+        with self.assertRaisesRegexp(ex.SourceError, error_re):
             source.git_clone(url)
 
     def test_git_clone_bad_url(self):
         url = 'http://github.com/dummy/armada'
-        error_re = '%s is not a valid git repository.' % url
+        error_re = 'Unable Git Clone : could not clone repo {}'.format(url)
 
-        with self.assertRaisesRegexp(
-                source_exceptions.GitLocationException, error_re):
+        with self.assertRaisesRegexp(ex.SourceError, error_re):
             source.git_clone(url)
 
     @mock.patch('armada.utils.source.tempfile')
@@ -88,6 +87,19 @@ class GitTestCase(unittest.TestCase):
         mock_open().write.assert_called_once_with(
             mock_requests.get(url).content)
 
+        error_re = 'Unable to download Chart :'
+        ' could not get http/some/path from source'
+
+        with self.assertRaisesRegexp(ex.SourceError, error_re):
+            source.download_tarball('http/some/path')
+
+        dummy_cert = '/tmp/certs'
+
+        with mock.patch.object(source, 'open', mock_open, create=True):
+            source.download_tarball(url, verify=dummy_cert)
+
+        mock_requests.get.assert_called_with(url, verify=dummy_cert)
+
     @mock.patch('armada.utils.source.tempfile')
     @mock.patch('armada.utils.source.path')
     @mock.patch('armada.utils.source.tarfile')
@@ -106,11 +118,20 @@ class GitTestCase(unittest.TestCase):
         mock_opened_file.extractall.assert_called_once_with('/tmp/armada')
 
     @mock.patch('armada.utils.source.path')
+    def test_tarball_extract_error(self, mock_path):
+        mock_path.exists.return_value = True
+
+        error_re = 'Unable to extract Chart :'
+        ' could not get http/some/path'
+        with self.assertRaisesRegexp(ex.SourceError, error_re):
+            source.extract_tarball('http/some/path')
+
+    @mock.patch('armada.utils.source.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract_bad_path(self, mock_tarfile, mock_path):
         mock_path.exists.return_value = False
         path = '/tmp/armada'
-        with self.assertRaises(source_exceptions.InvalidPathException):
+        with self.assertRaises(ex.SourceError):
             source.extract_tarball(path)
 
         mock_tarfile.open.assert_not_called()
@@ -122,19 +143,36 @@ class GitTestCase(unittest.TestCase):
         mock_path.exists.return_value = True
         path = 'armada'
 
-        try:
-            source.source_cleanup(path)
-        except source_exceptions.SourceCleanupException:
-            pass
+        source.source_cleanup(path)
+
+        with self.assertRaises(ex.SourceError):
+            source.git_clone('')
 
         mock_shutil.rmtree.assert_called_with(path)
 
-    @unittest.skip('not handled correctly')
     @mock.patch('armada.utils.source.shutil')
     @mock.patch('armada.utils.source.path')
     def test_source_cleanup_bad_path(self, mock_path, mock_shutil):
         mock_path.exists.return_value = False
-        path = 'armada'
-        with self.assertRaises(source_exceptions.InvalidPathException):
+        path = 'not_a_valid_path'
+        with self.assertRaises(ex.SourceError):
             source.source_cleanup(path)
+
         mock_shutil.rmtree.assert_not_called()
+
+    @mock.patch('armada.utils.source.tempfile')
+    @mock.patch('armada.utils.source.requests')
+    @mock.patch('armada.utils.source.tarfile')
+    def test_source_get_tarball(self, mock_tar, mock_requests, mock_temp):
+        url = 'http://localhost:8879/charts/mariadb-0.1.0.tgz'
+        mock_temp.mkstemp.return_value = (None, '/tmp/armada')
+        mock_temp.mkdtemp.return_value = '/tmp/armada'
+        mock_response = mock.Mock()
+        mock_response.content = 'some string'
+        mock_requests.get.return_value = mock_response
+        mock_opened_file = mock.Mock()
+        mock_tar.open.return_value = mock_opened_file
+
+        mock_open = mock.mock_open()
+        with mock.patch.object(source, 'open', mock_open, create=True):
+            source.get_tarball(url)
