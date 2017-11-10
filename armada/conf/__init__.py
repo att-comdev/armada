@@ -22,6 +22,9 @@ from armada import const
 
 CONF = cfg.CONF
 
+# Load oslo_log options prior to file/CLI parsing
+log.register_options(CONF)
+
 # Load config file if exists
 if (os.path.exists(const.CONFIG_PATH)):
     CONF(['--config-file', const.CONFIG_PATH])
