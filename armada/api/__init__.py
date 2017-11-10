@@ -67,6 +67,19 @@ class BaseResource(object):
             raise Exception(
                 "%s: Invalid YAML in body: %s" % (req.path, jex))
 
+    def req_json(self, req):
+        if req.content_length is None or req.content_length == 0:
+            return None
+
+        try:
+            return json.load(req.stream)
+        except json.JsonDecodeError as jex:
+            self.error(
+                req.context,
+                "Invalid JSON in request: %s" % str(jex))
+            raise Exception(
+                "%s: Invalid JSON in body: %s" % (req.path, jex))
+
     def return_error(self, resp, status_code, message="", retry=False):
         resp.body = json.dumps({
             'type': 'error',

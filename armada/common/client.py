@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import yaml
+import json
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -55,22 +56,34 @@ class ArmadaClient(object):
     def post_validate(self, manifest=None):
 
         endpoint = self._set_endpoint('1.0', 'validate')
-        resp = self.session.post(endpoint, body=manifest)
+        req_body = {
+            'href': manifest
+        }
+
+        resp = self.session.post(endpoint, json=req_body, headers={'content-type': 'application/json'})
 
         self._check_response(resp)
 
         return resp.json()
 
-    def post_apply(self, manifest=None, values=None, set=None, query=None):
-
-        if values or set:
-            document = list(yaml.safe_load_all(manifest))
-            override = Override(
-                document, overrides=set, values=values).update_manifests()
-            manifest = yaml.dump(override)
+    def post_apply(self, manifest=None, manifest_ref=None, values=None, set=None, query=None):
 
         endpoint = self._set_endpoint('1.0', 'apply')
-        resp = self.session.post(endpoint, body=manifest, query=query)
+
+        if manifest:
+            if values or set:
+                document = list(yaml.safe_load_all(manifest))
+                override = Override(
+                    document, overrides=set, values=values).update_manifests()
+                manifest = yaml.dump(override)
+            resp = self.session.post(endpoint, body=manifest, query=query, headers={'content-type': 'application/x-yaml'})
+        elif manifest_ref:
+            req_body = {
+                'document_ref': manifest_ref,
+                'overrides': set,
+                'values': values,
+            }
+            resp = self.session.post(endpoint, json=req_body, query=query, headers={'content-type': 'application/json'})
 
         self._check_response(resp)
 

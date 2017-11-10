@@ -13,12 +13,16 @@
 # limitations under the License.
 
 import yaml
+import requests
 
 import click
 from oslo_config import cfg
 
 from armada.cli import CliAction
+from armada.exceptions.source_exceptions import InvalidPathException
 from armada.handlers.armada import Armada
+from armada.handlers.document import ReferenceResolver
+from armada.utils import lint
 
 CONF = cfg.CONF
 
@@ -64,7 +68,7 @@ SHORT_DESC = "command install manifest charts"
 
 
 @apply.command(name='apply', help=DESC, short_help=SHORT_DESC)
-@click.argument('filename')
+@click.argument('filename', nargs=-1)
 @click.option('--api', help="Contacts service endpoint", is_flag=True)
 @click.option(
     '--disable-update-post', help="run charts without install", is_flag=True)
@@ -137,6 +141,7 @@ class ApplyManifest(CliAction):
                  wait):
         super(ApplyManifest, self).__init__()
         self.ctx = ctx
+        # Filename can also be a URL reference
         self.filename = filename
         self.api = api
         self.disable_update_post = disable_update_post
@@ -167,25 +172,39 @@ class ApplyManifest(CliAction):
                     self.logger.info(ch)
 
     def invoke(self):
-
         if not self.ctx.obj.get('api', False):
-            with open(self.filename) as f:
-                armada = Armada(
-                    list(yaml.safe_load_all(f.read())),
-                    self.disable_update_pre,
-                    self.disable_update_post,
-                    self.enable_chart_cleanup,
-                    self.dry_run,
-                    self.set,
-                    self.wait,
-                    self.timeout,
-                    self.tiller_host,
-                    self.tiller_port,
-                    self.values)
+            try:
+                documents = []
+                for f in self.filename:
+                    doc_data = ReferenceResolver(f)
+                    documents.extend(yaml.safe_load_all(doc_data.decode()))
+            except InvalidPathException as ex:
+                self.logger.error("Not a valid URL/filepath: %s", f)
+                return
+            except yaml.YAMLError as yex:
+                self.logger.error("Invalid YAML found in %s." % f)
+                return
 
-                resp = armada.sync()
-                self.output(resp)
+            armada = Armada(
+                documents,
+                self.disable_update_pre,
+                self.disable_update_post,
+                self.enable_chart_cleanup,
+                self.dry_run,
+                self.set,
+                self.wait,
+                self.timeout,
+                self.tiller_host,
+                self.tiller_port,
+                self.values)
+
+            resp = armada.sync()
+            self.output(resp)
         else:
+            if len(self.filename) > 1:
+                self.logger.error("Cannot specify multiple locations when using the API.")
+                return
+
             query = {
                 'disable_update_post': self.disable_update_post,
                 'disable_update_pre': self.disable_update_pre,
@@ -199,8 +218,7 @@ class ApplyManifest(CliAction):
 
             client = self.ctx.obj.get('CLIENT')
 
-            with open(self.filename, 'r') as f:
-                resp = client.post_apply(
-                    manifest=f.read(), values=self.values, set=self.set,
-                    query=query)
-                self.output(resp.get('message'))
+            resp = client.post_apply(
+                manifest_ref=self.filename[0], values=self.values, set=self.set,
+                query=query)
+            self.output(resp.get('message'))

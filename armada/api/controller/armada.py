@@ -13,13 +13,14 @@
 # limitations under the License.
 
 import json
+import yaml
 
 import falcon
 
 from armada import api
 from armada.common import policy
 from armada.handlers.armada import Armada
-
+from armada.handlers.document import ReferenceResolver
 
 class Apply(api.BaseResource):
     '''
@@ -30,8 +31,21 @@ class Apply(api.BaseResource):
         try:
 
             # Load data from request and get options
+            if req.content_type == 'application/x-yaml':
+                data = list(self.req_yaml(req))
+            elif req.content_type == 'application/json':
+                req_body = self.req_json(req)
+                doc_ref = req_body.get('document_ref', None)
 
-            data = list(self.req_yaml(req))
+                if doc_ref is None:
+                    resp.status = falcon.HTTP_400
+                    return
+
+                data = ReferenceResolver.resolve_reference(doc_ref)
+                data = data.decode()
+                documents = yaml.safe_load_all(data)
+
+                if req_body.get('overrides', None) or req_body.get('values', None):
 
             if type(data[0]) is list:
                 data = list(data[0])
