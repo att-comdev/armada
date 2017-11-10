@@ -12,27 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
+import pytest
 
 from armada.utils import release as rel
 
 
-class ReleaseTestCase(unittest.TestCase):
+@pytest.mark.parametrize('prefix,name,expected', [
+    ('armada', 'test', 'armada-test'),
+    ('armada', 4, 'armada-4'),
+    (4, 4, '4-4'),
 
-    def test_release_prefix_pass(self):
-        expected = 'armada-test'
-        prefix, chart = ('armada', 'test')
+])
+def test_release_prefix(prefix, name, expected):
+    assert rel.release_prefix(prefix, name) == expected
 
-        assert rel.release_prefix(prefix, chart) == expected
 
-    def test_release_prefix_int_string(self):
-        expected = 'armada-4'
-        prefix, chart = ('armada', 4)
-
-        assert rel.release_prefix(prefix, chart) == expected
-
-    def test_release_prefix_int_int(self):
-        expected = '4-4'
-        prefix, chart = (4, 4)
-
-        assert rel.release_prefix(prefix, chart) == expected
+@pytest.mark.parametrize('label_dict,expected', [
+    ({'a': 'b'}, 'a=b'),
+    ({}, ''),
+])
+def test_label_selector(label_dict, expected):
+    assert rel.label_selectors(label_dict) == expected
