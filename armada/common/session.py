@@ -55,22 +55,23 @@ class ArmadaSession(object):
         self.logger = LOG
 
     # TODO Add keystone authentication to produce a token for this session
-    def get(self, endpoint, query=None):
+    def get(self, endpoint, query=None, headers=None):
         """
         Send a GET request to armada.
 
         :param string endpoint: URL string following hostname and API prefix
         :param dict query: A dict of k, v pairs to add to the query string
+        :param headers: Dictionary of HTTP headers to include in request
 
         :return: A requests.Response object
         """
         api_url = '{}{}'.format(self.base_url, endpoint)
         resp = self._session.get(
-            api_url, params=query, timeout=3600)
+            api_url, params=query, headers=headers, timeout=3600)
 
         return resp
 
-    def post(self, endpoint, query=None, body=None, data=None):
+    def post(self, endpoint, query=None, body=None, data=None, headers=None):
         """
         Send a POST request to armada. If both body and data are specified,
         body will will be used.
@@ -79,6 +80,7 @@ class ArmadaSession(object):
         :param dict query: dict of k, v parameters to add to the query string
         :param string body: string to use as the request body.
         :param data: Something json.dumps(s) can serialize.
+        :param headers: Dictionary of HTTP headers to include in request
         :return: A requests.Response object
         """
         api_url = '{}{}'.format(self.base_url, endpoint)
@@ -86,11 +88,17 @@ class ArmadaSession(object):
         self.logger.debug("Sending POST with armada_client session")
         if body is not None:
             self.logger.debug("Sending POST with explicit body: \n%s" % body)
-            resp = self._session.post(
-                api_url, params=query, data=body, timeout=3600)
+            resp = self._session.post(api_url,
+                                      params=query,
+                                      data=body,
+                                      headers=headers,
+                                      timeout=3600)
         else:
             self.logger.debug("Sending POST with JSON body: \n%s" % str(data))
-            resp = self._session.post(
-                api_url, params=query, json=data, timeout=3600)
+            resp = self._session.post(api_url,
+                                      params=query,
+                                      json=data,
+                                      headers=headers,
+                                      timeout=3600)
 
         return resp

@@ -27,7 +27,6 @@ API_VERSION = 'v{}/{}'
 
 
 class ArmadaClient(object):
-
     def __init__(self, session):
         self.session = session
 
@@ -55,22 +54,72 @@ class ArmadaClient(object):
     def post_validate(self, manifest=None):
 
         endpoint = self._set_endpoint('1.0', 'validate')
-        resp = self.session.post(endpoint, body=manifest)
+        # TODO(sh8121att) Look to update the UCP convention to
+        # allow a list of hrefs
+        req_body = {'href': manifest}
+
+        resp = self.session.post(
+            endpoint,
+            data=req_body,
+            headers={
+                'content-type': 'application/json'
+            })
 
         self._check_response(resp)
 
         return resp.json()
 
-    def post_apply(self, manifest=None, values=None, set=None, query=None):
+    def post_apply(self,
+                   manifest=None,
+                   manifest_ref=None,
+                   values=None,
+                   set=None,
+                   query=None):
+        """Call the Armada API to apply a manifest.
 
-        if values or set:
-            document = list(yaml.safe_load_all(manifest))
-            override = Override(
-                document, overrides=set, values=values).update_manifests()
-            manifest = yaml.dump(override)
+        If manifest is not None, then the request body will be a fully
+        rendered set of YAML documents including overrides and
+        values-files application.
 
+        If manifest is None and manifest_ref is not, then the request
+        body will be a JSON structure providing a list of references
+        to Armada manifest documents and a list of overrides. Local
+        values files are not supported when using the API with references.
+
+        :param manifest: string of YAML formatted Armada manifests
+        :param manifest_ref: valid file paths or URIs referring to Armada
+                             manifests
+        :param values: list of local files containing values.yaml overrides
+        :param set: list of single-value overrides
+        :param query: explicit query string parameters
+        """
         endpoint = self._set_endpoint('1.0', 'apply')
-        resp = self.session.post(endpoint, body=manifest, query=query)
+
+        if manifest:
+            if values or set:
+                document = list(yaml.safe_load_all(manifest))
+                override = Override(
+                    document, overrides=set, values=values).update_manifests()
+                manifest = yaml.dump(override)
+            resp = self.session.post(
+                endpoint,
+                body=manifest,
+                query=query,
+                headers={
+                    'content-type': 'application/x-yaml'
+                })
+        elif manifest_ref:
+            req_body = {
+                'hrefs': manifest_ref,
+                'overrides': set or [],
+            }
+            resp = self.session.post(
+                endpoint,
+                data=req_body,
+                query=query,
+                headers={
+                    'content-type': 'application/json'
+                })
 
         self._check_response(resp)
 
@@ -100,8 +149,7 @@ class ArmadaClient(object):
                 "Unauthorized access to %s, include valid token.".format(
                     resp.url))
         elif resp.status_code == 403:
-            raise err.ClientForbiddenError(
-                "Forbidden access to %s" % resp.url)
+            raise err.ClientForbiddenError("Forbidden access to %s" % resp.url)
         elif not resp.ok:
-            raise err.ClientError(
-                "Error - received %d: %s" % (resp.status_code, resp.text))
+            raise err.ClientError("Error - received %d: %s" %
+                                  (resp.status_code, resp.text))

@@ -13,12 +13,13 @@
 # limitations under the License.
 
 import json
-
 import falcon
+import yaml
 
 from armada import api
 from armada.common import policy
 from armada.utils.lint import validate_armada_documents
+from armada.handlers.document import ReferenceResolver
 
 
 class Validate(api.BaseResource):
@@ -29,19 +30,58 @@ class Validate(api.BaseResource):
     @policy.enforce('armada:validate_manifest')
     def on_post(self, req, resp):
         try:
-            manifest = self.req_yaml(req)
-            documents = list(manifest)
+            if req.content_type == 'application/json':
+                self.logger.debug("Validating manifest based on reference.")
+                json_body = self.req_json(req)
+                if json_body.get('href', None):
+                    self.logger.debug("Validating manifest from reference %s."
+                                      % json_body.get('href'))
+                    data = ReferenceResolver.resolve_reference(
+                        json_body.get('href'))
+                    documents = list()
+                    for d in data:
+                        documents.extend(list(yaml.safe_load_all(d.decode())))
+                else:
+                    resp.status = falcon.HTTP_400
+                    return
+            else:
+                manifest = self.req_yaml(req)
+                documents = list(manifest)
 
-            message = {
-                'valid': validate_armada_documents(documents)
+            self.logger.debug("Validating set of %d documents."
+                              % len(documents))
+
+            result = validate_armada_documents(documents)
+
+            resp.content_type = 'application/json'
+            resp_body = {
+                'kind': 'Status',
+                'apiVersion': 'v1',
+                'metadata': {},
+                'reason': 'Validation',
+                'details': {
+                    'errorCount': 0,
+                    'messageList': []
+                },
             }
 
-            resp.status = falcon.HTTP_200
-            resp.body = json.dumps(message)
-            resp.content_type = 'application/json'
+            if result:
+                resp.status = falcon.HTTP_200
+                resp_body['status'] = 'Success'
+                resp_body['message'] = 'Armada validations succeeded'
+                resp_body['code'] = 200
+            else:
+                resp.status = falcon.HTTP_400
+                resp_body['status'] = 'Failure'
+                resp_body['message'] = 'Armada validations failed'
+                resp_body['code'] = 400
+                resp_body['details']['errorCount'] = 1
+                resp_body['details']['messageList'].\
+                    append(dict(message='Validation failed.', error=True))
 
-        except Exception:
+            resp.body = json.dumps(resp_body)
+        except Exception as ex:
             err_message = 'Failed to validate Armada Manifest'
-            self.error(req.context, err_message)
+            self.logger.error(err_message, exc_info=ex)
             self.return_error(
                 resp, falcon.HTTP_400, message=err_message)
