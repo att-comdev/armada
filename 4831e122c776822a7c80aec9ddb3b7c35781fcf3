@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94e9446e_68493909",
+        "filename": "entrypoint.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-16T16:06:13Z",
+      "side": 1,
+      "message": "honour need to be removed. this is for debugging.",
+      "revId": "4831e122c776822a7c80aec9ddb3b7c35781fcf3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
