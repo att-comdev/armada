@@ -22,6 +22,7 @@ RUN apt-get update && \
       python3-dev && \
     useradd -u 1000 -g users -d /armada armada && \
     chown -R armada:users /armada && \
+    mv /armada/etc/armada /etc/ && \
     \
     cd /armada && \
     pip3 install --upgrade pip && \
