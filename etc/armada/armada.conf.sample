@@ -25,6 +25,9 @@
 # Path to SSH private key. (string value)
 #ssh_key_path = /home/user/.ssh/
 
+# Labels for the tiller pod. (string value)
+#tiller_pod_labels = app=helm,name=tiller
+
 # IDs of approved API access roles. (list value)
 #tiller_release_roles = admin
 
@@ -87,6 +90,10 @@
 # Syslog facility to receive log lines. This option is ignored if
 # log_config_append is set. (string value)
 #syslog_log_facility = LOG_USER
+
+# Use JSON formatting for logging. This option is ignored if log_config_append
+# is set. (boolean value)
+#use_json = false
 
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
@@ -439,3 +446,20 @@
 # directories to be searched.  Missing or empty directories are ignored. (multi
 # valued)
 #policy_dirs = policy.d
+
+# Content Type to send and receive data for REST based policy check (string
+# value)
+# Allowed values: application/x-www-form-urlencoded, application/json
+#remote_content_type = application/x-www-form-urlencoded
+
+# server identity verification for REST based policy check (boolean value)
+#remote_ssl_verify_server_crt = false
+
+# Absolute path to ca cert file for REST based policy check (string value)
+#remote_ssl_ca_crt_file = <None>
+
+# Absolute path to client cert for REST based policy check (string value)
+#remote_ssl_client_crt_file = <None>
+
+# Absolute path client key file REST based policy check (string value)
+#remote_ssl_client_key_file = <None>

@@ -99,12 +99,22 @@ class Tiller(object):
 
     def _get_tiller_pod(self):
         '''
-        Search all namespaces for a pod beginning with tiller-deploy*
+        Returns tiller pod using the tiller pod labels specified in the Armada
+        config
         '''
-        for i in self.k8s.get_namespace_pod('kube-system').items:
-            # TODO(alanmeadows): this is a bit loose
-            if i.metadata.name.startswith('tiller-deploy'):
-                return i
+        pods = self.k8s.get_namespace_pod('kube-system',
+                                          CONF.tiller_pod_labels).items
+        # No tiller pods found
+        if not pods:
+            raise ex.TillerPodNotFoundException(CONF.tiller_pod_labels)
+
+        # Return first tiller pod in running state
+        for pod in pods:
+            if pod.status.phase == 'Running':
+                return pod
+
+        # No tiller pod found in running state
+        raise ex.TillerPodNotRunningException()
 
     def _get_tiller_ip(self):
         '''
