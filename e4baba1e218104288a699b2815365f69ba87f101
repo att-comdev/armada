@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "26303f00_6cfe066c",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 13
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-16T16:06:13Z",
+      "side": 1,
+      "message": "Will Fix",
+      "parentUuid": "d9287f82_4b9619e5",
+      "revId": "e4baba1e218104288a699b2815365f69ba87f101",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "95b36dcc_7f288b6d",
         "filename": "armada/handlers/k8s.py",
         "patchSetId": 13
@@ -30,6 +48,24 @@
       "writtenOn": "2017-11-15T04:53:35Z",
       "side": 1,
       "message": "The params don\u0027t match up with the arguments above. Not only that, but the correct syntax should be:\n\n    :param release: Pod release.\n\nWith two colons, not a colon and a dash.",
+      "revId": "e4baba1e218104288a699b2815365f69ba87f101",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a737d524_90d83357",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 13
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-11-16T16:06:13Z",
+      "side": 1,
+      "message": "Will Fix",
+      "parentUuid": "95b36dcc_7f288b6d",
       "revId": "e4baba1e218104288a699b2815365f69ba87f101",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
