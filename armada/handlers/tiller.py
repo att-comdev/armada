@@ -28,6 +28,7 @@ from hapi.services.tiller_pb2 import UpdateReleaseRequest
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from armada import conf
 from armada.const import STATUS_DEPLOYED, STATUS_FAILED
 from armada.exceptions import tiller_exceptions as ex
 from armada.handlers.k8s import K8s
@@ -49,6 +50,7 @@ MAX_MESSAGE_LENGTH = 429496729
 
 LOG = logging.getLogger(__name__)
 
+conf.set_app_default_configs()
 CONF = cfg.CONF
 
 
@@ -99,12 +101,22 @@ class Tiller(object):
 
     def _get_tiller_pod(self):
         '''
-        Search all namespaces for a pod beginning with tiller-deploy*
+        Returns tiller pod using the tiller pod labels specified in the Armada
+        config
         '''
-        for i in self.k8s.get_namespace_pod('kube-system').items:
-            # TODO(alanmeadows): this is a bit loose
-            if i.metadata.name.startswith('tiller-deploy'):
-                return i
+        pods = self.k8s.get_namespace_pod('kube-system',
+                                          CONF.tiller_pod_labels).items
+        # No tiller pods found
+        if not pods:
+            raise ex.TillerPodNotFoundException(CONF.tiller_pod_labels)
+
+        # Return first tiller pod in running state
+        for pod in pods:
+            if pod.status.phase == 'Running':
+                return pod
+
+        # No tiller pod found in running state
+        raise ex.TillerPodNotRunningException()
 
     def _get_tiller_ip(self):
         '''
