@@ -66,6 +66,11 @@ The Keystone project domain name used for authentication.
         default='/home/user/.ssh/',
         help=utils.fmt('Path to SSH private key.')),
 
+    cfg.StrOpt(
+        'tiller_pod_labels',
+        default='app=helm,name=tiller',
+        help=utils.fmt('Labels for the tiller pod.')),
+
     cfg.ListOpt(
         'tiller_release_roles',
         default=['admin'],
