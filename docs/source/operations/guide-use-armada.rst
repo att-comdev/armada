@@ -36,7 +36,9 @@ Usage
     git clone https://github.com/att-comdev/armada && cd armada/
     docker build . -t quay.io/attcomdev/armada:latest
 
-2. Run Armada docker container
+2. Running Armada
+
+   a. docker container
 
 .. note::
 
@@ -53,6 +55,20 @@ Usage
 
     docker run -d --net host -p 8000:8000 --name armada -v $(pwd)/etc/:/etc/ -v ~/.kube/:/armada/.kube/ -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
     docker exec armada armada --help
+
+
+b. Helm Install
+
+.. note::
+
+    To install Armada via the Helm chart please make sure to provide an Keysonte
+    endpoint
+
+.. code:: bash
+
+    make charts
+
+    helm install <registry>/armada --name armada --namespace armada
 
 3. Check that tiller is Available
 

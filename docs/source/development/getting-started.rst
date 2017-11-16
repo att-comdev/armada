@@ -22,7 +22,14 @@ To use the docker containter to develop:
 
     docker build . -t armada/latest
 
+    make images
+
+
+.. code-block:: bash
+
+    # Run Docker Image
     docker run -d --name armada -v ~/.kube/:/armada/.kube/ -v $(pwd)/etc:/etc armada:local
+
 
 .. note::
 
@@ -47,19 +54,44 @@ From the directory of the forked repository:
 
     virtualenv -p python3 venv
 
+.. code-block:: bash
+
     pip install -r requirements.txt -r test-requirements.txt
 
-    pip install .
+    make bootstrap      # install only requirements lib
+    make bootstrap-all  # install all requirements and tests lib
 
+
+.. code-block:: bash
+
+    pip install .
+    make build
+
+
+.. code-block:: bash
     # Testing your armada code
     # The tox command will execute lint, bandit, cover
-    pip install tox
-    tox
 
-    # For targeted test
+    pip install tox
+
+    tox
+    make test-all
+
+    # Linting
     tox -e pep8
+    make test-pep8
+    make lint
+
+    # Bandit
     tox -e bandit
-    tox -e cover
+    make test-bandit
+
+    # Coverage
+    tox -e coverage
+    make test-coverage
+
+    # build charts
+    make charts
 
     # policy and config are used in order to use and configure Armada API
     tox -e genconfig
