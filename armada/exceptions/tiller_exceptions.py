@@ -123,6 +123,26 @@ class GetReleaseContentException(TillerException):
         super(GetReleaseContentException, self).__init__(message)
 
 
+class TillerPodNotFoundException(TillerException):
+    '''Exception that occurs when a tiller pod cannot be found using the
+       labels specified in the Armada config.
+    '''
+
+    def __init__(self, labels):
+        message = 'Could not find tiller pod with labels "{}"'.format(labels)
+
+        super(TillerPodNotFoundException, self).__init__(message)
+
+
+class TillerPodNotRunningException(TillerException):
+    '''Exception that occurs when a tiller pod is not running'''
+
+    def __init__(self, status):
+        message = 'Tiller pod has status "{}"'.format(status)
+
+        super(TillerPodNotRunningException, self).__init__(message)
+
+
 class TillerVersionException(TillerException):
     '''Exception that occurs during a failed Release Testing'''
 
