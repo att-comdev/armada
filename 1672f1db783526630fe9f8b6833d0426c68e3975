@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ae5a8c6_3e1d7e9f",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 15
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2017-11-20T20:00:57Z",
+      "side": 1,
+      "message": "Should this not be CONF.certs?",
+      "range": {
+        "startLine": 155,
+        "startChar": 66,
+        "endLine": 155,
+        "endChar": 75
+      },
+      "revId": "1672f1db783526630fe9f8b6833d0426c68e3975",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
