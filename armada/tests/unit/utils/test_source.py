@@ -21,6 +21,7 @@ import mock
 import testtools
 
 from armada.exceptions import source_exceptions
+from armada.tests.unit import base
 from armada.tests import test_utils
 from armada.utils import source
 
@@ -39,7 +40,7 @@ def is_connected():
     return False
 
 
-class GitTestCase(testtools.TestCase):
+class GitTestCase(base.ArmadaTestCase):
 
     def _validate_git_clone(self, repo_dir, expected_ref=None):
         self.assertTrue(os.path.isdir(repo_dir))
@@ -58,6 +59,15 @@ class GitTestCase(testtools.TestCase):
     def test_git_clone_good_url(self):
         url = 'http://github.com/att-comdev/armada'
         git_dir = source.git_clone(url)
+        self._validate_git_clone(git_dir)
+
+    @testtools.skipUnless(
+        is_connected(), 'git clone requires network connectivity.')
+    def test_git_clone_good_url_with_ssh(self):
+        self.override_config('ssh_key_path', '~/.ssh/id_rsa', None)
+        url = 'ssh://fmontei@review.gerrithub.io:29418/att-comdev/armada'
+        git_dir = source.git_clone(url, ref='refs/changes/17/388517/5',
+                                   auth_method='SSH')
         self._validate_git_clone(git_dir)
 
     @testtools.skipUnless(
@@ -118,7 +128,7 @@ class GitTestCase(testtools.TestCase):
             mock_requests.get(url).content)
 
     @mock.patch('armada.utils.source.tempfile')
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract(self, mock_tarfile, mock_path, mock_temp):
         mock_path.exists.return_value = True
@@ -135,7 +145,7 @@ class GitTestCase(testtools.TestCase):
         mock_opened_file.extractall.assert_called_once_with('/tmp/armada')
 
     @test_utils.attr(type=['negative'])
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract_bad_path(self, mock_tarfile, mock_path):
         mock_path.exists.return_value = False
@@ -176,7 +186,7 @@ class GitTestCase(testtools.TestCase):
     @test_utils.attr(type=['negative'])
     @mock.patch.object(source, 'LOG')
     @mock.patch('armada.utils.source.shutil')
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     def test_source_cleanup_missing_git_path(self, mock_path, mock_shutil,
                                              mock_log):
         # Verify that passing in a missing path does nothing but log a warning.
