@@ -8,7 +8,8 @@ Kubernetes Cluster
 
 `Tiller Service <http://github.com/kubernetes/helm>`_
 
-`Armada.yaml <guide-build-armada-yaml.rst>`_
+`Armada.yaml <http://armada-helm.readthedocs.io/en/latest/operations/
+guide-build-armada-yaml.html>`_
 
 .. note::
 
