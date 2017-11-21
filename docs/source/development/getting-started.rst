@@ -69,6 +69,7 @@ From the directory of the forked repository:
 
 
 .. code-block:: bash
+
     # Testing your armada code
     # The tox command will execute lint, bandit, cover
 
@@ -112,4 +113,5 @@ We recommend:
 
 `Kubeadm <https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/>`_
 
-`Kubeadm-AIO <https://github.com/openstack/openstack-helm/tree/master/tools/kubeadm-aio>`_
+`Kubeadm-AIO <https://docs.openstack.org/openstack-helm/latest/install/
+developer/all-in-one.html>`_
