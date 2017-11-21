@@ -61,10 +61,14 @@ The Keystone project domain name used for authentication.
         default='admin',
         help=utils.fmt('The Keystone project name used for authentication.')),
 
+    # TODO(fmontei): Add support for multiple SSH keys, not just one site-wide
+    # one.
     cfg.StrOpt(
         'ssh_key_path',
-        default='/home/user/.ssh/',
-        help=utils.fmt('Path to SSH private key.')),
+        default='~/.ssh/id_rsa',
+        help=utils.fmt("""Optional path to an SSH private key used for
+authenticating against a Git source repository. The path must be an absolute
+path to the private key that includes the name of the key itself.""")),
 
     cfg.StrOpt(
         'tiller_pod_labels',
