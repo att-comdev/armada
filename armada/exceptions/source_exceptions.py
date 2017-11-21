@@ -21,6 +21,21 @@ class SourceException(base_exception.ArmadaBaseException):
     message = 'An unknown error occured while accessing a chart source'
 
 
+class GitAuthException(SourceException):
+    '''Exception that occurs when authentication fails for cloning a repo.'''
+
+    def __init__(self, repo_url, ssh_key_path):
+        self._repo_url = repo_url
+        self._ssh_key_path = ssh_key_path
+
+        self._message = ('Failed to authenticate for repo {} with ssh-key at '
+                         'path {}. Verify the repo exists and the correct ssh '
+                         'key path was supplied in the Armada config '
+                         'file.').format(self._repo_url, self._ssh_key_path)
+
+        super(GitAuthException, self).__init__(self._message)
+
+
 class GitLocationException(SourceException):
     '''Exception that occurs when an error occurs cloning a Git repository.'''
 

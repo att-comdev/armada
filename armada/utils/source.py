@@ -16,43 +16,90 @@ import os
 import shutil
 import tarfile
 import tempfile
-from os import path
+import time
 
-from git import exc as git_exc
-from git import Git
-from git import Repo
+import git
+from oslo_config import cfg
 from oslo_log import log as logging
 import requests
 from requests.packages import urllib3
 
 from armada.exceptions import source_exceptions
 
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
-def git_clone(repo_url, ref='master'):
+def git_clone(repo_url, ref='master', auth_method=None):
     '''Clone a git repository from ``repo_url`` using the reference ``ref``.
 
-    :params repo_url: URL of git repo to clone.
-    :params ref: branch, commit or reference in the repo to clone.
+    :param repo_url: URL of git repo to clone.
+    :param ref: branch, commit or reference in the repo to clone. Default is
+        'master' branch.
+    :param auth_method: Method to use for authenticating against the repository
+        specified in ``repo_url``.  If value is "SSH" Armada attempts to
+        authenticate against the repository using the SSH key specified under
+        ``CONF.ssh_key_path``. If value is None, authentication is skipped.
+        Valid values include "SSH" or None. Note that the values are not
+        case sensitive. Default is None.
     :returns: Path to the cloned repo.
+    :raises GitLocationException: If ``repo_url`` is invalid or could not be
+        found.
+    :raises GitAuthException: If authentication with the Git repository failed.
     '''
 
     if repo_url == '':
         raise source_exceptions.GitLocationException(repo_url)
 
-    os.environ['GIT_TERMINAL_PROMPT'] = '0'
-    _tmp_dir = tempfile.mkdtemp(prefix='armada')
+    env_vars = {'GIT_TERMINAL_PROMPT': '0'}
+    temp_dir = tempfile.mkdtemp(prefix='armada')
+    repo = None
 
     try:
-        repo = Repo.clone_from(repo_url, _tmp_dir)
-        repo.remotes.origin.fetch(ref)
-        g = Git(repo.working_dir)
-        g.checkout('FETCH_HEAD')
-    except Exception:
-        raise source_exceptions.GitLocationException(repo_url)
+        if auth_method and auth_method.lower() == 'ssh':
+            LOG.debug('Attempting to clone the repo at %s using reference %s '
+                      'with SSH authentication.', repo_url, ref)
+            ssh_cmd = 'ssh -i {}'.format(CONF.ssh_key_path)
+            env_vars.update({'GIT_SSH_COMMAND': ssh_cmd})
 
-    return _tmp_dir
+            ssh_clone_timeout = 60
+            start_time = time.time()
+            original_exc = None
+            attempt = 1
+
+            while time.time() - start_time < ssh_clone_timeout:
+                try:
+                    LOG.debug('Attempt #%d at cloning the repository via SSH.',
+                              attempt)
+                    repo = git.Repo.clone_from(
+                        repo_url, temp_dir, env=env_vars)
+                except git.exc.GitCommandError as e:
+                    original_exc = e
+                    attempt += 1
+                    time.sleep(2)
+                else:
+                    break
+
+            if not repo and original_exc:
+                raise original_exc
+        else:
+            LOG.debug('Attempting to clone the repo at %s using reference %s '
+                      'with no authentication.', repo_url, ref)
+            repo = git.Repo.clone_from(repo_url, temp_dir, env=env_vars)
+
+        repo.remotes.origin.fetch(ref)
+        g = git.Git(repo.working_dir)
+        g.checkout('FETCH_HEAD')
+    except git.exc.GitCommandError as e:
+        if 'ssh' in repo_url or '@' in repo_url:
+            raise source_exceptions.GitAuthException(repo_url,
+                                                     CONF.ssh_key_path)
+        else:
+            LOG.error('%s is not a valid git repository. Details: %s',
+                      repo_url, e)
+            raise source_exceptions.GitLocationException(repo_url)
+
+    return temp_dir
 
 
 def get_tarball(tarball_url, verify=False):
@@ -83,17 +130,17 @@ def extract_tarball(tarball_path):
     '''
     Extracts a tarball to /tmp and returns the path
     '''
-    if not path.exists(tarball_path):
+    if not os.path.exists(tarball_path):
         raise source_exceptions.InvalidPathException(tarball_path)
 
-    _tmp_dir = tempfile.mkdtemp(prefix='armada')
+    temp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
         file = tarfile.open(tarball_path)
-        file.extractall(_tmp_dir)
+        file.extractall(temp_dir)
     except Exception:
         raise source_exceptions.TarballExtractException(tarball_path)
-    return _tmp_dir
+    return temp_dir
 
 
 def source_cleanup(git_path):
@@ -104,11 +151,11 @@ def source_cleanup(git_path):
 
     :param str git_path: The git repository to delete.
     '''
-    if path.exists(git_path):
+    if os.path.exists(git_path):
         try:
             # Internally validates whether the path points to an actual repo.
-            Repo(git_path)
-        except git_exc.InvalidGitRepositoryError as e:
+            git.Repo(git_path)
+        except git.exc.InvalidGitRepositoryError as e:
             LOG.warning('%s is not a valid git repository. Details: %s',
                         git_path, e)
         else:
