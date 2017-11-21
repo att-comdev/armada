@@ -157,7 +157,8 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                                             tiller_namespace='kube-system',
                                             tiller_port=44134)
         mock_source.git_clone.assert_called_once_with(
-            'git://github.com/dummy/armada', 'master', None)
+            'git://github.com/dummy/armada', 'master', auth_method=None,
+            proxy_server=None)
 
     @mock.patch.object(armada, 'source')
     @mock.patch('armada.handlers.armada.Tiller')
