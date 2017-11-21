@@ -162,12 +162,14 @@ class Armada(object):
                     self.tag_cloned_repo(dep, repos)
 
     def tag_cloned_repo(self, ch, repos):
-        location = ch.get('chart').get('source').get('location')
-        ct_type = ch.get('chart').get('source').get('type')
-        subpath = ch.get('chart').get('source').get('subpath', '.')
+        chart = ch.get('chart', {})
+        chart_source = chart.get('source', {})
+        location = chart_source.get('location')
+        ct_type = chart_source.get('type')
+        subpath = chart_source.get('subpath', '.')
 
         if ct_type == 'local':
-            ch.get('chart')['source_dir'] = (location, subpath)
+            chart['source_dir'] = (location, subpath)
         elif ct_type == 'tar':
             LOG.info('Downloading tarball from: %s', location)
 
@@ -178,26 +180,23 @@ class Armada(object):
             else:
                 tarball_dir = source.get_tarball(location, verify=CONF.cert)
 
-            ch.get('chart')['source_dir'] = (tarball_dir, subpath)
+            chart['source_dir'] = (tarball_dir, subpath)
         elif ct_type == 'git':
-            reference = ch.get('chart').get('source').get(
-                'reference', 'master')
+            reference = chart_source.get('reference', 'master')
             repo_branch = (location, reference)
 
             if repo_branch not in repos:
-                try:
-                    LOG.info('Cloning repo: %s branch: %s', *repo_branch)
-                    repo_dir = source.git_clone(*repo_branch)
-                except Exception:
-                    raise source_exceptions.GitLocationException(
-                        '{} reference: {}'.format(*repo_branch))
+                LOG.info('Cloning repo: %s branch: %s', *repo_branch)
+                auth_method = chart_source.get('auth_method')
+                repo_dir = source.git_clone(*repo_branch,
+                                            auth_method=auth_method)
                 repos[repo_branch] = repo_dir
-                ch.get('chart')['source_dir'] = (repo_dir, subpath)
+
+                chart['source_dir'] = (repo_dir, subpath)
             else:
-                ch.get('chart')['source_dir'] = (repos.get(repo_branch),
-                                                 subpath)
+                chart['source_dir'] = (repos.get(repo_branch), subpath)
         else:
-            chart_name = ch.get('chart').get('chart_name')
+            chart_name = chart.get('chart_name')
             raise source_exceptions.ChartSourceException(ct_type, chart_name)
 
     def get_releases_by_status(self, status):
