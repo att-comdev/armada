@@ -69,6 +69,12 @@ class GitTestCase(unittest.TestCase):
                 source_exceptions.GitLocationException, error_re):
             source.git_clone(url)
 
+    def test_git_clone_bad_ssh(self):
+        url = 'git@github.com:dummy/armada'
+
+        with self.assertRaises(source_exceptions.GitAuthException):
+            source.git_clone(url)
+
     @mock.patch('armada.utils.source.tempfile')
     @mock.patch('armada.utils.source.requests')
     def test_tarball_download(self, mock_requests, mock_temp):

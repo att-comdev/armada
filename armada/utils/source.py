@@ -19,11 +19,15 @@ import tempfile
 from os import path
 
 import requests
+import git
 from git import Git
 from git import Repo
 from requests.packages import urllib3
+from oslo_config import cfg
 
 from armada.exceptions import source_exceptions
+
+CONF = cfg.CONF
 
 
 def git_clone(repo_url, ref='master'):
@@ -41,12 +45,20 @@ def git_clone(repo_url, ref='master'):
     _tmp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
-        repo = Repo.clone_from(repo_url, _tmp_dir)
-        repo.remotes.origin.fetch(ref)
+        ssh_cmd = 'ssh -i {}'.format(CONF.ssh_key_path)
+        with Git().custom_environment(GIT_SSH_CMD=ssh_cmd):
+            repo = Repo.clone_from(repo_url, _tmp_dir)
+            repo.remotes.origin.fetch(ref)
+
         g = Git(repo.working_dir)
+
         g.checkout('FETCH_HEAD')
-    except Exception:
-        raise source_exceptions.GitLocationException(repo_url)
+    except git.exc.GitCommandError:
+        if 'ssh' in repo_url or '@' in repo_url:
+            raise source_exceptions.GitAuthException(repo_url,
+                                                     CONF.ssh_key_path)
+        else:
+            raise source_exceptions.GitLocationException(repo_url)
 
     return _tmp_dir
 

@@ -160,13 +160,10 @@ class Armada(object):
             repo_branch = (location, reference)
 
             if repo_branch not in repos:
-                try:
-                    LOG.info('Cloning repo: %s branch: %s', *repo_branch)
-                    repo_dir = source.git_clone(*repo_branch)
-                except Exception:
-                    raise source_exceptions.GitLocationException(
-                        '{} reference: {}'.format(*repo_branch))
+                LOG.info('Cloning repo: %s branch: %s', *repo_branch)
+                repo_dir = source.git_clone(*repo_branch)
                 repos[repo_branch] = repo_dir
+
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
             else:
                 ch.get('chart')['source_dir'] = (repos.get(repo_branch),
