@@ -21,12 +21,15 @@ Installation
 
     docker run -d --net host -p 8000:8000 --name armada -v ~/.kube/config:/armada/.kube/config -v $(pwd)/examples/:/examples quay.io/attcomdev/armada:latest
 
-Using armada `docs <docs/source/operations/guide-use-armada.rst>`_
+Using armada `docs <http://armada-helm.readthedocs.io/en/latest/operations/
+guide-use-armada.html>`_
 
 Getting Started
 ---------------
 
-Get started guide can be found in our `Getting Started docs <docs/source/development/getting-started.rst>`_
+Get started guide can be found in our
+`Getting Started docs <http://armada-helm.readthedocs.io/en/latest/
+readme.html#getting-started>`_
 
 Usage
 -----
