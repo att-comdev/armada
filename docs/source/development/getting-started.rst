@@ -112,4 +112,5 @@ We recommend:
 
 `Kubeadm <https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/>`_
 
-`Kubeadm-AIO <https://github.com/openstack/openstack-helm/tree/master/tools/kubeadm-aio>`_
+`Kubeadm-AIO <https://github.com/openstack/openstack-helm/blob/master/doc/
+source/install/developer/all-in-one.rst>`_

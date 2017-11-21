@@ -7,8 +7,9 @@ involved in contributing to Armada.
 Code of Conduct
 ---------------
 By contributing to Armada, you are agreeing to uphold the
-`Contributor Convenant Code of Conduct <CODE_OF_CONDUCT.rst>`_. Please
-familiarize yourself with it before contributing.
+`Contributor Convenant Code of Conduct <https://github.com/att-comdev/armada/
+blob/master/CODE_OF_CONDUCT.rst>`_. Please familiarize yourself with it
+before contributing.
 
 Support
 -------
@@ -21,11 +22,12 @@ Reporting an Issue
 ------------------
 All bugs and features are tracked using the Armada GitHub
 `issues <http://github.com/att-comdev/armada/issues>`_ page. Before submitting
-an issue, please check the `troubleshooting guide <docs/source/operations/
-guide-troubleshooting.rst>`_. If the issue still persists, please file an
-official bug report on the `issues <http://github.com/att-comdev/armada/issues>`_
-page if one does not already exist. When filing an issue, please follow the issue
-template and be as descriptive as possible.
+an issue, please check the
+`troubleshooting guide <http://armada-helm.readthedocs.io/en/latest/operations/
+guide-troubleshooting.html>`_. If the issue still persists, please file an
+official bug report on the `issues <http://github.com/att-comdev/armada/
+issues>`_ page if one does not already exist. When filing an issue, please
+follow the issue template and be as descriptive as possible.
 
 After an issue is created, project maintainers will assign labels indicating
 the issue type.
@@ -75,7 +77,8 @@ Submitting a Patch
 ------------------
 This section focuses on the workflow and lifecycle of Armada patches.
 Development specific information can be found in the Armada
-`developers' guide <docs/source/development/getting-started.rst>`_
+`developers' guide <http://armada-helm.readthedocs.io/en/latest/
+readme.html#getting-started>`_
 
 Armada accepts patches through GerritHub changes. Each commit pushed to
 GerritHub is recognized as a "change" (the equivalent of a GitHub pull
