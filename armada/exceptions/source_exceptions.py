@@ -32,6 +32,21 @@ class GitException(SourceException):
         super(GitException, self).__init__(self._message)
 
 
+class GitAuthException(SourceException):
+    '''Exception that occurs when authentication fails for cloning a repo.'''
+
+    def __init__(self, repo_url, ssh_key_path):
+        self._repo_url = repo_url
+        self._ssh_key_path = ssh_key_path
+
+        self._message = ('Failed to authenticate for repo {} with ssh-key at '
+                         'path {}. Verify the repo exists and the correct ssh '
+                         'key path was supplied in the Armada config '
+                         'file.').format(self._repo_url, self._ssh_key_path)
+
+        super(GitAuthException, self).__init__(self._message)
+
+
 class GitProxyException(SourceException):
     '''Exception when an error occurs cloning a Git repository
        through a proxy.'''
@@ -41,6 +56,18 @@ class GitProxyException(SourceException):
         self._message = ('Could not resolve proxy [', self._location, '].')
 
         super(GitProxyException, self).__init__(self._message)
+
+
+class GitSSHException(SourceException):
+    '''Exception that occurs when an SSH key could not be found.'''
+
+    def __init__(self, ssh_key_path):
+        self._ssh_key_path = ssh_key_path
+
+        self._message = (
+            'Failed to find specified SSH key: {}.'.format(self._ssh_key_path))
+
+        super(GitSSHException, self).__init__(self._message)
 
 
 class SourceCleanupException(SourceException):

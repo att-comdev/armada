@@ -21,6 +21,7 @@ import mock
 import testtools
 
 from armada.exceptions import source_exceptions
+from armada.tests.unit import base
 from armada.tests import test_utils
 from armada.utils import source
 
@@ -39,7 +40,7 @@ def is_connected():
     return False
 
 
-class GitTestCase(testtools.TestCase):
+class GitTestCase(base.ArmadaTestCase):
 
     def _validate_git_clone(self, repo_dir, expected_ref=None):
         self.assertTrue(os.path.isdir(repo_dir))
@@ -102,11 +103,14 @@ class GitTestCase(testtools.TestCase):
         is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_fake_proxy(self):
         url = 'http://github.com/att-comdev/armada'
+        proxy_url = (test_utils.rand_name(
+            prefix='http://', 'not.a.proxy.that.works.and.never.will')
+            + ':8080')
 
         self.assertRaises(
             source_exceptions.GitProxyException,
             source.git_clone, url,
-            proxy_server='http://not.a.proxy.that.works.and.never.will:8080')
+            proxy_server=proxy_url)
 
     @mock.patch('armada.utils.source.tempfile')
     @mock.patch('armada.utils.source.requests')
@@ -128,7 +132,7 @@ class GitTestCase(testtools.TestCase):
             mock_requests.get(url).content)
 
     @mock.patch('armada.utils.source.tempfile')
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract(self, mock_tarfile, mock_path, mock_temp):
         mock_path.exists.return_value = True
@@ -145,7 +149,7 @@ class GitTestCase(testtools.TestCase):
         mock_opened_file.extractall.assert_called_once_with('/tmp/armada')
 
     @test_utils.attr(type=['negative'])
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract_bad_path(self, mock_tarfile, mock_path):
         mock_path.exists.return_value = False
@@ -186,7 +190,7 @@ class GitTestCase(testtools.TestCase):
     @test_utils.attr(type=['negative'])
     @mock.patch.object(source, 'LOG')
     @mock.patch('armada.utils.source.shutil')
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     def test_source_cleanup_missing_git_path(self, mock_path, mock_shutil,
                                              mock_log):
         # Verify that passing in a missing path does nothing but log a warning.
@@ -200,3 +204,21 @@ class GitTestCase(testtools.TestCase):
         self.assertEqual(
             ('Could not delete the path %s. Is it a git repository?', path),
             actual_call)
+
+    @test_utils.attr(type=['negative'])
+    @mock.patch.object(source, 'os')
+    def test_git_clone_ssh_auth_method_fails_auth(self, mock_os):
+        mock_os.path.exists.return_value = True
+        url = 'ssh://fmontei@fail.gerrithub.io:29418/att-comdev/armada'
+        self.assertRaises(
+            source_exceptions.GitAuthException, source.git_clone, url,
+            ref='refs/changes/17/388517/5', auth_method='SSH')
+
+    @test_utils.attr(type=['negative'])
+    @mock.patch.object(source, 'os')
+    def test_git_clone_ssh_auth_method_missing_ssh_key(self, mock_os):
+        mock_os.path.exists.return_value = False
+        url = 'ssh://fmontei@fail.gerrithub.io:29418/att-comdev/armada'
+        self.assertRaises(
+            source_exceptions.GitSSHException, source.git_clone, url,
+            ref='refs/changes/17/388517/5', auth_method='SSH')
