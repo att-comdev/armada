@@ -118,7 +118,7 @@ class GitTestCase(testtools.TestCase):
             mock_requests.get(url).content)
 
     @mock.patch('armada.utils.source.tempfile')
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract(self, mock_tarfile, mock_path, mock_temp):
         mock_path.exists.return_value = True
@@ -135,7 +135,7 @@ class GitTestCase(testtools.TestCase):
         mock_opened_file.extractall.assert_called_once_with('/tmp/armada')
 
     @test_utils.attr(type=['negative'])
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract_bad_path(self, mock_tarfile, mock_path):
         mock_path.exists.return_value = False
@@ -176,7 +176,7 @@ class GitTestCase(testtools.TestCase):
     @test_utils.attr(type=['negative'])
     @mock.patch.object(source, 'LOG')
     @mock.patch('armada.utils.source.shutil')
-    @mock.patch('armada.utils.source.path')
+    @mock.patch('armada.utils.source.os.path')
     def test_source_cleanup_missing_git_path(self, mock_path, mock_shutil,
                                              mock_log):
         # Verify that passing in a missing path does nothing but log a warning.
