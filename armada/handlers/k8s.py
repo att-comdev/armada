@@ -48,15 +48,21 @@ class K8s(object):
         self.batch_api = client.BatchV1Api()
         self.extension_api = client.ExtensionsV1beta1Api()
 
-    def delete_job_action(self, name, namespace="default"):
+    def delete_job_action(self, name, namespace="default",
+                          propagation_policy='Foreground'):
         '''
         :params name - name of the job
         :params namespace - name of pod that job
+        :params propagation_policy - The Kubernetes propagation_policy to apply
+                                    to the delete. Default 'Foreground' means
+                                    that child Pods to the Job will be deleted
+                                    before the Job is marked as deleted.
         '''
         try:
             body = client.V1DeleteOptions()
             self.batch_api.delete_namespaced_job(
-                name=name, namespace=namespace, body=body)
+                name=name, namespace=namespace, body=body,
+                propagation_policy=propagation_policy)
         except ApiException as e:
             LOG.error("Exception when deleting a job: %s", e)
 
