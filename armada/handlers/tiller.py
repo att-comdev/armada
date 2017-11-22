@@ -201,11 +201,6 @@ class Tiller(object):
 
                 self.delete_resources(
                     release_name, name, action_type, labels, namespace)
-
-                # Ensure pods get deleted when job is deleted
-                if 'job' in action_type:
-                    self.delete_resources(
-                        release_name, name, 'pod', labels, namespace)
         except Exception:
             raise ex.PreUpdateJobDeleteException(name, namespace)
 
@@ -481,12 +476,14 @@ class Tiller(object):
         label_selector = ''
         if resource_labels is not None:
             label_selector = label_selectors(resource_labels)
+        LOG.debug("Deleting resources in namespace %s matching"
+                  "selectors %s.", namespace, label_selector)
 
         if 'job' in resource_type:
-            LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
             get_jobs = self.k8s.get_namespace_job(namespace, label_selector)
             for jb in get_jobs.items:
                 jb_name = jb.metadata.name
+                LOG.info("Deleting %s in namespace: %s", jb_name, namespace)
 
                 self.k8s.delete_job_action(jb_name, namespace)
 

@@ -130,7 +130,7 @@ Update - Actions
 +=============+==========+===============================================================+
 | update      | object   | updates daemonsets in pre update actions                      |
 +-------------+----------+---------------------------------------------------------------+
-| delete      | object   | delete jobs in pre delete actions                             |
+| delete      | sequence | delete jobs in pre delete actions and child pods              |
 +-------------+----------+---------------------------------------------------------------+
 
 
@@ -147,9 +147,9 @@ Update - Actions - Update/Delete
 +=============+==========+===============================================================+
 | name        | string   | name of action                                                |
 +-------------+----------+---------------------------------------------------------------+
-| type        | string   | type of kubernetes workload  to execute                       |
+| type        | string   | type of kubernetes workload to execute in scope for action    |
 +-------------+----------+---------------------------------------------------------------+
-| labels      | object   | array of labels to query against kinds. (key: value)          |
+| labels      | object   | k:v mapping of labels to select Kubernetes resources          |
 +-------------+----------+---------------------------------------------------------------+
 
 .. note::
@@ -180,9 +180,9 @@ Example
         labels:
          component: blog
       install:
-        no_hook: false
+        no_hooks: false
       upgrade:
-        no_hook: false
+        no_hooks: false
       values: {}
       source:
         type: git
@@ -204,9 +204,9 @@ Example
       wait:
         timeout: 100
       install:
-        no_hook: false
+        no_hooks: false
       upgrade:
-        no_hook: false
+        no_hooks: false
       values: {}
       source:
         type: local
@@ -228,9 +228,9 @@ Example
       wait:
         timeout: 100
       install:
-        no_hook: false
+        no_hooks: false
       upgrade:
-        no_hook: false
+        no_hooks: false
       values: {}
       source:
         type: tar
@@ -273,9 +273,9 @@ Example
       wait:
         timeout: 100
       install:
-        no_hook: false
+        no_hooks: false
       upgrade:
-        no_hook: false
+        no_hooks: false
         pre:
             update:
                 - name: test-daemonset
