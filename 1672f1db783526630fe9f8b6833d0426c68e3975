@@ -46,6 +46,30 @@
       "revId": "1672f1db783526630fe9f8b6833d0426c68e3975",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec6f328_311f18e1",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 15
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2017-11-25T01:47:27Z",
+      "side": 1,
+      "message": "You\u0027re right, I shouldn\u0027t have -1\u0027ed this PS over this unrelated issue.",
+      "parentUuid": "73e03e6d_184daea2",
+      "range": {
+        "startLine": 155,
+        "startChar": 66,
+        "endLine": 155,
+        "endChar": 75
+      },
+      "revId": "1672f1db783526630fe9f8b6833d0426c68e3975",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
