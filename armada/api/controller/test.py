@@ -29,34 +29,16 @@ class Test(api.BaseResource):
     Test helm releases via release name
     '''
 
-    @policy.enforce('armada:test_release')
+    @policy.enforce('armada:test_releases')
     def on_get(self, req, resp, release):
         try:
-            self.logger.info('RUNNING: %s', release)
             opts = req.params
             tiller = Tiller(tiller_host=opts.get('tiller_host', None),
                             tiller_port=opts.get('tiller_port', None))
-            tiller_resp = tiller.testing_release(release)
-            msg = {
-                'result': '',
-                'message': ''
-            }
 
-            if tiller_resp:
-                test_status = getattr(
-                    tiller_resp.info.status, 'last_test_suite_run', 'FAILED')
-
-                if test_status.result[0].status:
-                    msg['result'] = 'PASSED: {}'.format(release)
-                    msg['message'] = 'MESSAGE: Test Pass'
-                    self.logger.info(msg)
-                else:
-                    msg['result'] = 'FAILED: {}'.format(release)
-                    msg['message'] = 'MESSAGE: Test Fail'
-                    self.logger.info(msg)
-            else:
-                msg['result'] = 'FAILED: {}'.format(release)
-                msg['message'] = 'MESSAGE: No test found'
+            msg = tiller.testing_release(
+                release, output=req.get_param_as_bool('output'),
+                timeout=int(opts.get('timeout', 300)))
 
             resp.body = json.dumps(msg)
             resp.status = falcon.HTTP_200
@@ -74,7 +56,7 @@ class Tests(api.BaseResource):
     Test helm releases via a manifest
     '''
 
-    @policy.enforce('armada:tests_manifest')
+    @policy.enforce('armada:test_releases')
     def on_post(self, req, resp):
         try:
             opts = req.params
@@ -86,13 +68,12 @@ class Tests(api.BaseResource):
             prefix = armada_obj.get(const.KEYWORD_ARMADA).get(
                 const.KEYWORD_PREFIX)
             known_releases = [release[0] for release in tiller.list_charts()]
+            output = req.get_param_as_bool('output')
+            timeout = int(opts.get('timeout', 300))
 
             message = {
-                'tests': {
-                    'passed': [],
-                    'skipped': [],
-                    'failed': []
-                }
+                'results': [],
+                'info': []
             }
 
             for group in armada_obj.get(const.KEYWORD_ARMADA).get(
@@ -100,31 +81,26 @@ class Tests(api.BaseResource):
                 for ch in group.get(const.KEYWORD_CHARTS):
                     release_name = release_prefix(
                         prefix, ch.get('chart').get('chart_name'))
+                    if not output:
+                        output = ch.get('chart').get('test', {}).get(
+                            'output', False)
+                    if timeout == 300:
+                        timeout = ch.get('chart').get('test', {}).get(
+                            'timeout', 300)
 
                     if release_name in known_releases:
-                        self.logger.info('RUNNING: %s tests', release_name)
-                        resp = tiller.testing_release(release_name)
+                        result = tiller.testing_release(
+                            release_name, output=output, timeout=timeout)
 
-                        if not resp:
-                            continue
-
-                        test_status = getattr(
-                            resp.info.status, 'last_test_suite_run',
-                            'FAILED')
-                        if test_status.results[0].status:
-                            self.logger.info("PASSED: %s", release_name)
-                            message['test']['passed'].append(release_name)
-                        else:
-                            self.logger.info("FAILED: %s", release_name)
-                            message['test']['failed'].append(release_name)
+                        message['results'].append(result)
                     else:
-                        self.logger.info(
-                            'Release %s not found - SKIPPING', release_name)
-                        message['test']['skipped'].append(release_name)
+                        info_msg = 'Release {} not found - SKIPPING'.format(
+                            release_name)
 
-            resp.status = falcon.HTTP_200
+                        message['info'].append(info_msg)
 
             resp.body = json.dumps(message)
+            resp.status = falcon.HTTP_200
             resp.content_type = 'application/json'
 
         except Exception as e:
