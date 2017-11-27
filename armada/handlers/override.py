@@ -44,7 +44,10 @@ class Override(object):
                 r = self.update(d.get(k, {}), v)
                 d[k] = r
             else:
-                d[k] = u[k]
+                if isinstance(d.get(k), collections.Iterable):
+                    d[k] = u[k].split(',')
+                else:
+                    d[k] = u[k]
         return d
 
     def find_document_type(self, alias):
