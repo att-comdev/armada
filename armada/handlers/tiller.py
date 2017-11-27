@@ -89,11 +89,9 @@ class Tiller(object):
         try:
             return grpc.insecure_channel(
                 '%s:%s' % (tiller_ip, tiller_port),
-                options=[
-                    ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-                    ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
-                ]
-            )
+                options=[('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                         ('grpc.max_receive_message_length',
+                          MAX_MESSAGE_LENGTH)])
         except Exception:
             raise ex.ChannelException()
 
@@ -135,13 +133,13 @@ class Tiller(object):
         '''
         releases = []
         stub = ReleaseServiceStub(self.channel)
-        req = ListReleasesRequest(limit=RELEASE_LIMIT,
-                                  status_codes=[STATUS_DEPLOYED,
-                                                STATUS_FAILED],
-                                  sort_by='LAST_RELEASED',
-                                  sort_order='DESC')
-        release_list = stub.ListReleases(req, self.timeout,
-                                         metadata=self.metadata)
+        req = ListReleasesRequest(
+            limit=RELEASE_LIMIT,
+            status_codes=[STATUS_DEPLOYED, STATUS_FAILED],
+            sort_by='LAST_RELEASED',
+            sort_order='DESC')
+        release_list = stub.ListReleases(
+            req, self.timeout, metadata=self.metadata)
 
         for y in release_list:
             releases.extend(y.releases)
@@ -188,8 +186,8 @@ class Tiller(object):
                 labels = action.get('labels')
 
                 self.rolling_upgrade_pod_deployment(
-                    name, release_name, namespace, labels,
-                    action_type, chart, disable_hooks, values)
+                    name, release_name, namespace, labels, action_type, chart,
+                    disable_hooks, values)
         except Exception:
             LOG.debug("Pre: Could not update anything, please check yaml")
 
@@ -201,6 +199,13 @@ class Tiller(object):
 
                 self.delete_resources(
                     release_name, name, action_type, labels, namespace)
+                self.delete_resources(release_name, name, action_type, labels,
+                                      namespace)
+
+                # Ensure pods get deleted when job is deleted
+                if 'job' in action_type:
+                    self.delete_resources(release_name, name, 'pod', labels,
+                                          namespace)
         except Exception:
             raise ex.PreUpdateJobDeleteException(name, namespace)
 
@@ -218,6 +223,38 @@ class Tiller(object):
             raise ex.PreUpdateJobCreateException(name, namespace)
 
             LOG.debug("PRE: Could not create anything, please check yaml")
+
+    def delete_resource(self, release_name, resource_name, resource_type,
+                        resource_labels, namespace):
+        '''
+        :params release_name - release name the specified resource is under
+        :params resource_name - name of specific resource
+        :params resource_type - type of resource e.g. job, pod, etc.
+        :params resource_labels - labels by which to identify the resource
+        :params namespace - namespace of the resource
+
+        Apply deletion logic based on type of resource
+        '''
+
+        label_selector = 'release_name={}'.format(release_name)
+        for label in resource_labels:
+            label_selector += ', {}={}'.format(
+                list(label.keys())[0], list(label.values())[0])
+
+        if 'job' in resource_type:
+            LOG.info("Deleting %s in namespace: %s", resource_name, namespace)
+            self.k8s.delete_job_action(resource_name, namespace)
+        elif 'pod' in resource_type:
+            release_pods = self.k8s.get_namespace_pod(namespace,
+                                                      label_selector)
+            for pod in release_pods.items:
+                pod_name = pod.metadata.name
+                LOG.info("Deleting %s in namespace: %s", pod_name, namespace)
+                self.k8s.delete_namespace_pod(pod_name, namespace)
+                self.k8s.wait_for_pod_redeployment(pod_name, namespace)
+        else:
+            LOG.error("Unable to execute name: %s type: %s ", resource_name,
+                      resource_type)
 
     def _post_update_actions(self, actions, namespace):
         try:
@@ -242,16 +279,18 @@ class Tiller(object):
         charts = []
         for latest_release in self.list_releases():
             try:
-                charts.append(
-                    (latest_release.name, latest_release.version,
-                     latest_release.chart, latest_release.config.raw,
-                     latest_release.info.status.Code.Name(
-                         latest_release.info.status.code)))
+                charts.append((latest_release.name, latest_release.version,
+                               latest_release.chart, latest_release.config.raw,
+                               latest_release.info.status.Code.Name(
+                                   latest_release.info.status.code)))
             except IndexError:
                 continue
         return charts
 
-    def update_release(self, chart, release, namespace,
+    def update_release(self,
+                       chart,
+                       release,
+                       namespace,
                        dry_run=False,
                        pre_actions=None,
                        post_actions=None,
@@ -293,7 +332,10 @@ class Tiller(object):
 
         self._post_update_actions(post_actions, namespace)
 
-    def install_release(self, chart, release, namespace,
+    def install_release(self,
+                        chart,
+                        release,
+                        namespace,
                         dry_run=False,
                         values=None,
                         wait=False,
@@ -328,9 +370,11 @@ class Tiller(object):
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Install')
 
-    def testing_release(self, release, timeout=300, cleanup=True):
+    def testing_release(self, release, output=False, timeout=300,
+                        cleanup=True):
         '''
         :param release - name of release to test
+        :param output - output the pod log
         :param timeout - runtime before exiting
         :param cleanup - removes testing pod created
 
@@ -344,23 +388,40 @@ class Tiller(object):
 
             release_request = TestReleaseRequest(
                 name=release, timeout=timeout, cleanup=cleanup)
-
             content = self.get_release_content(release)
+            pod_out = {"output": "", "status": []}
 
             if not len(content.release.hooks):
-                LOG.info('No test found')
-                return False
+                pod_out['status'] = {release: 'No test(s) found'}
+                return pod_out
 
             if content.release.hooks[0].events[0] == RUNTEST_SUCCESS:
-                test = stub.RunReleaseTest(
-                    release_request, self.timeout, metadata=self.metadata)
+                content_release = content.release.hooks[0].name
 
-                if test.running():
-                    self.k8s.wait_get_completed_podphase(release)
+                if not self.k8s.find_pod(content_release):
+                    test = stub.RunReleaseTest(
+                        release_request, self.timeout, metadata=self.metadata)
 
-                test.cancel()
+                    if test.running():
+                        LOG.debug('GRPC call successful')
+                    else:
+                        raise Exception("GRPC call failing")
 
-                return self.get_release_status(release)
+                self.k8s.wait_get_running_podphase(content_release)
+
+                out_log = self.k8s.get_test_pod_log(release, follow=True)
+                pod_success = self.get_release_status(
+                    release).info.status.last_test_suite_run.results[0].status
+
+                if pod_success:
+                    pod_out['status'] = {content_release: 'passed'}
+                else:
+                    pod_out['status'] = {content_release: 'failed'}
+
+                if output:
+                    pod_out['output'] = out_log
+
+                return pod_out
 
         except Exception:
             status = self.get_release_status(release)
@@ -450,8 +511,8 @@ class Tiller(object):
         valid_charts = []
         for gchart in charts:
             for chart in gchart.get('chart_group'):
-                valid_charts.append(release_prefix(
-                    prefix, chart.get('chart').get('name')))
+                valid_charts.append(
+                    release_prefix(prefix, chart.get('chart').get('name')))
 
         actual_charts = [x.name for x in self.list_releases()]
         chart_diff = list(set(actual_charts) - set(valid_charts))
@@ -488,8 +549,8 @@ class Tiller(object):
                 self.k8s.delete_job_action(jb_name, namespace)
 
         elif 'pod' in resource_type:
-            release_pods = self.k8s.get_namespace_pod(
-                namespace, label_selector)
+            release_pods = self.k8s.get_namespace_pod(namespace,
+                                                      label_selector)
 
             for pod in release_pods.items:
                 pod_name = pod.metadata.name
@@ -498,8 +559,8 @@ class Tiller(object):
                 if wait:
                     self.k8s.wait_for_pod_redeployment(pod_name, namespace)
         else:
-            LOG.error("Unable to execute name: %s type: %s ",
-                      resource_name, resource_type)
+            LOG.error("Unable to execute name: %s type: %s ", resource_name,
+                      resource_type)
 
     def rolling_upgrade_pod_deployment(self, name, release_name, namespace,
                                        resource_labels, action_type, chart,
