@@ -62,6 +62,20 @@ class OverrideTestCase(unittest.TestCase):
 
             self.assertEqual(ovr_doc, expect_doc)
 
+    def test_set_list_valid(self):
+        expected = "{}/templates/override-{}-expected.yaml".format(
+            self.basepath, '03')
+
+        with open(self.base_manifest) as f, open(expected) as e:
+            doc_obj = list(yaml.safe_load_all(f.read()))
+            doc_path = ['manifest', 'simple-armada']
+            override = ('manifest:simple-armada:chart_groups=blog-group3',)
+            ovr = Override(doc_obj, override)
+            ovr.update_manifests()
+            ovr_doc = ovr.find_manifest_document(doc_path)
+            expect_doc = list(yaml.load_all(e.read()))[0]
+            self.assertEqual(ovr_doc, expect_doc)
+
     def test_find_manifest_document_valid(self):
         expected = "{}/templates/override-{}-expected.yaml".format(
             self.basepath, '02')
