@@ -1,0 +1,10 @@
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: simple-armada
+data:
+  release_prefix: armada
+  chart_groups:
+    - blog-group3
+    - blog-group4

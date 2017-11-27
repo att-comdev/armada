@@ -43,6 +43,8 @@ class Override(object):
             if isinstance(v, collections.Mapping):
                 r = self.update(d.get(k, {}), v)
                 d[k] = r
+            elif isinstance(v, str) and isinstance(d.get(k), (list, tuple)):
+                d[k] = [x.strip() for x in v.split(',')]
             else:
                 d[k] = u[k]
         return d
@@ -140,7 +142,6 @@ class Override(object):
             for value in self.values:
                 merging_values = self._load_yaml_file(value)
                 self.update_document(merging_values)
-
         if self.overrides:
             for override in self.overrides:
                 new_value = override.split('=')[1]
