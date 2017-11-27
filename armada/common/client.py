@@ -127,7 +127,7 @@ class ArmadaClient(object):
 
     def get_test_release(self, release=None, query=None):
 
-        endpoint = self._set_endpoint('1.0', 'test/{}'.format(release))
+        endpoint = self._set_endpoint('1.0', 'tests/{}'.format(release))
         resp = self.session.get(endpoint, query=query)
 
         self._check_response(resp)
