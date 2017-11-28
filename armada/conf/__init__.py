@@ -15,6 +15,7 @@
 import os
 
 from oslo_config import cfg
+from oslo_log import log
 
 from armada.conf import default
 from armada import const
@@ -27,4 +28,23 @@ if (os.path.exists(const.CONFIG_PATH)):
 
 
 def set_app_default_configs():
+    set_default_for_default_log_levels()
     default.register_opts(CONF)
+
+
+def set_default_for_default_log_levels():
+    """Set the default for the default_log_levels option for Armada.
+    Armada uses some packages that other OpenStack services don't use that do
+    logging. This will set the default_log_levels default level for those
+    packages.
+    This function needs to be called before CONF().
+    """
+
+    extra_log_level_defaults = [
+        'kubernetes.client.rest=INFO'
+    ]
+
+    log.register_options(CONF)
+    log.set_defaults(
+        default_log_levels=log.get_default_log_levels() +
+        extra_log_level_defaults)
