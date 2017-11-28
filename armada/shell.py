@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 from urllib.parse import urlparse
 
 import click
@@ -82,6 +83,8 @@ def main(ctx, debug, api, url, token):
     if debug:
         CONF.debug = debug
 
+    # Below line to surpress kubernetes client python debug
+    log.getLogger('kubernetes.client.rest').setLevel(logging.INFO)
     log.set_defaults(default_log_levels=CONF.default_log_levels)
     log.setup(CONF, 'armada')
 
