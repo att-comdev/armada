@@ -32,6 +32,9 @@ CONF = cfg.CONF
 @click.option(
     '--debug/--no-debug', help='Enable or disable debugging', default=False)
 @click.option(
+    '--verbose/--no-verbose', '-v', help='Enable or disable verbose logging',
+    default=False)
+@click.option(
     '--api/--no-api', help='Execute service endpoints. (requires url option)',
     default=False)
 @click.option(
@@ -39,7 +42,7 @@ CONF = cfg.CONF
 @click.option(
     '--token', help='Keystone Service Token', envvar='TOKEN', default=None)
 @click.pass_context
-def main(ctx, debug, api, url, token):
+def main(ctx, debug, verbose, api, url, token):
     """
     Multi Helm Chart Deployment Manager
 
@@ -81,6 +84,9 @@ def main(ctx, debug, api, url, token):
 
     if debug:
         CONF.debug = debug
+
+    if verbose:
+        click.echo('currently do not support verbose')
 
     log.set_defaults(default_log_levels=CONF.default_log_levels)
     log.setup(CONF, 'armada')
