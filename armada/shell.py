@@ -39,7 +39,7 @@ CONF = cfg.CONF
 @click.option(
     '--token', help='Keystone Service Token', envvar='TOKEN', default=None)
 @click.pass_context
-def main(ctx, debug, api, url, token):
+def main(ctx, debug, verbose, api, url, token):
     """
     Multi Helm Chart Deployment Manager
 
