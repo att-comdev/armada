@@ -25,7 +25,7 @@ armada_policies = [
         name=base.ARMADA % 'validate_manifest',
         check_str=base.RULE_ADMIN_REQUIRED,
         description='validate installed manifest',
-        operations=[{'path': '/api/v1.0/validate/', 'method': 'POST'}]),
+        operations=[{'path': '/api/v1.0/validatedesign/', 'method': 'POST'}]),
     policy.DocumentedRuleDefault(
         name=base.ARMADA % 'test_release',
         check_str=base.RULE_ADMIN_REQUIRED,

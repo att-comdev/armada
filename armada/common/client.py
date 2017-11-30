@@ -54,7 +54,7 @@ class ArmadaClient(object):
 
     def post_validate(self, manifest=None):
 
-        endpoint = self._set_endpoint('1.0', 'validate')
+        endpoint = self._set_endpoint('1.0', 'validatedesign')
         resp = self.session.post(endpoint, body=manifest)
 
         self._check_response(resp)
