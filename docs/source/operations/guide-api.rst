@@ -113,14 +113,14 @@ Unable to Authorize or Permission
 Failed to perform action
 
 
-GET ``/validate``
+POST ``/validatedesign``
 -----------------
 
 
 Summary
 +++++++
 
-Get tiller releases
+Validates Armada manifest
 
 
 Request
@@ -133,7 +133,7 @@ Responses
 **200**
 ^^^^^^^
 
-obtain all running releases
+obtain valid status true/false
 
 
 **Example:**

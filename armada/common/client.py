@@ -53,17 +53,8 @@ class ArmadaClient(object):
 
     def post_validate(self, manifest=None):
 
-        endpoint = self._set_endpoint('1.0', 'validate')
-        # TODO(sh8121att) Look to update the UCP convention to
-        # allow a list of hrefs
-        req_body = {'href': manifest}
-
-        resp = self.session.post(
-            endpoint,
-            data=req_body,
-            headers={
-                'content-type': 'application/json'
-            })
+        endpoint = self._set_endpoint('1.0', 'validatedesign')
+        resp = self.session.post(endpoint, body=manifest)
 
         self._check_response(resp)
 
