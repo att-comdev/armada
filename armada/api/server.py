@@ -60,7 +60,7 @@ def create(enable_middleware=CONF.middleware):
         ('status', Status()),
         ('tests', Tests()),
         ('test/{release}', Test()),
-        ('validate', Validate()),
+        ('validatedesign', Validate()),
     )
 
     for route, service in url_routes_v1:
