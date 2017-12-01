@@ -10,6 +10,10 @@
 # The default Keystone authentication url. (string value)
 #auth_url = http://0.0.0.0/v3
 
+# Absolute path to the certificate file to use for chart registries (string
+# value)
+#certs = <None>
+
 # Path to Kubernetes configurations. (string value)
 #kubernetes_config_path = /home/user/.kube/
 

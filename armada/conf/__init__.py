@@ -28,7 +28,6 @@ if (os.path.exists(const.CONFIG_PATH)):
 
 
 def set_app_default_configs():
-    set_default_for_default_log_levels()
     default.register_opts(CONF)
 
 
