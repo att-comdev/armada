@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c908a08b_2fab1613",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "Should this be on_post since you are running tests?",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65115129_a5d7370d",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "Might want to specify a sensible default. If timeout is not a parameter, I think this will cause an exception as int() does not handle None.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a499483e_f3beb151",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "See above",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb41b0cb_6d59da39",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "I\u0027m unclear why you have specialty handling here only if timeout is exactly 5 mins.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ca6f7a5_d49ae157",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "Again, this is a bit confusing.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49d6348d_c0ef33b1",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "Why is delete_resources called twice here?",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "684599c3_00944b58",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "This should not be needed as the K8s handler job deletion routine automatically propagates the deletion to child pods. Doing it this way has the side-effect that if non-job Pods have the same labels as the jobs, they get deleted.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44e1124b_b000801d",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2017-12-01T19:23:25Z",
+      "side": 1,
+      "message": "How does this relate to line 523 where delete_resources is defined? also, you might need to rebase your PS from master as I see the current delete_resources in master is different from what you have here:\n\nhttps://github.com/att-comdev/armada/blob/4470f4ec641f6b3b1f50fda5789da81df1a09d02/armada/handlers/tiller.py#L482",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
