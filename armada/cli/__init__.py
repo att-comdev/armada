@@ -17,7 +17,9 @@ from oslo_log import log as logging
 
 
 from armada import conf
+
 conf.set_app_default_configs()
+conf.set_default_for_default_log_levels()
 
 CONF = cfg.CONF
 
