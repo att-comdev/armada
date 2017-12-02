@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "372a7da6_b3b698e0",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-12-02T19:04:18Z",
+      "side": 1,
+      "message": "Is the difference between Test and Tests that one tests releases via name, and the other one tests via manifest, and one has get and  one has a post?  This kind of naming convention where it is off by plurality is often confusing.",
+      "range": {
+        "startLine": 27,
+        "startChar": 6,
+        "endLine": 27,
+        "endChar": 10
+      },
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c908a08b_2fab1613",
         "filename": "armada/api/controller/test.py",
         "patchSetId": 17
@@ -30,6 +53,29 @@
       "writtenOn": "2017-12-01T19:23:25Z",
       "side": 1,
       "message": "Might want to specify a sensible default. If timeout is not a parameter, I think this will cause an exception as int() does not handle None.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d0cf76c_1f85d40c",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-12-02T19:04:18Z",
+      "side": 1,
+      "message": "this ``armada:test_releases`` is now enforcing on a post in 1 class but also a get in another class, is this intended?",
+      "range": {
+        "startLine": 59,
+        "startChar": 21,
+        "endLine": 59,
+        "endChar": 41
+      },
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
@@ -81,6 +127,24 @@
       "writtenOn": "2017-12-01T19:23:25Z",
       "side": 1,
       "message": "Again, this is a bit confusing.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a081027e_0994fd34",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2017-12-02T19:04:18Z",
+      "side": 1,
+      "message": "++.  I believe you are intended to read a new value if the time out is the actual default, but if someone decides to pass in an actual 300 (as in that\u0027s the value the person REALLY wants), you will now go and overwrite that value with something else.",
+      "parentUuid": "8ca6f7a5_d49ae157",
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
