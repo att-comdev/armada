@@ -15,12 +15,7 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
-
-from armada import conf
-conf.set_app_default_configs()
-
 CONF = cfg.CONF
-
 LOG = logging.getLogger(__name__)
 
 

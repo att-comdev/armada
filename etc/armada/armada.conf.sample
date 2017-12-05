@@ -10,6 +10,10 @@
 # The default Keystone authentication url. (string value)
 #auth_url = http://0.0.0.0/v3
 
+# Absolute path to the certificate file to use for chart registries (string
+# value)
+#certs = <None>
+
 # Path to Kubernetes configurations. (string value)
 #kubernetes_config_path = /home/user/.kube/
 
@@ -87,6 +91,10 @@
 # Syslog facility to receive log lines. This option is ignored if
 # log_config_append is set. (string value)
 #syslog_log_facility = LOG_USER
+
+# Use JSON formatting for logging. This option is ignored if log_config_append
+# is set. (boolean value)
+#use_json = false
 
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
@@ -439,3 +447,20 @@
 # directories to be searched.  Missing or empty directories are ignored. (multi
 # valued)
 #policy_dirs = policy.d
+
+# Content Type to send and receive data for REST based policy check (string
+# value)
+# Allowed values: application/x-www-form-urlencoded, application/json
+#remote_content_type = application/x-www-form-urlencoded
+
+# server identity verification for REST based policy check (boolean value)
+#remote_ssl_verify_server_crt = false
+
+# Absolute path to ca cert file for REST based policy check (string value)
+#remote_ssl_ca_crt_file = <None>
+
+# Absolute path to client cert for REST based policy check (string value)
+#remote_ssl_client_crt_file = <None>
+
+# Absolute path client key file REST based policy check (string value)
+#remote_ssl_client_key_file = <None>
