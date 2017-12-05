@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from keystoneauth1 import loading
 from oslo_config import cfg
 
-from keystoneauth1 import loading
-
 from armada.conf import utils
+
 
 default_options = [
 
@@ -44,7 +44,7 @@ Absolute path to the certificate file to use for chart registries
 
     cfg.BoolOpt(
         'middleware',
-        default='true',
+        default=True,
         help=utils.fmt("""
 Enables or disables Keystone authentication middleware.
 """)),
