@@ -30,4 +30,4 @@ STATUS_DEPLOYED = 'DEPLOYED'
 STATUS_FAILED = 'FAILED'
 
 # Configuration File
-CONFIG_PATH = '/etc/armada/armada.conf'
+CONFIG_PATH = '/etc/armada'
