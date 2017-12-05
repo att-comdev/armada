@@ -14,6 +14,7 @@
 
 import falcon
 from oslo_config import cfg
+from oslo_policy import policy
 
 from armada import conf
 from armada.api import ArmadaRequest
@@ -27,18 +28,19 @@ from armada.api.controller.health import Health
 from armada.api.controller.tiller import Release
 from armada.api.controller.tiller import Status
 from armada.api.controller.validation import Validate
-from armada.common import policy
 
 conf.set_app_default_configs()
 CONF = cfg.CONF
 
 
-# Build API
-def create(middleware=CONF.middleware):
+def create(enable_middleware=CONF.middleware):
+    """Entry point for intializing Armada server.
 
-    policy.setup_policy()
+    :param enable_middleware: Whether to enable middleware.
+    :type enable_middleware: bool
+    """
 
-    if middleware:
+    if enable_middleware:
         api = falcon.API(
             request_type=ArmadaRequest,
             middleware=[
@@ -63,11 +65,14 @@ def create(middleware=CONF.middleware):
     for route, service in url_routes_v1:
         api.add_route("/api/v1.0/{}".format(route), service)
 
+    # Initialize policy config options.
+    policy.Enforcer(CONF)
+
     return api
 
 
 def paste_start_armada(global_conf, **kwargs):
-    # At this time just ignore everything in  the paste configuration
+    # At this time just ignore everything in the paste configuration
     # and rely on olso_config
 
     return api
