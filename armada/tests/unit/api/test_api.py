@@ -17,45 +17,45 @@ import mock
 import unittest
 
 import falcon
-from falcon import testing
 from oslo_config import cfg
 
-from armada import conf
-from armada.api import server
+from armada.handlers import armada
+from armada.tests.unit.api import base
 
 CONF = cfg.CONF
-conf.set_app_default_configs()
 
 
-class APITestCase(testing.TestCase):
-    def setUp(self):
-        super(APITestCase, self).setUp()
-        self.app = server.create(middleware=False)
+class ArmadaControllerTest(base.BaseControllerTest):
 
+    @mock.patch.object(armada, 'lint')
+    @mock.patch.object(armada, 'Manifest')
+    @mock.patch.object(armada, 'Tiller')
+    def test_armada_apply_resource(self, mock_tiller, mock_manifest,
+                                   mock_lint):
+        rules = {'armada:create_endpoints': '@'}
+        self.policy.set_rules(rules)
 
-class TestAPI(APITestCase):
-    @unittest.skip('this is incorrectly tested')
-    @mock.patch('armada.api.armada_controller.Handler')
-    def test_armada_apply(self, mock_armada):
-        '''
-        Test /api/v1.0/apply endpoint
-        '''
-        mock_armada.sync.return_value = None
+        options = {'debug': 'true',
+                   'disable_update_pre': 'false',
+                   'disable_update_post': 'false',
+                   'enable_chart_cleanup': 'false',
+                   'skip_pre_flight': 'false',
+                   'dry_run': 'false',
+                   'wait': 'false',
+                   'timeout': '100'}
+        payload = {'file': '', 'options': options}
+        body = json.dumps(payload)
+        expected = {'message': {'diff': [], 'install': [], 'upgrade': []}}
 
-        body = json.dumps({'file': '',
-                           'options': {'debug': 'true',
-                                       'disable_update_pre': 'false',
-                                       'disable_update_post': 'false',
-                                       'enable_chart_cleanup': 'false',
-                                       'skip_pre_flight': 'false',
-                                       'dry_run': 'false',
-                                       'wait': 'false',
-                                       'timeout': '100'}})
+        result = self.app.simulate_post(path='/api/v1.0/apply', body=body)
+        self.assertEqual(result.json, expected)
 
-        doc = {u'message': u'Success'}
-
-        result = self.simulate_post(path='/api/v1.0/apply', body=body)
-        self.assertEqual(result.json, doc)
+        mock_tiller.assert_called_once_with(tiller_host=None,
+                                            tiller_port=44134)
+        mock_manifest.assert_called_once_with([payload])
+        mock_lint.validate_armada_documents.assert_called_once_with([payload])
+        fake_manifest = mock_manifest.return_value.get_manifest.return_value
+        mock_lint.validate_armada_object.assert_called_once_with(fake_manifest)
 
     @unittest.skip('Test does not handle auth/policy correctly')
     @mock.patch('armada.api.tiller_controller.Tiller')

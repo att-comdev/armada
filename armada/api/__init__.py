@@ -14,7 +14,6 @@
 
 import json
 import logging as log
-import os
 import uuid
 import yaml
 
@@ -22,19 +21,12 @@ import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from armada import const
-
 CONF = cfg.CONF
 
 
 class BaseResource(object):
 
     def __init__(self):
-        if not (os.path.exists(const.CONFIG_PATH)):
-            logging.register_options(CONF)
-            logging.set_defaults(default_log_levels=CONF.default_log_levels)
-            logging.setup(CONF, 'armada')
-
         self.logger = logging.getLogger(__name__)
 
     def on_options(self, req, resp):
