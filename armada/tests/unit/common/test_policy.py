@@ -12,12 +12,13 @@
 
 import testtools
 
+import mock
 from oslo_policy import policy as common_policy
 
 from armada.common import policy
 from armada import conf as cfg
 from armada.exceptions import base_exception as exc
-import mock
+from armada.tests.unit import fixtures
 
 
 CONF = cfg.CONF
@@ -32,6 +33,7 @@ class PolicyTestCase(testtools.TestCase):
             "example:allowed": [],
             "example:disallowed": [["false:false"]]
         }
+        self.useFixture(fixtures.RealPolicyFixture(False))
         self._set_rules()
         self.credentials = {}
         self.target = {}
@@ -46,7 +48,7 @@ class PolicyTestCase(testtools.TestCase):
         mock_ctx.to_policy_view.return_value = self.credentials
 
         self.assertRaises(
-            exc.ActionForbidden, policy.enforce_policy, action,
+            exc.ActionForbidden, policy._enforce_policy, action,
             self.target, mock_ctx)
 
     @mock.patch('armada.api.ArmadaRequestContext')
@@ -54,12 +56,12 @@ class PolicyTestCase(testtools.TestCase):
         action = "example:allowed"
         mock_ctx.to_policy_view.return_value = self.credentials
 
-        policy.enforce_policy(action, self.target, mock_ctx)
+        policy._enforce_policy(action, self.target, mock_ctx)
 
     @mock.patch('armada.api.ArmadaRequestContext')
     def test_enforce_bad_action(self, mock_ctx):
         action = "example:disallowed"
         mock_ctx.to_policy_view.return_value = self.credentials
 
-        self.assertRaises(exc.ActionForbidden, policy.enforce_policy,
+        self.assertRaises(exc.ActionForbidden, policy._enforce_policy,
                           action, self.target, mock_ctx)

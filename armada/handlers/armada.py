@@ -59,7 +59,6 @@ class Armada(object):
         Initialize the Armada Engine and establish
         a connection to Tiller
         '''
-
         self.disable_update_pre = disable_update_pre
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
