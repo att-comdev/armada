@@ -12,22 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Documents
-DOCUMENT_CHART = 'armada/Chart/v1'
-DOCUMENT_GROUP = 'armada/ChartGroup/v1'
-DOCUMENT_MANIFEST = 'armada/Manifest/v1'
 
-# Armada Data
-KEYWORD_ARMADA = 'armada'
-KEYWORD_PREFIX = 'release_prefix'
-KEYWORD_GROUPS = 'chart_groups'
-KEYWORD_CHARTS = 'chart_group'
-KEYWORD_RELEASE = 'release'
-KEYWORD_CHART = 'chart'
-
-# Statuses
-STATUS_DEPLOYED = 'DEPLOYED'
-STATUS_FAILED = 'FAILED'
-
-# Configuration File
-CONFIG_PATH = '/etc/armada'
+policy_data = """
+"admin_required": "role:admin"
+"armada:create_endpoints": "rule:admin_required"
+"armada:validate_manifest": "rule:admin_required"
+"armada:test_release": "rule:admin_required"
+"armada:test_manifest": "rule:admin_required"
+"tiller:get_status": "rule:admin_required"
+"tiller:get_release": "rule:admin_required"
+"""

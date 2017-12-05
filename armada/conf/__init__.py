@@ -22,12 +22,23 @@ from armada import const
 
 CONF = cfg.CONF
 
-# Load config file if exists
-if (os.path.exists(const.CONFIG_PATH)):
-    CONF(['--config-file', const.CONFIG_PATH])
+CONFIG_FILES = ['armada.conf', 'api-paste.ini']
+
+
+def _get_config_files(env=None):
+    if env is None:
+        env = os.environ
+    dirname = env.get('OS_ARMADA_CONFIG_DIR', const.CONFIG_PATH).strip()
+    config_files = [
+        os.path.join(dirname, config_file) for config_file in CONFIG_FILES
+    ]
+    return config_files
 
 
 def set_app_default_configs():
+    config_files = _get_config_files()
+    if all([os.path.exists(x) for x in config_files]):
+        CONF([], project='armada', default_config_files=config_files)
     set_default_for_default_log_levels()
     default.register_opts(CONF)
 
@@ -44,7 +55,6 @@ def set_default_for_default_log_levels():
         'kubernetes.client.rest=INFO'
     ]
 
-    log.register_options(CONF)
     log.set_defaults(
         default_log_levels=log.get_default_log_levels() +
         extra_log_level_defaults)
