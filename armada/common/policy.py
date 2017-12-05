@@ -23,6 +23,13 @@ CONF = cfg.CONF
 _ENFORCER = None
 
 
+def reset_policy():
+    global _ENFORCER
+    if _ENFORCER:
+        _ENFORCER.clear()
+        _ENFORCER = None
+
+
 def setup_policy():
     global _ENFORCER
     if not _ENFORCER:
@@ -30,7 +37,7 @@ def setup_policy():
         register_rules(_ENFORCER)
 
 
-def enforce_policy(action, target, credentials, do_raise=True):
+def _enforce_policy(action, target, credentials, do_raise=True):
     extras = {}
     if do_raise:
         extras.update(exc=exc.ActionForbidden, do_raise=do_raise)
@@ -46,7 +53,7 @@ def enforce(rule):
         @functools.wraps(func)
         def handler(*args, **kwargs):
             context = args[1].context
-            enforce_policy(rule, {}, context, do_raise=True)
+            _enforce_policy(rule, {}, context, do_raise=True)
             return func(*args, **kwargs)
         return handler
 
