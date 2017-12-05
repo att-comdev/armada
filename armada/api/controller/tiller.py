@@ -65,9 +65,7 @@ class Release(api.BaseResource):
 
             releases = {}
             for release in tiller.list_releases():
-                if not releases.get(release.namespace, None):
-                    releases[release.namespace] = []
-
+                releases.setdefault(release.namespace, [])
                 releases[release.namespace].append(release.name)
 
             resp.body = json.dumps({'releases': releases})
