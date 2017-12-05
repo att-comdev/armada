@@ -14,6 +14,7 @@
 
 import falcon
 from oslo_config import cfg
+from oslo_policy import policy
 
 from armada import conf
 from armada.api import ArmadaRequest
@@ -26,16 +27,13 @@ from armada.api.controller.test import Tests
 from armada.api.controller.tiller import Release
 from armada.api.controller.tiller import Status
 from armada.api.controller.validation import Validate
-from armada.common import policy
 
 conf.set_app_default_configs()
 CONF = cfg.CONF
 
 
-# Build API
-def create(middleware=CONF.middleware):
-
-    policy.setup_policy()
+def create(middleware=None):
+    """Entry point for intializing Armada server."""
 
     if middleware:
         api = falcon.API(
@@ -60,6 +58,8 @@ def create(middleware=CONF.middleware):
 
     for route, service in url_routes_v1:
         api.add_route("/api/v1.0/{}".format(route), service)
+
+    policy.Enforcer(CONF)
 
     return api
 

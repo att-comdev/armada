@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from keystoneauth1 import loading
 from oslo_config import cfg
 
-from keystoneauth1 import loading
-
 from armada.conf import utils
+
+CONF = cfg.CONF
+
 
 default_options = [
 
@@ -89,3 +91,6 @@ def list_opts():
     return {
         'DEFAULT': default_options,
         'keystone_authtoken': loading.get_auth_plugin_conf_options('password')}
+
+
+register_opts(CONF)
