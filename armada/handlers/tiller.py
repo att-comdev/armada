@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pkg_resources
+
 import grpc
 import yaml
 
@@ -114,7 +116,11 @@ class Tiller(object):
             return self.tiller_host
         else:
             pod = self._get_tiller_pod()
-            return pod.status.pod_ip
+
+            if pod:
+                return pod.status.pod_ip
+            else:
+                return 'localhost'
 
     def _get_tiller_port(self):
         '''Stub method to support arbitrary ports in the future'''
@@ -438,6 +444,27 @@ class Tiller(object):
         except Exception:
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Delete')
+
+    def _get_tiller_manifest(self):
+        return pkg_resources.resource_filename('armada', 'templates')
+
+    def install_tiller_service(self, namespace='kube-system'):
+        file = '{}/{}'.format(self._get_tiller_manifest(), 'tiller.yaml')
+
+        if self._get_tiller_pod():
+            LOG.error('Tiller service already exists in %s', namespace)
+            return
+
+        with open(file) as f:
+            manifest = yaml.safe_load_all(f.read())
+
+            for document in manifest:
+                if document.get('kind') == 'Deployment':
+                    self.k8s.create_deployment_action(
+                        namespace=namespace, document=document)
+                else:
+                    self.k8s.create_service_action(
+                        namespace=namespace, document=document)
 
     def chart_cleanup(self, prefix, charts):
         '''

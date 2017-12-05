@@ -150,6 +150,30 @@ class K8s(object):
 
         return self.client.delete_namespaced_pod(name, namespace, body)
 
+    def create_service_action(self, namespace='default', document=None):
+        '''
+        :params name: kubernetes namespace
+        :params document: kurnetes manifest kind service
+        '''
+
+        if not document:
+            LOG.error('Could not provide template')
+            return
+
+        self.client.create_namespaced_service(namespace, document)
+
+    def create_deployment_action(self, namespace='default', document=None):
+        '''
+        :params name: kubernetes namespace
+        :params document: kurnetes manifest kind service
+        '''
+
+        if not document:
+            LOG.error('Could not provide template')
+            return
+
+        self.extension_api.create_namespaced_deployment(namespace, document)
+
     def wait_for_pod_redeployment(self, old_pod_name, namespace):
         '''
         :param old_pod_name - name of pods

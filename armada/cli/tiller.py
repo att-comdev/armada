@@ -50,20 +50,23 @@ SHORT_DESC = "command gets tiller infromation"
     '--tiller-port', help="Tiller host port", type=int, default=44134)
 @click.option('--releases', help="list of deployed releses", is_flag=True)
 @click.option('--status', help="Status of Armada services", is_flag=True)
+@click.option('--init', help="Status of Armada services", is_flag=True)
 @click.pass_context
-def tiller_service(ctx, tiller_host, tiller_port, releases, status):
-    TillerServices(ctx, tiller_host, tiller_port, releases, status).invoke()
+def tiller_service(ctx, tiller_host, tiller_port, releases, status, init):
+    TillerServices(
+        ctx, tiller_host, tiller_port, releases, status, init).invoke()
 
 
 class TillerServices(CliAction):
 
-    def __init__(self, ctx, tiller_host, tiller_port, releases, status):
+    def __init__(self, ctx, tiller_host, tiller_port, releases, status, init):
         super(TillerServices, self).__init__()
         self.ctx = ctx
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
         self.releases = releases
         self.status = status
+        self.init = init
 
     def invoke(self):
 
@@ -105,3 +108,7 @@ class TillerServices(CliAction):
                         self.logger.info(
                             'Release %s in namespace: %s', release,
                             namespace)
+
+        if self.init:
+            click.echo("Deploying Tiller Service")
+            tiller.install_tiller_service()

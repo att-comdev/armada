@@ -10,6 +10,7 @@ requests
 supermutes==0.2.5
 Paste>=2.0.3
 PasteDeploy>=1.5.2
+Jinja2==2.10
 
 # API
 falcon
