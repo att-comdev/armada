@@ -37,6 +37,7 @@ from armada.utils.release import label_selectors
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.5.0'
 TILLER_TIMEOUT = 300
+GRPC_EPSILON = 60
 RELEASE_LIMIT = 64
 RUNTEST_SUCCESS = 9
 
@@ -272,6 +273,9 @@ class Tiller(object):
         '''
         Update a Helm Release
         '''
+
+        rel_timeout = self.timeout if not timeout else timeout
+
         LOG.debug("wait: %s", wait)
         LOG.debug("timeout: %s", timeout)
 
@@ -296,7 +300,8 @@ class Tiller(object):
                 timeout=timeout)
 
             stub.UpdateRelease(
-                release_request, self.timeout, metadata=self.metadata)
+                release_request, rel_timeout + GRPC_EPSILON,
+                metadata=self.metadata)
         except Exception:
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Upgrade')
@@ -311,6 +316,8 @@ class Tiller(object):
         '''
         Create a Helm Release
         '''
+
+        rel_timeout = self.timeout if not timeout else timeout
 
         LOG.info("Wait: %s, Timeout: %s", wait, timeout)
 
@@ -332,8 +339,8 @@ class Tiller(object):
                 timeout=timeout)
 
             return stub.InstallRelease(
-                release_request, self.timeout, metadata=self.metadata)
-
+                release_request, rel_timeout + GRPC_EPSILON,
+                metadata=self.metadata)
         except Exception:
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Install')

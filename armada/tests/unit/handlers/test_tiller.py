@@ -46,5 +46,5 @@ class TillerTestCase(unittest.TestCase):
         )
         (mock_stub(tiller.channel).InstallRelease
          .assert_called_with(release_request,
-                             tiller.timeout,
+                             timeout + 60,
                              metadata=tiller.metadata))
