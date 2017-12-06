@@ -102,8 +102,8 @@ class Tiller(object):
         Returns tiller pod using the tiller pod labels specified in the Armada
         config
         '''
-        pods = self.k8s.get_namespace_pod('kube-system',
-                                          CONF.tiller_pod_labels).items
+        pods = self.k8s.get_namespace_pod(
+            CONF.tiller_namespace, CONF.tiller_pod_labels).items
         # No tiller pods found
         if not pods:
             raise ex.TillerPodNotFoundException(CONF.tiller_pod_labels)

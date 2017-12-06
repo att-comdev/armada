@@ -27,6 +27,7 @@ images:
     ks_endpoints: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     ks_service: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     ks_user: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    tiller: gcr.io/kubernetes-helm/tiller:v2.7.0
 
   pull_policy: "IfNotPresent"
 
@@ -39,6 +40,8 @@ network:
       port: 31903
 
 dependencies:
+  tiller:
+    services: null
   ks_user:
     services:
     - service: identity
@@ -112,6 +115,8 @@ endpoints:
       default: http
     host_fqdn_override:
       default: null
+  tiller:
+    namespace: kube-system
 
 secrets:
   identity:
@@ -121,6 +126,7 @@ secrets:
 conf:
   armada:
     DEFAULT:
+      tiller_namespace: openstack
     keystone_authtoken:
       auth_type: password
       auth_version: 3
@@ -215,6 +221,7 @@ manifests:
   configmap_bin: true
   configmap_etc: true
   deployment_api: true
+  deployment_tiller: true
   ingress_api: true
   job_ks_endpoints: true
   job_ks_service: true
@@ -222,3 +229,4 @@ manifests:
   secret_keystone: true
   service_api: true
   service_ingress_api: true
+  service_tiller_deploy: true
