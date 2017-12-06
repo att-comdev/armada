@@ -32,6 +32,9 @@
 # Labels for the tiller pod. (string value)
 #tiller_pod_labels = app=helm,name=tiller
 
+# Namespace for the tiller pod. (string value)
+#tiller_namespace = kube-system
+
 # IDs of approved API access roles. (list value)
 #tiller_release_roles = admin
 

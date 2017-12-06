@@ -71,6 +71,11 @@ The Keystone project domain name used for authentication.
         default='app=helm,name=tiller',
         help=utils.fmt('Labels for the tiller pod.')),
 
+    cfg.StrOpt(
+        'tiller_namespace',
+        default='kube-system',
+        help=utils.fmt('Namespace for the tiller pod.')),
+
     cfg.ListOpt(
         'tiller_release_roles',
         default=['admin'],
