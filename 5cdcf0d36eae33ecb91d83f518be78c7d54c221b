@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c4b8c28b_be4e27fe",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "Yes, Test is release and Tests is manifest.\nPlease raise the concern in github issues and we will address.",
+      "parentUuid": "372a7da6_b3b698e0",
+      "range": {
+        "startLine": 27,
+        "startChar": 6,
+        "endLine": 27,
+        "endChar": 10
+      },
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c908a08b_2fab1613",
         "filename": "armada/api/controller/test.py",
         "patchSetId": 17
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "9bb49172_47bfafe2",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "This is on_get because we\u0027re not sending/consuming a manifest, just targeting a release.  We could change it to a sending style, but I don\u0027t see the benefits for a single release.",
+      "parentUuid": "c908a08b_2fab1613",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "65115129_a5d7370d",
         "filename": "armada/api/controller/test.py",
         "patchSetId": 17
@@ -53,6 +95,24 @@
       "writtenOn": "2017-12-01T19:23:25Z",
       "side": 1,
       "message": "Might want to specify a sensible default. If timeout is not a parameter, I think this will cause an exception as int() does not handle None.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42c5cd46_ffccd88a",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "Will fix",
+      "parentUuid": "65115129_a5d7370d",
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
@@ -99,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5167e27b_cbc2f3c0",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "a499483e_f3beb151",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb41b0cb_6d59da39",
         "filename": "armada/api/controller/test.py",
         "patchSetId": 17
@@ -110,6 +188,24 @@
       "writtenOn": "2017-12-01T19:23:25Z",
       "side": 1,
       "message": "I\u0027m unclear why you have specialty handling here only if timeout is exactly 5 mins.",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b36eb91_bc3be97e",
+        "filename": "armada/api/controller/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "The default value is 300, I\u0027m sure there\u0027s an easier way but the idea is that if the value is 300 then the user didn\u0027t change it via the timeout flag and we should check the manifest for timeout values.\nI\u0027ll try to come up with a better solution.",
+      "parentUuid": "fb41b0cb_6d59da39",
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
@@ -151,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "3e930f35_8ecd6030",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "This is a legitimate concern yes, if you have any suggestions please let me know.  I will try to find a better solution.",
+      "parentUuid": "a081027e_0994fd34",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49d6348d_c0ef33b1",
         "filename": "armada/handlers/tiller.py",
         "patchSetId": 17
@@ -162,6 +276,24 @@
       "writtenOn": "2017-12-01T19:23:25Z",
       "side": 1,
       "message": "Why is delete_resources called twice here?",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c766cbc4_5e3e7999",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "I didn\u0027t write this, it was pulled in from master I believe.",
+      "parentUuid": "49d6348d_c0ef33b1",
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
@@ -196,6 +328,24 @@
       "writtenOn": "2017-12-01T19:23:25Z",
       "side": 1,
       "message": "How does this relate to line 523 where delete_resources is defined? also, you might need to rebase your PS from master as I see the current delete_resources in master is different from what you have here:\n\nhttps://github.com/att-comdev/armada/blob/4470f4ec641f6b3b1f50fda5789da81df1a09d02/armada/handlers/tiller.py#L482",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb5f2ccf_5fe93a31",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1012425
+      },
+      "writtenOn": "2017-12-08T18:36:22Z",
+      "side": 1,
+      "message": "Yea I didn\u0027t write this, will need to rebase",
+      "parentUuid": "44e1124b_b000801d",
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
