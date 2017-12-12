@@ -105,3 +105,19 @@ class TestAPI(APITestCase):
 
         # FIXME(lamt) Need authentication - mock, fixture
         # self.assertEqual(result.json, doc)
+
+    def test_versions_endpoint(self):
+        """
+        Testing /versions
+        """
+
+        result = self.simulate_get('/versions')
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        doc = {
+            "v1.0": {
+                "path": "/api/v1.0",
+                "status": "stable"
+            }
+        }
+        self.assertEqual(result.json, doc)
