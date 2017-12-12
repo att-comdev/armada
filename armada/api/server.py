@@ -23,6 +23,7 @@ from armada.api.middleware import ContextMiddleware
 from armada.api.middleware import LoggingMiddleware
 from armada.api.controller.test import Test
 from armada.api.controller.test import Tests
+from armada.api.controller.health import Health
 from armada.api.controller.tiller import Release
 from armada.api.controller.tiller import Status
 from armada.api.controller.validation import Validate
@@ -50,6 +51,7 @@ def create(middleware=CONF.middleware):
 
     # Configure API routing
     url_routes_v1 = (
+        ('health', Health()),
         ('apply', Apply()),
         ('releases', Release()),
         ('status', Status()),
