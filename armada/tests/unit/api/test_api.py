@@ -105,3 +105,10 @@ class TestAPI(APITestCase):
 
         # FIXME(lamt) Need authentication - mock, fixture
         # self.assertEqual(result.json, doc)
+
+    def test_health_endpoint(self):
+        """
+        Validate that /api/v1.0/health returns 204.
+        """
+        result = self.simulate_get('/api/v1.0/health')
+        self.assertEqual(result.status, falcon.HTTP_204)
