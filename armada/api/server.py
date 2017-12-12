@@ -26,6 +26,7 @@ from armada.api.middleware import LoggingMiddleware
 from armada.api.controller.test import Test
 from armada.api.controller.test import Tests
 from armada.api.controller.health import Health
+from armada.api.controller.version import Version
 from armada.api.controller.tiller import Release
 from armada.api.controller.tiller import Status
 from armada.api.controller.validation import Validate
@@ -66,6 +67,8 @@ def create(enable_middleware=CONF.middleware):
         ('test/{release}', Test()),
         ('validatedesign', Validate()),
     )
+
+    api.add_route("/versions", Version())
 
     for route, service in url_routes_v1:
         api.add_route("/api/v1.0/{}".format(route), service)
