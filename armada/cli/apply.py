@@ -91,11 +91,16 @@ SHORT_DESC = "command install manifest charts"
               type=str,
               default=[])
 @click.option('--tiller-host',
-              help="Tiller host IP.")
+              help="Tiller host IP.",
+              default=CONF.tiller_host)
 @click.option('--tiller-port',
               help="Tiller host port.",
               type=int,
-              default=44134)
+              default=CONF.tiller_port)
+@click.option('--tiller-namespace', '-tn',
+              help="Tiller namespace.",
+              type=str,
+              default=CONF.tiller_namespace)
 @click.option('--timeout',
               help="Specifies time to wait for charts to deploy.",
               type=int,
@@ -120,20 +125,33 @@ SHORT_DESC = "command install manifest charts"
 @click.pass_context
 def apply_create(ctx, locations, api, disable_update_post, disable_update_pre,
                  dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
-                 timeout, values, wait, target_manifest, debug):
-
+                 tiller_namespace, timeout, values, wait, target_manifest,
+                 debug):
     if debug:
         CONF.debug = debug
 
     ApplyManifest(ctx, locations, api, disable_update_post, disable_update_pre,
                   dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
-                  timeout, values, wait, target_manifest).invoke()
+                  tiller_namespace, timeout, values, wait,
+                  target_manifest).invoke()
 
 
 class ApplyManifest(CliAction):
-    def __init__(self, ctx, locations, api, disable_update_post,
-                 disable_update_pre, dry_run, enable_chart_cleanup, set,
-                 tiller_host, tiller_port, timeout, values, wait,
+    def __init__(self,
+                 ctx,
+                 locations,
+                 api,
+                 disable_update_post,
+                 disable_update_pre,
+                 dry_run,
+                 enable_chart_cleanup,
+                 set,
+                 tiller_host,
+                 tiller_port,
+                 tiller_namespace,
+                 timeout,
+                 values,
+                 wait,
                  target_manifest):
         super(ApplyManifest, self).__init__()
         self.ctx = ctx
@@ -147,6 +165,7 @@ class ApplyManifest(CliAction):
         self.set = set
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+        self.tiller_namespace = tiller_namespace
         self.timeout = timeout
         self.values = values
         self.wait = wait
@@ -182,10 +201,19 @@ class ApplyManifest(CliAction):
                 return
 
             armada = Armada(
-                documents, self.disable_update_pre, self.disable_update_post,
-                self.enable_chart_cleanup, self.dry_run, self.set, self.wait,
-                self.timeout, self.tiller_host, self.tiller_port, self.values,
-                self.target_manifest)
+                documents,
+                disable_update_pre=self.disable_update_pre,
+                disable_update_post=self.disable_update_post,
+                enable_chart_cleanup=self.enable_chart_cleanup,
+                dry_run=self.dry_run,
+                set_ovr=self.set,
+                wait=self.wait,
+                timeout=self.timeout,
+                tiller_host=self.tiller_host,
+                tiller_port=self.tiller_port,
+                tiller_namespace=self.tiller_namespace,
+                values=self.values,
+                target_manifest=self.target_manifest)
 
             resp = armada.sync()
             self.output(resp)
@@ -202,6 +230,7 @@ class ApplyManifest(CliAction):
                 'enable_chart_cleanup': self.enable_chart_cleanup,
                 'tiller_host': self.tiller_host,
                 'tiller_port': self.tiller_port,
+                'tiller_namespace': self.tiller_namespace,
                 'timeout': self.timeout,
                 'wait': self.wait
             }
