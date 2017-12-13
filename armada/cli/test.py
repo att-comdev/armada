@@ -55,15 +55,22 @@ SHORT_DESC = "command test releases"
 @click.option('--release', help='helm release', type=str)
 @click.option('--tiller-host', help="Tiller Host IP")
 @click.option(
-    '--tiller-port', help="Tiller host Port", type=int, default=44134)
+    '--tiller-port', help="Tiller Host Port", type=int, default=44134)
+@click.option(
+    '--tiller-namespace', '-tn', help="Tiller Namespace", type=str,
+    default="kube-system")
 @click.pass_context
-def test_charts(ctx, file, release, tiller_host, tiller_port):
+def test_charts(
+        ctx, file, release, tiller_host, tiller_port, tiller_namespace):
     TestChartManifest(
-        ctx, file, release, tiller_host, tiller_port).invoke()
+        ctx, file, release, tiller_host, tiller_port,
+        tiller_namespace).invoke()
 
 
 class TestChartManifest(CliAction):
-    def __init__(self, ctx, file, release, tiller_host, tiller_port):
+    def __init__(self,
+                 ctx, file, release, tiller_host, tiller_port,
+                 tiller_namespace):
 
         super(TestChartManifest, self).__init__()
         self.ctx = ctx
@@ -71,10 +78,12 @@ class TestChartManifest(CliAction):
         self.release = release
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+        self.tiller_namespace = tiller_namespace
 
     def invoke(self):
         tiller = Tiller(
-            tiller_host=self.tiller_host, tiller_port=self.tiller_port)
+            tiller_host=self.tiller_host, tiller_port=self.tiller_port,
+            tiller_namespace=self.tiller_namespace)
         known_release_names = [release[0] for release in tiller.list_charts()]
 
         if self.release:
@@ -96,7 +105,8 @@ class TestChartManifest(CliAction):
                 client = self.ctx.obj.get('CLIENT')
                 query = {
                     'tiller_host': self.tiller_host,
-                    'tiller_port': self.tiller_port
+                    'tiller_port': self.tiller_port,
+                    'tiller_namespace': self.tiller_namespace
                 }
                 resp = client.get_test_release(release=self.release,
                                                query=query)
@@ -140,7 +150,8 @@ class TestChartManifest(CliAction):
                 client = self.ctx.obj.get('CLIENT')
                 query = {
                     'tiller_host': self.tiller_host,
-                    'tiller_port': self.tiller_port
+                    'tiller_port': self.tiller_port,
+                    'tiller_namespace': self.tiller_namespace
                 }
 
                 with open(self.filename, 'r') as f:

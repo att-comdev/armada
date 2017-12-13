@@ -31,7 +31,8 @@ class Status(api.BaseResource):
             opts = req.params
             tiller = Tiller(
                 tiller_host=opts.get('tiller_host', None),
-                tiller_port=opts.get('tiller_port', None))
+                tiller_port=opts.get('tiller_port', None),
+                tiller_namespace=opts.get('tiller_namespace', None))
 
             message = {
                 'tiller': {
@@ -61,7 +62,9 @@ class Release(api.BaseResource):
             # Get tiller releases
             opts = req.params
             tiller = Tiller(tiller_host=opts.get('tiller_host', None),
-                            tiller_port=opts.get('tiller_port', None))
+                            tiller_port=opts.get('tiller_port', None),
+                            tiller_namespace=opts.get('tiller_namespace',
+                                                      None))
 
             releases = {}
             for release in tiller.list_releases():

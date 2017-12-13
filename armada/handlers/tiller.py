@@ -35,6 +35,7 @@ from armada.utils.release import release_prefix
 from armada.utils.release import label_selectors
 
 TILLER_PORT = 44134
+TILLER_NAMESPACE = "kube-system"
 TILLER_VERSION = b'2.5.0'
 TILLER_TIMEOUT = 300
 GRPC_EPSILON = 60
@@ -59,10 +60,12 @@ class Tiller(object):
     service over gRPC
     '''
 
-    def __init__(self, tiller_host=None, tiller_port=TILLER_PORT):
+    def __init__(self, tiller_host=None, tiller_port=TILLER_PORT,
+                 tiller_namespace=TILLER_NAMESPACE):
 
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+        self.tiller_namespace = tiller_namespace
         # init k8s connectivity
         self.k8s = K8s()
 
@@ -103,8 +106,10 @@ class Tiller(object):
         Returns tiller pod using the tiller pod labels specified in the Armada
         config
         '''
-        pods = self.k8s.get_namespace_pod(
-            CONF.tiller_namespace, CONF.tiller_pod_labels).items
+        pods = None
+        namespace = self._get_tiller_namespace()
+        pods = self.k8s.get_namespace_pod(namespace,
+                                          CONF.tiller_pod_labels).items
         # No tiller pods found
         if not pods:
             raise ex.TillerPodNotFoundException(CONF.tiller_pod_labels)
@@ -130,6 +135,12 @@ class Tiller(object):
     def _get_tiller_port(self):
         '''Stub method to support arbitrary ports in the future'''
         return TILLER_PORT
+
+    def _get_tiller_namespace(self):
+        if not self.tiller_namespace == CONF.tiller_namespace:
+            return self.tiller_namespace
+
+        return CONF.tiller_namespace
 
     def tiller_status(self):
         '''
