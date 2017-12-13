@@ -16,6 +16,7 @@ import json
 import yaml
 
 import falcon
+from oslo_config import cfg
 
 from armada import api
 from armada.common import policy
@@ -23,6 +24,8 @@ from armada import exceptions
 from armada.handlers.armada import Armada
 from armada.handlers.document import ReferenceResolver
 from armada.handlers.override import Override
+
+CONF = cfg.CONF
 
 
 class Apply(api.BaseResource):
@@ -78,8 +81,11 @@ class Apply(api.BaseResource):
                 dry_run=req.get_param_as_bool('dry_run'),
                 wait=req.get_param_as_bool('wait'),
                 timeout=req.get_param_as_int('timeout') or 3600,
-                tiller_host=req.get_param('tiller_host', default=None),
-                tiller_port=req.get_param_as_int('tiller_port') or 44134,
+                tiller_host=req.get_param('tiller_host'),
+                tiller_port=req.get_param_as_int(
+                    'tiller_port') or CONF.tiller_port,
+                tiller_namespace=req.get_param(
+                    'tiller_namespace', default=CONF.tiller_namespace),
                 target_manifest=req.get_param('target_manifest')
             )
 

@@ -43,7 +43,7 @@ class ArmadaControllerTest(base.BaseControllerTest):
                    'wait': 'false',
                    'timeout': '100'}
 
-        armada_options = {
+        expected_armada_options = {
             'disable_update_pre': False,
             'disable_update_post': False,
             'enable_chart_cleanup': False,
@@ -52,6 +52,7 @@ class ArmadaControllerTest(base.BaseControllerTest):
             'timeout': 100,
             'tiller_host': None,
             'tiller_port': 44134,
+            'tiller_namespace': 'kube-system',
             'target_manifest': None
         }
 
@@ -76,7 +77,8 @@ class ArmadaControllerTest(base.BaseControllerTest):
         self.assertEqual('application/json', result.headers['content-type'])
 
         mock_resolver.resolve_reference.assert_called_with([payload_url])
-        mock_armada.assert_called_with([{'foo': 'bar'}], **armada_options)
+        mock_armada.assert_called_with([{'foo': 'bar'}],
+                                       **expected_armada_options)
         mock_armada.return_value.sync.assert_called()
 
     def test_armada_apply_no_href(self):

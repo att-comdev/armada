@@ -53,7 +53,8 @@ class Armada(object):
                  wait=False,
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
-                 tiller_port=44134,
+                 tiller_port=None,
+                 tiller_namespace=None,
                  values=None,
                  target_manifest=None):
         '''
@@ -67,11 +68,17 @@ class Armada(object):
         :param bool dry_run: Run charts without installing them.
         :param bool wait: Wait until all charts are deployed.
         :param int timeout: Specifies time to wait for charts to deploy.
-        :param str tiller_host: Tiller host IP.
-        :param int tiller_port: Tiller host port.
+        :param str tiller_host: Tiller host IP. Default is None.
+        :param int tiller_port: Tiller host port. Default is
+            ``CONF.tiller_port``.
+        :param str tiller_namespace: Tiller host namespace. Default is
+            ``CONF.tiller_namespace``.
         :param str target_manifest: The target manifest to run. Useful for
             specifying which manifest to run when multiple are available.
         '''
+        tiller_port = tiller_port or CONF.tiller_port
+        tiller_namespace = tiller_namespace or CONF.tiller_namespace
+
         self.disable_update_pre = disable_update_pre
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
@@ -79,7 +86,9 @@ class Armada(object):
         self.overrides = set_ovr
         self.wait = wait
         self.timeout = timeout
-        self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
+        self.tiller = Tiller(
+            tiller_host=tiller_host, tiller_port=tiller_port,
+            tiller_namespace=tiller_namespace)
         self.values = values
         self.documents = file
         self.config = None
