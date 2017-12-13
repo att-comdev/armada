@@ -53,7 +53,8 @@ class Armada(object):
                  wait=False,
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
-                 tiller_port=44134,
+                 tiller_port=None,
+                 tiller_namespace=None,
                  values=None,
                  target_manifest=None):
         '''
@@ -72,6 +73,10 @@ class Armada(object):
         :param str target_manifest: The target manifest to run. Useful for
             specifying which manifest to run when multiple are available.
         '''
+        tiller_host = tiller_host or CONF.tiller_host
+        tiller_namespace = tiller_namespace or CONF.tiller_namespace
+        tiller_port = tiller_port or CONF.tiller_port
+
         self.disable_update_pre = disable_update_pre
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
@@ -79,7 +84,9 @@ class Armada(object):
         self.overrides = set_ovr
         self.wait = wait
         self.timeout = timeout
-        self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
+        self.tiller = Tiller(
+            tiller_host=tiller_host, tiller_port=tiller_port,
+            tiller_namespace=tiller_namespace)
         self.values = values
         self.documents = file
         self.config = None

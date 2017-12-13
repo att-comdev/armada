@@ -72,9 +72,19 @@ The Keystone project domain name used for authentication.
         help=utils.fmt('Labels for the tiller pod.')),
 
     cfg.StrOpt(
+        'tiller_host',
+        default='localhost',
+        help=utils.fmt('Host for the tiller pod.')),
+
+    cfg.StrOpt(
         'tiller_namespace',
         default='kube-system',
         help=utils.fmt('Namespace for the tiller pod.')),
+
+    cfg.IntOpt(
+        'tiller_port',
+        default=44134,
+        help=utils.fmt('Port for the tiller pod.')),
 
     cfg.ListOpt(
         'tiller_release_roles',

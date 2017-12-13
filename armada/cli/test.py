@@ -15,12 +15,15 @@
 import yaml
 
 import click
+from oslo_config import cfg
 
 from armada.cli import CliAction
 from armada import const
 from armada.handlers.manifest import Manifest
 from armada.handlers.tiller import Tiller
 from armada.utils.release import release_prefix
+
+CONF = cfg.CONF
 
 
 @click.group()
@@ -53,22 +56,28 @@ SHORT_DESC = "command test releases"
 @test.command(name='test', help=DESC, short_help=SHORT_DESC)
 @click.option('--file', help='armada manifest', type=str)
 @click.option('--release', help='helm release', type=str)
-@click.option('--tiller-host', help="Tiller Host IP")
+@click.option('--tiller-host', help="Tiller Host IP", default=CONF.tiller_host)
 @click.option(
-    '--tiller-port', help="Tiller host Port", type=int, default=44134)
+    '--tiller-port', help="Tiller Host Port", type=int,
+    default=CONF.tiller_port)
+@click.option(
+    '--tiller-namespace', '-tn', help="Tiller Namespace", type=str,
+    default=CONF.tiller_namespace)
 @click.option('--target-manifest',
               help=('The target manifest to run. Required for specifying '
                     'which manifest to run when multiple are available.'),
               default=None)
 @click.pass_context
-def test_charts(ctx, file, release, tiller_host, tiller_port, target_manifest):
+def test_charts(ctx, file, release, tiller_host, tiller_port, tiller_namespace,
+                target_manifest):
     TestChartManifest(
-        ctx, file, release, tiller_host, tiller_port).invoke()
+        ctx, file, release, tiller_host, tiller_port, tiller_namespace,
+        target_manifest).invoke()
 
 
 class TestChartManifest(CliAction):
     def __init__(self, ctx, file, release, tiller_host, tiller_port,
-                 target_manifest):
+                 tiller_namespace, target_manifest):
 
         super(TestChartManifest, self).__init__()
         self.ctx = ctx
@@ -76,11 +85,14 @@ class TestChartManifest(CliAction):
         self.release = release
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+        self.tiller_namespace = tiller_namespace
         self.target_manifest = target_manifest
 
     def invoke(self):
         tiller = Tiller(
-            tiller_host=self.tiller_host, tiller_port=self.tiller_port)
+            tiller_host=self.tiller_host,
+            tiller_port=self.tiller_port,
+            tiller_namespace=self.tiller_namespace)
         known_release_names = [release[0] for release in tiller.list_charts()]
 
         if self.release:
@@ -102,7 +114,8 @@ class TestChartManifest(CliAction):
                 client = self.ctx.obj.get('CLIENT')
                 query = {
                     'tiller_host': self.tiller_host,
-                    'tiller_port': self.tiller_port
+                    'tiller_port': self.tiller_port,
+                    'tiller_namespace': self.tiller_namespace
                 }
                 resp = client.get_test_release(release=self.release,
                                                query=query)
@@ -148,7 +161,8 @@ class TestChartManifest(CliAction):
                 client = self.ctx.obj.get('CLIENT')
                 query = {
                     'tiller_host': self.tiller_host,
-                    'tiller_port': self.tiller_port
+                    'tiller_port': self.tiller_port,
+                    'tiller_namespace': self.tiller_namespace
                 }
 
                 with open(self.filename, 'r') as f:
