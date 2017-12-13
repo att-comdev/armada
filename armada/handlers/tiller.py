@@ -448,6 +448,7 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             release_request = UninstallReleaseRequest(
                 name=release, disable_hooks=disable_hooks, purge=purge)
+            LOG.info("purge: %s", purge)
 
             return stub.UninstallRelease(
                 release_request, self.timeout, metadata=self.metadata)
