@@ -34,8 +34,10 @@ class Test(api.BaseResource):
         try:
             self.logger.info('RUNNING: %s', release)
             opts = req.params
-            tiller = Tiller(tiller_host=opts.get('tiller_host', None),
-                            tiller_port=opts.get('tiller_port', None))
+            tiller = Tiller(
+                tiller_host=opts.get('tiller_host', None),
+                tiller_port=opts.get('tiller_port', None),
+                tiller_namespace=opts.get('tiller_namespace', None))
             tiller_resp = tiller.testing_release(release)
             msg = {
                 'result': '',
@@ -78,8 +80,10 @@ class Tests(api.BaseResource):
     def on_post(self, req, resp):
         try:
             opts = req.params
-            tiller = Tiller(tiller_host=opts.get('tiller_host', None),
-                            tiller_port=opts.get('tiller_port', None))
+            tiller = Tiller(
+                tiller_host=opts.get('tiller_host', None),
+                tiller_port=opts.get('tiller_port', None),
+                tiller_namespace=opts.get('tiller_namespace', None))
 
             documents = self.req_yaml(req)
             armada_obj = Manifest(documents).get_manifest()

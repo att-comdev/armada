@@ -54,6 +54,7 @@ class Armada(object):
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
                  tiller_port=44134,
+                 tiller_namespace="kube-system",
                  values=None):
         '''
         Initialize the Armada Engine and establish
@@ -67,7 +68,9 @@ class Armada(object):
         self.overrides = set_ovr
         self.wait = wait
         self.timeout = timeout
-        self.tiller = Tiller(tiller_host=tiller_host, tiller_port=tiller_port)
+        self.tiller = Tiller(
+            tiller_host=tiller_host, tiller_port=tiller_port,
+            tiller_namespace=tiller_namespace)
         self.values = values
         self.documents = file
         self.config = None

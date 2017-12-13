@@ -78,6 +78,9 @@ SHORT_DESC = "command install manifest charts"
 @click.option(
     '--tiller-port', help="Tiller host port", type=int, default=44134)
 @click.option(
+    '--tiller-namespace', '-tn', help="Tiller namespace", type=str,
+    default="kube-system")
+@click.option(
     '--timeout', help="specifies time to wait for charts", type=int,
     default=3600)
 @click.option('--values', '-f', multiple=True, type=str, default=[])
@@ -96,6 +99,7 @@ def apply_create(ctx,
                  set,
                  tiller_host,
                  tiller_port,
+                 tiller_namespace,
                  timeout,
                  values,
                  wait,
@@ -115,6 +119,7 @@ def apply_create(ctx,
         set,
         tiller_host,
         tiller_port,
+        tiller_namespace,
         timeout,
         values,
         wait).invoke()
@@ -132,6 +137,7 @@ class ApplyManifest(CliAction):
                  set,
                  tiller_host,
                  tiller_port,
+                 tiller_namespace,
                  timeout,
                  values,
                  wait):
@@ -146,6 +152,7 @@ class ApplyManifest(CliAction):
         self.set = set
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+        self.tiller_namespace = tiller_namespace
         self.timeout = timeout
         self.values = values
         self.wait = wait
@@ -181,6 +188,7 @@ class ApplyManifest(CliAction):
                     self.timeout,
                     self.tiller_host,
                     self.tiller_port,
+                    self.tiller_namespace,
                     self.values)
 
                 resp = armada.sync()
@@ -193,6 +201,7 @@ class ApplyManifest(CliAction):
                 'enable_chart_cleanup': self.enable_chart_cleanup,
                 'tiller_host': self.tiller_host,
                 'tiller_port': self.tiller_port,
+                'tiller_namespace': self.tiller_namespace,
                 'timeout': self.timeout,
                 'wait': self.wait
             }

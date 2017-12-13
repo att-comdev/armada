@@ -52,6 +52,7 @@ class Apply(api.BaseResource):
                 timeout=int(opts.get('timeout', 3600)),
                 tiller_host=opts.get('tiller_host', None),
                 tiller_port=int(opts.get('tiller_port', 44134)),
+                tiller_namespace=opts.get('tiller_namespace', "kube-system")
             )
 
             msg = armada.sync()
