@@ -42,7 +42,8 @@ class TillerControllerTest(base.BaseControllerTest):
 
         self.assertEqual(expected, result.json)
         self.assertEqual('application/json', result.headers['content-type'])
-        mock_tiller.assert_called_once_with(tiller_host=None, tiller_port=None)
+        mock_tiller.assert_called_once_with(
+            tiller_host=None, tiller_port=None, tiller_namespace=None)
 
     @mock.patch.object(tiller_controller, 'Tiller')
     def test_get_tiller_status_with_params(self, mock_tiller):
@@ -56,7 +57,8 @@ class TillerControllerTest(base.BaseControllerTest):
         result = self.app.simulate_get('/api/v1.0/status',
                                        params_csv=False,
                                        params={'tiller_host': 'fake_host',
-                                               'tiller_port': '98765'})
+                                               'tiller_port': '98765',
+                                               'tiller_namespace': 'fake_ns'})
         expected = {
             'tiller': {'version': 'fake_verson', 'state': 'fake_status'}
         }
@@ -64,7 +66,8 @@ class TillerControllerTest(base.BaseControllerTest):
         self.assertEqual(expected, result.json)
         self.assertEqual('application/json', result.headers['content-type'])
         mock_tiller.assert_called_once_with(tiller_host='fake_host',
-                                            tiller_port='98765')
+                                            tiller_port='98765',
+                                            tiller_namespace='fake_ns')
 
     @mock.patch.object(tiller_controller, 'Tiller')
     def test_tiller_releases(self, mock_tiller):
@@ -87,7 +90,8 @@ class TillerControllerTest(base.BaseControllerTest):
         }
 
         self.assertEqual(expected, result.json)
-        mock_tiller.assert_called_once_with(tiller_host=None, tiller_port=None)
+        mock_tiller.assert_called_once_with(
+            tiller_host=None, tiller_port=None, tiller_namespace=None)
         mock_tiller.return_value.list_releases.assert_called_once_with()
 
     @mock.patch.object(tiller_controller, 'Tiller')
@@ -108,14 +112,16 @@ class TillerControllerTest(base.BaseControllerTest):
         result = self.app.simulate_get('/api/v1.0/releases',
                                        params_csv=False,
                                        params={'tiller_host': 'fake_host',
-                                               'tiller_port': '98765'})
+                                               'tiller_port': '98765',
+                                               'tiller_namespace': 'fake_ns'})
         expected = {
             'releases': {'bar_namespace': ['foo'], 'qux_namespace': ['baz']}
         }
 
         self.assertEqual(expected, result.json)
         mock_tiller.assert_called_once_with(tiller_host='fake_host',
-                                            tiller_port='98765')
+                                            tiller_port='98765',
+                                            tiller_namespace='fake_ns')
         mock_tiller.return_value.list_releases.assert_called_once_with()
 
 

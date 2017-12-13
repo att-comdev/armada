@@ -50,8 +50,9 @@ class ArmadaControllerTest(base.BaseControllerTest):
             'dry_run': False,
             'wait': False,
             'timeout': 100,
-            'tiller_host': None,
+            'tiller_host': 'localhost',
             'tiller_port': 44134,
+            'tiller_namespace': 'kube-system',
             'target_manifest': None
         }
 

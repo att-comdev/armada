@@ -34,7 +34,6 @@ from armada.handlers.k8s import K8s
 from armada.utils.release import release_prefix
 from armada.utils.release import label_selectors
 
-TILLER_PORT = 44134
 TILLER_VERSION = b'2.5.0'
 TILLER_TIMEOUT = 300
 GRPC_EPSILON = 60
@@ -48,9 +47,8 @@ RUNTEST_SUCCESS = 9
 # limit is exhausted with just 10 releases
 MAX_MESSAGE_LENGTH = 429496729
 
-LOG = logging.getLogger(__name__)
-
 CONF = cfg.CONF
+LOG = logging.getLogger(__name__)
 
 
 class Tiller(object):
@@ -59,10 +57,11 @@ class Tiller(object):
     service over gRPC
     '''
 
-    def __init__(self, tiller_host=None, tiller_port=TILLER_PORT):
-
-        self.tiller_host = tiller_host
-        self.tiller_port = tiller_port
+    def __init__(self, tiller_host=None, tiller_port=None,
+                 tiller_namespace=None):
+        self.tiller_host = tiller_host or CONF.tiller_host
+        self.tiller_port = tiller_port or CONF.tiller_port
+        self.tiller_namespace = tiller_namespace or CONF.tiller_namespace
         # init k8s connectivity
         self.k8s = K8s()
 
@@ -103,8 +102,10 @@ class Tiller(object):
         Returns tiller pod using the tiller pod labels specified in the Armada
         config
         '''
-        pods = self.k8s.get_namespace_pod(
-            CONF.tiller_namespace, CONF.tiller_pod_labels).items
+        pods = None
+        namespace = self._get_tiller_namespace()
+        pods = self.k8s.get_namespace_pod(namespace,
+                                          CONF.tiller_pod_labels).items
         # No tiller pods found
         if not pods:
             raise ex.TillerPodNotFoundException(CONF.tiller_pod_labels)
@@ -129,7 +130,10 @@ class Tiller(object):
 
     def _get_tiller_port(self):
         '''Stub method to support arbitrary ports in the future'''
-        return TILLER_PORT
+        return self.tiller_port
+
+    def _get_tiller_namespace(self):
+        return self.tiller_namespace
 
     def tiller_status(self):
         '''
