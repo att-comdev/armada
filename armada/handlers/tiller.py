@@ -446,6 +446,8 @@ class Tiller(object):
         # build release install request
         try:
             stub = ReleaseServiceStub(self.channel)
+            LOG.info("Uninstall %s release with disable_hooks=%s, "
+                     "purge=%s flags", release, disable_hooks, purge)
             release_request = UninstallReleaseRequest(
                 name=release, disable_hooks=disable_hooks, purge=purge)
 
