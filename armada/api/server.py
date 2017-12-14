@@ -28,6 +28,7 @@ from armada.api.controller.health import Health
 from armada.api.controller.tiller import Release
 from armada.api.controller.tiller import Status
 from armada.api.controller.validation import Validate
+from armada.api.controller.versions import Versions
 
 conf.set_app_default_configs()
 CONF = cfg.CONF
@@ -64,6 +65,7 @@ def create(enable_middleware=CONF.middleware):
 
     for route, service in url_routes_v1:
         api.add_route("/api/v1.0/{}".format(route), service)
+    api.add_route('/versions', Versions())
 
     # Initialize policy config options.
     policy.Enforcer(CONF)
