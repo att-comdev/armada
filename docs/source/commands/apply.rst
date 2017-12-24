@@ -56,5 +56,5 @@ an update of the armada deployed charts.
 
 If you remove ``armada/Charts/v1`` from the ``armada/ChartGroups/v1`` in the armada
 manifest and exectute an ``armada apply`` with the  ``--enable-chart-cleanup`` flag.
-Armada will remove undefiend releases with the armada manifest's
+Armada will remove undefined releases with the armada manifest's
 ``release_prefix`` keyword.
