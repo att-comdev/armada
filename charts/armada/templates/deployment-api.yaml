@@ -19,6 +19,8 @@ limitations under the License.
 {{- $dependencies := .Values.dependencies.api }}
 {{- $mounts_armada_api := .Values.pod.mounts.armada_api.armada_api }}
 {{- $mounts_armada_api_init := .Values.pod.mounts.armada_api.init_container }}
+{{- $serviceAccountName := "armada" }}
+{{ tuple $envAll $dependencies $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -35,6 +37,7 @@ spec:
         configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
         configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
+      serviceAccountName: {{ $serviceAccountName }}
       affinity:
 {{ tuple $envAll "armada" "api" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
