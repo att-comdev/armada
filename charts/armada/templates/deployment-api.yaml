@@ -19,7 +19,7 @@ limitations under the License.
 {{- $dependencies := .Values.dependencies.api }}
 {{- $mounts_armada_api := .Values.pod.mounts.armada_api.armada_api }}
 {{- $mounts_armada_api_init := .Values.pod.mounts.armada_api.init_container }}
-{{- $serviceAccountName := "armada" }}
+{{- $serviceAccountName := "armada-api" }}
 {{ tuple $envAll $dependencies $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
 ---
 apiVersion: apps/v1beta1
