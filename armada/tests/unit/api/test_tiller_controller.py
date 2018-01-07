@@ -17,6 +17,7 @@ import mock
 from oslo_config import cfg
 
 from armada.api.controller import tiller as tiller_controller
+from armada.tests import test_utils
 from armada.tests.unit.api import base
 
 CONF = cfg.CONF
@@ -115,3 +116,26 @@ class TillerControllerTest(base.BaseControllerTest):
         mock_tiller.assert_called_once_with(tiller_host='fake_host',
                                             tiller_port='98765')
         mock_tiller.return_value.list_releases.assert_called_once_with()
+
+
+class TillerControllerNegativeRbacTest(base.BaseControllerTest):
+
+    @test_utils.attr(type=['negative'])
+    def test_list_tiller_releases_insufficient_permissions(self):
+        """Tests the GET /api/v1.0/releases endpoint returns 403 following
+        failed authorization.
+        """
+        rules = {'tiller:get_release': 'rule:admin_api'}
+        self.policy.set_rules(rules)
+        resp = self.app.simulate_get('/api/v1.0/releases')
+        self.assertEqual(403, resp.status_code)
+
+    @test_utils.attr(type=['negative'])
+    def test_get_tiller_status_insufficient_permissions(self):
+        """Tests the GET /api/v1.0/status endpoint returns 403 following
+        failed authorization.
+        """
+        rules = {'tiller:get_status': 'rule:admin_api'}
+        self.policy.set_rules(rules)
+        resp = self.app.simulate_get('/api/v1.0/status')
+        self.assertEqual(403, resp.status_code)

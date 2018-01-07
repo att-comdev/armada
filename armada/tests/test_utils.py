@@ -1,5 +1,6 @@
 # Copyright 2010 United States Government as represented by the
 # Administrator of the National Aeronautics and Space Administration.
+# Copyright 2015 Hewlett-Packard Development Company, L.P.
 # Copyright 2017 AT&T Intellectual Property.
 # All Rights Reserved.
 #
@@ -18,6 +19,8 @@
 import random
 import string
 import uuid
+
+import testtools
 
 
 def rand_uuid_hex():
@@ -86,3 +89,21 @@ def rand_password(length=15):
     pre = upper + digit + punc
     password = pre + ''.join(random.choice(seed) for x in range(length - 3))
     return password
+
+
+def attr(**kwargs):
+    """A decorator which applies the testtools attr decorator
+
+    This decorator applies the testtools.testcase.attr if it is in the list of
+    attributes to testtools we want to apply.
+    """
+
+    def decorator(f):
+        if 'type' in kwargs and isinstance(kwargs['type'], str):
+            f = testtools.testcase.attr(kwargs['type'])(f)
+        elif 'type' in kwargs and isinstance(kwargs['type'], list):
+            for attr in kwargs['type']:
+                f = testtools.testcase.attr(attr)(f)
+        return f
+
+    return decorator
