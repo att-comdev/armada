@@ -69,7 +69,13 @@ class ChartBuilder(object):
         '''
         Return the joined path of the source directory and subpath
         '''
-        return os.path.join(self.chart.source_dir[0], self.chart.source_dir[1])
+        return (
+            os.path.join(self.chart.source_dir[0], self.chart.source_dir[1])
+            if (hasattr(self.chart, 'source_dir') and
+                isinstance(self.chart.source_dir, (list, tuple)) and
+                len(self.chart.source_dir) == 2)
+            else ""
+        )
 
     def get_ignored_files(self):
         '''
@@ -123,10 +129,17 @@ class ChartBuilder(object):
     def get_files(self):
         '''
         Return (non-template) files in this chart
-
-        TODO(alanmeadows): Not implemented
         '''
-        return []
+
+        non_template_files = []
+        for root, dirs, files in os.walk(self.source_directory):
+            relfolder = os.path.split(root)[-1]
+            if not relfolder == 'templates':
+                for file in files:
+                    if (file not in ['Chart.yaml', 'values.yaml'] and
+                            file not in non_template_files):
+                        non_template_files.append(file)
+        return non_template_files
 
     def get_values(self):
         '''
