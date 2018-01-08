@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
+import os
+import shutil
+import yaml
+
+import fixtures
 import mock
+from supermutes.dot import dotify
+import testtools
 
 from armada.handlers.chartbuilder import ChartBuilder
 
 
-class ChartBuilderTestCase(unittest.TestCase):
+class ChartBuilderTestCase(testtools.TestCase):
     chart_stream = """
         chart:
             name: mariadb
@@ -70,12 +76,10 @@ class ChartBuilderTestCase(unittest.TestCase):
         memory: 128Mi
     """
 
-    @unittest.skip("we are having wierd scenario")
+    @testtools.skip("we are having wierd scenario")
     @mock.patch('armada.handlers.chartbuilder.dotify')
     @mock.patch('armada.handlers.chartbuilder.os')
     def test_chart_source_clone(self, mock_os, mock_dot):
-        from supermutes.dot import dotify
-        import yaml
         mock_dot.dotify.return_value = dotify(yaml.load(self.chart_stream))
         mock_os.path.join.return_value = self.chart_stream
 
@@ -85,3 +89,44 @@ class ChartBuilderTestCase(unittest.TestCase):
 
         self.assertIsNotNone(resp)
         self.assertIsInstance(resp, str)
+
+    def test_chart_get_non_template_files(self):
+        """Validates that ``get_files()`` ignores 'Chart.yaml', 'values.yaml'
+        and 'templates' subfolder and all the files contained therein.
+        """
+
+        # Create a temporary directory that represents a chart source directory
+        # with various files, including 'Chart.yaml' and 'values.yaml' which
+        # should be ignored by `get_files()`.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+
+        for filename in ['foo', 'bar', 'Chart.yaml', 'values.yaml']:
+            path = os.path.join(chart_dir.path, filename)
+            fd = os.open(path, os.O_CREAT | os.O_WRONLY)
+            try:
+                os.write(fd, "".encode('utf-8'))
+            finally:
+                os.close(fd)
+
+        # Create a template directory -- 'templates' -- nested inside the chart
+        # directory which should also be ignored.
+        template_dir = os.path.join(chart_dir.path, 'templates')
+        if not os.path.exists(template_dir):
+            os.makedirs(template_dir)
+            self.addCleanup(shutil.rmtree, template_dir)
+
+        for filename in ['template%d' % x for x in range(3)]:
+            path = os.path.join(template_dir, filename)
+            fd = os.open(path, os.O_CREAT | os.O_WRONLY)
+            try:
+                os.write(fd, "".encode('utf-8'))
+            finally:
+                os.close(fd)
+
+        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
+        chartbuilder = ChartBuilder(mock_chart)
+
+        # Validate that only 'foo' and 'bar' are returned.
+        files = chartbuilder.get_files()
+        self.assertEqual(['bar', 'foo'], files)
