@@ -77,7 +77,7 @@ armada/Chart/v1
 
 .. DANGER::
 
-    DEPRICATION: ``timeout`` key-value will be removed timeout will be defiend
+    DEPRECATION: ``timeout`` key-value will be removed timeout will be defined
     under ``wait`` object.
 
 
