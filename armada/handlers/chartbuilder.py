@@ -15,6 +15,7 @@
 import os
 import yaml
 
+from google.protobuf.any_pb2 import Any
 from hapi.chart.chart_pb2 import Chart
 from hapi.chart.config_pb2 import Config
 from hapi.chart.metadata_pb2 import Metadata
@@ -33,7 +34,7 @@ CONF = cfg.CONF
 
 class ChartBuilder(object):
     '''
-    This class handles taking chart intentions as a paramter and
+    This class handles taking chart intentions as a parameter and
     turning those into proper protoc helm charts that can be
     pushed to tiller.
 
@@ -136,9 +137,15 @@ class ChartBuilder(object):
             relfolder = os.path.split(root)[-1]
             if not relfolder == 'templates':
                 for file in files:
+                    file = file.strip()
                     if (file not in ['Chart.yaml', 'values.yaml'] and
                             file not in non_template_files):
-                        non_template_files.append(file)
+                        abspath = os.path.abspath(os.path.join(root, file))
+                        with open(abspath, 'r') as f:
+                            file_contents = f.read().encode('utf-8')
+                        non_template_files.append(
+                            Any(type_url=abspath,
+                                value=file_contents))
         return non_template_files
 
     def get_values(self):
@@ -212,7 +219,8 @@ class ChartBuilder(object):
                 dependencies=dependencies,
                 values=self.get_values(),
                 files=self.get_files())
-        except Exception:
+        except Exception as e:
+            print(e)
             chart_name = self.chart.chart_name
             raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
 

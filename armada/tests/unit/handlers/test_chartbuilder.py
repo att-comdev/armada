@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 import os
 import shutil
+import yaml
 
 import fixtures
+from hapi.chart.chart_pb2 import Chart
 from hapi.chart.metadata_pb2 import Metadata
 import mock
+from supermutes.dot import dotify
 import testtools
 
 from armada.handlers.chartbuilder import ChartBuilder
@@ -26,7 +30,7 @@ from armada.handlers.chartbuilder import ChartBuilder
 class ChartBuilderTestCase(testtools.TestCase):
     chart_stream = """
         chart:
-            name: mariadb
+            chart_name: mariadb
             release_name: mariadb
             namespace: openstack
             install:
@@ -75,18 +79,21 @@ class ChartBuilderTestCase(testtools.TestCase):
         memory: 128Mi
     """
 
+    def _write_temporary_file_contents(self, directory, filename, contents):
+        path = os.path.join(directory, filename)
+        fd = os.open(path, os.O_CREAT | os.O_WRONLY)
+        try:
+            os.write(fd, contents.encode('utf-8'))
+        finally:
+            os.close(fd)
+
     def test_chart_source_clone(self):
         # Create a temporary directory with Chart.yaml that contains data
         # from ``self.chart_yaml``.
         chart_dir = self.useFixture(fixtures.TempDir())
         self.addCleanup(shutil.rmtree, chart_dir.path)
-
-        path = os.path.join(chart_dir.path, 'Chart.yaml')
-        fd = os.open(path, os.O_CREAT | os.O_WRONLY)
-        try:
-            os.write(fd, self.chart_yaml.encode('utf-8'))
-        finally:
-            os.close(fd)
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
+                                            self.chart_yaml)
 
         mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
         chartbuilder = ChartBuilder(mock_chart)
@@ -105,14 +112,8 @@ class ChartBuilderTestCase(testtools.TestCase):
         # should be ignored by `get_files()`.
         chart_dir = self.useFixture(fixtures.TempDir())
         self.addCleanup(shutil.rmtree, chart_dir.path)
-
         for filename in ['foo', 'bar', 'Chart.yaml', 'values.yaml']:
-            path = os.path.join(chart_dir.path, filename)
-            fd = os.open(path, os.O_CREAT | os.O_WRONLY)
-            try:
-                os.write(fd, "".encode('utf-8'))
-            finally:
-                os.close(fd)
+            self._write_temporary_file_contents(chart_dir.path, filename, "")
 
         # Create a template directory -- 'templates' -- nested inside the chart
         # directory which should also be ignored.
@@ -120,18 +121,145 @@ class ChartBuilderTestCase(testtools.TestCase):
         if not os.path.exists(template_dir):
             os.makedirs(template_dir)
             self.addCleanup(shutil.rmtree, template_dir)
-
         for filename in ['template%d' % x for x in range(3)]:
-            path = os.path.join(template_dir, filename)
-            fd = os.open(path, os.O_CREAT | os.O_WRONLY)
-            try:
-                os.write(fd, "".encode('utf-8'))
-            finally:
-                os.close(fd)
+            self._write_temporary_file_contents(template_dir, filename, "")
 
         mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
         chartbuilder = ChartBuilder(mock_chart)
 
+        expected_files = ('[type_url: "%s"\n, type_url: "%s"\n]' % (
+                          os.path.join(chart_dir.path, 'bar'),
+                          os.path.join(chart_dir.path, 'foo')))
+
         # Validate that only 'foo' and 'bar' are returned.
         files = chartbuilder.get_files()
-        self.assertEqual(['bar', 'foo'], sorted(files))
+        self.assertEqual(expected_files, repr(files).strip())
+
+    def test_get_basic_helm_chart(self):
+        # Before ChartBuilder is executed the `source_dir` points to a
+        # directory that was either clone or unpacked from a tarball... pretend
+        # that that logic has already been performed.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
+                                            self.chart_yaml)
+        ch = yaml.safe_load(self.chart_stream)['chart']
+        ch['source_dir'] = (chart_dir.path, '')
+
+        test_chart = dotify(ch)
+        chartbuilder = ChartBuilder(test_chart)
+        helm_chart = chartbuilder.get_helm_chart()
+
+        expected = inspect.cleandoc(
+            """
+            metadata {
+              name: "hello-world-chart"
+              version: "0.1.0"
+              description: "A Helm chart for Kubernetes"
+            }
+            values {
+            }
+            """
+        ).strip()
+
+        self.assertIsInstance(helm_chart, Chart)
+        self.assertTrue(hasattr(helm_chart, 'metadata'))
+        self.assertTrue(hasattr(helm_chart, 'values'))
+        self.assertEqual(expected, repr(helm_chart).strip())
+
+    def test_get_helm_chart_with_values(self):
+        # Before ChartBuilder is executed the `source_dir` points to a
+        # directory that was either clone or unpacked from a tarball... pretend
+        # that that logic has already been performed.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
+                                            self.chart_yaml)
+        self._write_temporary_file_contents(chart_dir.path, 'values.yaml',
+                                            self.chart_value)
+
+        ch = yaml.safe_load(self.chart_stream)['chart']
+        ch['source_dir'] = (chart_dir.path, '')
+
+        test_chart = dotify(ch)
+        chartbuilder = ChartBuilder(test_chart)
+        helm_chart = chartbuilder.get_helm_chart()
+
+        self.assertIsInstance(helm_chart, Chart)
+        self.assertTrue(hasattr(helm_chart, 'metadata'))
+        self.assertTrue(hasattr(helm_chart, 'values'))
+        self.assertTrue(hasattr(helm_chart.values, 'raw'))
+        self.assertEqual(self.chart_value, helm_chart.values.raw)
+
+    def test_get_helm_chart_with_files(self):
+        # Before ChartBuilder is executed the `source_dir` points to a
+        # directory that was either clone or unpacked from a tarball... pretend
+        # that that logic has already been performed.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
+                                            self.chart_yaml)
+        self._write_temporary_file_contents(chart_dir.path, 'foo', "foobar")
+        self._write_temporary_file_contents(chart_dir.path, 'bar', "bazqux")
+
+        ch = yaml.safe_load(self.chart_stream)['chart']
+        ch['source_dir'] = (chart_dir.path, '')
+
+        test_chart = dotify(ch)
+        chartbuilder = ChartBuilder(test_chart)
+        helm_chart = chartbuilder.get_helm_chart()
+
+        expected_files = ('[type_url: "%s"\nvalue: "bazqux"\n, '
+                          'type_url: "%s"\nvalue: "foobar"\n]' % (
+                              os.path.join(chart_dir.path, 'bar'),
+                              os.path.join(chart_dir.path, 'foo')))
+
+        self.assertIsInstance(helm_chart, Chart)
+        self.assertTrue(hasattr(helm_chart, 'metadata'))
+        self.assertTrue(hasattr(helm_chart, 'values'))
+        self.assertTrue(hasattr(helm_chart, 'files'))
+        self.assertEqual(expected_files, repr(helm_chart.files).strip())
+
+    def test_get_helm_chart_includes_only_relevant_files(self):
+        # Before ChartBuilder is executed the `source_dir` points to a
+        # directory that was either clone or unpacked from a tarball... pretend
+        # that that logic has already been performed.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        template_dir = os.path.join(chart_dir.path, 'templates')
+        if not os.path.exists(template_dir):
+            os.makedirs(template_dir)
+            self.addCleanup(shutil.rmtree, template_dir)
+
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
+                                            self.chart_yaml)
+        self._write_temporary_file_contents(chart_dir.path, 'foo', "foobar")
+        self._write_temporary_file_contents(chart_dir.path, 'bar', "bazqux")
+
+        # Files to ignore.
+        self._write_temporary_file_contents(chart_dir.path, 'values.yaml', "")
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml', "")
+        for filename in ['template%d' % x for x in range(3)]:
+            self._write_temporary_file_contents(template_dir, filename, "")
+
+        ch = yaml.safe_load(self.chart_stream)['chart']
+        ch['source_dir'] = (chart_dir.path, '')
+
+        test_chart = dotify(ch)
+        chartbuilder = ChartBuilder(test_chart)
+        helm_chart = chartbuilder.get_helm_chart()
+
+        expected_files = ('[type_url: "%s"\nvalue: "bazqux"\n, '
+                          'type_url: "%s"\nvalue: "foobar"\n]' % (
+                              os.path.join(chart_dir.path, 'bar'),
+                              os.path.join(chart_dir.path, 'foo')))
+
+        # Validate that only relevant files are included, that the ignored
+        # files are present.
+        self.assertIsInstance(helm_chart, Chart)
+        self.assertTrue(hasattr(helm_chart, 'metadata'))
+        self.assertTrue(hasattr(helm_chart, 'values'))
+        self.assertTrue(hasattr(helm_chart, 'files'))
+        self.assertEqual(expected_files, repr(helm_chart.files).strip())
