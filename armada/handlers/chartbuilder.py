@@ -15,6 +15,7 @@
 import os
 import yaml
 
+from google.protobuf.any_pb2 import Any
 from hapi.chart.chart_pb2 import Chart
 from hapi.chart.config_pb2 import Config
 from hapi.chart.metadata_pb2 import Metadata
@@ -33,7 +34,7 @@ CONF = cfg.CONF
 
 class ChartBuilder(object):
     '''
-    This class handles taking chart intentions as a paramter and
+    This class handles taking chart intentions as a parameter and
     turning those into proper protoc helm charts that can be
     pushed to tiller.
 
@@ -128,17 +129,43 @@ class ChartBuilder(object):
 
     def get_files(self):
         '''
-        Return (non-template) files in this chart
+        Return (non-template) files in this chart.
+
+        Non-template files include all files **not** under templates and
+        charts subfolders, except: Chart.yaml, values.yaml, values.toml and
+        charts/.prov
+
+        The class :class:`google.protobuf.any_pb2.Any` is wrapped around
+        each file as that is what Helm uses.
+
+        For more information, see:
+        https://github.com/kubernetes/helm/blob/fa06dd176dbbc247b40950e38c09f978efecaecc/pkg/chartutil/load.go
+
+        :returns: List of non-template files.
+        :rtype: List[:class:`google.protobuf.any_pb2.Any`]
         '''
 
+        files_to_ignore = ['Chart.yaml', 'values.yaml', 'values.toml']
         non_template_files = []
+
+        def _append_file_to_result(root, file):
+            abspath = os.path.abspath(os.path.join(root, file))
+            with open(abspath, 'r') as f:
+                file_contents = f.read().encode('utf-8')
+            non_template_files.append(
+                Any(type_url=abspath,
+                    value=file_contents))
+
         for root, dirs, files in os.walk(self.source_directory):
             relfolder = os.path.split(root)[-1]
-            if not relfolder == 'templates':
+            if relfolder not in ['charts', 'templates']:
                 for file in files:
-                    if (file not in ['Chart.yaml', 'values.yaml'] and
+                    if (file not in files_to_ignore and
                             file not in non_template_files):
-                        non_template_files.append(file)
+                        _append_file_to_result(root, file)
+            elif relfolder == 'charts' and '.prov' in files:
+                _append_file_to_result(root, '.prov')
+
         return non_template_files
 
     def get_values(self):
@@ -190,11 +217,9 @@ class ChartBuilder(object):
         '''
         Return a helm chart object
         '''
-
         if self._helm_chart:
             return self._helm_chart
-        # dependencies
-        # [process_chart(x, is_dependency=True) for x in chart.dependencies]
+
         dependencies = []
         for dep in self.chart.dependencies:
             LOG.info("Building dependency chart %s for release %s",
