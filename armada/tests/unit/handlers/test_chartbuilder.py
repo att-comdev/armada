@@ -28,10 +28,41 @@ from armada.handlers.chartbuilder import ChartBuilder
 
 
 class ChartBuilderTestCase(testtools.TestCase):
+
+    chart_yaml = """
+        apiVersion: v1
+        description: A sample Helm chart for Kubernetes
+        name: hello-world-chart
+        version: 0.1.0
+    """
+
+    chart_value = """
+        # Default values for hello-world-chart.
+        # This is a YAML-formatted file.
+        # Declare variables to be passed into your templates.
+        replicaCount: 1
+        image:
+            repository: nginx
+            tag: stable
+            pullPolicy: IfNotPresent
+        service:
+            name: nginx
+            type: ClusterIP
+            externalPort: 38443
+            internalPort: 80
+        resources:
+            limits:
+                cpu: 100m
+                memory: 128Mi
+        requests:
+            cpu: 100m
+            memory: 128Mi
+    """
+
     chart_stream = """
         chart:
             chart_name: mariadb
-            release_name: mariadb
+            release: mariadb
             namespace: openstack
             install:
                 no_hooks: false
@@ -47,36 +78,32 @@ class ChartBuilderTestCase(testtools.TestCase):
                 subpath: mariadb
                 reference: master
             dependencies: []
-            """
-
-    chart_yaml = """
-    apiVersion: v1
-    description: A Helm chart for Kubernetes
-    name: hello-world-chart
-    version: 0.1.0
     """
 
-    chart_value = """
-    # Default values for hello-world-chart.
-    # This is a YAML-formatted file.
-    # Declare variables to be passed into your templates.
-    replicaCount: 1
-    image:
-        repository: nginx
-        tag: stable
-        pullPolicy: IfNotPresent
-    service:
-        name: nginx
-        type: ClusterIP
-        externalPort: 38443
-        internalPort: 80
-    resources:
-        limits:
-            cpu: 100m
-            memory: 128Mi
-    requests:
-        cpu: 100m
-        memory: 128Mi
+    dependency_chart_yaml = """
+        apiVersion: v1
+        description: Another sample Helm chart for Kubernetes
+        name: dependency-chart
+        version: 0.1.0
+    """
+
+    dependency_chart_stream = """
+        chart:
+            chart_name: keystone
+            release: keystone
+            namespace: undercloud
+            timeout: 100
+            install:
+                no_hooks: false
+            upgrade:
+                no_hooks: false
+            values: {}
+            source:
+                type: git
+                location: git://github.com/example/example
+                subpath: example-chart
+                reference: master
+            dependencies: []
     """
 
     def _write_temporary_file_contents(self, directory, filename, contents):
@@ -161,7 +188,7 @@ class ChartBuilderTestCase(testtools.TestCase):
             metadata {
               name: "hello-world-chart"
               version: "0.1.0"
-              description: "A Helm chart for Kubernetes"
+              description: "A sample Helm chart for Kubernetes"
             }
             values {
             }
@@ -282,4 +309,104 @@ class ChartBuilderTestCase(testtools.TestCase):
         actual_files = sorted(helm_chart.files, key=lambda x: x.value)
         self.assertEqual(expected_files, repr(actual_files).strip())
 
-    # TODO(fmontei): Add a test for test_get_helm_chart_with_dependencies.
+    def test_get_helm_chart_with_dependencies(self):
+        # Main chart directory and files.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
+                                            self.chart_yaml)
+        ch = yaml.safe_load(self.chart_stream)['chart']
+        ch['source_dir'] = (chart_dir.path, '')
+
+        # Dependency chart directory and files.
+        dep_chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, dep_chart_dir.path)
+        self._write_temporary_file_contents(dep_chart_dir.path, 'Chart.yaml',
+                                            self.dependency_chart_yaml)
+        dep_ch = yaml.safe_load(self.dependency_chart_stream)
+        dep_ch['chart']['source_dir'] = (dep_chart_dir.path, '')
+
+        main_chart = dotify(ch)
+        dependency_chart = dotify(dep_ch)
+        main_chart.dependencies = [dependency_chart]
+
+        chartbuilder = ChartBuilder(main_chart)
+        helm_chart = chartbuilder.get_helm_chart()
+
+        expected_dependency = inspect.cleandoc("""
+            metadata {
+              name: "dependency-chart"
+              version: "0.1.0"
+              description: "Another sample Helm chart for Kubernetes"
+            }
+            values {
+            }
+        """).strip()
+
+        expected = inspect.cleandoc("""
+            metadata {
+              name: "hello-world-chart"
+              version: "0.1.0"
+              description: "A sample Helm chart for Kubernetes"
+            }
+            dependencies {
+              metadata {
+                name: "dependency-chart"
+                version: "0.1.0"
+                description: "Another sample Helm chart for Kubernetes"
+              }
+              values {
+              }
+            }
+            values {
+            }
+        """).strip()
+
+        # Validate the main chart.
+        self.assertIsInstance(helm_chart, Chart)
+        self.assertTrue(hasattr(helm_chart, 'metadata'))
+        self.assertTrue(hasattr(helm_chart, 'values'))
+        self.assertEqual(expected, repr(helm_chart).strip())
+
+        # Validate the dependency chart.
+        self.assertTrue(hasattr(helm_chart, 'dependencies'))
+        self.assertEqual(1, len(helm_chart.dependencies))
+
+        dep_helm_chart = helm_chart.dependencies[0]
+        self.assertIsInstance(dep_helm_chart, Chart)
+        self.assertTrue(hasattr(dep_helm_chart, 'metadata'))
+        self.assertTrue(hasattr(dep_helm_chart, 'values'))
+        self.assertEqual(expected_dependency, repr(dep_helm_chart).strip())
+
+    def test_dump(self):
+        # Validate base case.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
+                                            self.chart_yaml)
+        ch = yaml.safe_load(self.chart_stream)['chart']
+        ch['source_dir'] = (chart_dir.path, '')
+
+        test_chart = dotify(ch)
+        chartbuilder = ChartBuilder(test_chart)
+        self.assertRegex(
+            repr(chartbuilder.dump()),
+            'hello-world-chart.*A sample Helm chart for Kubernetes.*')
+
+        # Validate recursive case (with dependencies).
+        dep_chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, dep_chart_dir.path)
+        self._write_temporary_file_contents(dep_chart_dir.path, 'Chart.yaml',
+                                            self.dependency_chart_yaml)
+        dep_ch = yaml.safe_load(self.dependency_chart_stream)
+        dep_ch['chart']['source_dir'] = (dep_chart_dir.path, '')
+
+        dependency_chart = dotify(dep_ch)
+        test_chart.dependencies = [dependency_chart]
+        chartbuilder = ChartBuilder(test_chart)
+
+        re = inspect.cleandoc("""
+            hello-world-chart.*A sample Helm chart for Kubernetes.*
+            dependency-chart.*Another sample Helm chart for Kubernetes.*
+        """).replace('\n', '').strip()
+        self.assertRegex(repr(chartbuilder.dump()), re)
