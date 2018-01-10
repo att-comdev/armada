@@ -222,8 +222,8 @@ class ChartBuilder(object):
 
         dependencies = []
         for dep in self.chart.dependencies:
-            LOG.info("Building dependency chart %s for release %s",
-                     self.chart.chart_name, self.chart.release)
+            LOG.info("Building dependency chart %s for release %s.",
+                     dep.chart.chart_name, dep.chart.release)
             try:
                 dependencies.append(ChartBuilder(dep.chart).get_helm_chart())
             except Exception:
