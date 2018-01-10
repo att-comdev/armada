@@ -26,5 +26,5 @@ class ValidationControllerNegativeRbacTest(base.BaseControllerTest):
         """
         rules = {'armada:validate_manifest': policy_base.RULE_ADMIN_REQUIRED}
         self.policy.set_rules(rules)
-        resp = self.app.simulate_post('/api/v1.0/validate')
+        resp = self.app.simulate_post('/api/v1.0/validatedesign')
         self.assertEqual(403, resp.status_code)
