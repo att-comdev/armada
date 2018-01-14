@@ -1,5 +1,7 @@
-Armada - Using Armada
-=====================
+.. _guide-use-armada:
+
+Armada Install & Usage Guide
+============================
 
 Prerequisites
 -------------
