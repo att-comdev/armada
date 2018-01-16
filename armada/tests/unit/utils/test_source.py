@@ -13,16 +13,33 @@
 # limitations under the License.
 
 import os
+import socket
 import shutil
 
+import fixtures
 import mock
-import unittest
+import testtools
 
 from armada.exceptions import source_exceptions
+from armada.tests import test_utils
 from armada.utils import source
 
 
-class GitTestCase(unittest.TestCase):
+def is_connected():
+    """Verifies whether network connectivity is up.
+
+    :returns: True if connected else False.
+    """
+    try:
+        host = socket.gethostbyname("www.github.com")
+        socket.create_connection((host, 80), 2)
+        return True
+    except:
+        pass
+    return False
+
+
+class GitTestCase(testtools.TestCase):
 
     def _validate_git_clone(self, repo_dir, expected_ref=None):
         self.assertTrue(os.path.isdir(repo_dir))
@@ -36,23 +53,32 @@ class GitTestCase(unittest.TestCase):
                     as git_file:
                 self.assertIn(expected_ref, git_file.read())
 
+    @testtools.skipUnless(
+        is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_good_url(self):
         url = 'http://github.com/att-comdev/armada'
         git_dir = source.git_clone(url)
         self._validate_git_clone(git_dir)
 
+    @testtools.skipUnless(
+        is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_commit(self):
         url = 'http://github.com/att-comdev/armada'
         commit = 'cba78d1d03e4910f6ab1691bae633c5bddce893d'
         git_dir = source.git_clone(url, commit)
         self._validate_git_clone(git_dir)
 
+    @testtools.skipUnless(
+        is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_ref(self):
         ref = 'refs/changes/54/457754/73'
         git_dir = source.git_clone(
             'https://github.com/openstack/openstack-helm', ref)
         self._validate_git_clone(git_dir, ref)
 
+    @test_utils.attr(type=['negative'])
+    @testtools.skipUnless(
+        is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_empty_url(self):
         url = ''
         error_re = '%s is not a valid git repository.' % url
@@ -61,6 +87,9 @@ class GitTestCase(unittest.TestCase):
                 source_exceptions.GitLocationException, error_re):
             source.git_clone(url)
 
+    @test_utils.attr(type=['negative'])
+    @testtools.skipUnless(
+        is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_bad_url(self):
         url = 'http://github.com/dummy/armada'
         error_re = '%s is not a valid git repository.' % url
@@ -105,36 +134,55 @@ class GitTestCase(unittest.TestCase):
         mock_tarfile.open.assert_called_once_with(path)
         mock_opened_file.extractall.assert_called_once_with('/tmp/armada')
 
+    @test_utils.attr(type=['negative'])
     @mock.patch('armada.utils.source.path')
     @mock.patch('armada.utils.source.tarfile')
     def test_tarball_extract_bad_path(self, mock_tarfile, mock_path):
         mock_path.exists.return_value = False
         path = '/tmp/armada'
-        with self.assertRaises(source_exceptions.InvalidPathException):
-            source.extract_tarball(path)
+
+        self.assertRaises(source_exceptions.InvalidPathException,
+                          source.extract_tarball, path)
 
         mock_tarfile.open.assert_not_called()
         mock_tarfile.extractall.assert_not_called()
 
+    @mock.patch.object(source, 'LOG')
+    def test_source_cleanup(self, mock_log):
+        url = 'http://github.com/att-comdev/armada'
+        git_path = source.git_clone(url)
+        source.source_cleanup(git_path)
+        mock_log.warning.assert_not_called()
+
+    @test_utils.attr(type=['negative'])
+    @mock.patch.object(source, 'LOG')
+    def test_source_cleanup_fake_git_path(self, mock_log):
+        # Verify that passing in a fake path does nothing but log a warning.
+        # Don't want anyone using the function to delete random directories.
+        fake_path = self.useFixture(fixtures.TempDir()).path
+        self.addCleanup(shutil.rmtree, fake_path)
+        source.source_cleanup(fake_path)
+
+        self.assertTrue(mock_log.warning.called)
+        actual_call = mock_log.warning.mock_calls[0][1][:2]
+        self.assertEqual(
+            ('%s is not a valid git repository. Details: %s', fake_path),
+            actual_call)
+
+    @test_utils.attr(type=['negative'])
+    @mock.patch.object(source, 'LOG')
     @mock.patch('armada.utils.source.shutil')
     @mock.patch('armada.utils.source.path')
-    def test_source_cleanup(self, mock_path, mock_shutil):
-        mock_path.exists.return_value = True
-        path = 'armada'
-
-        try:
-            source.source_cleanup(path)
-        except source_exceptions.SourceCleanupException:
-            pass
-
-        mock_shutil.rmtree.assert_called_with(path)
-
-    @unittest.skip('not handled correctly')
-    @mock.patch('armada.utils.source.shutil')
-    @mock.patch('armada.utils.source.path')
-    def test_source_cleanup_bad_path(self, mock_path, mock_shutil):
+    def test_source_cleanup_missing_git_path(self, mock_path, mock_shutil,
+                                             mock_log):
+        # Verify that passing in a missing path does nothing but log a warning.
         mock_path.exists.return_value = False
         path = 'armada'
-        with self.assertRaises(source_exceptions.InvalidPathException):
-            source.source_cleanup(path)
+        source.source_cleanup(path)
+
         mock_shutil.rmtree.assert_not_called()
+        self.assertTrue(mock_log.warning.called)
+        actual_call = mock_log.warning.mock_calls[0][1]
+        self.assertEqual(
+            ('Could not delete the path %s. Is it a git repository?', path),
+            actual_call)
