@@ -18,20 +18,23 @@ import tarfile
 import tempfile
 from os import path
 
-import requests
 from git import Git
 from git import Repo
+from oslo_log import log as logging
+import requests
 from requests.packages import urllib3
 
 from armada.exceptions import source_exceptions
 
+LOG = logging.getLogger(__name__)
+
 
 def git_clone(repo_url, ref='master'):
-    '''
-    :params repo_url - URL of git repo to clone
-    :params ref - branch, commit or reference in the repo to clone
+    '''Clone a git repository from ``repo_url`` using the reference ``ref``.
 
-    Returns a path to the cloned repo
+    :params repo_url: URL of git repo to clone.
+    :params ref: branch, commit or reference in the repo to clone.
+    :returns: Path to the cloned repo.
     '''
 
     if repo_url == '':
@@ -93,8 +96,15 @@ def extract_tarball(tarball_path):
 
 
 def source_cleanup(target_dir):
-    '''
-    Clean up source
+    '''Clean up the git repository that was created by ``git_clone`` above.
+
+    Removes the ``target_dir`` repository and all associated files if they
+    exist.
+
+    :param str target_dir: The git repository to delete.
     '''
     if path.exists(target_dir):
         shutil.rmtree(target_dir)
+    else:
+        LOG.warning('Could not delete the path %s. Is it a git repository?',
+                    target_dir)
