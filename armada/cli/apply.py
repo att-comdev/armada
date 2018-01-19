@@ -124,13 +124,13 @@ class ApplyManifest(CliAction):
     def output(self, resp):
         for result in resp:
             if not resp[result] and not result == 'diff':
-                self.logger.info('Did not performed chart %s(s)', result)
+                self.logger.info('Did not perform chart %s(s)', result)
             elif result == 'diff' and not resp[result]:
-                self.logger.info('No Relase changes detected')
+                self.logger.info('No release changes detected')
 
             for ch in resp[result]:
                 if not result == 'diff':
-                    msg = 'Chart {} was {}'.format(ch, result)
+                    msg = 'Chart {} was {}ed'.format(ch, result)
                     self.logger.info(msg)
                 else:
                     self.logger.info('Chart values diff')
