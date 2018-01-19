@@ -155,6 +155,20 @@ conf:
     tiller:get_released: "rule:admin_required"
 
 pod:
+  env:
+    armada_api:
+#      - name: http_proxy
+#        value: http://proxy.example.com:8080
+#      - name: https_proxy
+#        value: http://proxy.example.com:8080
+#      - name: no_proxy
+#        value: 10.96.0.1
+#      - name: HTTP_PROXY
+#        value: http://proxy.example.com:8080
+#      - name: HTTPS_PROXY
+#        value: http://proxy.example.com:8080
+#      - name: NO_PROXY
+#        value: 10.96.0.1
   mounts:
     armada_api:
       init_container: null
