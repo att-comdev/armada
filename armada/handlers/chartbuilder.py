@@ -22,10 +22,10 @@ from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.template_pb2 import Template
 from supermutes.dot import dotify
 
-from armada.exceptions import chartbuilder_exceptions
-
 from oslo_config import cfg
 from oslo_log import log as logging
+
+from armada.exceptions import chartbuilder_exceptions
 
 LOG = logging.getLogger(__name__)
 
@@ -131,9 +131,9 @@ class ChartBuilder(object):
         '''
         Return (non-template) files in this chart.
 
-        Non-template files include all files **not** under templates and
-        charts subfolders, except: Chart.yaml, values.yaml, values.toml and
-        charts/.prov
+        Non-template files include all files *except* Chart.yaml, values.yaml,
+        values.toml, and any file nested under charts/ or templates/. The only
+        exception to this rule is charts/.prov
 
         The class :class:`google.protobuf.any_pb2.Any` is wrapped around
         each file as that is what Helm uses.
@@ -148,23 +148,28 @@ class ChartBuilder(object):
         files_to_ignore = ['Chart.yaml', 'values.yaml', 'values.toml']
         non_template_files = []
 
-        def _append_file_to_result(root, file):
+        def _append_file_to_result(root, rel_folder_path, file):
             abspath = os.path.abspath(os.path.join(root, file))
+            relpath = os.path.join(rel_folder_path, file)
+
             with open(abspath, 'r') as f:
                 file_contents = f.read().encode('utf-8')
             non_template_files.append(
-                Any(type_url=abspath,
+                Any(type_url=relpath,
                     value=file_contents))
 
         for root, dirs, files in os.walk(self.source_directory):
             relfolder = os.path.split(root)[-1]
-            if relfolder not in ['charts', 'templates']:
+            rel_folder_path = os.path.relpath(root, self.source_directory)
+
+            if not any(root.startswith(os.path.join(self.source_directory, x))
+                       for x in ['templates', 'charts']):
                 for file in files:
                     if (file not in files_to_ignore and
                             file not in non_template_files):
-                        _append_file_to_result(root, file)
+                        _append_file_to_result(root, rel_folder_path, file)
             elif relfolder == 'charts' and '.prov' in files:
-                _append_file_to_result(root, '.prov')
+                _append_file_to_result(root, rel_folder_path, '.prov')
 
         return non_template_files
 

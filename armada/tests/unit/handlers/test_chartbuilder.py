@@ -28,7 +28,6 @@ from armada.handlers.chartbuilder import ChartBuilder
 
 
 class ChartBuilderTestCase(testtools.TestCase):
-
     chart_yaml = """
         apiVersion: v1
         description: A sample Helm chart for Kubernetes
@@ -159,10 +158,8 @@ class ChartBuilderTestCase(testtools.TestCase):
         mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
         chartbuilder = ChartBuilder(mock_chart)
 
-        expected_files = ('[type_url: "%s"\n, type_url: "%s"\n]' % (
-                          os.path.join(chart_dir.path, 'bar'),
-                          os.path.join(chart_dir.path, 'foo')))
-
+        expected_files = ('[type_url: "%s"\n, type_url: "%s"\n]' % ('./bar',
+                                                                    './foo'))
         # Validate that only 'foo' and 'bar' are returned.
         actual_files = sorted(chartbuilder.get_files(),
                               key=lambda x: x.type_url)
@@ -247,10 +244,8 @@ class ChartBuilderTestCase(testtools.TestCase):
 
         expected_files = ('[type_url: "%s"\nvalue: "bazqux"\n, '
                           'type_url: "%s"\nvalue: "foobar"\n, '
-                          'type_url: "%s"\nvalue: "random"\n]' % (
-                              os.path.join(chart_dir.path, 'bar'),
-                              os.path.join(chart_dir.path, 'foo'),
-                              os.path.join(nested_dir, 'nested0')))
+                          'type_url: "%s"\nvalue: "random"\n]' %
+                          ('./bar', './foo', 'nested/nested0'))
 
         self.assertIsInstance(helm_chart, Chart)
         self.assertTrue(hasattr(helm_chart, 'metadata'))
@@ -267,6 +262,10 @@ class ChartBuilderTestCase(testtools.TestCase):
             chart_dir.path, 'templates')
         charts_subdir = self._make_temporary_subdirectory(
             chart_dir.path, 'charts')
+        templates_nested_subdir = self._make_temporary_subdirectory(
+            templates_subdir, 'bin')
+        charts_nested_subdir = self._make_temporary_subdirectory(
+            charts_subdir, 'extra')
 
         self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
                                             self.chart_yaml)
@@ -277,14 +276,22 @@ class ChartBuilderTestCase(testtools.TestCase):
         files_to_ignore = ['Chart.yaml', 'values.yaml', 'values.toml']
         for file in files_to_ignore:
             self._write_temporary_file_contents(chart_dir.path, file, "")
+        file_to_ignore = 'file_to_ignore'
         # Files to ignore within templates/ subdirectory.
-        for filename in ['template%d' % x for x in range(3)]:
-            self._write_temporary_file_contents(templates_subdir, filename, "")
+        self._write_temporary_file_contents(
+            templates_subdir, file_to_ignore, "")
         # Files to ignore within charts/ subdirectory.
-        for filename in ['chart%d' % x for x in range(3)]:
-            self._write_temporary_file_contents(charts_subdir, filename, "")
+        self._write_temporary_file_contents(
+            charts_subdir, file_to_ignore, "")
+        # Files to ignore within templates/bin subdirectory.
+        self._write_temporary_file_contents(
+            templates_nested_subdir, file_to_ignore, "")
+        # Files to ignore within charts/extra subdirectory.
+        self._write_temporary_file_contents(
+            charts_nested_subdir, file_to_ignore, "")
         # Files to **include** within charts/ subdirectory.
-        self._write_temporary_file_contents(charts_subdir, '.prov', "xyzzy")
+        self._write_temporary_file_contents(
+            charts_subdir, '.prov', "xyzzy")
 
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
@@ -295,10 +302,8 @@ class ChartBuilderTestCase(testtools.TestCase):
 
         expected_files = ('[type_url: "%s"\nvalue: "bazqux"\n, '
                           'type_url: "%s"\nvalue: "foobar"\n, '
-                          'type_url: "%s"\nvalue: "xyzzy"\n]' % (
-                              os.path.join(chart_dir.path, 'bar'),
-                              os.path.join(chart_dir.path, 'foo'),
-                              os.path.join(charts_subdir, '.prov')))
+                          'type_url: "%s"\nvalue: "xyzzy"\n]' %
+                          ('./bar', './foo', 'charts/.prov'))
 
         # Validate that only relevant files are included, that the ignored
         # files are present.
