@@ -159,10 +159,8 @@ class ChartBuilderTestCase(testtools.TestCase):
         mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
         chartbuilder = ChartBuilder(mock_chart)
 
-        expected_files = ('[type_url: "%s"\n, type_url: "%s"\n]' % (
-                          os.path.join(chart_dir.path, 'bar'),
-                          os.path.join(chart_dir.path, 'foo')))
-
+        expected_files = ('[type_url: "%s"\n, type_url: "%s"\n]' % ('./bar',
+                                                                    './foo'))
         # Validate that only 'foo' and 'bar' are returned.
         actual_files = sorted(chartbuilder.get_files(),
                               key=lambda x: x.type_url)
@@ -247,10 +245,8 @@ class ChartBuilderTestCase(testtools.TestCase):
 
         expected_files = ('[type_url: "%s"\nvalue: "bazqux"\n, '
                           'type_url: "%s"\nvalue: "foobar"\n, '
-                          'type_url: "%s"\nvalue: "random"\n]' % (
-                              os.path.join(chart_dir.path, 'bar'),
-                              os.path.join(chart_dir.path, 'foo'),
-                              os.path.join(nested_dir, 'nested0')))
+                          'type_url: "%s"\nvalue: "random"\n]' %
+                          ('./bar', './foo', 'nested/nested0'))
 
         self.assertIsInstance(helm_chart, Chart)
         self.assertTrue(hasattr(helm_chart, 'metadata'))
@@ -295,10 +291,8 @@ class ChartBuilderTestCase(testtools.TestCase):
 
         expected_files = ('[type_url: "%s"\nvalue: "bazqux"\n, '
                           'type_url: "%s"\nvalue: "foobar"\n, '
-                          'type_url: "%s"\nvalue: "xyzzy"\n]' % (
-                              os.path.join(chart_dir.path, 'bar'),
-                              os.path.join(chart_dir.path, 'foo'),
-                              os.path.join(charts_subdir, '.prov')))
+                          'type_url: "%s"\nvalue: "xyzzy"\n]' %
+                          ('./bar', './foo', 'charts/.prov'))
 
         # Validate that only relevant files are included, that the ignored
         # files are present.
