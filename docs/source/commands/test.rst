@@ -13,7 +13,7 @@ Commands
 
       The tiller command uses flags to obtain information from tiller services.
       The test command will run the release chart tests either via a
-      manifest or by targeting a relase.
+      manifest or by targeting a release.
 
       To obtain armada deployed releases:
 

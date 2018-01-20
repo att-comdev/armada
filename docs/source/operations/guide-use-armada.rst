@@ -62,7 +62,7 @@ b. Helm Install
 
 .. note::
 
-    To install Armada via the Helm chart please make sure to provide an Keysonte
+    To install Armada via the Helm chart please make sure to provide a Keystone
     endpoint
 
 .. code:: bash

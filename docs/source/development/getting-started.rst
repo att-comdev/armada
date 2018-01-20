@@ -5,7 +5,7 @@ Development
 Docker
 ######
 
-To use the docker containter to develop:
+To use the docker container to develop:
 
 1. Fork the `Repository <http://github.com/att-comdev/armada>`_
 2. Clone the forked repo

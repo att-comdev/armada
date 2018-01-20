@@ -69,7 +69,7 @@ Source Exceptions
 +--------------------------+---------------------------------------------------------------------+
 | TarballExtractException  | Occurs when extracting a tarball fails.                             |
 +--------------------------+---------------------------------------------------------------------+
-| InvalidPathException     | Occurs when a nonexistant path is accessed.                         |
+| InvalidPathException     | Occurs when a non-existent path is accessed.                        |
 +--------------------------+---------------------------------------------------------------------+
 | ChartSourceException     | Occurs when an unknown chart source type is encountered.            |
 +--------------------------+---------------------------------------------------------------------+

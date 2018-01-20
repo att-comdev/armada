@@ -12,8 +12,8 @@ Commands
       This command install and updates charts defined in armada manifest
 
       The apply argument must be relative path to Armada Manifest. Executing
-      apply commnad once will install all charts defined in manifest. Re-
-      executing apply commnad will execute upgrade.
+      apply command once will install all charts defined in manifest. Re-
+      executing apply command will execute upgrade.
 
       To see how to create an Armada manifest:
       http://armada-helm.readthedocs.io/en/latest/operations/
@@ -48,13 +48,13 @@ Synopsis
 --------
 
 The apply command will consume an armada manifest which contains group of charts
-that it will deploy into the tiller service in your kubernetes cluster.
-Executing the ``armada apply`` again on existing armada deployement will start
+that it will deploy into the tiller service in your Kubernetes cluster.
+Executing the ``armada apply`` again on existing armada deployment will start
 an update of the armada deployed charts.
 
-``amada apply armada-manifest.yaml [--debug-logging]``
+``armada apply armada-manifest.yaml [--debug-logging]``
 
 If you remove ``armada/Charts/v1`` from the ``armada/ChartGroups/v1`` in the armada
-manifest and exectute an ``armada apply`` with the  ``--enable-chart-cleanup`` flag.
+manifest and execute an ``armada apply`` with the  ``--enable-chart-cleanup`` flag.
 Armada will remove undefined releases with the armada manifest's
 ``release_prefix`` keyword.

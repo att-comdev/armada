@@ -107,7 +107,7 @@ Chart
 +-----------------+----------+---------------------------------------------------------------------------------------+
 | dependencies    | object   | reference any chart dependencies before install                                       |
 +-----------------+----------+---------------------------------------------------------------------------------------+
-| timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set (DEPRICATED)   |
+| timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set (DEPRECATED)   |
 +-----------------+----------+---------------------------------------------------------------------------------------+
 
 Update - Pre or Post
@@ -147,7 +147,7 @@ Update - Actions - Update/Delete
 +=============+==========+===============================================================+
 | name        | string   | name of action                                                |
 +-------------+----------+---------------------------------------------------------------+
-| type        | string   | type of kubernetes workload to execute in scope for action    |
+| type        | string   | type of Kubernetes workload to execute in scope for action    |
 +-------------+----------+---------------------------------------------------------------+
 | labels      | object   | k:v mapping of labels to select Kubernetes resources          |
 +-------------+----------+---------------------------------------------------------------+
@@ -283,14 +283,14 @@ Example
                   labels:
                     foo: bar
                     component: bar
-                    rak1: enababled
+                    rak1: enabled
             delete:
                 - name: test-job
                   type: job
                   labels:
                     foo: bar
                     component: bar
-                    rak1: enababled
+                    rak1: enabled
       values: {}
       source:
         type: git
