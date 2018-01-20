@@ -13,19 +13,17 @@
 # limitations under the License.
 
 import os
-import yaml
 
+import yaml
+from armada.exceptions import chartbuilder_exceptions
 from google.protobuf.any_pb2 import Any
 from hapi.chart.chart_pb2 import Chart
 from hapi.chart.config_pb2 import Config
 from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.template_pb2 import Template
-from supermutes.dot import dotify
-
-from armada.exceptions import chartbuilder_exceptions
-
 from oslo_config import cfg
 from oslo_log import log as logging
+from supermutes.dot import dotify
 
 LOG = logging.getLogger(__name__)
 
@@ -148,23 +146,27 @@ class ChartBuilder(object):
         files_to_ignore = ['Chart.yaml', 'values.yaml', 'values.toml']
         non_template_files = []
 
-        def _append_file_to_result(root, file):
+        def _append_file_to_result(root, rel_folder_path, file):
             abspath = os.path.abspath(os.path.join(root, file))
+            relpath = os.path.join(rel_folder_path, file)
+
             with open(abspath, 'r') as f:
                 file_contents = f.read().encode('utf-8')
             non_template_files.append(
-                Any(type_url=abspath,
+                Any(type_url=relpath,
                     value=file_contents))
 
         for root, dirs, files in os.walk(self.source_directory):
             relfolder = os.path.split(root)[-1]
+            rel_folder_path = os.path.relpath(root, self.source_directory)
+
             if relfolder not in ['charts', 'templates']:
                 for file in files:
                     if (file not in files_to_ignore and
                             file not in non_template_files):
-                        _append_file_to_result(root, file)
+                        _append_file_to_result(root, rel_folder_path, file)
             elif relfolder == 'charts' and '.prov' in files:
-                _append_file_to_result(root, '.prov')
+                _append_file_to_result(root, rel_folder_path, '.prov')
 
         return non_template_files
 
