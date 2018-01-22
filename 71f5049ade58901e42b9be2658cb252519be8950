@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ca963ac_41096dbd",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 21
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-01-22T06:02:18Z",
+      "side": 1,
+      "message": "Remove",
+      "range": {
+        "startLine": 122,
+        "startChar": 17,
+        "endLine": 122,
+        "endChar": 60
+      },
+      "revId": "71f5049ade58901e42b9be2658cb252519be8950",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
