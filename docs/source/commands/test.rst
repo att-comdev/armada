@@ -24,11 +24,13 @@ Commands
           $ armada test --release blog-1
 
     Options:
-      --file TEXT            armada manifest
-      --release TEXT         helm release
-      --tiller-host TEXT     Tiller Host IP
-      --tiller-port INTEGER  Tiller host Port
-      --help                 Show this message and exit.
+      --file TEXT             armada manifest
+      --release TEXT          helm release
+      --tiller-host TEXT      Tiller Host IP
+      --tiller-port INTEGER   Tiller host Port
+      --help                  Show this message and exit.
+      --target-manifest TEXT  The target manifest to run. Required for specifying
+                              which manifest to run when multiple are available.
 
 
 Synopsis

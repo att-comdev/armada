@@ -191,7 +191,7 @@ class AppError(Exception):
         """
         :param description: The internal error description
         :param error_list: The list of errors
-        :param status: The desired falcon HTTP resposne code
+        :param status: The desired falcon HTTP response code
         :param title: The title of the error message
         :param error_list: A list of errors to be included in output
                            messages list
