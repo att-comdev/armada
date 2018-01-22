@@ -65,46 +65,76 @@ To obtain override manifest:
 SHORT_DESC = "command install manifest charts"
 
 
-@apply.command(name='apply', help=DESC, short_help=SHORT_DESC)
+@apply.command(name='apply',
+               help=DESC,
+               short_help=SHORT_DESC)
 @click.argument('locations', nargs=-1)
-@click.option('--api', help="Contacts service endpoint", is_flag=True)
-@click.option(
-    '--disable-update-post', help="run charts without install", is_flag=True)
-@click.option(
-    '--disable-update-pre', help="run charts without install", is_flag=True)
-@click.option('--dry-run', help="run charts without install", is_flag=True)
-@click.option(
-    '--enable-chart-cleanup', help="Clean up Unmanaged Charts", is_flag=True)
-@click.option('--set', multiple=True, type=str, default=[])
-@click.option('--tiller-host', help="Tiller host ip")
-@click.option(
-    '--tiller-port', help="Tiller host port", type=int, default=44134)
-@click.option(
-    '--timeout',
-    help="specifies time to wait for charts",
-    type=int,
-    default=3600)
-@click.option('--values', '-f', multiple=True, type=str, default=[])
-@click.option('--wait', help="wait until all charts deployed", is_flag=True)
-@click.option(
-    '--debug/--no-debug', help='Enable or disable debugging', default=False)
+@click.option('--api',
+              help="Contacts service endpoint.",
+              is_flag=True)
+@click.option('--disable-update-post',
+              help="Disable post-update Tiller operations.",
+              is_flag=True)
+@click.option('--disable-update-pre',
+              help="Disable pre-update Tiller operations.",
+              is_flag=True)
+@click.option('--dry-run',
+              help="Run charts without installing them.",
+              is_flag=True)
+@click.option('--enable-chart-cleanup',
+              help="Clean up unmanaged charts.",
+              is_flag=True)
+@click.option('--set',
+              help=("Use to override Armada Manifest values. Accepts "
+                    "overrides that adhere to the format <key>=<value>"),
+              multiple=True,
+              type=str,
+              default=[])
+@click.option('--tiller-host',
+              help="Tiller host IP.")
+@click.option('--tiller-port',
+              help="Tiller host port.",
+              type=int,
+              default=44134)
+@click.option('--timeout',
+              help="Specifies time to wait for charts to deploy.",
+              type=int,
+              default=3600)
+@click.option('--values',
+              '-f',
+              help=("Use to override multiple Armada Manifest values by "
+                    "reading overrides from a values.yaml-type file."),
+              multiple=True,
+              type=str,
+              default=[])
+@click.option('--wait',
+              help="Wait until all charts deployed.",
+              is_flag=True)
+@click.option('--target-manifest',
+              help=('The target manifest to run. Useful for specifying which '
+                    'manifest to run when multiple are available.'),
+              default=None)
+@click.option('--debug/--no-debug',
+              help='Enable or disable debugging.',
+              default=False)
 @click.pass_context
 def apply_create(ctx, locations, api, disable_update_post, disable_update_pre,
                  dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
-                 timeout, values, wait, debug):
+                 timeout, values, wait, target_manifest, debug):
 
     if debug:
         CONF.debug = debug
 
     ApplyManifest(ctx, locations, api, disable_update_post, disable_update_pre,
                   dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
-                  timeout, values, wait).invoke()
+                  timeout, values, wait, target_manifest).invoke()
 
 
 class ApplyManifest(CliAction):
     def __init__(self, ctx, locations, api, disable_update_post,
                  disable_update_pre, dry_run, enable_chart_cleanup, set,
-                 tiller_host, tiller_port, timeout, values, wait):
+                 tiller_host, tiller_port, timeout, values, wait,
+                 target_manifest):
         super(ApplyManifest, self).__init__()
         self.ctx = ctx
         # Filename can also be a URL reference
@@ -120,6 +150,7 @@ class ApplyManifest(CliAction):
         self.timeout = timeout
         self.values = values
         self.wait = wait
+        self.target_manifest = target_manifest
 
     def output(self, resp):
         for result in resp:
@@ -153,7 +184,8 @@ class ApplyManifest(CliAction):
             armada = Armada(
                 documents, self.disable_update_pre, self.disable_update_post,
                 self.enable_chart_cleanup, self.dry_run, self.set, self.wait,
-                self.timeout, self.tiller_host, self.tiller_port, self.values)
+                self.timeout, self.tiller_host, self.tiller_port, self.values,
+                self.target_manifest)
 
             resp = armada.sync()
             self.output(resp)
