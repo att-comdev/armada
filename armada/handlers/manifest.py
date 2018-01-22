@@ -22,9 +22,9 @@ class Manifest(object):
         self.charts = []
         self.groups = []
         self.manifest = None
-        self.get_documents()
+        self._find_documents()
 
-    def get_documents(self):
+    def _find_documents(self):
         for document in self.documents:
             if document.get('schema') == DOCUMENT_CHART:
                 self.charts.append(document)
@@ -34,22 +34,18 @@ class Manifest(object):
                 self.manifest = document
 
     def find_chart_document(self, name):
-        try:
-            for chart in self.charts:
-                if chart.get('metadata').get('name') == name:
-                    return chart
-        except Exception:
-            raise Exception(
-                "Could not find {} in {}".format(name, DOCUMENT_CHART))
+        for chart in self.charts:
+            if chart.get('metadata', {}).get('name') == name:
+                return chart
+        raise ValueError(
+            'Could not find a {} named "{}"'.format(DOCUMENT_CHART, name))
 
     def find_chart_group_document(self, name):
-        try:
-            for group in self.groups:
-                if group.get('metadata').get('name') == name:
-                    return group
-        except Exception:
-            raise Exception(
-                "Could not find {} in {}".format(name, DOCUMENT_GROUP))
+        for group in self.groups:
+            if group.get('metadata', {}).get('name') == name:
+                return group
+        raise ValueError(
+            'Could not find a {} named "{}"'.format(DOCUMENT_GROUP, name))
 
     def build_charts_deps(self):
         for chart in self.charts:
