@@ -89,3 +89,13 @@ Lint Exceptions
 +----------------------------------+------------------------------+
 | InvalidArmadaObjectException     |  Armada object not declared. |
 +----------------------------------+------------------------------+
+
+Manifest Exceptions
+===================
++----------------------------------+------------------------------------------------+
+| Exception                        | Error Description                              |
++==================================+================================================+
+| ManifestException                | An exception occurred while attempting to build|
+|                                  | an Armada manifest. The exception will return  |
+|                                  | with details as to why.                        |
++----------------------------------+------------------------------------------------+

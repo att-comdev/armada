@@ -54,10 +54,23 @@ class Armada(object):
                  timeout=DEFAULT_TIMEOUT,
                  tiller_host=None,
                  tiller_port=44134,
-                 values=None):
+                 values=None,
+                 desired_manifest=None):
         '''
-        Initialize the Armada Engine and establish
-        a connection to Tiller
+        Initialize the Armada engine and establish a connection to Tiller.
+
+        :param List[dict] file: Armada documents.
+        :param bool disable_update_pre: Disable pre-update Tiller operations.
+        :param bool disable_update_post: Disable post-update Tiller
+            operations.
+        :param bool enable_chart_cleanup: Clean up unmanaged charts.
+        :param bool dry_run: Run charts without installing them.
+        :param bool wait: Wait until all charts are deployed.
+        :param int timeout: Specifies time to wait for charts to deploy.
+        :param str tiller_host: Tiller host IP.
+        :param int tiller_port: Tiller host port.
+        :param str desired_manifest: The desired manifest to run. Useful for
+            specifying which manifest to run when multiple are available.
         '''
         self.disable_update_pre = disable_update_pre
         self.disable_update_post = disable_update_post
@@ -70,9 +83,13 @@ class Armada(object):
         self.values = values
         self.documents = file
         self.config = None
+        self.desired_manifest = desired_manifest
 
     def get_armada_manifest(self):
-        return Manifest(self.documents).get_manifest()
+        return Manifest(
+            self.documents,
+            desired_manifest=self.desired_manifest
+        ).get_manifest()
 
     def find_release_chart(self, known_releases, name):
         '''
@@ -303,7 +320,7 @@ class Armada(object):
                         timeout=chart_timeout)
 
                     if chart_wait:
-                        # TODO(gardlt): after v0.7.1 depricate timeout values
+                        # TODO(gardlt): after v0.7.1 deprecate timeout values
                         if not wait_values.get('timeout', None):
                             wait_values['timeout'] = chart_timeout
 

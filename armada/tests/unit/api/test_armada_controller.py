@@ -52,6 +52,7 @@ class ArmadaControllerTest(base.BaseControllerTest):
             'timeout': 100,
             'tiller_host': None,
             'tiller_port': 44134,
+            'desired_manifest': None
         }
 
         payload_url = 'http://foo.com/test.yaml'

@@ -31,18 +31,21 @@ Commands
           $ armada apply examples/simple.yaml --values examples/simple-ovr-values.yaml
 
     Options:
-      --api                   Contacts service endpoint
-      --disable-update-post   run charts without install
-      --disable-update-pre    run charts without install
-      --dry-run               run charts without install
-      --enable-chart-cleanup  Clean up Unmanaged Charts
+      --api                    Contacts service endpoint.
+      --disable-update-post    Disable post-update Tiller operations.
+      --disable-update-pre     Disable pre-update Tiller operations.
+      --dry-run                Run charts without installing them.
+      --enable-chart-cleanup   Clean up unmanaged charts.
       --set TEXT
-      --tiller-host TEXT      Tiller host ip
-      --tiller-port INTEGER   Tiller host port
-      --timeout INTEGER       specifies time to wait for charts
+      --tiller-host TEXT       Tiller host IP.
+      --tiller-port INTEGER    Tiller host port.
+      --timeout INTEGER        Specifies time to wait for charts to deploy.
       -f, --values TEXT
-      --wait                  wait until all charts deployed
-      --help                  Show this message and exit.
+      --wait                   Wait until all charts deployed.
+      --desired-manifest TEXT  The desired manifest to run. Useful for specifying
+                               which manifest to run when multiple are available.
+      --debug / --no-debug     Enable or disable debugging.
+      --help                   Show this message and exit.
 
 Synopsis
 --------
