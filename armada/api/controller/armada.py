@@ -19,57 +19,54 @@ import falcon
 
 from armada import api
 from armada.common import policy
+from armada import exceptions
 from armada.handlers.armada import Armada
 from armada.handlers.document import ReferenceResolver
 from armada.handlers.override import Override
 
 
 class Apply(api.BaseResource):
-    '''
-    apply armada endpoint service
-    '''
+    """Controller for installing and updateing charts defined in an Armada
+    manifest file.
+    """
+
     @policy.enforce('armada:create_endpoints')
     def on_post(self, req, resp):
-        try:
-
-            # Load data from request and get options
-            if req.content_type == 'application/x-yaml':
-                data = list(self.req_yaml(req))
-                if type(data[0]) is list:
-                    documents = list(data[0])
-                else:
-                    documents = data
-            elif req.content_type == 'application/json':
-                self.logger.debug("Applying manifest based on reference.")
-                req_body = self.req_json(req)
-                doc_ref = req_body.get('hrefs', None)
-
-                if not doc_ref:
-                    self.logger.info("Request did not contain 'hrefs'.")
-                    resp.status = falcon.HTTP_400
-                    return
-
-                data = ReferenceResolver.resolve_reference(doc_ref)
-                documents = list()
-                for d in data:
-                    documents.extend(list(yaml.safe_load_all(d.decode())))
-
-                if req_body.get('overrides', None):
-                    overrides = Override(documents,
-                                         overrides=req_body.get('overrides'))
-                    documents = overrides.update_manifests()
+        # Load data from request and get options
+        if req.content_type == 'application/x-yaml':
+            data = list(self.req_yaml(req))
+            if type(data[0]) is list:
+                documents = list(data[0])
             else:
-                self.error(req.context, "Unknown content-type %s"
-                           % req.content_type)
-                self.return_error(
-                    resp,
-                    falcon.HTTP_415,
-                    message="Request must be in application/x-yaml"
-                            "or application/json")
+                documents = data
+        elif req.content_type == 'application/json':
+            self.logger.debug("Applying manifest based on reference.")
+            req_body = self.req_json(req)
+            doc_ref = req_body.get('hrefs', None)
 
-            opts = req.params
+            if not doc_ref:
+                self.logger.info("Request did not contain 'hrefs'.")
+                resp.status = falcon.HTTP_400
+                return
 
-            # Encode filename
+            data = ReferenceResolver.resolve_reference(doc_ref)
+            documents = list()
+            for d in data:
+                documents.extend(list(yaml.safe_load_all(d.decode())))
+
+            if req_body.get('overrides', None):
+                overrides = Override(documents,
+                                     overrides=req_body.get('overrides'))
+                documents = overrides.update_manifests()
+        else:
+            self.error(req.context, "Unknown content-type %s"
+                       % req.content_type)
+            self.return_error(
+                resp,
+                falcon.HTTP_415,
+                message="Request must be in application/x-yaml"
+                        "or application/json")
+        try:
             armada = Armada(
                 documents,
                 disable_update_pre=req.get_param_as_bool(
@@ -80,9 +77,10 @@ class Apply(api.BaseResource):
                     'enable_chart_cleanup'),
                 dry_run=req.get_param_as_bool('dry_run'),
                 wait=req.get_param_as_bool('wait'),
-                timeout=int(opts.get('timeout', 3600)),
-                tiller_host=opts.get('tiller_host', None),
-                tiller_port=int(opts.get('tiller_port', 44134)),
+                timeout=req.get_param_as_int('timeout') or 3600,
+                tiller_host=req.get_param('tiller_host', default=None),
+                tiller_port=req.get_param_as_int('tiller_port') or 44134,
+                target_manifest=req.get_param('target_manifest')
             )
 
             msg = armada.sync()
@@ -95,6 +93,8 @@ class Apply(api.BaseResource):
 
             resp.content_type = 'application/json'
             resp.status = falcon.HTTP_200
+        except exceptions.ManifestException as e:
+            self.return_error(resp, falcon.HTTP_400, message=str(e))
         except Exception as e:
             err_message = 'Failed to apply manifest: {}'.format(e)
             self.error(req.context, err_message)

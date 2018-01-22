@@ -75,13 +75,13 @@ class ArmadaClient(object):
                    values=None,
                    set=None,
                    query=None):
-        """Call the Armada API to apply a manifest.
+        """Call the Armada API to apply a Manifest.
 
-        If manifest is not None, then the request body will be a fully
+        If ``manifest`` is not None, then the request body will be a fully
         rendered set of YAML documents including overrides and
         values-files application.
 
-        If manifest is None and manifest_ref is not, then the request
+        If ``manifest`` is None and ``manifest_ref`` is not, then the request
         body will be a JSON structure providing a list of references
         to Armada manifest documents and a list of overrides. Local
         values files are not supported when using the API with references.
