@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from armada.exceptions.manifest_exceptions import ManifestException
+from armada.exceptions import base_exception as base
 
 
-__all__ = ['ManifestException']
+class ManifestException(base.ArmadaBaseException):
+    message = 'An error occurred while generating the manifest: %(details)s.'
