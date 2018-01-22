@@ -212,6 +212,29 @@
     },
     {
       "key": {
+        "uuid": "e68cfd6c_d6c682d1",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-01-22T06:00:46Z",
+      "side": 1,
+      "message": "Remove/fix this",
+      "range": {
+        "startLine": 122,
+        "startChar": 16,
+        "endLine": 122,
+        "endChar": 60
+      },
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ca6f7a5_d49ae157",
         "filename": "armada/cli/test.py",
         "patchSetId": 17
@@ -259,6 +282,52 @@
       "side": 1,
       "message": "This is a legitimate concern yes, if you have any suggestions please let me know.  I will try to find a better solution.",
       "parentUuid": "a081027e_0994fd34",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea905f00_5729f7c7",
+        "filename": "armada/cli/test.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-01-22T06:00:46Z",
+      "side": 1,
+      "message": "[]",
+      "range": {
+        "startLine": 169,
+        "startChar": 54,
+        "endLine": 169,
+        "endChar": 56
+      },
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "097e0446_2d6189fb",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-01-22T06:00:46Z",
+      "side": 1,
+      "message": "Why is this here?",
+      "range": {
+        "startLine": 57,
+        "startChar": 17,
+        "endLine": 57,
+        "endChar": 30
+      },
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
@@ -346,6 +415,52 @@
       "side": 1,
       "message": "Yea I didn\u0027t write this, will need to rebase",
       "parentUuid": "44e1124b_b000801d",
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17b9cbda_f2f8f203",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-01-22T06:00:46Z",
+      "side": 1,
+      "message": "This might also work:\n\n    label_selector \u003d \u0027, \u0027.join([[\u0027%s\u003d%s\u0027 % (key, val) for key, val in label.items()] for label in resource_labels])",
+      "range": {
+        "startLine": 240,
+        "startChar": 8,
+        "endLine": 242,
+        "endChar": 63
+      },
+      "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36c2e5f5_933bccaf",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-01-22T06:00:46Z",
+      "side": 1,
+      "message": "Don\u0027t raise generic Exception",
+      "range": {
+        "startLine": 408,
+        "startChar": 30,
+        "endLine": 408,
+        "endChar": 39
+      },
       "revId": "5cdcf0d36eae33ecb91d83f518be78c7d54c221b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
