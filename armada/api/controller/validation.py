@@ -23,8 +23,7 @@ from armada.handlers.document import ReferenceResolver
 
 
 class Validate(api.BaseResource):
-    '''
-    apply armada endpoint service
+    '''Controller for validating an Armada manifest.
     '''
 
     @policy.enforce('armada:validate_manifest')
