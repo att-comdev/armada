@@ -105,15 +105,48 @@ class ManifestTestCase(testtools.TestCase):
         self.assertEqual('alt-armada-manifest',
                          armada_manifest.manifest['metadata']['name'])
 
-    def test_find_chart_document(self):
+    def test_verify_chart_documents(self):
         armada_manifest = manifest.Manifest(self.documents)
         chart = armada_manifest.find_chart_document('helm-toolkit')
         self.assertEqual(self.documents[0], chart)
 
-    def test_find_group_document(self):
+        chart = armada_manifest.find_chart_document('mariadb')
+        self.assertEqual(self.documents[1], chart)
+
+        chart = armada_manifest.find_chart_document('memcached')
+        self.assertEqual(self.documents[2], chart)
+
+        chart = armada_manifest.find_chart_document('keystone')
+        self.assertEqual(self.documents[3], chart)
+
+    def test_verify_chart_group_documents(self):
         armada_manifest = manifest.Manifest(self.documents)
         chart = armada_manifest.find_chart_group_document('openstack-keystone')
         self.assertEqual(self.documents[-2], chart)
+
+        armada_manifest = manifest.Manifest(self.documents)
+        chart = armada_manifest.find_chart_group_document(
+            'keystone-infra-services')
+        self.assertEqual(self.documents[-3], chart)
+
+    def test_verify_build_dep(self):
+        armada_manifest = manifest.Manifest(self.documents)
+        chart = armada_manifest.find_chart_document('keystone')
+        original_chart = copy.deepcopy(chart)
+        chart_with_deps = armada_manifest.build_chart_deps(chart)
+
+        self.assertNotEqual(original_chart, chart_with_deps)
+        self.assertIn('data', chart_with_deps)
+        self.assertIn('dependencies', chart_with_deps['data'])
+
+        dependencies = chart_with_deps['data']['dependencies']
+        self.assertIsInstance(dependencies, list)
+        self.assertEqual(1, len(dependencies))
+
+        helm_toolkit_chart = armada_manifest.find_chart_document(
+            'helm-toolkit')
+        expected_dependency =  {'chart': helm_toolkit_chart.get('data')}
+        self.assertEqual(expected_dependency, dependencies[0])
 
 
 class ManifestNegativeTestCase(testtools.TestCase):
