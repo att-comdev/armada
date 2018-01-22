@@ -113,6 +113,15 @@ class Manifest(object):
             self.build_chart_group(chart_group)
 
     def build_chart_deps(self, chart):
+        """Recursively build chart dependencies for ``chart``.
+
+        :param dict chart: The chart whose dependencies will be recursively
+            built.
+        :returns: The chart with all dependencies.
+        :rtype: dict
+        :raises ManifestException: If a chart for a dependency name listed
+            under ``chart['data']['dependencies']`` could not be found.
+        """
         try:
             dep = None
             for iter, dep in enumerate(chart.get('data').get('dependencies')):
@@ -127,6 +136,8 @@ class Manifest(object):
             raise exceptions.ManifestException(
                 details="Could not find dependency chart {} in {}".format(
                     dep, const.DOCUMENT_CHART))
+        else:
+            return chart
 
     def build_chart_group(self, chart_group):
         try:
@@ -143,6 +154,8 @@ class Manifest(object):
             raise exceptions.ManifestException(
                 details="Could not find chart {} in {}".format(
                     chart, const.DOCUMENT_GROUP))
+        else:
+            return chart_group
 
     def build_armada_manifest(self):
         try:
@@ -162,6 +175,8 @@ class Manifest(object):
             raise exceptions.ManifestException(
                 "Could not find chart group {} in {}".format(
                     group, const.DOCUMENT_MANIFEST))
+        else:
+            return self.manifest
 
     def get_manifest(self):
         self.build_charts_deps()
