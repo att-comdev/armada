@@ -56,14 +56,19 @@ SHORT_DESC = "command test releases"
 @click.option('--tiller-host', help="Tiller Host IP")
 @click.option(
     '--tiller-port', help="Tiller host Port", type=int, default=44134)
+@click.option('--target-manifest',
+              help=('The target manifest to run. Required for specifying '
+                    'which manifest to run when multiple are available.'),
+              default=None)
 @click.pass_context
-def test_charts(ctx, file, release, tiller_host, tiller_port):
+def test_charts(ctx, file, release, tiller_host, tiller_port, target_manifest):
     TestChartManifest(
         ctx, file, release, tiller_host, tiller_port).invoke()
 
 
 class TestChartManifest(CliAction):
-    def __init__(self, ctx, file, release, tiller_host, tiller_port):
+    def __init__(self, ctx, file, release, tiller_host, tiller_port,
+                 target_manifest):
 
         super(TestChartManifest, self).__init__()
         self.ctx = ctx
@@ -71,6 +76,7 @@ class TestChartManifest(CliAction):
         self.release = release
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+        self.target_manifest = target_manifest
 
     def invoke(self):
         tiller = Tiller(
@@ -107,7 +113,9 @@ class TestChartManifest(CliAction):
         if self.file:
             if not self.ctx.obj.get('api', False):
                 documents = yaml.safe_load_all(open(self.file).read())
-                armada_obj = Manifest(documents).get_manifest()
+                armada_obj = Manifest(
+                    documents,
+                    target_manifest=self.target_manifest).get_manifest()
                 prefix = armada_obj.get(const.KEYWORD_ARMADA).get(
                     const.KEYWORD_PREFIX)
 

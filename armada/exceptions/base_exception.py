@@ -27,8 +27,12 @@ CONF = cfg.CONF
 class ArmadaBaseException(Exception):
     '''Base class for Armada exception and error handling.'''
 
-    def __init__(self, message=None):
+    def __init__(self, message=None, **kwargs):
         self.message = message or self.message
+        try:
+            self.message = self.message % kwargs
+        except TypeError:
+            pass
         super(ArmadaBaseException, self).__init__(self.message)
 
 
