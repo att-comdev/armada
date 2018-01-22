@@ -1,4 +1,3 @@
-# simple deploy
 ---
 schema: armada/Chart/v1
 metadata:
