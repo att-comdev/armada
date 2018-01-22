@@ -25,13 +25,12 @@ from armada.handlers.override import Override
 
 
 class Apply(api.BaseResource):
+    '''Controller for generating Armada charts.
     '''
-    apply armada endpoint service
-    '''
+
     @policy.enforce('armada:create_endpoints')
     def on_post(self, req, resp):
         try:
-
             # Load data from request and get options
             if req.content_type == 'application/x-yaml':
                 data = list(self.req_yaml(req))
@@ -67,9 +66,6 @@ class Apply(api.BaseResource):
                     message="Request must be in application/x-yaml"
                             "or application/json")
 
-            opts = req.params
-
-            # Encode filename
             armada = Armada(
                 documents,
                 disable_update_pre=req.get_param_as_bool(
@@ -80,9 +76,10 @@ class Apply(api.BaseResource):
                     'enable_chart_cleanup'),
                 dry_run=req.get_param_as_bool('dry_run'),
                 wait=req.get_param_as_bool('wait'),
-                timeout=int(opts.get('timeout', 3600)),
-                tiller_host=opts.get('tiller_host', None),
-                tiller_port=int(opts.get('tiller_port', 44134)),
+                timeout=req.get_param_as_int('timeout') or 3600,
+                tiller_host=req.get_param('tiller_host', default=None),
+                tiller_port=req.get_param_as_int('tiller_port') or 44134,
+                desired_manifest=req.get_param('desired_manifest')
             )
 
             msg = armada.sync()
