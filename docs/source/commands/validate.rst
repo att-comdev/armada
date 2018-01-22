@@ -21,5 +21,5 @@ Commands
 Synopsis
 --------
 
-The validate commad will take in a armada manifest and will validate if its
-correctly defined and comsumable.
+The validate command will take in an Armada manifest and will validate if it is
+correctly defined and consumable.

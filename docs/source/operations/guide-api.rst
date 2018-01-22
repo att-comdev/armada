@@ -201,7 +201,7 @@ Responses
 **200**
 ^^^^^^^
 
-Succesfull installation/update of manifest
+Successful installation/update of manifest
 
 **Example:**
 
@@ -326,7 +326,7 @@ Responses
 **200**
 ^^^^^^^
 
-Succesfully Test of manifest
+Successful Test of manifest
 
 **Example:**
 

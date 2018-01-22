@@ -40,8 +40,8 @@ Debugging Checklist:
 
 1. python -c "import ssl; print ssl.OPENSSL_VERSION"
 
-   If the version that appers is less than 1.0 then problems will occur, please
-   update to current or use our docker container solve this issue
+   If the version that appears is less than 1.0, then problems will occur.
+   Please update to current or use our docker container solve this issue
 
 2. check your urllib3 version, you could run into urllib3 issues. older versions
    of this lib can cause SSL errors run ``pip install --upgrade urllib3`` and it
@@ -52,6 +52,6 @@ Debugging Checklist:
 Issue
 -----
 
-If the issue that you are having does not appear here please check the aramda
+If the issue that you are having does not appear here please check the Armada
 issues `section <https://github.com/att-comdev/armada/issues>`_. If the issue does
 not exist, please create an issue.
