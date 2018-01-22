@@ -105,15 +105,104 @@ class ManifestTestCase(testtools.TestCase):
         self.assertEqual('alt-armada-manifest',
                          armada_manifest.manifest['metadata']['name'])
 
-    def test_find_chart_document(self):
+    def test_verify_chart_documents(self):
         armada_manifest = manifest.Manifest(self.documents)
         chart = armada_manifest.find_chart_document('helm-toolkit')
         self.assertEqual(self.documents[0], chart)
 
-    def test_find_group_document(self):
+        chart = armada_manifest.find_chart_document('mariadb')
+        self.assertEqual(self.documents[1], chart)
+
+        chart = armada_manifest.find_chart_document('memcached')
+        self.assertEqual(self.documents[2], chart)
+
+        chart = armada_manifest.find_chart_document('keystone')
+        self.assertEqual(self.documents[3], chart)
+
+    def test_verify_chart_group_documents(self):
         armada_manifest = manifest.Manifest(self.documents)
         chart = armada_manifest.find_chart_group_document('openstack-keystone')
         self.assertEqual(self.documents[-2], chart)
+
+        armada_manifest = manifest.Manifest(self.documents)
+        chart = armada_manifest.find_chart_group_document(
+            'keystone-infra-services')
+        self.assertEqual(self.documents[-3], chart)
+
+    def test_verify_build_chart_deps(self):
+        armada_manifest = manifest.Manifest(self.documents)
+
+        # helm-toolkit chart
+        helm_toolkit_chart = armada_manifest.find_chart_document(
+            'helm-toolkit')
+        helm_toolkit_original_dependency = helm_toolkit_chart.get('data')
+        helm_toolkit_chart_with_deps = armada_manifest.build_chart_deps(
+            helm_toolkit_chart).get('data')
+
+        # since not dependent on other charts, the original and modified
+        # dependencies are the same
+        self.assertEqual(helm_toolkit_original_dependency,
+                         helm_toolkit_chart_with_deps)
+
+        # helm-toolkit dependency, the basis for comparison of d
+        # ependencies in other charts
+        expected_helm_toolkit_dependency = {'chart': helm_toolkit_chart.get(
+            'data')}
+
+        # keystone chart dependencies
+        keystone_chart = armada_manifest.find_chart_document('keystone')
+        original_keystone_chart = copy.deepcopy(keystone_chart)
+        keystone_chart_with_deps = armada_manifest.build_chart_deps(
+            keystone_chart)
+
+        self.assertNotEqual(original_keystone_chart, keystone_chart_with_deps)
+        self.assertIn('data', keystone_chart_with_deps)
+        self.assertIn('dependencies', keystone_chart_with_deps['data'])
+
+        keystone_dependencies = keystone_chart_with_deps[
+            'data']['dependencies']
+        self.assertIsInstance(keystone_dependencies, list)
+        self.assertEqual(1, len(keystone_dependencies))
+
+        self.assertEqual(expected_helm_toolkit_dependency,
+                         keystone_dependencies[0])
+
+        # mariadb chart dependencies
+        mariadb_chart = armada_manifest.find_chart_document('mariadb')
+        original_mariadb_chart = copy.deepcopy(mariadb_chart)
+        mariadb_chart_with_deps = armada_manifest.build_chart_deps(
+            mariadb_chart)
+
+        self.assertNotEqual(original_mariadb_chart, mariadb_chart_with_deps)
+        self.assertIn('data', mariadb_chart_with_deps)
+        self.assertIn('dependencies', mariadb_chart_with_deps['data'])
+
+        mariadb_dependencies = mariadb_chart_with_deps[
+            'data']['dependencies']
+        self.assertIsInstance(mariadb_dependencies, list)
+        self.assertEqual(1, len(mariadb_dependencies))
+
+        self.assertEqual(expected_helm_toolkit_dependency,
+                         mariadb_dependencies[0])
+
+        # memcached chart dependencies
+        memcached_chart = armada_manifest.find_chart_document('memcached')
+        original_memcached_chart = copy.deepcopy(memcached_chart)
+        memcached_chart_with_deps = armada_manifest.build_chart_deps(
+            memcached_chart)
+
+        self.assertNotEqual(original_memcached_chart,
+                            memcached_chart_with_deps)
+        self.assertIn('data', memcached_chart_with_deps)
+        self.assertIn('dependencies', memcached_chart_with_deps['data'])
+
+        memcached_dependencies = memcached_chart_with_deps[
+            'data']['dependencies']
+        self.assertIsInstance(memcached_dependencies, list)
+        self.assertEqual(1, len(memcached_dependencies))
+
+        self.assertEqual(expected_helm_toolkit_dependency,
+                         memcached_dependencies[0])
 
 
 class ManifestNegativeTestCase(testtools.TestCase):
