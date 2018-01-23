@@ -16,7 +16,7 @@
 
 images:
   tags:
-    tiller: gcr.io/kubernetes-helm/tiller:v2.7.0
+    tiller: gcr.io/kubernetes-helm/tiller:v2.7.2
 
   pull_policy: "IfNotPresent"
 
