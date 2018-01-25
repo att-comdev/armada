@@ -235,7 +235,7 @@ class Armada(object):
                 if chart.release is None:
                     continue
 
-                if test_chart:
+                if test_chart is True:
                     chart_wait = True
 
                 # retrieve appropriate timeout value if 'wait' is specified
@@ -343,7 +343,7 @@ class Armada(object):
                 LOG.debug("Cleaning up chart source in %s",
                           chartbuilder.source_directory)
 
-                if test_charts or test_chart:
+                if test_charts or (test_chart is True):
                     LOG.info('Testing: %s', prefix_chart)
                     resp = self.tiller.testing_release(prefix_chart)
                     test_status = getattr(resp.info.status,
