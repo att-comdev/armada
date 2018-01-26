@@ -14,6 +14,9 @@
 
 # namespace: "kube-system"
 
+dependencies:
+  tiller_deploy:
+
 images:
   tags:
     tiller: gcr.io/kubernetes-helm/tiller:v2.7.2
@@ -21,6 +24,9 @@ images:
   pull_policy: "IfNotPresent"
 
 deployment:
+  # NOTE: CUrrent replica is hard-coded to 1. This is a placeholder variable
+  # for future usage. Updates will be made to the chart when we know that
+  # tiller is stable with multiple instances.
   replicas: 1
   # The amount of revision tiller is willing to support. 0 means that there is
   # no limit.
@@ -29,4 +35,3 @@ deployment:
 manifests:
   deployment_tiller: true
   service_tiller: true
-  rbac: true
