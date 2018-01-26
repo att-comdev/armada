@@ -36,6 +36,7 @@ spec:
       maxUnavailable: 1
     type: RollingUpdate
   template:
+    serviceAccountName: tiller
     metadata:
       labels:
         app: helm
