@@ -41,6 +41,7 @@ spec:
         app: helm
         name: tiller
     spec:
+      serviceAccountName: tiller
       containers:
       - env:
         - name: TILLER_NAMESPACE
