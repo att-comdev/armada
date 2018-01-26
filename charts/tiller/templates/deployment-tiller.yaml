@@ -26,6 +26,7 @@ metadata:
   name: tiller-deploy
 spec:
   replicas: 1
+  serviceAccountName: tiller
   selector:
     matchLabels:
       app: helm
