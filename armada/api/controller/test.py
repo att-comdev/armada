@@ -77,12 +77,13 @@ class Tests(api.BaseResource):
     @policy.enforce('armada:tests_manifest')
     def on_post(self, req, resp):
         try:
-            opts = req.params
-            tiller = Tiller(tiller_host=opts.get('tiller_host', None),
-                            tiller_port=opts.get('tiller_port', None))
+            tiller = Tiller(tiller_host=req.get_param('tiller_host', None),
+                            tiller_port=req.get_param('tiller_port', None))
 
             documents = self.req_yaml(req)
-            armada_obj = Manifest(documents).get_manifest()
+            target_manifest = req.get_param('target_manifest', None)
+            armada_obj = Manifest(
+                documents, target_manifest=target_manifest).get_manifest()
             prefix = armada_obj.get(const.KEYWORD_ARMADA).get(
                 const.KEYWORD_PREFIX)
             known_releases = [release[0] for release in tiller.list_charts()]
