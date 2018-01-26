@@ -1,4 +1,4 @@
-# Copyright 2017 AT&T Intellectual Property.  All other rights reserved.
+# Copyright 2018 AT&T Intellectual Property.  All other rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# namespace: "kube-system"
-
-images:
-  tags:
-    tiller: gcr.io/kubernetes-helm/tiller:v2.7.2
-
-  pull_policy: "IfNotPresent"
-
-deployment:
-  replicas: 1
-  # The amount of revision tiller is willing to support. 0 means that there is
-  # no limit.
-  tiller_history: 0
-
-manifests:
-  deployment_tiller: true
-  service_tiller: true
+dependencies:
+  - name: helm-toolkit
+    repository: http://localhost:8879/charts
+    version: 0.1.0
