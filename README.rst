@@ -3,9 +3,37 @@ Armada
 
 |Docker Repository on Quay| |Build Status| |Doc Status|
 
-Armada is a tool for managing multiple Helm charts with dependencies by centralizing
-all configurations in a single Armada YAML and providing lifecycle
-hooks for all Helm releases.
+Armada is a tool for managing multiple Helm charts with dependencies by
+centralizing all configurations in a single Armada YAML and providing
+life-cycle hooks for all Helm releases.
+
+Overview
+--------
+
+The Armada Python library and command line tool provide a way to
+synchronize a Helm (Tiller) target with an operator's intended state,
+consisting of several charts, dependencies, and overrides using a single file
+or directory with a collection of files. This allows operators to define many
+charts, potentially with different namespaces for those releases, and their
+overrides in a central place. With a single command, deploy and/or upgrade them
+where applicable.
+
+Armada also supports fetching Helm chart source and then building charts from
+source from various local and remote locations, such as Git endpoints, tarballs
+or local directories.
+
+It will also give the operator some indication of what is about to change by
+assisting with diffs for both values, values overrides, and actual template
+changes.
+
+Its functionality extends beyond Helm, assisting in interacting with Kubernetes
+directly to perform basic pre- and post-steps, such as removing completed or
+failed jobs, running backup jobs, blocking on chart readiness, or deleting
+resources that do not support upgrades. However, primarily, it is an interface
+to support orchestrating Helm.
+
+Components
+----------
 
 Armada consists of two separate but complementary components:
 
