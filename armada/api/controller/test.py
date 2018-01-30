@@ -15,6 +15,7 @@
 import json
 
 import falcon
+from oslo_config import cfg
 
 from armada import api
 from armada.common import policy
@@ -22,6 +23,8 @@ from armada import const
 from armada.handlers.tiller import Tiller
 from armada.handlers.manifest import Manifest
 from armada.utils.release import release_prefix
+
+CONF = cfg.CONF
 
 
 class Test(api.BaseResource):
@@ -33,9 +36,12 @@ class Test(api.BaseResource):
     def on_get(self, req, resp, release):
         try:
             self.logger.info('RUNNING: %s', release)
-            opts = req.params
-            tiller = Tiller(tiller_host=opts.get('tiller_host', None),
-                            tiller_port=opts.get('tiller_port', None))
+            tiller = Tiller(
+                tiller_host=req.get_param('tiller_host'),
+                tiller_port=req.get_param_as_int(
+                    'tiller_port') or CONF.tiller_port,
+                tiller_namespace=req.get_param(
+                    'tiller_namespace', default=CONF.tiller_namespace))
             tiller_resp = tiller.testing_release(release)
             msg = {
                 'result': '',
@@ -77,8 +83,12 @@ class Tests(api.BaseResource):
     @policy.enforce('armada:tests_manifest')
     def on_post(self, req, resp):
         try:
-            tiller = Tiller(tiller_host=req.get_param('tiller_host', None),
-                            tiller_port=req.get_param('tiller_port', None))
+            tiller = Tiller(
+                tiller_host=req.get_param('tiller_host'),
+                tiller_port=req.get_param_as_int(
+                    'tiller_port') or CONF.tiller_port,
+                tiller_namespace=req.get_param(
+                    'tiller_namespace', default=CONF.tiller_namespace))
 
             documents = self.req_yaml(req)
             target_manifest = req.get_param('target_manifest', None)

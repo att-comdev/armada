@@ -22,11 +22,12 @@ Commands
           $ armada tiller --status
 
     Options:
-      --tiller-host TEXT     Tiller host ip
-      --tiller-port INTEGER  Tiller host port
-      --releases             list of deployed releases
-      --status               Status of Armada services
-      --help                 Show this message and exit.
+      --tiller-host TEXT            Tiller host ip
+      --tiller-port INTEGER         Tiller host port
+      -tn, --tiller-namespace TEXT  Tiller namespace
+      --releases                    list of deployed releses
+      --status                      Status of Armada services
+      --help                        Show this message and exit.
 
 Synopsis
 --------

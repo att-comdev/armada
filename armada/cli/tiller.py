@@ -14,9 +14,12 @@
 
 
 import click
+from oslo_config import cfg
 
 from armada.cli import CliAction
 from armada.handlers.tiller import Tiller
+
+CONF = cfg.CONF
 
 
 @click.group()
@@ -47,28 +50,37 @@ SHORT_DESC = "command gets tiller infromation"
 @tiller.command(name='tiller', help=DESC, short_help=SHORT_DESC)
 @click.option('--tiller-host', help="Tiller host ip", default=None)
 @click.option(
-    '--tiller-port', help="Tiller host port", type=int, default=44134)
+    '--tiller-port', help="Tiller host port", type=int,
+    default=CONF.tiller_port)
+@click.option(
+    '--tiller-namespace', '-tn', help="Tiller namespace", type=str,
+    default=CONF.tiller_namespace)
 @click.option('--releases', help="list of deployed releses", is_flag=True)
 @click.option('--status', help="Status of Armada services", is_flag=True)
 @click.pass_context
-def tiller_service(ctx, tiller_host, tiller_port, releases, status):
-    TillerServices(ctx, tiller_host, tiller_port, releases, status).invoke()
+def tiller_service(ctx, tiller_host, tiller_port, tiller_namespace, releases,
+                   status):
+    TillerServices(ctx, tiller_host, tiller_port, tiller_namespace, releases,
+                   status).invoke()
 
 
 class TillerServices(CliAction):
 
-    def __init__(self, ctx, tiller_host, tiller_port, releases, status):
+    def __init__(self, ctx, tiller_host, tiller_port, tiller_namespace,
+                 releases, status):
         super(TillerServices, self).__init__()
         self.ctx = ctx
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
+        self.tiller_namespace = tiller_namespace
         self.releases = releases
         self.status = status
 
     def invoke(self):
 
         tiller = Tiller(
-            tiller_host=self.tiller_host, tiller_port=self.tiller_port)
+            tiller_host=self.tiller_host, tiller_port=self.tiller_port,
+            tiller_namespace=self.tiller_namespace)
 
         if self.status:
             if not self.ctx.obj.get('api', False):
@@ -78,7 +90,8 @@ class TillerServices(CliAction):
                 client = self.ctx.obj.get('CLIENT')
                 query = {
                     'tiller_host': self.tiller_host,
-                    'tiller_port': self.tiller_port
+                    'tiller_port': self.tiller_port,
+                    'tiller_namespace': self.tiller_namespace
                 }
                 resp = client.get_status(query=query)
                 tiller_status = resp.get('tiller').get('state', False)
@@ -97,7 +110,8 @@ class TillerServices(CliAction):
                 client = self.ctx.obj.get('CLIENT')
                 query = {
                     'tiller_host': self.tiller_host,
-                    'tiller_port': self.tiller_port
+                    'tiller_port': self.tiller_port,
+                    'tiller_namespace': self.tiller_namespace
                 }
                 resp = client.get_releases(query=query)
                 for namespace in resp.get('releases'):

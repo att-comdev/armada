@@ -15,10 +15,13 @@
 import json
 
 import falcon
+from oslo_config import cfg
 
 from armada import api
 from armada.common import policy
 from armada.handlers.tiller import Tiller
+
+CONF = cfg.CONF
 
 
 class Status(api.BaseResource):
@@ -28,10 +31,12 @@ class Status(api.BaseResource):
         get tiller status
         '''
         try:
-            opts = req.params
             tiller = Tiller(
-                tiller_host=opts.get('tiller_host', None),
-                tiller_port=opts.get('tiller_port', None))
+                tiller_host=req.get_param('tiller_host'),
+                tiller_port=req.get_param_as_int(
+                    'tiller_port') or CONF.tiller_port,
+                tiller_namespace=req.get_param(
+                    'tiller_namespace', default=CONF.tiller_namespace))
 
             message = {
                 'tiller': {
@@ -54,14 +59,15 @@ class Status(api.BaseResource):
 class Release(api.BaseResource):
     @policy.enforce('tiller:get_release')
     def on_get(self, req, resp):
-        '''
-        get tiller releases
+        '''Controller for listing Tiller releases.
         '''
         try:
-            # Get tiller releases
-            opts = req.params
-            tiller = Tiller(tiller_host=opts.get('tiller_host', None),
-                            tiller_port=opts.get('tiller_port', None))
+            tiller = Tiller(
+                tiller_host=req.get_param('tiller_host'),
+                tiller_port=req.get_param_as_int(
+                    'tiller_port') or CONF.tiller_port,
+                tiller_namespace=req.get_param(
+                    'tiller_namespace', default=CONF.tiller_namespace))
 
             releases = {}
             for release in tiller.list_releases():

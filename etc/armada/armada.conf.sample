@@ -32,8 +32,14 @@
 # Labels for the tiller pod. (string value)
 #tiller_pod_labels = app=helm,name=tiller
 
+# Host for the tiller pod. (string value)
+#tiller_host = localhost
+
 # Namespace for the tiller pod. (string value)
 #tiller_namespace = kube-system
+
+# Port for the tiller pod. (integer value)
+#tiller_port = 44134
 
 # IDs of approved API access roles. (list value)
 #tiller_release_roles = admin
@@ -345,7 +351,10 @@
 # in the cache. If ENCRYPT, token data is encrypted and authenticated in the
 # cache. If the value is not one of these options or empty, auth_token will
 # raise an exception on initialization. (string value)
-# Allowed values: None, MAC, ENCRYPT
+# Possible values:
+# None - <No description provided>
+# MAC - <No description provided>
+# ENCRYPT - <No description provided>
 #memcache_security_strategy = None
 
 # (Optional, mandatory if memcache_security_strategy is defined) This string is
@@ -441,6 +450,14 @@
 # From oslo.policy
 #
 
+# This option controls whether or not to enforce scope when evaluating
+# policies. If ``True``, the scope of the token used in the request is compared
+# to the ``scope_types`` of the policy being enforced. If the scopes do not
+# match, an ``InvalidScope`` exception will be raised. If ``False``, a message
+# will be logged informing operators that policies are being invoked with
+# mismatching scope. (boolean value)
+#enforce_scope = false
+
 # The file that defines policies. (string value)
 #policy_file = policy.json
 
@@ -456,7 +473,9 @@
 
 # Content Type to send and receive data for REST based policy check (string
 # value)
-# Allowed values: application/x-www-form-urlencoded, application/json
+# Possible values:
+# application/x-www-form-urlencoded - <No description provided>
+# application/json - <No description provided>
 #remote_content_type = application/x-www-form-urlencoded
 
 # server identity verification for REST based policy check (boolean value)
