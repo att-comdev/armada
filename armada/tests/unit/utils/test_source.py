@@ -81,22 +81,31 @@ class GitTestCase(testtools.TestCase):
         is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_empty_url(self):
         url = ''
-        error_re = '%s is not a valid git repository.' % url
+        # error_re = '%s is not a valid git repository.' % url
 
-        with self.assertRaisesRegexp(
-                source_exceptions.GitLocationException, error_re):
-            source.git_clone(url)
+        self.assertRaises(source_exceptions.GitException,
+                          source.git_clone, url)
 
     @test_utils.attr(type=['negative'])
     @testtools.skipUnless(
         is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_bad_url(self):
         url = 'http://github.com/dummy/armada'
-        error_re = '%s is not a valid git repository.' % url
 
-        with self.assertRaisesRegexp(
-                source_exceptions.GitLocationException, error_re):
-            source.git_clone(url)
+        self.assertRaises(source_exceptions.GitException,
+                          source.git_clone, url)
+
+    # TODO need to design a positive proxy test,
+    #      difficult to achieve behind a corporate proxy
+    @test_utils.attr(type=['negative'])
+    @testtools.skipUnless(
+        is_connected(), 'git clone requires network connectivity.')
+    def test_git_clone_fake_proxy(self):
+        url = 'http://github.com/att-comdev/armada'
+
+        self.assertRaises(source_exceptions.GitProxyException,
+                          source.git_clone, url,
+                          proxy_server='http://not.a.proxy:8080')
 
     @mock.patch('armada.utils.source.tempfile')
     @mock.patch('armada.utils.source.requests')

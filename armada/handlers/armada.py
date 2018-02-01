@@ -156,6 +156,7 @@ class Armada(object):
         location = ch.get('chart').get('source').get('location')
         ct_type = ch.get('chart').get('source').get('type')
         subpath = ch.get('chart').get('source').get('subpath', '.')
+        proxy_server = ch.get('chart').get('source').get('proxy_server')
 
         if ct_type == 'local':
             ch.get('chart')['source_dir'] = (location, subpath)
@@ -178,9 +179,11 @@ class Armada(object):
             if repo_branch not in repos:
                 try:
                     LOG.info('Cloning repo: %s branch: %s', *repo_branch)
-                    repo_dir = source.git_clone(*repo_branch)
+                    if proxy_server:
+                        LOG.info('Using proxy to clone: %s', proxy_server)
+                    repo_dir = source.git_clone(*repo_branch, proxy_server)
                 except Exception:
-                    raise source_exceptions.GitLocationException(
+                    raise source_exceptions.GitException(
                         '{} reference: {}'.format(*repo_branch))
                 repos[repo_branch] = repo_dir
                 ch.get('chart')['source_dir'] = (repo_dir, subpath)
