@@ -21,14 +21,26 @@ class SourceException(base_exception.ArmadaBaseException):
     message = 'An unknown error occured while accessing a chart source'
 
 
-class GitLocationException(SourceException):
-    '''Exception that occurs when an error occurs cloning a Git repository.'''
+class GitException(SourceException):
+    '''Exception when an error occurs cloning a Git repository.'''
 
     def __init__(self, location):
         self._location = location
-        self._message = self._location + ' is not a valid git repository.'
+        self._message = ('Git exception occured, ', self._location,
+                         ' may not be a valid git repository.')
 
-        super(GitLocationException, self).__init__(self._message)
+        super(GitException, self).__init__(self._message)
+
+
+class GitProxyException(SourceException):
+    '''Exception when an error occurs cloning a Git repository
+       through a proxy.'''
+
+    def __init__(self, location):
+        self._location = location
+        self._message = 'Could not resolve proxy ' + self._location
+
+        super(GitProxyException, self).__init__(self._message)
 
 
 class SourceCleanupException(SourceException):
