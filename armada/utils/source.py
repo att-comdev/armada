@@ -30,27 +30,42 @@ from armada.exceptions import source_exceptions
 LOG = logging.getLogger(__name__)
 
 
-def git_clone(repo_url, ref='master'):
+def git_clone(repo_url, ref='master', proxy_server=None):
     '''Clone a git repository from ``repo_url`` using the reference ``ref``.
 
     :params repo_url: URL of git repo to clone.
     :params ref: branch, commit or reference in the repo to clone.
+    :params proxy_server: optional, HTTP proxy to use while cloning the repo.
     :returns: Path to the cloned repo.
     '''
 
     if repo_url == '':
-        raise source_exceptions.GitLocationException(repo_url)
+        raise source_exceptions.GitException(repo_url)
 
     os.environ['GIT_TERMINAL_PROMPT'] = '0'
     _tmp_dir = tempfile.mkdtemp(prefix='armada')
 
     try:
-        repo = Repo.clone_from(repo_url, _tmp_dir)
+        if proxy_server:
+            LOG.info('Cloning [%s] with proxy [%s]', repo_url, proxy_server)
+            repo = Repo.clone_from(repo_url, _tmp_dir,
+                                   config='http.proxy=%s' % proxy_server)
+        else:
+            LOG.info('Cloning [%s]', repo_url)
+            repo = Repo.clone_from(repo_url, _tmp_dir)
+
         repo.remotes.origin.fetch(ref)
         g = Git(repo.working_dir)
         g.checkout('FETCH_HEAD')
+    except git_exc.GitCommandError as e:
+        LOG.exception('Encountered GitCommandError during clone.')
+        if 'Could not resolve proxy' in e.stderr:
+            raise source_exceptions.GitProxyException(proxy_server)
+        else:
+            raise source_exceptions.GitException(repo_url)
     except Exception:
-        raise source_exceptions.GitLocationException(repo_url)
+        LOG.exception('Encountered unknown Exception during clone.')
+        raise source_exceptions.GitException(repo_url)
 
     return _tmp_dir
 
