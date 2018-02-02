@@ -6,17 +6,17 @@ python:
   - "2.7"
 
 before_install:
-    - pip install -r test-requirements.txt
-    - pip install -r requirements.txt
-    - pip install tox
+  - pip install -r test-requirements.txt
+  - pip install -r requirements.txt
+  - pip install tox
 
 install:
-    - pip install -e .
+  - pip install -e .
 
 script:
-    - flake8
-    - armada -h
-    - nosetests -w armada/tests/unit --cover-package=armada --with-coverage --cover-tests
+  - flake8
+  - armada -h
+  - nosetests -w armada/tests/unit --cover-package=armada --with-coverage --cover-tests
 
-# after_success:
-#     - codecov
+#after_success:
+#  - codecov

@@ -12,17 +12,17 @@ RUN pip3 install -r /tmp/requirements.txt
 COPY . /armada
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      netbase \
-      curl \
-      git && \
+        netbase \
+        curl \
+        git && \
     useradd -u 1000 -g users -d /armada armada && \
     chown -R armada:users /armada && \
     mv /armada/etc/armada /etc/ && \
     cd /armada && \
     python3 setup.py install && \
     rm -rf \
-      /root/.cache \
-      /var/lib/apt/lists/*
+        /root/.cache \
+        /var/lib/apt/lists/*
 
 EXPOSE 8000
 

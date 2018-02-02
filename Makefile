@@ -62,7 +62,6 @@ check-tox:
 images: check-docker
 	docker build --rm -t ${IMAGE} .
 
-
 .PHONY: dry-run
 dry-run: clean
 	tools/helm_tk.sh $(HELM)
@@ -107,10 +106,7 @@ helm_lint:
 	@tools/helm_tk.sh $(HELM)
 	$(HELM) lint $(CHART)
 
-
 .PHONY: charts
 charts: clean
 	$(HELM) dep up $(CHART)
 	$(HELM) package $(CHART)
-
-
