@@ -20,6 +20,8 @@ import mock
 from oslo_config import cfg
 import testtools
 
+from armada.conf import default
+
 CONF = cfg.CONF
 
 
@@ -28,6 +30,7 @@ class ArmadaTestCase(testtools.TestCase):
     def setUp(self):
         super(ArmadaTestCase, self).setUp()
         self.useFixture(fixtures.FakeLogger('armada'))
+        default.register_opts(CONF)
 
     def override_config(self, name, override, group=None):
         CONF.set_override(name, override, group)
