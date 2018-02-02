@@ -91,8 +91,8 @@ class Armada(object):
             tiller_namespace=tiller_namespace)
         self.values = values
         self.documents = file
-        self.config = None
         self.target_manifest = target_manifest
+        self.config = self.get_armada_manifest()
 
     def get_armada_manifest(self):
         return Manifest(
@@ -125,9 +125,6 @@ class Armada(object):
             self.documents = Override(
                 self.documents, overrides=self.overrides,
                 values=self.values).update_manifests()
-
-        # Get config and validate
-        self.config = self.get_armada_manifest()
 
         if not lint.validate_armada_object(self.config):
             raise lint_exceptions.InvalidArmadaObjectException()
