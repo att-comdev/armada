@@ -31,7 +31,7 @@ CONF = cfg.CONF
 
 @click.group()
 @click.option(
-    '--debug/--no-debug', help='Enable or disable debugging', default=False)
+    '--debug', help='Enable debug logging', is_flag=True)
 @click.option(
     '--api/--no-api', help='Execute service endpoints. (requires url option)',
     default=False)
