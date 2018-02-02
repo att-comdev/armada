@@ -103,9 +103,10 @@ class GitTestCase(testtools.TestCase):
     def test_git_clone_fake_proxy(self):
         url = 'http://github.com/att-comdev/armada'
 
-        self.assertRaises(source_exceptions.GitProxyException,
-                          source.git_clone, url,
-                          proxy_server='http://not.a.proxy:8080')
+        self.assertRaises(
+            source_exceptions.GitProxyException,
+            source.git_clone, url,
+            proxy_server='http://not.a.proxy.that.works.and.never.will:8080')
 
     @mock.patch('armada.utils.source.tempfile')
     @mock.patch('armada.utils.source.requests')
