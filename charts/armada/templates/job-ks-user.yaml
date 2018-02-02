@@ -65,4 +65,3 @@ spec:
             name: armada-bin
             defaultMode: 0555
 {{- end }}
-
