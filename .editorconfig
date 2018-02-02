@@ -1,0 +1,27 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.py]
+# Armada uses PEP8 line length of 79
+# Note: for VS Code, set "editor.rulers":[79] in your workspace settings
+max_line_length = 79
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.md]
+# Note: VS Code may not honor the following setting
+# See: https://github.com/editorconfig/editorconfig-vscode/issues/153
+trim_trailing_whitespace = false

@@ -19,13 +19,13 @@ tiller_policies = [
     policy.DocumentedRuleDefault(
         name=base.TILLER % 'get_status',
         check_str=base.RULE_ADMIN_REQUIRED,
-        description='Get tiller status',
+        description='Get Tiller status',
         operations=[{'path': '/api/v1.0/status/', 'method': 'GET'}]),
 
     policy.DocumentedRuleDefault(
         name=base.TILLER % 'get_release',
         check_str=base.RULE_ADMIN_REQUIRED,
-        description='Get tiller release',
+        description='Get Tiller release',
         operations=[{'path': '/api/v1.0/releases/', 'method': 'GET'}]),
 ]
 

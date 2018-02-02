@@ -24,7 +24,7 @@ images:
   pull_policy: "IfNotPresent"
 
 deployment:
-  # NOTE: CUrrent replica is hard-coded to 1. This is a placeholder variable
+  # NOTE: Current replica is hard-coded to 1. This is a placeholder variable
   # for future usage. Updates will be made to the chart when we know that
   # tiller is stable with multiple instances.
   replicas: 1
