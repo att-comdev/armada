@@ -184,9 +184,10 @@ class Armada(object):
 
             if repo_branch not in repos:
                 try:
-                    LOG.info('Cloning repo: %s branch: %s', *repo_branch)
+                    logstr = 'Cloning repo: {} branch: {}'.format(*repo_branch)
                     if proxy_server:
-                        LOG.info('Using proxy to clone: %s', proxy_server)
+                        logstr += ' proxy: {}'.format(proxy_server)
+                    LOG.info(logstr)
                     repo_dir = source.git_clone(*repo_branch, proxy_server)
                 except Exception:
                     raise source_exceptions.GitException(
@@ -216,7 +217,7 @@ class Armada(object):
 
     def sync(self):
         '''
-        Syncronize Helm with the Armada Config(s)
+        Synchronize Helm with the Armada Config(s)
         '''
 
         msg = {'install': [], 'upgrade': [], 'diff': []}
@@ -235,7 +236,7 @@ class Armada(object):
             raise armada_exceptions.KnownReleasesException()
 
         for release in known_releases:
-            LOG.debug("Release %s, Version %s found on tiller", release[0],
+            LOG.debug("Release %s, Version %s found on Tiller", release[0],
                       release[1])
 
         for entry in self.config[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:

@@ -30,4 +30,3 @@
 # Get tiller release
 # GET  /api/v1.0/releases/
 #"tiller:get_release": "rule:admin_required"
-

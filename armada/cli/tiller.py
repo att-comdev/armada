@@ -30,33 +30,43 @@ def tiller():
 
 
 DESC = """
-This command gets tiller information
+This command gets Tiller information
 
-The tiller command uses flags to obtain information from tiller services
+The tiller command uses flags to obtain information from Tiller services
 
-To obtain armada deployed releases:
+To obtain Armada deployed releases:
 
     $ armada tiller --releases
 
-To obtain tiller service status/information:
+To obtain Tiller service status/information:
 
     $ armada tiller --status
 
 """
 
-SHORT_DESC = "command gets tiller infromation"
+SHORT_DESC = "Command gets Tiller information."
 
 
-@tiller.command(name='tiller', help=DESC, short_help=SHORT_DESC)
-@click.option('--tiller-host', help="Tiller host ip", default=None)
-@click.option(
-    '--tiller-port', help="Tiller host port", type=int,
-    default=CONF.tiller_port)
-@click.option(
-    '--tiller-namespace', '-tn', help="Tiller namespace", type=str,
-    default=CONF.tiller_namespace)
-@click.option('--releases', help="list of deployed releses", is_flag=True)
-@click.option('--status', help="Status of Armada services", is_flag=True)
+@tiller.command(name='tiller',
+                help=DESC,
+                short_help=SHORT_DESC)
+@click.option('--tiller-host',
+              help="Tiller host IP.",
+              default=None)
+@click.option('--tiller-port',
+              help="Tiller host port.",
+              type=int,
+              default=CONF.tiller_port)
+@click.option('--tiller-namespace', '-tn',
+              help="Tiller namespace.",
+              type=str,
+              default=CONF.tiller_namespace)
+@click.option('--releases',
+              help="List of deployed releases.",
+              is_flag=True)
+@click.option('--status',
+              help="Status of Armada services.",
+              is_flag=True)
 @click.pass_context
 def tiller_service(ctx, tiller_host, tiller_port, tiller_namespace, releases,
                    status):

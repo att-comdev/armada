@@ -33,11 +33,11 @@ def apply():
 
 
 DESC = """
-This command install and updates charts defined in armada manifest
+This command installs and updates charts defined in Armada manifest.
 
 The apply argument must be relative path to Armada Manifest. Executing apply
-commnad once will install all charts defined in manifest. Re-executing apply
-commnad will execute upgrade.
+command once will install all charts defined in manifest. Re-executing apply
+command will execute upgrade.
 
 To see how to create an Armada manifest:
     http://armada-helm.readthedocs.io/en/latest/operations/
@@ -51,7 +51,7 @@ To obtain override manifest:
 
     \b
     $ armada apply examples/simple.yaml \
---set manifest:simple-armada:relase_name="wordpress"
+--set manifest:simple-armada:release_name="wordpress"
 
     \b
     or
@@ -62,13 +62,14 @@ To obtain override manifest:
 
 """
 
-SHORT_DESC = "command install manifest charts"
+SHORT_DESC = "Command installs manifest charts."
 
 
 @apply.command(name='apply',
                help=DESC,
                short_help=SHORT_DESC)
-@click.argument('locations', nargs=-1)
+@click.argument('locations',
+                nargs=-1)
 @click.option('--api',
               help="Contacts service endpoint.",
               is_flag=True)
@@ -105,8 +106,7 @@ SHORT_DESC = "command install manifest charts"
               help="Specifies time to wait for charts to deploy.",
               type=int,
               default=3600)
-@click.option('--values',
-              '-f',
+@click.option('--values', '-f',
               help=("Use to override multiple Armada Manifest values by "
                     "reading overrides from a values.yaml-type file."),
               multiple=True,
@@ -116,12 +116,12 @@ SHORT_DESC = "command install manifest charts"
               help="Wait until all charts deployed.",
               is_flag=True)
 @click.option('--target-manifest',
-              help=('The target manifest to run. Required for specifying '
-                    'which manifest to run when multiple are available.'),
+              help=("The target manifest to run. Required for specifying "
+                    "which manifest to run when multiple are available."),
               default=None)
-@click.option('--debug/--no-debug',
-              help='Enable or disable debugging.',
-              default=False)
+@click.option('--debug',
+              help="Enable debug logging.",
+              is_flag=True)
 @click.pass_context
 def apply_create(ctx, locations, api, disable_update_post, disable_update_pre,
                  dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,

@@ -36,7 +36,7 @@ This command deletes releases.
 The delete command will delete the releases either via a manifest
 or by targeting specific releases.
 
-To delete all the releases that are created by the armada manifest:
+To delete all the releases that are created by the Armada manifest:
 
     $ armada delete --manifest examples/simple.yaml
 
@@ -50,18 +50,27 @@ To delete releases by the name:
 
 """
 
-SHORT_DESC = "command delete releases"
+SHORT_DESC = "Command deletes releases."
 
 
-@delete.command(name='delete', help=DESC, short_help=SHORT_DESC)
-@click.option('--manifest', help='Armada manifest file', type=str)
-@click.option(
-    '--releases', help='Comma-separated list of release names', type=str)
-@click.option(
-    '--no-purge', help="Deletes release without purge option", is_flag=True)
-@click.option('--tiller-host', help="Tiller Host IP")
-@click.option(
-    '--tiller-port', help="Tiller host Port", type=int, default=44134)
+@delete.command(name='delete',
+                help=DESC,
+                short_help=SHORT_DESC)
+@click.option('--manifest',
+              help="Armada Manifest file.",
+              type=str)
+@click.option('--releases',
+              help="Comma-separated list of release names.",
+              type=str)
+@click.option('--no-purge',
+              help="Deletes release without purge option.",
+              is_flag=True)
+@click.option('--tiller-host',
+              help="Tiller host IP.")
+@click.option('--tiller-port',
+              help="Tiller host port.",
+              type=int,
+              default=44134)
 @click.pass_context
 def delete_charts(ctx, manifest, releases, no_purge, tiller_host, tiller_port):
     DeleteChartManifest(

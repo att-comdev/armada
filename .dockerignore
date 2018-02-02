@@ -4,7 +4,6 @@ examples
 CODE_OF_CONDUCT.rst
 ChangeLog
 LICENSE
-OWNERS
 etc/armada/armada.conf
 etc/armada/policy.yaml
 charts/*

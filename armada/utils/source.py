@@ -47,11 +47,11 @@ def git_clone(repo_url, ref='master', proxy_server=None):
 
     try:
         if proxy_server:
-            LOG.info('Cloning [%s] with proxy [%s]', repo_url, proxy_server)
+            LOG.debug('Cloning [%s] with proxy [%s]', repo_url, proxy_server)
             repo = Repo.clone_from(repo_url, _tmp_dir,
                                    config='http.proxy=%s' % proxy_server)
         else:
-            LOG.info('Cloning [%s]', repo_url)
+            LOG.debug('Cloning [%s]', repo_url)
             repo = Repo.clone_from(repo_url, _tmp_dir)
 
         repo.remotes.origin.fetch(ref)

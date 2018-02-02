@@ -1,7 +1,7 @@
 Armada
 ======
 
-|Docker Repository on Quay| |Build Status| |Doc Status|
+|Docker Repository on Quay| |Doc Status|
 
 Armada is a tool for managing multiple Helm charts with dependencies by
 centralizing all configurations in a single Armada YAML and providing
@@ -83,7 +83,7 @@ Usage
 To run Armada, simply supply it with your YAML-based intention for any
 number of charts::
 
-  $ armada apply examples/openstack-helm.yaml [--debug-loggging ]
+  $ armada apply examples/openstack-helm.yaml [ --debug ]
 
 Which should output something like this::
 
@@ -121,7 +121,5 @@ Further Reading
 
 .. |Docker Repository on Quay| image:: https://quay.io/repository/attcomdev/armada/status
    :target: https://quay.io/repository/attcomdev/armada
-.. |Build Status| image:: https://travis-ci.org/att-comdev/armada.svg?branch=master
-   :target: https://travis-ci.org/att-comdev/armada
 .. |Doc Status| image:: https://readthedocs.org/projects/armada-helm/badge/?version=latest
    :target: http://armada-helm.readthedocs.io/

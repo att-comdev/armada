@@ -7,7 +7,7 @@ involved in contributing to Armada.
 Code of Conduct
 ---------------
 By contributing to Armada, you are agreeing to uphold the
-`Contributor Convenant Code of Conduct <https://github.com/att-comdev/armada/
+`Contributor Covenant Code of Conduct <https://github.com/att-comdev/armada/
 blob/master/CODE_OF_CONDUCT.rst>`_. Please familiarize yourself with it
 before contributing.
 
@@ -37,12 +37,12 @@ the issue type.
 +=============+===============================================================+
 | bug         | Indicates a confirmed bug or other unexpected behavior        |
 +-------------+---------------------------------------------------------------+
-| ehancement  | Feature request                                               |
+| enhancement | Feature request                                               |
 +-------------+---------------------------------------------------------------+
 | question    | Indicates a question                                          |
 +-------------+---------------------------------------------------------------+
 | docs        | Assigned to issues indicating missing or incomplete           |
-|             | documenation                                                  |
+|             | documentation                                                 |
 +-------------+---------------------------------------------------------------+
 | duplicate   | Assigned to issues that are duplicates of previously reported |
 |             | issues                                                        |
@@ -83,9 +83,9 @@ readme.html#getting-started>`_
 Armada accepts patches through GerritHub changes. Each commit pushed to
 GerritHub is recognized as a "change" (the equivalent of a GitHub pull
 request). When a change is pushed to GerritHub for review, it contains an
-intial patch set that shows all of the revised changes. When a Gerrit change is
-amended, a new patch set is created to show the differences from the previous
-patch set.
+initial patch set that shows all of the revised changes. When a Gerrit change
+is amended, a new patch set is created to show the differences from the
+previous patch set.
 
 The general workflow for submitting a change is:
 
@@ -114,7 +114,7 @@ installed. Git-review can be installed using Python
 
     pip install git-review
 
-Git-review can also be intalled on Ubuntu by executing:
+Git-review can also be installed on Ubuntu by executing:
 
 .. code-block:: bash
 
@@ -138,7 +138,7 @@ connecting-to-github-with-ssh/>`_.
 
 If you require authentication over HTTPS, you will need to generate an
 `HTTPS password <https://review.gerrithub.io/#/settings/http-password>`_.
-Once you have generated an HTTPS passowrd, add the repository to your remote
+Once you have generated an HTTPS password, add the repository to your remote
 repositories
 
 .. code-block:: bash
@@ -178,7 +178,7 @@ Armada uses Karma inspired `Semantic Commit Messages
 
 In the above template, `TYPE` refers to the type of change, `SCOPE` refers to
 the area where the change occurs (i.e. api, cli, source), `TITLE` is the title
-of the commit message, `DESCRIPTION` is a desription of the change, and
+of the commit message, `DESCRIPTION` is a description of the change, and
 `ISSUE-REFERENCE` is a link to the GitHub issue the change addresses.
 
 Below is a list of possible types:
@@ -201,7 +201,7 @@ Below is a list of possible types:
 
 .. NOTE::
 
-    The scope component of a commit message may be ommited if the change
+    The scope component of a commit message may be committed if the change
     covers more than a single component of Armada.
 
 An commit message for a change that adds a new API endpoint might resemble the
@@ -218,7 +218,7 @@ following example:
 .. NOTE::
 
     It is necessary to leave a blank line between the commit title and
-    desciption in order for a change to appear properly on GerritHub.
+    description in order for a change to appear properly on GerritHub.
 
 Since each commit is represented as a "change" in GerritHub, multiple commits
 should be squashed into one commit before pushing to GerritHub for review. To
@@ -241,7 +241,7 @@ Your change will now be visible on GerritHub for review. In order to amend your
 change after pushing it for review, you will need to create additional
 patch sets.
 
-In order to create an additional patch set, modify your exisiting commit and
+In order to create an additional patch set, modify your existing commit and
 push your new changes for review
 
 .. code-block:: bash
@@ -304,5 +304,5 @@ and conforms to the PEP8 style guide, execute:
 .. code-block:: bash
 
     tox -e pep8
-    tox -e py27,py35
+    tox -e py35
     tox -e coverage

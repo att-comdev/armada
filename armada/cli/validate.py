@@ -30,7 +30,7 @@ def validate():
 
 
 DESC = """
-This command validates Armada Manifest
+This command validates an Armada Manifest.
 
 The validate argument must be a relative path to Armada manifest
 
@@ -38,11 +38,14 @@ The validate argument must be a relative path to Armada manifest
 
 """
 
-SHORT_DESC = "command validates Armada Manifest"
+SHORT_DESC = "Command validates Armada Manifest."
 
 
-@validate.command(name='validate', help=DESC, short_help=SHORT_DESC)
-@click.argument('locations', nargs=-1)
+@validate.command(name='validate',
+                  help=DESC,
+                  short_help=SHORT_DESC)
+@click.argument('locations',
+                nargs=-1)
 @click.pass_context
 def validate_manifest(ctx, locations):
     ValidateManifest(ctx, locations).invoke()
