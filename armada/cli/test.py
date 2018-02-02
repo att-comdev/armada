@@ -34,13 +34,13 @@ def test():
 
 
 DESC = """
-This command test deployed charts
+This command tests deployed charts.
 
-The tiller command uses flags to obtain information from tiller services.
+The tiller command uses flags to obtain information from Tiller services.
 The test command will run the release chart tests either via a the manifest or
-by targetings a relase.
+by targeting a release.
 
-To test armada deployed releases:
+To test Armada deployed releases:
 
     $ armada test --file examples/simple.yaml
 
@@ -50,22 +50,32 @@ To test release:
 
 """
 
-SHORT_DESC = "command test releases"
+SHORT_DESC = "Command tests releases."
 
 
-@test.command(name='test', help=DESC, short_help=SHORT_DESC)
-@click.option('--file', help='armada manifest', type=str)
-@click.option('--release', help='helm release', type=str)
-@click.option('--tiller-host', help="Tiller Host IP", default=None)
-@click.option(
-    '--tiller-port', help="Tiller Host Port", type=int,
-    default=CONF.tiller_port)
-@click.option(
-    '--tiller-namespace', '-tn', help="Tiller Namespace", type=str,
-    default=CONF.tiller_namespace)
+@test.command(name='test',
+              help=DESC,
+              short_help=SHORT_DESC)
+@click.option('--file',
+              help="Armada manifest.",
+              type=str)
+@click.option('--release',
+              help="Helm release.",
+              type=str)
+@click.option('--tiller-host',
+              help="Tiller host IP.",
+              default=None)
+@click.option('--tiller-port',
+              help="Tiller host port.",
+              type=int,
+              default=CONF.tiller_port)
+@click.option('--tiller-namespace', '-tn',
+              help="Tiller Namespace.",
+              type=str,
+              default=CONF.tiller_namespace)
 @click.option('--target-manifest',
-              help=('The target manifest to run. Required for specifying '
-                    'which manifest to run when multiple are available.'),
+              help=("The target manifest to run. Required for specifying "
+                    "which manifest to run when multiple are available."),
               default=None)
 @click.pass_context
 def test_charts(ctx, file, release, tiller_host, tiller_port, tiller_namespace,

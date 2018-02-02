@@ -18,20 +18,20 @@ from armada.exceptions.base_exception import ArmadaBaseException as ex
 class TillerException(ex):
     '''Base class for Tiller exceptions and error handling.'''
 
-    message = 'An unknown Tiller error occured.'
+    message = 'An unknown Tiller error occurred.'
 
 
 class TillerServicesUnavailableException(TillerException):
-    '''Exception for tiller services unavailable.'''
+    '''Exception for Tiller services unavailable.'''
 
     message = 'Tiller services unavailable.'
 
 
 class ChartCleanupException(TillerException):
-    '''Exception that occures during chart cleanup.'''
+    '''Exception that occurs during chart cleanup.'''
 
     def __init__(self, chart_name):
-        message = 'An error occred during cleanup while removing {}'.format(
+        message = 'An error occurred during cleanup while removing {}'.format(
             chart_name)
         super(ChartCleanupException, self).__init__(message)
 
@@ -39,7 +39,7 @@ class ChartCleanupException(TillerException):
 class ListChartsException(TillerException):
     '''Exception that occurs when listing charts'''
 
-    message = 'There was an error listing the helm chart releases.'
+    message = 'There was an error listing the Helm chart releases.'
 
 
 class PostUpdateJobDeleteException(TillerException):
@@ -98,9 +98,9 @@ class ReleaseException(TillerException):
 
 
 class ChannelException(TillerException):
-    '''Exception that occurs during a failed GRPC channel creation'''
+    '''Exception that occurs during a failed gRPC channel creation'''
 
-    message = 'Failed to create GRPC channel.'
+    message = 'Failed to create gRPC channel.'
 
 
 class GetReleaseStatusException(TillerException):
@@ -129,15 +129,15 @@ class TillerPodNotFoundException(TillerException):
     '''
 
     def __init__(self, labels):
-        message = 'Could not find tiller pod with labels "{}"'.format(labels)
+        message = 'Could not find Tiller pod with labels "{}"'.format(labels)
 
         super(TillerPodNotFoundException, self).__init__(message)
 
 
 class TillerPodNotRunningException(TillerException):
-    '''Exception that occurs when no tiller pod is found in a running state'''
+    '''Exception that occurs when no Tiller pod is found in a running state'''
 
-    message = 'No tiller pods found in running state'
+    message = 'No Tiller pods found in running state'
 
 
 class TillerVersionException(TillerException):

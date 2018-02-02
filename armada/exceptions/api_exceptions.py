@@ -24,28 +24,28 @@ class ApiException(base.ArmadaBaseException):
 class ApiBaseException(ApiException):
     '''Exception that occurs during chart cleanup.'''
 
-    message = 'There was an error listing the helm chart releases.'
+    message = 'There was an error listing the Helm chart releases.'
 
 
 class ApiJsonException(ApiException):
     '''Exception that occurs during chart cleanup.'''
 
-    message = 'There was an error listing the helm chart releases.'
+    message = 'There was an error listing the Helm chart releases.'
 
 
 class ClientUnauthorizedError(ApiException):
     '''Exception that occurs during chart cleanup.'''
 
-    message = 'There was an error listing the helm chart releases.'
+    message = 'There was an error listing the Helm chart releases.'
 
 
 class ClientForbiddenError(ApiException):
     '''Exception that occurs during chart cleanup.'''
 
-    message = 'There was an error listing the helm chart releases.'
+    message = 'There was an error listing the Helm chart releases.'
 
 
 class ClientError(ApiException):
     '''Exception that occurs during chart cleanup.'''
 
-    message = 'There was an error listing the helm chart releases.'
+    message = 'There was an error listing the Helm chart releases.'

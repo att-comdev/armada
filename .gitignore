@@ -105,4 +105,7 @@ AUTHORS
 ChangeLog
 etc/armada/armada.conf
 etc/armada/policy.yaml
-.editorconfig
+
+# IDEs
+.idea/
+.vscode/

@@ -24,7 +24,7 @@ Commands
 
       To obtain override manifest:
 
-          $ armada apply examples/simple.yaml --set manifest:simple-armada:relase_name="wordpress"
+          $ armada apply examples/simple.yaml --set manifest:simple-armada:release_name="wordpress"
 
           or
 
@@ -50,7 +50,7 @@ Commands
       --target-manifest TEXT        The target manifest to run. Required for
                                     specifying which manifest to run when multiple
                                     are available.
-      --debug / --no-debug          Enable or disable debugging.
+      --debug                       Enable debug logging.
       --help                        Show this message and exit.
 
 Synopsis
@@ -61,7 +61,7 @@ that it will deploy into the tiller service in your Kubernetes cluster.
 Executing the ``armada apply`` again on existing armada deployment will start
 an update of the armada deployed charts.
 
-``armada apply armada-manifest.yaml [--debug-logging]``
+``armada apply armada-manifest.yaml [--debug]``
 
 If you remove ``armada/Charts/v1`` from the ``armada/ChartGroups/v1`` in the armada
 manifest and execute an ``armada apply`` with the  ``--enable-chart-cleanup`` flag.
