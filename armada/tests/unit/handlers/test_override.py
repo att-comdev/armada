@@ -25,6 +25,13 @@ class OverrideTestCase(unittest.TestCase):
         self.basepath = os.path.join(os.path.dirname(__file__))
         self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
 
+    def test_load_yaml_file(self):
+        with open(self.base_manifest) as f:
+            doc_obj = list(yaml.safe_load_all(f.read()))
+            ovr = Override(doc_obj)
+            value = ovr._load_yaml_file(self.base_manifest)
+            self.assertIsInstance(value, list)
+
     def test_find_document_type_valid(self):
         with open(self.base_manifest) as f:
             doc_obj = list(yaml.safe_load_all(f.read()))
@@ -37,13 +44,6 @@ class OverrideTestCase(unittest.TestCase):
 
             test_manifest = ovr.find_document_type('manifest')
             self.assertEqual(test_manifest, const.DOCUMENT_MANIFEST)
-
-    def test_find_document_type_invalid(self):
-        with self.assertRaises(Exception):
-            with open(self.base_manifest) as f:
-                doc_obj = list(yaml.safe_load_all(f.read()))
-                ovr = Override(doc_obj)
-                ovr.find_document_type('charts')
 
     def test_update_dictionary_valid(self):
         expected = "{}/templates/override-{}-expected.yaml".format(
@@ -96,6 +96,28 @@ class OverrideTestCase(unittest.TestCase):
 
         ovr = Override(self.base_manifest).array_to_dict(data_path, new_value)
         self.assertEqual(ovr, expected_dict)
+
+
+class OverrideNegativeTestCase(unittest.TestCase):
+    def setUp(self):
+        self.basepath = os.path.join(os.path.dirname(__file__))
+        self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
+
+    def test_load_yaml_file_invalid(self):
+        expected = "{}/templates/non_existing_yaml".format(self.basepath)
+        with self.assertRaises(IOError):
+            with open(expected) as f:
+                doc_obj = list(yaml.safe_load_all(f.read()))
+                ovr = Override(doc_obj)
+                value = ovr._load_yaml_file(self.base_manifest)
+                self.assertIsInstance(value, list)
+
+    def test_find_document_type_invalid(self):
+        with self.assertRaises(ValueError):
+            with open(self.base_manifest) as f:
+                doc_obj = list(yaml.safe_load_all(f.read()))
+                ovr = Override(doc_obj)
+                ovr.find_document_type('non_existing_chart')
 
     def test_convert_array_to_dict_invalid(self):
         data_path = ['a', 'b', 'c']
