@@ -25,6 +25,13 @@ class OverrideTestCase(unittest.TestCase):
         self.basepath = os.path.join(os.path.dirname(__file__))
         self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
 
+    def test_load_yaml_file(self):
+        with open(self.base_manifest) as f:
+            doc_obj = list(yaml.safe_load_all(f.read()))
+            ovr = Override(doc_obj)
+            value = ovr._load_yaml_file(self.base_manifest)
+            self.assertIsInstance(value, list)
+
     def test_find_document_type_valid(self):
         with open(self.base_manifest) as f:
             doc_obj = list(yaml.safe_load_all(f.read()))
