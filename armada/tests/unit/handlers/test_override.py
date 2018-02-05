@@ -12,18 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
+import testtools
 import yaml
 import os
 
 from armada.handlers.override import Override
+from armada.exceptions import override_exceptions
 from armada import const
 
 
-class OverrideTestCase(unittest.TestCase):
+class OverrideTestCase(testtools.TestCase):
     def setUp(self):
+        super(OverrideTestCase, self).setUp()
         self.basepath = os.path.join(os.path.dirname(__file__))
         self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
+
+    def test_load_yaml_file(self):
+        with open(self.base_manifest) as f:
+            doc_obj = list(yaml.safe_load_all(f.read()))
+            ovr = Override(doc_obj)
+            value = ovr._load_yaml_file(self.base_manifest)
+            self.assertIsInstance(value, list)
 
     def test_find_document_type_valid(self):
         with open(self.base_manifest) as f:
@@ -37,13 +46,6 @@ class OverrideTestCase(unittest.TestCase):
 
             test_manifest = ovr.find_document_type('manifest')
             self.assertEqual(test_manifest, const.DOCUMENT_MANIFEST)
-
-    def test_find_document_type_invalid(self):
-        with self.assertRaises(Exception):
-            with open(self.base_manifest) as f:
-                doc_obj = list(yaml.safe_load_all(f.read()))
-                ovr = Override(doc_obj)
-                ovr.find_document_type('charts')
 
     def test_update_dictionary_valid(self):
         expected = "{}/templates/override-{}-expected.yaml".format(
@@ -96,6 +98,28 @@ class OverrideTestCase(unittest.TestCase):
 
         ovr = Override(self.base_manifest).array_to_dict(data_path, new_value)
         self.assertEqual(ovr, expected_dict)
+
+
+class OverrideNegativeTestCase(testtools.TestCase):
+    def setUp(self):
+        super(OverrideNegativeTestCase, self).setUp()
+        self.basepath = os.path.join(os.path.dirname(__file__))
+        self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
+
+    def test_load_yaml_file_invalid(self):
+        expected = "{}/templates/non_existing_yaml.yaml".format(self.basepath)
+        with open(self.base_manifest) as f:
+            doc_obj = list(yaml.safe_load_all(f.read()))
+            ovr = Override(doc_obj)
+            self.assertRaises(override_exceptions.InvalidOverrideFileException,
+                              ovr._load_yaml_file, expected)
+
+    def test_find_document_type_invalid(self):
+        with open(self.base_manifest) as f:
+            doc_obj = list(yaml.safe_load_all(f.read()))
+            ovr = Override(doc_obj)
+            self.assertRaises(ValueError, ovr.find_document_type,
+                              'non_existing_document')
 
     def test_convert_array_to_dict_invalid(self):
         data_path = ['a', 'b', 'c']
