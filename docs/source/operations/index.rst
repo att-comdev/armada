@@ -15,7 +15,7 @@ Operations Guide
    guide-configure.rst
    guide-troubleshooting.rst
    guide-use-armada.rst
-   guide-exceptions.rst
+   exceptions/index
    guide-helm-plugin.rst
    sampleconf.rst
    samplepolicy.rst

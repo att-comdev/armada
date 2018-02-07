@@ -31,7 +31,7 @@ class ChartCleanupException(TillerException):
     '''Exception that occures during chart cleanup.'''
 
     def __init__(self, chart_name):
-        message = 'An error occred during cleanup while removing {}'.format(
+        message = 'An error occurred during cleanup while removing {}'.format(
             chart_name)
         super(ChartCleanupException, self).__init__(message)
 
@@ -87,7 +87,10 @@ class PreUpdateJobCreateException(TillerException):
 
 
 class ReleaseException(TillerException):
-    '''Exception that occurs when a release fails to install.'''
+    '''
+    Exception that occurs when a release fails to install, upgrade, delete,
+    or test.
+    '''
 
     def __init__(self, name, status, action):
         til_msg = getattr(status.info, 'Description').encode()
@@ -124,8 +127,9 @@ class GetReleaseContentException(TillerException):
 
 
 class TillerPodNotFoundException(TillerException):
-    '''Exception that occurs when a tiller pod cannot be found using the
-       labels specified in the Armada config.
+    '''
+    Exception that occurs when a tiller pod cannot be found using the labels
+    specified in the Armada config.
     '''
 
     def __init__(self, labels):
