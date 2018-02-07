@@ -18,7 +18,7 @@ from armada.exceptions import base_exception
 class ArmadaException(base_exception.ArmadaBaseException):
     '''Base class for Armada handler exception and error handling.'''
 
-    message = 'An unknown Armada handler error occured.'
+    message = 'An unknown Armada handler error occurred.'
 
 
 class KnownReleasesException(ArmadaException):
