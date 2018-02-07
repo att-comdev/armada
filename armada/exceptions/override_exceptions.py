@@ -20,7 +20,7 @@ class OverrideException(base_exception.ArmadaBaseException):
     Base class for Override handler exception and error handling.
     '''
 
-    message = 'An unknown Override handler error occured.'
+    message = 'An unknown Override handler error occurred.'
 
 
 class InvalidOverrideTypeException(OverrideException):
