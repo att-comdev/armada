@@ -1,0 +1,9 @@
+.. include:: api-exceptions.rst
+.. include:: armada-exceptions.rst
+.. include:: base-exceptions.rst
+.. include:: chartbuilder-exceptions.rst
+.. include:: lint-exceptions.rst
+.. include:: manifest-exceptions.rst
+.. include:: override-exceptions.rst
+.. include:: source-exceptions.rst
+.. include:: tiller-exceptions.rst

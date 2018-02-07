@@ -3,19 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Operations Guide
+Exceptions Guide
 ================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   guide-api.rst
-   guide-build-armada-yaml.rst
-   guide-configure.rst
-   guide-troubleshooting.rst
-   guide-use-armada.rst
-   exceptions/index
-   guide-helm-plugin.rst
-   sampleconf.rst
-   samplepolicy.rst
+   guide-exceptions.rst

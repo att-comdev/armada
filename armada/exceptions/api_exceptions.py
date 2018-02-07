@@ -18,7 +18,7 @@ from armada.exceptions import base_exception as base
 class ApiException(base.ArmadaBaseException):
     '''Base class for API exceptions and error handling.'''
 
-    message = 'An unknown API error occur.'
+    message = 'An unknown API error occurred.'
 
 
 class ApiBaseException(ApiException):

@@ -46,7 +46,7 @@ class HelmChartBuildException(ChartBuilderException):
 class IgnoredFilesLoadException(ChartBuilderException):
     '''Exception that occurs when there is an error loading ignored files.'''
 
-    message = 'An error occured while loading the ignored files in \
+    message = 'An error occurred while loading the ignored files in \
               .helmignore'
 
 
