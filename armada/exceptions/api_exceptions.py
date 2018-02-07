@@ -16,9 +16,14 @@ from armada.exceptions import base_exception as base
 
 
 class ApiException(base.ArmadaBaseException):
-    '''Base class for API exceptions and error handling.'''
+    '''
+    Base class for API exceptions and error handling.
 
-    message = 'An unknown API error occur.'
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
+
+    message = 'An unknown API error occurred.'
 
 
 class ApiBaseException(ApiException):
@@ -34,18 +39,33 @@ class ApiJsonException(ApiException):
 
 
 class ClientUnauthorizedError(ApiException):
-    '''Exception that occurs during chart cleanup.'''
+    '''
+    Exception that occurs when the server returns a 401 Unauthorized error.
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'There was an error listing the Helm chart releases.'
 
 
 class ClientForbiddenError(ApiException):
-    '''Exception that occurs during chart cleanup.'''
+    '''
+    Exception that occurs when the server returns a 403 Forbidden error.
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'There was an error listing the Helm chart releases.'
 
 
 class ClientError(ApiException):
-    '''Exception that occurs during chart cleanup.'''
+    '''
+    Exception that occurs when the server returns a 500 Internal Server error.
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'There was an error listing the Helm chart releases.'
