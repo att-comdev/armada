@@ -18,7 +18,7 @@ from armada.exceptions import base_exception
 class LintException(base_exception.ArmadaBaseException):
     '''Base class for linting exceptions and errors.'''
 
-    message = 'An unknown linting error occured.'
+    message = 'An unknown linting error occurred.'
 
 
 class InvalidManifestException(LintException):
@@ -30,13 +30,13 @@ class InvalidManifestException(LintException):
 class InvalidChartNameException(LintException):
     '''Exception that occurs when an invalid filename is encountered.'''
 
-    message = 'Chart name must be a string,'
+    message = 'Chart name must be a string.'
 
 
 class InvalidChartDefinitionException(LintException):
     '''Exception when invalid chart definition is encountered.'''
 
-    message = 'Invalid chart definition.Chart definition must be array.'
+    message = 'Invalid chart definition. Chart definition must be array.'
 
 
 class InvalidReleaseException(LintException):
