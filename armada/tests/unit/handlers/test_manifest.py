@@ -406,3 +406,35 @@ class ManifestNegativeTestCase(testtools.TestCase):
         self.assertRaisesRegexp(exceptions.ManifestException, error_re,
                                 armada_manifest.find_chart_group_document,
                                 'invalid')
+
+    def test_build_chart_deps_with_missing_dependency_fails(self):
+        """Validate that attempting to build a chart that points to
+        a missing dependency fails.
+        """
+        armada_manifest = manifest.Manifest(self.documents)
+        self.documents[1]['data']['dependencies'] = ['missing-dependency']
+        test_chart = armada_manifest.find_chart_document('mariadb')
+        self.assertRaises(exceptions.ManifestException,
+                          armada_manifest.build_chart_deps,
+                          test_chart)
+
+    def test_build_chart_group_with_missing_chart_grp_fails(self):
+        """Validate that attempting to build a chart group document with
+        missing chart group fails.
+        """
+        armada_manifest = manifest.Manifest(self.documents)
+        self.documents[5]['data']['chart_group'] = ['missing-chart-group']
+        test_chart_group = armada_manifest.find_chart_group_document(
+            'openstack-keystone')
+        self.assertRaises(exceptions.ManifestException,
+                          armada_manifest.build_chart_group,
+                          test_chart_group)
+
+    def test_build_armada_manifest_with_missing_chart_grps_fails(self):
+        """Validate that attempting to build a manifest with missing
+        chart groups fails.
+        """
+        armada_manifest = manifest.Manifest(self.documents)
+        self.documents[6]['data']['chart_groups'] = ['missing-manifest']
+        self.assertRaises(exceptions.ManifestException,
+                          armada_manifest.build_armada_manifest)
