@@ -22,7 +22,15 @@ class ChartBuilderException(base_exception.ArmadaBaseException):
 
 
 class DependencyException(ChartBuilderException):
-    '''Exception that occurs when dependencies cannot be resolved.'''
+    '''
+    Exception that occurs when dependencies cannot be resolved.
+
+    **Message:**
+    *Failed to resolve dependencies for <chart name>.*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, chart_name):
         self._chart_name = chart_name
@@ -33,7 +41,15 @@ class DependencyException(ChartBuilderException):
 
 
 class HelmChartBuildException(ChartBuilderException):
-    '''Exception that occurs when Helm Chart fails to build.'''
+    '''
+    Exception that occurs when Helm Chart fails to build.
+
+    **Message:**
+    *Failed to build Helm chart for <chart name>.*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, chart_name):
         self._chart_name = chart_name
@@ -44,14 +60,30 @@ class HelmChartBuildException(ChartBuilderException):
 
 
 class IgnoredFilesLoadException(ChartBuilderException):
-    '''Exception that occurs when there is an error loading ignored files.'''
+    '''
+    Exception that occurs when there is an error loading ignored files.
+
+    **Message:**
+    *An error occurred while loading the ignored files in .helmignore*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'An error occurred while loading the ignored files in \
               .helmignore'
 
 
 class MetadataLoadException(ChartBuilderException):
-    ''' Exception that occurs when metadata loading fails.'''
+    '''
+    Exception that occurs when metadata loading fails.
+
+    **Message**
+    *Failed to load metadata from chart yaml file*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'Failed to load metadata from chart yaml file'
 
