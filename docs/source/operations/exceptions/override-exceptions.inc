@@ -14,15 +14,19 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-Armada Exceptions
-=================
+.. list-table:: **Override Exceptions**
+  :widths: 5 50
+  :header-rows: 1
 
-.. include:: api-exceptions.inc
-.. include:: armada-exceptions.inc
-.. include:: base-exceptions.inc
-.. include:: chartbuilder-exceptions.inc
-.. include:: lint-exceptions.inc
-.. include:: manifest-exceptions.inc
-.. include:: override-exceptions.inc
-.. include:: source-exceptions.inc
-.. include:: tiller-exceptions.inc
+  * - Exception Name
+    - Description
+  * - InvalidOverrideFileException
+    - .. autoexception:: armada.exceptions.override_exceptions.InvalidOverrideFileException
+         :members:
+         :show-inheritance:
+  * - InvalidOverrideValueException
+    - .. autoexception:: armada.exceptions.override_exceptions.InvalidOverrideValueException
+         :members:
+  * - UnknownDocumentOverrideException
+    - .. autoexception:: armada.exceptions.override_exceptions.UnknownDocumentOverrideException
+         :members:
