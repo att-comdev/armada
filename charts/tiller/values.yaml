@@ -34,4 +34,4 @@ deployment:
 
 manifests:
   deployment_tiller: true
-  service_tiller: true
+  service_tiller_deploy: true
