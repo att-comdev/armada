@@ -37,6 +37,8 @@ class ArmadaBaseException(Exception):
 
 
 class ArmadaAPIException(falcon.HTTPError):
+    '''Base class for Armada API Exceptions.'''
+
     status = falcon.HTTP_500
     message = "unknown error"
     title = "Internal Server Error"
@@ -49,6 +51,13 @@ class ArmadaAPIException(falcon.HTTPError):
 
 
 class ActionForbidden(ArmadaAPIException):
+    '''
+    Action Forbidden
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
+
     status = falcon.HTTP_403
     message = _("Insufficient privilege to perform action.")
     title = _("Action Forbidden")
