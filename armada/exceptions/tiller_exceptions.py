@@ -22,7 +22,15 @@ class TillerException(ex):
 
 
 class TillerServicesUnavailableException(TillerException):
-    '''Exception for tiller services unavailable.'''
+    '''
+    Exception for tiller services unavailable.
+
+    **Message:**
+    *Tiller services unavailable.*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'Tiller services unavailable.'
 
@@ -54,7 +62,15 @@ class PostUpdateJobDeleteException(TillerException):
 
 
 class PostUpdateJobCreateException(TillerException):
-    '''Exception that occurs when a job creation fails.'''
+    '''
+    Exception that occurs when a job creation fails.
+
+    **Message:**
+    *Failed to create k8s job <name> in <namespace>*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, name, namespace):
 
@@ -65,7 +81,15 @@ class PostUpdateJobCreateException(TillerException):
 
 
 class PreUpdateJobDeleteException(TillerException):
-    '''Exception that occurs when a job deletion'''
+    '''
+    Exception that occurs when a job deletion.
+
+    **Message:**
+    *Failed to delete k8s job <name> in <namespace>*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, name, namespace):
 
@@ -90,6 +114,15 @@ class ReleaseException(TillerException):
     '''
     Exception that occurs when a release fails to install, upgrade, delete,
     or test.
+
+    **Message:**
+    *Failed to <action> release: <name> - Tiller Message: <tiller message>*
+
+    **Possible Actions:**
+    *delete, install, test, upgrade*
+
+    **Troubleshoot:**
+    *Coming Soon*
     '''
 
     def __init__(self, name, status, action):
@@ -101,13 +134,29 @@ class ReleaseException(TillerException):
 
 
 class ChannelException(TillerException):
-    '''Exception that occurs during a failed GRPC channel creation'''
+    '''
+    Exception that occurs during a failed GRPC channel creation.
+
+    **Message:**
+    *Failed to create GRPC channel*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'Failed to create GRPC channel.'
 
 
 class GetReleaseStatusException(TillerException):
-    '''Exception that occurs during a failed Release Testing'''
+    '''
+    Exception that occurs during a failed Release Testing.
+
+    **Message:**
+    *Failed to get <release> status <version>*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, release, version):
         message = 'Failed to get {} status {} version'.format(
@@ -130,6 +179,12 @@ class TillerPodNotFoundException(TillerException):
     '''
     Exception that occurs when a tiller pod cannot be found using the labels
     specified in the Armada config.
+
+    **Message:**
+    *Could not find tiller pod with labels "<labels>"*
+
+    **Troubleshoot:**
+    *Coming Soon*
     '''
 
     def __init__(self, labels):
@@ -139,12 +194,28 @@ class TillerPodNotFoundException(TillerException):
 
 
 class TillerPodNotRunningException(TillerException):
-    '''Exception that occurs when no tiller pod is found in a running state'''
+    '''
+    Exception that occurs when no tiller pod is found in a running state.
+
+    **Message:**
+    *No tiller pods found in running state*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'No tiller pods found in running state'
 
 
 class TillerVersionException(TillerException):
-    '''Exception that occurs during a failed Release Testing'''
+    '''
+    Exception that occurs during a failed Release Testing
+
+    **Message:**
+    *Failed to get Tiller Version*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'Failed to get Tiller Version'
