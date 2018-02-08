@@ -14,10 +14,13 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-Armada Exceptions
-=================
+.. list-table:: **Armada Exceptions**
+  :widths: 5 50
+  :header-rows: 1
 
-.. include:: api-exceptions.inc
-.. include:: armada-exceptions.inc
-.. include:: base-exceptions.inc
-.. include:: chartbuilder-exceptions.inc
+  * - Exception Name
+    - Description
+  * - KnownReleasesException
+    - .. autoexception:: armada.exceptions.armada_exceptions.KnownReleasesException
+         :members:
+         :show-inheritance:
