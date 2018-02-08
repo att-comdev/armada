@@ -14,15 +14,17 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-Armada Exceptions
-=================
+.. list-table:: **Lint Exceptions**
+  :widths: 5 50
+  :header-rows: 1
 
-.. include:: api-exceptions.inc
-.. include:: armada-exceptions.inc
-.. include:: base-exceptions.inc
-.. include:: chartbuilder-exceptions.inc
-.. include:: lint-exceptions.inc
-.. include:: manifest-exceptions.inc
-.. include:: override-exceptions.inc
-.. include:: source-exceptions.inc
-.. include:: tiller-exceptions.inc
+  * - Exception Name
+    - Description
+  * - InvalidArmadaObjectException
+    - .. autoexception:: armada.exceptions.lint_exceptions.InvalidArmadaObjectException
+         :members:
+         :show-inheritance:
+  * - InvalidManifestException
+    - .. autoexception:: armada.exceptions.lint_exceptions.InvalidManifestException
+         :members:
+         :show-inheritance:

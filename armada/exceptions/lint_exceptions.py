@@ -22,7 +22,15 @@ class LintException(base_exception.ArmadaBaseException):
 
 
 class InvalidManifestException(LintException):
-    '''Exception for invalid manifests.'''
+    '''
+    Exception for invalid manifests.
+
+    **Message:**
+    *Armada manifest invalid.*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'Armada manifest invalid.'
 
@@ -46,6 +54,14 @@ class InvalidReleaseException(LintException):
 
 
 class InvalidArmadaObjectException(LintException):
-    '''Exception that occurs when an Armada object is not declared.'''
+    '''
+    Exception that occurs when an Armada object is not declared.
+
+    **Message:**
+    *An Armada object was not declared.*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'An Armada object was not declared.'

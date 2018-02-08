@@ -16,4 +16,15 @@ from armada.exceptions import base_exception as base
 
 
 class ManifestException(base.ArmadaBaseException):
+    """
+    An exception occurred while attempting to build an Armada manifest. The
+    exception will return with details as to why.
+
+    **Message:**
+    *An error occured while generating the manifest: <details>*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    """
+
     message = 'An error occurred while generating the manifest: %(details)s.'

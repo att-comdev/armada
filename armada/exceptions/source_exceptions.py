@@ -22,7 +22,15 @@ class SourceException(base_exception.ArmadaBaseException):
 
 
 class GitException(SourceException):
-    '''Exception when an error occurs cloning a Git repository.'''
+    '''
+    Exception when an error occurs cloning a Git repository.
+
+    **Message:**
+    *Git exception occurred, <location> may not be a valid git repository.*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, location):
         self._location = location
@@ -54,8 +62,15 @@ class SourceCleanupException(SourceException):
 
 
 class TarballDownloadException(SourceException):
-    '''Exception that occurs when the tarball cannot be downloaded
-        from the provided URL
+    '''
+    Exception that occurs when the tarball cannot be downloaded from the
+    provided URL.
+
+    **Message:**
+    *Unable to download from <tarball url>*
+
+    **Troubleshoot:**
+    *Coming Soon*
     '''
 
     def __init__(self, tarball_url):
@@ -66,7 +81,15 @@ class TarballDownloadException(SourceException):
 
 
 class TarballExtractException(SourceException):
-    '''Exception that occurs when extracting the tarball fails'''
+    '''
+    Exception that occurs when extracting the tarball fails.
+
+    **Message:**
+    *Unable to extract <tarball directory>*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, tarball_dir):
         self._tarball_dir = tarball_dir
@@ -76,7 +99,15 @@ class TarballExtractException(SourceException):
 
 
 class InvalidPathException(SourceException):
-    '''Exception that occurs when a nonexistant path is accessed'''
+    '''
+    Exception that occurs when a nonexistant path is accessed.
+
+    **Message:**
+    *Unable to access path <path>*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, path):
         self._path = path
@@ -86,7 +117,15 @@ class InvalidPathException(SourceException):
 
 
 class ChartSourceException(SourceException):
-    '''Exception for unknown chart source type.'''
+    '''
+    Exception for unknown chart source type.
+
+    **Message:**
+    *Unknown source type "<source type>"" for chart "<chart name>"*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     def __init__(self, chart_name, source_type):
         self._chart_name = chart_name
