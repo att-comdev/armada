@@ -38,6 +38,9 @@ class InvalidOverrideTypeException(OverrideException):
 class InvalidOverrideFileException(OverrideException):
     '''
     Exception that occurs when an invalid override file is provided.
+
+    **Troubleshoot:**
+    *Coming Soon*
     '''
 
     def __init__(self, filename):
@@ -49,6 +52,9 @@ class InvalidOverrideFileException(OverrideException):
 class InvalidOverrideValueException(OverrideException):
     '''
     Exception that occurs when an invalid value is used with the set flag.
+
+    **Troubleshoot:**
+    *Coming Soon*
     '''
 
     def __init__(self, override_command):
@@ -61,6 +67,9 @@ class InvalidOverrideValueException(OverrideException):
 class UnknownDocumentOverrideException(OverrideException):
     '''
     Exception that occurs when an invalid value is used with the set flag.
+
+    **Troubleshoot:**
+    *Coming Soon*
     '''
 
     def __init__(self, doc_type, doc_name):
