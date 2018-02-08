@@ -1,5 +1,5 @@
 ..
-  Copyright 2017 AT&T Intellectual Property.
+  Copyright 2018 AT&T Intellectual Property.
   All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,29 +14,29 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-.. list-table:: **ApiException**
+.. list-table:: **Charbuilder Exceptions**
   :widths: 5 50
   :header-rows: 1
 
   * - Exception Name
     - Description
-  * - ApiException
-    - .. autoexception:: armada.exceptions.api_exceptions.ApiException
+  * - DependencyException
+    - .. autoexception:: armada.exceptions.chartbuilder_exceptions.DependencyException
          :members:
          :show-inheritance:
          :undoc-members:
-  * - ClientError
-    - .. autoexception:: armada.exceptions.api_exceptions.ClientError
+  * - HelmChartBuildException
+    - .. autoexception:: armada.exceptions.chartbuilder_exceptions.HelmChartBuildException
          :members:
          :show-inheritance:
          :undoc-members:
-  * - ClientForbiddenError
-    - .. autoexception:: armada.exceptions.api_exceptions.ClientForbiddenError
+  * - IgnoredFilesLoadException
+    - .. autoexception:: armada.exceptions.chartbuilder_exceptions.IgnoredFilesLoadException
          :members:
          :show-inheritance:
          :undoc-members:
-  * - ClientUnauthorizedError
-    - .. autoexception:: armada.exceptions.api_exceptions.ClientUnauthorizedError
+  * - MetadataLoadException
+    - .. autoexception:: armada.exceptions.chartbuilder_exceptions.MetadataLoadException
          :members:
          :show-inheritance:
          :undoc-members:
