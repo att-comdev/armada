@@ -49,6 +49,16 @@ class ArmadaAPIException(falcon.HTTPError):
 
 
 class ActionForbidden(ArmadaAPIException):
+    '''
+    Action Forbidden
+
+    **Message:**
+    Insufficient privilege to perform action.*
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
+
     status = falcon.HTTP_403
     message = _("Insufficient privilege to perform action.")
     title = _("Action Forbidden")
