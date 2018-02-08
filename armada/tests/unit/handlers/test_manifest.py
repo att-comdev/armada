@@ -406,3 +406,38 @@ class ManifestNegativeTestCase(testtools.TestCase):
         self.assertRaisesRegexp(exceptions.ManifestException, error_re,
                                 armada_manifest.find_chart_group_document,
                                 'invalid')
+
+    def test_build_chart_deps_negative(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        test_yaml_file = None
+        with open(os.path.join(examples_dir, 'testing-file.yaml')) as f:
+            test_yaml_file = list(yaml.safe_load_all(f.read()))
+            test_manifest = manifest.Manifest(test_yaml_file)
+            test_chart = test_manifest.find_chart_document('test-chart')
+            self.assertRaises(exceptions.ManifestException,
+                              test_manifest.build_chart_deps,
+                              test_chart)
+
+    def test_build_chart_group_negative(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        test_yaml_file = None
+        with open(os.path.join(examples_dir, 'testing-file.yaml')) as f:
+            test_yaml_file = list(yaml.safe_load_all(f.read()))
+            test_manifest = manifest.Manifest(test_yaml_file)
+            test_chart_group = test_manifest. \
+                find_chart_group_document('test-chart-group')
+            self.assertRaises(exceptions.ManifestException,
+                              test_manifest.build_chart_group,
+                              test_chart_group)
+
+    def test_build_armada_manifest_negative(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        test_yaml_file = None
+        with open(os.path.join(examples_dir, 'testing-file.yaml')) as f:
+            test_yaml_file = list(yaml.safe_load_all(f.read()))
+            test_manifest = manifest.Manifest(test_yaml_file)
+            self.assertRaises(exceptions.ManifestException,
+                              test_manifest.build_armada_manifest)

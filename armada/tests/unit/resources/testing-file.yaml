@@ -1,0 +1,15 @@
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: test-chart
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: test-chart-group
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: testing-manifest
