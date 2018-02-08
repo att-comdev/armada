@@ -1,5 +1,5 @@
 ..
-  Copyright 2018 AT&T Intellectual Property.
+  Copyright 2017 AT&T Intellectual Property.
   All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,10 +14,14 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-Armada Exceptions
-=================
+.. list-table:: **Base Exceptions**
+  :widths: 5 50
+  :header-rows: 1
 
-.. include:: api-exceptions.inc
-.. include:: armada-exceptions.inc
-.. include:: base-exceptions.inc
-.. include:: chartbuilder-exceptions.inc
+  * - Exception Name
+    - Description
+  * - ActionForbidden
+    - .. autoexception:: armada.exceptions.base_exception.ActionForbidden
+         :members:
+         :show-inheritance:
+         :undoc-members:

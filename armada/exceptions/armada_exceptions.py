@@ -22,6 +22,11 @@ class ArmadaException(base_exception.ArmadaBaseException):
 
 
 class KnownReleasesException(ArmadaException):
-    '''Exception that occurs when no known releases are found'''
+    '''
+    Exception that occurs when no known releases are found.
+
+    **Troubleshoot:**
+    *Coming Soon*
+    '''
 
     message = 'No known releases found'
