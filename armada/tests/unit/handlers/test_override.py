@@ -27,6 +27,14 @@ class OverrideTestCase(testtools.TestCase):
         self.basepath = os.path.join(os.path.dirname(__file__))
         self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
 
+    def test_update_manifests_with_values_valid(self):
+        with open(self.base_manifest) as f:
+            doc_obj = list(yaml.safe_load_all(f.read()))
+            override = ('manifest:simple-armada:chart_groups=\
+                         blog-group3,blog-group4',)
+            ovr = Override(doc_obj, override, [self.base_manifest])
+            ovr.update_manifests()
+
     def test_load_yaml_file(self):
         with open(self.base_manifest) as f:
             doc_obj = list(yaml.safe_load_all(f.read()))
@@ -46,6 +54,22 @@ class OverrideTestCase(testtools.TestCase):
 
             test_manifest = ovr.find_document_type('manifest')
             self.assertEqual(test_manifest, const.DOCUMENT_MANIFEST)
+
+    def test_update_chart_group_document_valid(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        with open(os.path.join(examples_dir, 'keystone-manifest.yaml')) as f:
+            self.documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(self.documents)
+            ovr.update_chart_group_document(self.documents[5])
+
+    def test_update_armada_manifest_valid(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        with open(os.path.join(examples_dir, 'keystone-manifest.yaml')) as f:
+            self.documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(self.documents)
+            ovr.update_armada_manifest(self.documents[6])
 
     def test_update_dictionary_valid(self):
         expected = "{}/templates/override-{}-expected.yaml".format(
