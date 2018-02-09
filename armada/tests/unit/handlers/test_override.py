@@ -15,6 +15,7 @@
 import testtools
 import yaml
 import os
+import copy
 
 from armada.handlers.override import Override
 from armada.exceptions import override_exceptions
@@ -27,17 +28,41 @@ class OverrideTestCase(testtools.TestCase):
         self.basepath = os.path.join(os.path.dirname(__file__))
         self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
 
+    def test_update_manifests_no_overrides_and_values_valid(self):
+        with open(self.base_manifest) as f:
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents)
+            ovr.update_manifests()
+            # no updates since no overrides and values provided
+            self.assertEqual(documents, ovr.documents)
+
+    def test_update_manifests_with_values_valid(self):
+        original = "{}/templates/override-{}.yaml".format(self.basepath, '01')
+        values_yaml = "{}/templates/override-{}-expected.yaml".format(
+            self.basepath, '01')
+        with open(original) as f, open(values_yaml) as g:
+            original_documents = list(yaml.safe_load_all(f.read()))
+            documents_copy = copy.deepcopy(original_documents)
+            values_document = list(yaml.safe_load_all(
+                                   g.read()))
+        ovr = Override(original_documents, None, [values_yaml])
+        ovr.update_manifests()
+        # updating values changed the original document
+        self.assertNotEqual(original_documents, documents_copy)
+        # verifying that these documents have the same value now
+        self.assertEqual(original_documents, values_document)
+
     def test_load_yaml_file(self):
         with open(self.base_manifest) as f:
-            doc_obj = list(yaml.safe_load_all(f.read()))
-            ovr = Override(doc_obj)
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents)
             value = ovr._load_yaml_file(self.base_manifest)
             self.assertIsInstance(value, list)
 
     def test_find_document_type_valid(self):
         with open(self.base_manifest) as f:
-            doc_obj = list(yaml.safe_load_all(f.read()))
-            ovr = Override(doc_obj)
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents)
             test_group = ovr.find_document_type('chart_group')
             self.assertEqual(test_group, const.DOCUMENT_GROUP)
 
@@ -47,6 +72,22 @@ class OverrideTestCase(testtools.TestCase):
             test_manifest = ovr.find_document_type('manifest')
             self.assertEqual(test_manifest, const.DOCUMENT_MANIFEST)
 
+    def test_update_chart_group_document_valid(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        with open(os.path.join(examples_dir, 'keystone-manifest.yaml')) as f:
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents)
+            ovr.update_chart_group_document(documents[5])
+
+    def test_update_armada_manifest_valid(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        with open(os.path.join(examples_dir, 'keystone-manifest.yaml')) as f:
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents)
+            ovr.update_armada_manifest(documents[6])
+
     def test_update_dictionary_valid(self):
         expected = "{}/templates/override-{}-expected.yaml".format(
             self.basepath, '01')
@@ -55,9 +96,9 @@ class OverrideTestCase(testtools.TestCase):
         with open(self.base_manifest) as f, open(expected) as e, open(
                 merge) as m:
             merging_values = list(yaml.safe_load_all(m.read()))
-            doc_obj = list(yaml.safe_load_all(f.read()))
+            documents = list(yaml.safe_load_all(f.read()))
             doc_path = ['chart', 'blog-1']
-            ovr = Override(doc_obj)
+            ovr = Override(documents)
             ovr.update_document(merging_values)
             ovr_doc = ovr.find_manifest_document(doc_path)
             expect_doc = list(yaml.load_all(e.read()))[0]
@@ -69,11 +110,11 @@ class OverrideTestCase(testtools.TestCase):
             self.basepath, '03')
 
         with open(self.base_manifest) as f, open(expected) as e:
-            doc_obj = list(yaml.safe_load_all(f.read()))
+            documents = list(yaml.safe_load_all(f.read()))
             doc_path = ['manifest', 'simple-armada']
             override = ('manifest:simple-armada:chart_groups=\
                          blog-group3,blog-group4',)
-            ovr = Override(doc_obj, override)
+            ovr = Override(documents, override)
             ovr.update_manifests()
             ovr_doc = ovr.find_manifest_document(doc_path)
             expect_doc = list(yaml.load_all(e.read()))[0]
@@ -85,8 +126,8 @@ class OverrideTestCase(testtools.TestCase):
 
         with open(self.base_manifest) as f, open(expected) as e:
             doc_path = ['chart', 'blog-1']
-            doc_obj = list(yaml.safe_load_all(f.read()))
-            ovr = Override(doc_obj).find_manifest_document(doc_path)
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents).find_manifest_document(doc_path)
             expected_doc = list(yaml.safe_load_all(e.read()))[0]
 
             self.assertEqual(ovr, expected_doc)
@@ -106,18 +147,28 @@ class OverrideNegativeTestCase(testtools.TestCase):
         self.basepath = os.path.join(os.path.dirname(__file__))
         self.base_manifest = '{}/templates/base.yaml'.format(self.basepath)
 
+    def test_update_manifests_invalid(self):
+        missing_yaml = "{}/templates/non_existing_yaml.yaml". \
+            format(self.basepath)
+        with open(self.base_manifest):
+            ovr = Override(missing_yaml)
+            self.assertRaises(
+                override_exceptions.InvalidOverrideValueException,
+                ovr.update_manifests)
+
     def test_load_yaml_file_invalid(self):
-        expected = "{}/templates/non_existing_yaml.yaml".format(self.basepath)
+        missing_yaml = "{}/templates/non_existing_yaml.yaml". \
+            format(self.basepath)
         with open(self.base_manifest) as f:
-            doc_obj = list(yaml.safe_load_all(f.read()))
-            ovr = Override(doc_obj)
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents)
             self.assertRaises(override_exceptions.InvalidOverrideFileException,
-                              ovr._load_yaml_file, expected)
+                              ovr._load_yaml_file, missing_yaml)
 
     def test_find_document_type_invalid(self):
         with open(self.base_manifest) as f:
-            doc_obj = list(yaml.safe_load_all(f.read()))
-            ovr = Override(doc_obj)
+            documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(documents)
             self.assertRaises(ValueError, ovr.find_document_type,
                               'non_existing_document')
 
