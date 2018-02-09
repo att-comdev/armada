@@ -47,6 +47,22 @@ class OverrideTestCase(testtools.TestCase):
             test_manifest = ovr.find_document_type('manifest')
             self.assertEqual(test_manifest, const.DOCUMENT_MANIFEST)
 
+    def test_update_chart_group_document_valid(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        with open(os.path.join(examples_dir, 'keystone-manifest.yaml')) as f:
+            self.documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(self.documents)
+            ovr.update_chart_group_document(self.documents[5])
+
+    def test_update_armada_manifest_valid(self):
+        examples_dir = os.path.join(
+            os.getcwd(), 'armada', 'tests', 'unit', 'resources')
+        with open(os.path.join(examples_dir, 'keystone-manifest.yaml')) as f:
+            self.documents = list(yaml.safe_load_all(f.read()))
+            ovr = Override(self.documents)
+            ovr.update_armada_manifest(self.documents[6])
+
     def test_update_dictionary_valid(self):
         expected = "{}/templates/override-{}-expected.yaml".format(
             self.basepath, '01')
