@@ -25,6 +25,7 @@ from supermutes.dot import dotify
 import testtools
 
 from armada.handlers.chartbuilder import ChartBuilder
+from armada.exceptions import chartbuilder_exceptions
 
 
 class ChartBuilderTestCase(testtools.TestCase):
@@ -134,6 +135,21 @@ class ChartBuilderTestCase(testtools.TestCase):
         # Validate response type is :class:`hapi.chart.metadata_pb2.Metadata`
         resp = chartbuilder.get_metadata()
         self.assertIsInstance(resp, Metadata)
+
+    def test_get_metadata_with_incorrect_file_invalid(self):
+        # Create a temporary directory with Chart.yaml that contains data
+        # from ``self.chart_yaml``.
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        self._write_temporary_file_contents(chart_dir.path, 'Chart2.yaml',
+                                            self.chart_yaml)
+
+        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
+        chartbuilder = ChartBuilder(mock_chart)
+
+        self.assertRaises(
+            chartbuilder_exceptions.MetadataLoadException,
+            chartbuilder.get_metadata)
 
     def test_get_files(self):
         """Validates that ``get_files()`` ignores 'Chart.yaml', 'values.yaml'
