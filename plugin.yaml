@@ -1,8 +1,10 @@
-name: "armada"
+name: "Armada"
 version: "0.0.3"
-usage: "Manages multiple helm charts with a centralized armada yaml"
+usage: "Manages multiple helm charts with a centralized Armada yaml"
 description: |-
-  This plugin provides helm access to armada. A tool for managing multiple helm charts with dependencies by centralizing all configurations in a single Armada yaml and providing lifecycle hooks for all helm releases
+  This plugin provides helm access to Armada. A tool for managing
+  multiple helm charts with dependencies by centralizing all configurations
+  in a single Armada yaml and providing lifecycle hooks for all helm releases
   usage:
     $ helm armada tiller --status
     $ helm armada apply /examples/openstack-helm.yaml

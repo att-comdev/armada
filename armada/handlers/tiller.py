@@ -34,7 +34,7 @@ from armada.handlers.k8s import K8s
 from armada.utils.release import release_prefix
 from armada.utils.release import label_selectors
 
-TILLER_VERSION = b'2.5.0'
+TILLER_VERSION = b'2.7.2'
 TILLER_TIMEOUT = 300
 GRPC_EPSILON = 60
 RELEASE_LIMIT = 64
