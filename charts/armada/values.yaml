@@ -129,11 +129,6 @@ conf:
       auth_type: password
       auth_version: 3
       delay_auth_decision: true
-      password: armada
-      project_domain_name: ucp
-      project_name: service
-      user_domain_name: ucp
-      user_name: armada
     armada_api:
       bind_port: 8000
   paste:
