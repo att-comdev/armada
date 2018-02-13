@@ -75,7 +75,7 @@ Manual Installation
 ^^^^^^^^^^^^^^^^^^^
 
 For a comprehensive manual installation guide, please
-see :ref:`dev-getting-started`.
+see `Manual Install Guide`_.
 
 Usage
 ^^^^^
@@ -93,8 +93,7 @@ Which should output something like this::
     ...
 
 For more information on how to install and use Armada, please reference:
-:ref:`guide-use-armada`.
-
+`Armada Quickstart`_.
 
 Integration Points
 ------------------
@@ -114,6 +113,8 @@ Further Reading
 
 `Undercloud Platform (UCP) <https://github.com/att-comdev/ucp-integration>`_.
 
+.. _Manual Install Guide: http://armada-helm.readthedocs.io/en/latest/development/getting-started.html#developer-install-guide
+.. _Armada Quickstart: http://armada-helm.readthedocs.io/en/latest/operations/guide-use-armada.html
 .. _kubectl: https://kubernetes.io/docs/user-guide/kubectl/kubectl_config/
 .. _Tiller: https://docs.helm.sh/using_helm/#easy-in-cluster-installation
 .. _Deckhand: https://github.com/openstack/deckhand

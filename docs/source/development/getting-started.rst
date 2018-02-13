@@ -60,11 +60,7 @@ Armada requires a Kubernetes cluster to be deployed, along with `kubectl`_,
 
 #. Install Kubernetes (k8s) and deploy a k8s cluster.
 
-   This can be accomplished by cloning the
-   `k8s repo <https://github.com/kubernetes/kubernetes>_` and running
-   ``kube-up.sh`` in ``kubernetes/cluster``.
-
-   Alternatively, reference the :ref:`k8s-cluster-management` section below.
+   Reference the :ref:`k8s-cluster-management` section below for help.
 
 #. Install and configure `kubectl`_
 
@@ -272,7 +268,7 @@ included beneath each bullet.
     $ sudo apt-get install python3-dev -y
 
 .. _Bandit: https://github.com/openstack/bandit
-.. _kubectl: https://kubernetes.io/docs/user-guide/kubectl/kubectl_config/
+.. _kubectl: https://kubernetes.io/docs/tasks/tools/install-kubectl/
 .. _Helm: https://docs.helm.sh/using_helm/#installing-helm
 .. _Keystone: https://github.com/openstack/keystone
 .. _Tiller: https://docs.helm.sh/using_helm/#easy-in-cluster-installation
