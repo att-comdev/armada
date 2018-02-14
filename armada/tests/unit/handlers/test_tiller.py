@@ -16,6 +16,7 @@ import mock
 import unittest
 
 from armada.handlers.tiller import Tiller
+# from armada.exceptions import tiller_exceptions as ex
 
 
 class TillerTestCase(unittest.TestCase):
@@ -62,3 +63,33 @@ class TillerTestCase(unittest.TestCase):
          .assert_called_with(release_request,
                              timeout + 60,
                              metadata=tiller.metadata))
+
+    @mock.patch.object(Tiller, '_get_tiller_ip')
+    @mock.patch('armada.handlers.tiller.K8s')
+    @mock.patch('armada.handlers.tiller.grpc')
+    @mock.patch('armada.handlers.tiller.Config')
+    @mock.patch('armada.handlers.tiller.InstallReleaseRequest')
+    @mock.patch('armada.handlers.tiller.ReleaseServiceStub')
+    def test_get_channel(self, mock_stub, mock_install_request,
+                         mock_config, mock_grpc, mock_k8s, mock_ip):
+
+        # instantiate Tiller object
+        mock_grpc.insecure_channel.return_value = 'connected'
+        mock_ip.return_value = '1.1.1.1'
+        tiller = Tiller()
+        self.assertNotEqual(tiller.get_channel(), None)
+        self.assertEqual(tiller.get_channel(), 'connected')
+
+    @mock.patch.object(Tiller, '_get_tiller_ip')
+    @mock.patch('armada.handlers.tiller.K8s')
+    @mock.patch('armada.handlers.tiller.grpc')
+    @mock.patch('armada.handlers.tiller.Config')
+    @mock.patch('armada.handlers.tiller.InstallReleaseRequest')
+    @mock.patch('armada.handlers.tiller.ReleaseServiceStub')
+    def test_get_tiller_ip(self, mock_stub, mock_install_request,
+                           mock_config, mock_grpc, mock_k8s,
+                           mock_ip):
+        # instantiate Tiller object
+        mock_ip.return_value = '1.1.1.1'
+        tiller = Tiller()
+        self.assertEqual(tiller._get_tiller_ip(), '1.1.1.1')
