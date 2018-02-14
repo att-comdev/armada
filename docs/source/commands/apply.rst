@@ -18,15 +18,16 @@ Commands
       To see how to create an Armada manifest:
       http://armada-helm.readthedocs.io/en/latest/operations/
 
-      To obtain install/upgrade charts:
+      To install or upgrade charts, run:
 
           $ armada apply examples/simple.yaml
 
-      To obtain override manifest:
+      To override a specific value in a Manifest, run:
 
           $ armada apply examples/simple.yaml --set manifest:simple-armada:release_name="wordpress"
 
-          or
+      Or to override several values in a Manifest, reference a values.yaml-
+      formatted file:
 
           $ armada apply examples/simple.yaml --values examples/simple-ovr-values.yaml
 
@@ -38,7 +39,10 @@ Commands
       --enable-chart-cleanup        Clean up unmanaged charts.
       --set TEXT                    Use to override Armada Manifest values.
                                     Accepts overrides that adhere to the format
-                                    <key>=<value>
+                                    <path>:<to>:<property>=<value> to specify a
+                                    primitive or
+                                    <path>:<to>:<property>=<value1>,...,<valueN>
+                                    to specify a list of values.
       --tiller-host TEXT            Tiller host IP.
       --tiller-port INTEGER         Tiller host port.
       -tn, --tiller-namespace TEXT  Tiller namespace.
