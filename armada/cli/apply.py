@@ -42,19 +42,19 @@ command will execute upgrade.
 To see how to create an Armada manifest:
     http://armada-helm.readthedocs.io/en/latest/operations/
 
-To obtain install/upgrade charts:
+To install or upgrade charts, run:
 
     \b
     $ armada apply examples/simple.yaml
 
-To obtain override manifest:
+To override a specific value in a Manifest, run:
 
     \b
     $ armada apply examples/simple.yaml \
 --set manifest:simple-armada:release_name="wordpress"
 
-    \b
-    or
+Or to override several values in a Manifest, reference a values.yaml-formatted
+file:
 
     \b
     $ armada apply examples/simple.yaml \
@@ -87,7 +87,10 @@ SHORT_DESC = "Command installs manifest charts."
               is_flag=True)
 @click.option('--set',
               help=("Use to override Armada Manifest values. Accepts "
-                    "overrides that adhere to the format <key>=<value>"),
+                    "overrides that adhere to the format "
+                    "<path>:<to>:<property>=<value> to specify a primitive or "
+                    "<path>:<to>:<property>=<value1>,...,<valueN> to specify "
+                    "a list of values."),
               multiple=True,
               type=str,
               default=[])
