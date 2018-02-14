@@ -69,6 +69,8 @@ class Override(object):
             doc_path[0], doc_path[1])
 
     def array_to_dict(self, data_path, new_value):
+        # TODO(fmontei): Handle `json.decoder.JSONDecodeError` getting thrown
+        # better.
         def convert(data):
             if isinstance(data, str):
                 return str(data)
