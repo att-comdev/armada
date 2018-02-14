@@ -38,7 +38,10 @@ Commands
       --enable-chart-cleanup        Clean up unmanaged charts.
       --set TEXT                    Use to override Armada Manifest values.
                                     Accepts overrides that adhere to the format
-                                    <key>=<value>
+                                    <path>:<to>:<property>=<value> to specify a
+                                    primitive or
+                                    <path>:<to>:<property>=<value1>,...,<valueN>
+                                    to specify a list of values.
       --tiller-host TEXT            Tiller host IP.
       --tiller-port INTEGER         Tiller host port.
       -tn, --tiller-namespace TEXT  Tiller namespace.

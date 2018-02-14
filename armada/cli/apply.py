@@ -87,7 +87,10 @@ SHORT_DESC = "Command installs manifest charts."
               is_flag=True)
 @click.option('--set',
               help=("Use to override Armada Manifest values. Accepts "
-                    "overrides that adhere to the format <key>=<value>"),
+                    "overrides that adhere to the format "
+                    "<path>:<to>:<property>=<value> to specify a primitive or "
+                    "<path>:<to>:<property>=<value1>,...,<valueN> to specify "
+                    "a list of values."),
               multiple=True,
               type=str,
               default=[])

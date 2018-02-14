@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import testtools
-import yaml
-import os
 import copy
+import json
+import os
+import yaml
+
+import testtools
 
 from armada.handlers.override import Override
 from armada.exceptions import override_exceptions
@@ -61,9 +63,25 @@ class OverrideTestCase(testtools.TestCase):
             original_documents = list(yaml.safe_load_all(f.read()))
             documents_copy = copy.deepcopy(original_documents)
             values_documents = list(yaml.safe_load_all(g.read()))
-        override = ('manifest:simple-armada:chart_groups=\
-            blog-group3,blog-group4',)
 
+        override = ('manifest:simple-armada:release_prefix='
+                    'overridden',)
+
+        # Case 1: Checking if primitive gets updated.
+        ovr = Override(original_documents, override, [values_yaml])
+        ovr.update_manifests()
+
+        # updating values changed the original document
+        self.assertNotEqual(original_documents, documents_copy)
+        # since overrides done, these documents aren't same anymore
+        self.assertNotEqual(original_documents, values_documents)
+        self.assertEqual('overridden',
+                         ovr.documents[-1]['data']['release_prefix'])
+
+        override = ('manifest:simple-armada:chart_groups='
+                    'blog-group3,blog-group4',)
+
+        # Case 2: Checking if list gets updated.
         ovr = Override(original_documents, override, [values_yaml])
         ovr.update_manifests()
         # updating values changed the original document
@@ -75,6 +93,17 @@ class OverrideTestCase(testtools.TestCase):
         # verifying that the override is correct
         self.assertEqual(original_documents[2]['data']['chart_groups'],
                          comparison_documents[0]['data']['chart_groups'])
+
+    def test_update_manifests_invalid_override_format(self):
+        with open(self.base_manifest) as f:
+            original_documents = list(yaml.safe_load_all(f.read()))
+
+        original_documents[-1]['data']['test'] = {'foo': 'bar'}
+        override = ('manifest:simple-armada:test='
+                    '{"foo": "bar"}',)
+
+        ovr = Override(original_documents, override, [])
+        self.assertRaises(json.decoder.JSONDecodeError, ovr.update_manifests)
 
     def test_load_yaml_file(self):
         with open(self.base_manifest) as f:
