@@ -29,6 +29,8 @@ LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
 
+READY_PHASES = {'Running', 'Succeeded'}
+
 
 class K8s(object):
     '''
@@ -207,77 +209,115 @@ class K8s(object):
                          namespace='default',
                          labels='',
                          timeout=300,
-                         sleep=15):
+                         sleep=15,
+                         required_successes=3,
+                         inter_success_wait=10):
         '''
         :param release - part of namespace
         :param timeout - time before disconnecting stream
         '''
-        LOG.debug("Wait on %s for %s sec", namespace, timeout)
-
         label_selector = ''
 
         if labels:
             label_selector = label_selectors(labels)
 
-        valid_state = ['Succeeded', 'Running']
+        LOG.debug("Wait on %s (%s) for %s sec", namespace, label_selector,
+                  timeout)
 
-        wait_timeout = time.time() + 60 * timeout
+        deadline = time.time() + timeout
 
-        while True:
+        # NOTE(mark-burnett): Attempt to wait multiple times without
+        # modification, in case new pods appear after our watch exits.
 
-            self.is_pods_ready(label_selector=label_selector, timeout=timeout)
+        successes = 0
+        while successes < required_successes:
+            deadline_remaining = int(deadline - time.time())
+            if deadline_remaining <= 0:
+                return False
+            timed_out, modified_pods, unready_pods = self.wait_one_time(
+                label_selector, timeout=deadline_remaining)
 
-            pod_ready = []
-            not_ready = []
-            for pod in self.client.list_pod_for_all_namespaces(
-                    label_selector=label_selector).items:
-                p_state = pod.status.phase
-                p_name = pod.metadata.name
-                if p_state in valid_state:
-                    pod_ready.append(True)
-                    continue
+            if timed_out:
+                LOG.info('Timed out waiting for pods: %s', unready_pods)
+                return False
 
-                pod_ready.append(False)
-                not_ready.append(p_name)
-
-                LOG.debug('%s', p_state)
-
-            if time.time() > wait_timeout or all(pod_ready):
-                LOG.debug("Pod States %s", pod_ready)
-                break
-            if time.time() > wait_timeout and not all(pod_ready):
-                LOG.exception(
-                    'Failed to bring up release %s: %s', release, not_ready)
-                break
+            if modified_pods:
+                successes = 0
+                LOG.debug('Continuing to wait, found modified pods: %s',
+                          modified_pods)
             else:
-                LOG.debug('time: %s pod %s', wait_timeout, pod_ready)
+                successes += 1
+                LOG.debug('Found no modified pods this attempt. successes=%d',
+                          successes)
 
-    def is_pods_ready(self, label_selector='', timeout=100):
-        '''
-        :params release_labels - list of labels to identify relevant pods
-        :params namespace - namespace in which to search for pods
+            time.sleep(inter_success_wait)
 
-        Returns after waiting for all pods to enter Ready state
-        '''
-        pods_found = []
-        valid_state = ['Succeeded', 'Running']
+        return True
 
+    def wait_one_time(self, label_selector='', timeout=100):
+        LOG.debug('Starting to wait: label_selector=%s, timeout=%s',
+                  label_selector, timeout)
+        ready_pods = {}
+        modified_pods = set()
         w = watch.Watch()
-        for pod in w.stream(self.client.list_pod_for_all_namespaces,
-                            label_selector=label_selector,
-                            timeout_seconds=timeout):
+        first_event = True
+        for event in w.stream(self.client.list_pod_for_all_namespaces,
+                              label_selector=label_selector,
+                              timeout_seconds=timeout):
+            if first_event:
+                pod_list = self.client.list_pod_for_all_namespaces(
+                    label_selector=label_selector,
+                    timeout_seconds=timeout)
+                for pod in pod_list.items:
+                    LOG.debug('Setting up to wait for pod %s',
+                              pod.metadata.name)
+                    ready_pods[pod.metadata.name] = False
+                first_event = False
 
-            pod_name = pod['object'].metadata.name
-            pod_state = pod['object'].status.phase
+            event_type = event['type'].upper()
+            pod_name = event['object'].metadata.name
 
-            if pod['type'] == 'ADDED' and pod_state not in valid_state:
-                LOG.debug("Pod %s in %s", pod_name, pod_state)
-                pods_found.append(pod_name)
-            elif pod_name in pods_found:
-                if pod_state in valid_state:
-                    pods_found.remove(pod_name)
-                    LOG.debug(pods_found)
+            if event_type in {'ADDED', 'MODIFIED'}:
+                status = event['object'].status
+                is_ready = status.phase in READY_PHASES
 
-            if not pods_found:
-                LOG.debug('Terminate wait')
-                w.stop()
+                if is_ready:
+                    LOG.debug('Pod %s (%s) is_ready=%s', pod_name, event_type,
+                              is_ready)
+                else:
+                    container_statuses = status.container_statuses
+                    conditions = status.conditions
+                    LOG.debug('Pod %s (%s) is_ready=%s container_statuses=%s '
+                              'conditions=%s', pod_name, event_type, is_ready,
+                              container_statuses, conditions)
+
+                ready_pods[pod_name] = is_ready
+
+                if event_type == 'MODIFIED':
+                    modified_pods.add(pod_name)
+
+            elif event_type == 'DELETED':
+                LOG.debug('Removing pod %s from tracking', pod_name)
+                ready_pods.pop(pod_name)
+
+            elif event_type == 'ERROR':
+                LOG.error('Got error event for pod: %s',
+                          event['object'].to_dict())
+                # XXX be specific, bob
+                raise RuntimeError('')
+
+            else:
+                LOG.error('Unrecognized event type (%s) for pod: %s',
+                          event_type, event['object'].to_dict())
+                # XXX be specific, bob
+                raise RuntimeError('')
+
+            if all(ready_pods.values()):
+                return (False, modified_pods,
+                        [name for name, ready in ready_pods.items()
+                         if not ready])
+
+        # NOTE(mark-burnett): This path is reachable if there are no pods
+        # (unlikely) or in the case of the watch timing out.
+        return (not all(ready_pods.values()), modified_pods,
+                [name for name, ready in ready_pods.items() if not ready])
