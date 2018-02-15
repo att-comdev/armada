@@ -73,8 +73,8 @@ SHORT_DESC = "Command deletes releases."
               default=44134)
 @click.pass_context
 def delete_charts(ctx, manifest, releases, no_purge, tiller_host, tiller_port):
-    DeleteChartManifest(
-        ctx, manifest, releases, no_purge, tiller_host, tiller_port).invoke()
+    DeleteChartManifest(ctx, manifest, releases, no_purge, tiller_host,
+                        tiller_port).safe_invoke()
 
 
 class DeleteChartManifest(CliAction):

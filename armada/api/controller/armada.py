@@ -102,6 +102,7 @@ class Apply(api.BaseResource):
         except exceptions.ManifestException as e:
             self.return_error(resp, falcon.HTTP_400, message=str(e))
         except Exception as e:
+            self.logger.exception('Caught unexpected exception')
             err_message = 'Failed to apply manifest: {}'.format(e)
             self.error(req.context, err_message)
             self.return_error(

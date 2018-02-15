@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from armada import conf
+from armada.exceptions.base_exception import ArmadaBaseException
 
 conf.set_app_default_configs()
 conf.set_default_for_default_log_levels()
@@ -32,5 +35,15 @@ class CliAction(object):
         logging.set_defaults(default_log_levels=CONF.default_log_levels)
         logging.setup(CONF, 'armada')
 
+    def safe_invoke(self):
+        try:
+            self.invoke()
+        except ArmadaBaseException:
+            self.logger.exception('Caught internal exception')
+            sys.exit(1)
+        except:
+            self.logger.exception('Caught unexpected exception')
+            sys.exit(1)
+
     def invoke(self):
-        raise Exception()
+        raise NotImplementedError()

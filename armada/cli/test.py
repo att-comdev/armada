@@ -82,7 +82,7 @@ def test_charts(ctx, file, release, tiller_host, tiller_port, tiller_namespace,
                 target_manifest):
     TestChartManifest(
         ctx, file, release, tiller_host, tiller_port, tiller_namespace,
-        target_manifest).invoke()
+        target_manifest).safe_invoke()
 
 
 class TestChartManifest(CliAction):

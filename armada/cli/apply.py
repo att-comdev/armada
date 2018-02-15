@@ -133,7 +133,7 @@ def apply_create(ctx, locations, api, disable_update_post, disable_update_pre,
     ApplyManifest(ctx, locations, api, disable_update_post, disable_update_pre,
                   dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
                   tiller_namespace, timeout, values, wait,
-                  target_manifest).invoke()
+                  target_manifest).safe_invoke()
 
 
 class ApplyManifest(CliAction):

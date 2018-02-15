@@ -71,7 +71,7 @@ SHORT_DESC = "Command gets Tiller information."
 def tiller_service(ctx, tiller_host, tiller_port, tiller_namespace, releases,
                    status):
     TillerServices(ctx, tiller_host, tiller_port, tiller_namespace, releases,
-                   status).invoke()
+                   status).safe_invoke()
 
 
 class TillerServices(CliAction):

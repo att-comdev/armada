@@ -48,7 +48,7 @@ SHORT_DESC = "Command validates Armada Manifest."
                 nargs=-1)
 @click.pass_context
 def validate_manifest(ctx, locations):
-    ValidateManifest(ctx, locations).invoke()
+    ValidateManifest(ctx, locations).safe_invoke()
 
 
 class ValidateManifest(CliAction):
