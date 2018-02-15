@@ -14,16 +14,20 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-Armada Exceptions
-=================
 
-.. include:: api-exceptions.inc
-.. include:: armada-exceptions.inc
-.. include:: base-exceptions.inc
-.. include:: chartbuilder-exceptions.inc
-.. include:: k8s-exceptions.inc
-.. include:: lint-exceptions.inc
-.. include:: manifest-exceptions.inc
-.. include:: override-exceptions.inc
-.. include:: source-exceptions.inc
-.. include:: tiller-exceptions.inc
+.. list-table:: **Kubernetes Exceptions**
+  :widths: 5 50
+  :header-rows: 1
+
+  * - Exception Name
+    - Description
+  * - KubernetesErrorEventException
+    - .. autoexception:: armada.exceptions.k8s_exceptions.KubernetesErrorEventException
+         :members:
+         :show-inheritance:
+         :undoc-members:
+  * - KubernetesUnknownStreamngEventTypeException
+    - .. autoexception:: armada.exceptions.k8s_exceptions.KubernetesUnknownStreamngEventTypeException
+         :members:
+         :show-inheritance:
+         :undoc-members:
