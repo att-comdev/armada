@@ -53,6 +53,19 @@ roleRef:
   name: armada-api-runner
   apiGroup: rbac.authorization.k8s.io
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: armada-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: {{ $serviceAccountName }}
+  namespace: {{ .Release.Namespace }}
+---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
