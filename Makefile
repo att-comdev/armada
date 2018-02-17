@@ -3,6 +3,7 @@ DOCKER_REGISTRY ?= quay.io
 IMAGE_PREFIX    ?= attcomdev
 SHORT_NAME      ?= armada
 HELM            ?= helm
+LABEL           ?= commit-id
 PYTHON          = python3
 APP             = armada
 CHART      = charts/armada
@@ -60,7 +61,7 @@ check-tox:
 
 .PHONY: docker-build
 images: check-docker
-	docker build --rm -t ${IMAGE} .
+	docker build --rm -t ${IMAGE} --label $(LABEL) .
 
 .PHONY: dry-run
 dry-run: clean
