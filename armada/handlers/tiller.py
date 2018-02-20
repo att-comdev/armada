@@ -217,9 +217,8 @@ class Tiller(object):
                 self.delete_resources(
                     release_name, name, action_type, labels, namespace)
         except Exception:
-            raise ex.PreUpdateJobDeleteException(name, namespace)
-
             LOG.debug("PRE: Could not delete anything, please check yaml")
+            raise ex.PreUpdateJobDeleteException(name, namespace)
 
         try:
             for action in actions.get('create', []):
@@ -230,9 +229,8 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
-            raise ex.PreUpdateJobCreateException(name, namespace)
-
             LOG.debug("PRE: Could not create anything, please check yaml")
+            raise ex.PreUpdateJobCreateException(name, namespace)
 
     def _post_update_actions(self, actions, namespace):
         try:
@@ -244,8 +242,8 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
-            raise ex.PreUpdateJobCreateException()
             LOG.debug("POST: Could not create anything, please check yaml")
+            raise ex.PreUpdateJobCreateException(name, namespace)
 
     def list_charts(self):
         '''
