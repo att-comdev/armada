@@ -13,14 +13,15 @@
 # limitations under the License.
 
 import mock
-import unittest
 
-from armada.handlers.tiller import Tiller
+from armada.exceptions import tiller_exceptions as ex
+from armada.handlers import tiller
+from armada.tests.unit import base
 
 
-class TillerTestCase(unittest.TestCase):
+class TillerTestCase(base.ArmadaTestCase):
 
-    @mock.patch.object(Tiller, '_get_tiller_ip')
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip')
     @mock.patch('armada.handlers.tiller.K8s')
     @mock.patch('armada.handlers.tiller.grpc')
     @mock.patch('armada.handlers.tiller.Config')
@@ -31,8 +32,8 @@ class TillerTestCase(unittest.TestCase):
         # instantiate Tiller object
         mock_grpc.insecure_channel.return_value = None
         mock_ip.return_value = '0.0.0.0'
-        tiller = Tiller()
-        assert tiller._get_tiller_ip() == '0.0.0.0'
+        tiller_obj = tiller.Tiller()
+        assert tiller_obj._get_tiller_ip() == '0.0.0.0'
 
         # set params
         chart = mock.Mock()
@@ -44,11 +45,11 @@ class TillerTestCase(unittest.TestCase):
         wait = False
         timeout = 3600
 
-        tiller.install_release(chart, name, namespace,
-                               dry_run=dry_run, values=initial_values,
-                               wait=wait, timeout=timeout)
+        tiller_obj.install_release(chart, name, namespace,
+                                   dry_run=dry_run, values=initial_values,
+                                   wait=wait, timeout=timeout)
 
-        mock_stub.assert_called_with(tiller.channel)
+        mock_stub.assert_called_with(tiller_obj.channel)
         release_request = mock_install_request(
             chart=chart,
             dry_run=dry_run,
@@ -58,7 +59,110 @@ class TillerTestCase(unittest.TestCase):
             wait=wait,
             timeout=timeout
         )
-        (mock_stub(tiller.channel).InstallRelease
+        (mock_stub(tiller_obj.channel).InstallRelease
          .assert_called_with(release_request,
                              timeout + 60,
-                             metadata=tiller.metadata))
+                             metadata=tiller_obj.metadata))
+
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch.object(tiller.Tiller, '_get_tiller_port', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_channel(self, mock_grpc, mock_port, mock_ip, _):
+        mock_port.return_value = mock.sentinel.port
+        mock_ip.return_value = mock.sentinel.ip
+
+        # instantiate Tiller object
+        mock_grpc.insecure_channel.return_value = 'connected'
+        tiller_obj = tiller.Tiller()
+
+        self.assertIsNotNone(tiller_obj.channel)
+        self.assertEqual('connected', tiller_obj.channel)
+
+        mock_grpc.insecure_channel.assert_called_once_with(
+            '%s:%s' % (str(mock.sentinel.ip), str(mock.sentinel.port)),
+            options=[('grpc.max_send_message_length',
+                     tiller.MAX_MESSAGE_LENGTH),
+                     ('grpc.max_receive_message_length',
+                     tiller.MAX_MESSAGE_LENGTH)]
+        )
+
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_tiller_ip_with_host_provided(self, mock_grpc, _):
+        tiller_obj = tiller.Tiller('1.1.1.1')
+        self.assertIsNotNone(tiller_obj._get_tiller_ip())
+        self.assertEqual('1.1.1.1', tiller_obj._get_tiller_ip())
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_pod', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_tiller_ip_with_mocked_pod(self, mock_grpc, mock_k8s,
+                                           mock_pod):
+        status = mock.Mock(pod_ip='1.1.1.1')
+        mock_pod.return_value.status = status
+        tiller_obj = tiller.Tiller()
+        self.assertEqual('1.1.1.1', tiller_obj._get_tiller_ip())
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_tiller_pod_throws_exception(self, mock_grpc, mock_k8s,
+                                             mock_ip):
+
+        mock_k8s.get_namespace_pod.return_value.items = []
+        tiller_obj = tiller.Tiller()
+        mock_grpc.insecure_channel.side_effect = ex.ChannelException()
+        self.assertRaises(ex.TillerPodNotRunningException,
+                          tiller_obj._get_tiller_pod)
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_tiller_port(self, mock_grpc, _, mock_ip):
+        # instantiate Tiller object
+        tiller_obj = tiller.Tiller(None, '8080', None)
+        self.assertEqual('8080', tiller_obj._get_tiller_port())
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_tiller_namespace(self, mock_grpc, _, mock_ip):
+        # verifies namespace set via instantiation
+        tiller_obj = tiller.Tiller(None, None, 'test_namespace2')
+        self.assertEqual('test_namespace2',
+                         tiller_obj._get_tiller_namespace())
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_tiller_status_with_ip_provided(self, mock_grpc, _, mock_ip):
+        # instantiate Tiller object
+        tiller_obj = tiller.Tiller(None, '8080', None)
+        self.assertTrue(tiller_obj.tiller_status())
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_get_tiller_status_no_ip(self, mock_grpc, _, mock_ip):
+        mock_ip.return_value = ''
+        # instantiate Tiller object
+        tiller_obj2 = tiller.Tiller()
+        print(tiller_obj2.tiller_status())
+        self.assertFalse(tiller_obj2.tiller_status())
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_list_releases_empty(self, mock_grpc, _, mock_ip):
+        # instantiate Tiller object
+        tiller_obj = tiller.Tiller()
+        self.assertEqual([], tiller_obj.list_releases())
+
+    @mock.patch.object(tiller.Tiller, '_get_tiller_ip', autospec=True)
+    @mock.patch('armada.handlers.tiller.K8s', autospec=True)
+    @mock.patch('armada.handlers.tiller.grpc', autospec=True)
+    def test_list_charts_empty(self, mock_grpc, _, mock_ip):
+        # instantiate Tiller object
+        tiller_obj = tiller.Tiller()
+        self.assertEqual([], tiller_obj.list_charts())
