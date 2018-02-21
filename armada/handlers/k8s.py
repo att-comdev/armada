@@ -25,12 +25,17 @@ from oslo_log import log as logging
 from armada.utils.release import label_selectors
 from armada.exceptions import k8s_exceptions as exceptions
 
-
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
-CONF = cfg.CONF
-
-READY_PHASES = {'Running', 'Succeeded'}
+# * Running: The Pod has been bound to a node, and all of the Containers have
+#   been created. At least one Container is still running, or is in the process
+#   of starting or restarting.
+# * Succeeded: All Containers in the Pod have terminated in success, and will
+#   not be restarted.
+#
+# Reference: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-and-container-status  # noqa
+POD_READY_PHASES = {'Running', 'Succeeded'}
 
 
 class K8s(object):
@@ -67,7 +72,8 @@ class K8s(object):
                 name=name, namespace=namespace, body=body,
                 propagation_policy=propagation_policy)
         except ApiException as e:
-            LOG.error("Exception when deleting a job: %s", e)
+            LOG.error("Exception when deleting job: name=%s, namespace=%s: %s",
+                      name, namespace, e)
 
     def get_namespace_job(self, namespace="default", label_selector=''):
         '''
@@ -79,13 +85,15 @@ class K8s(object):
             return self.batch_api.list_namespaced_job(
                 namespace, label_selector=label_selector)
         except ApiException as e:
-            LOG.error("Exception getting a job: %s", e)
+            LOG.error("Exception getting a job: namespace=%s, label=%s: %s",
+                      namespace, label_selector, e)
 
     def create_job_action(self, name, namespace="default"):
         '''
         :params name - name of the job
         :params namespace - name of pod that job
         '''
+        # TODO(MarshM) this does nothing?
         LOG.debug(" %s in namespace: %s", name, namespace)
 
     def get_namespace_pod(self, namespace="default", label_selector=''):
@@ -99,6 +107,7 @@ class K8s(object):
         return self.client.list_namespaced_pod(
             namespace, label_selector=label_selector)
 
+    # TODO(MarshM) unused?
     def get_all_pods(self, label_selector=''):
         '''
         :params label_selector - filters Pods by label
@@ -210,17 +219,23 @@ class K8s(object):
                          namespace='default',
                          labels='',
                          timeout=300,
-                         sleep=15,
-                         required_successes=3,
-                         inter_success_wait=10):
+                         k8s_wait_attempts=3,
+                         k8s_wait_attempt_sleep=5):
         '''
-        :param release - part of namespace
-        :param timeout - time before disconnecting stream
-        '''
-        label_selector = ''
+        Wait until all pods become ready given the filters provided by
+        ``release``, ``labels`` and ``namespace``.
 
-        if labels:
-            label_selector = label_selectors(labels)
+        :param release: chart release
+        :param namespace: the namespace used to filter which pods to wait on
+        :param labels: the labels used to filter which pods to wait on
+        :param timeout: time before disconnecting ``Watch`` stream
+        :param k8s_wait_attempts: The number of times to attempt waiting
+            for pods to become ready.
+        :param k8s_wait_attempt_sleep: The time in seconds to sleep
+            between attempts.
+        '''
+        # NOTE(MarshM) 'release' is currently unused
+        label_selector = label_selectors(labels) if labels else ''
 
         LOG.debug("Wait on %s (%s) for %s sec", namespace, label_selector,
                   timeout)
@@ -231,12 +246,13 @@ class K8s(object):
         # modification, in case new pods appear after our watch exits.
 
         successes = 0
-        while successes < required_successes:
+        while successes < k8s_wait_attempts:
             deadline_remaining = int(deadline - time.time())
             if deadline_remaining <= 0:
                 return False
-            timed_out, modified_pods, unready_pods = self.wait_one_time(
-                label_selector, timeout=deadline_remaining)
+            timed_out, modified_pods, unready_pods = self._wait_one_time(
+                namespace=namespace, label_selector=label_selector,
+                timeout=deadline_remaining)
 
             if timed_out:
                 LOG.info('Timed out waiting for pods: %s', unready_pods)
@@ -251,17 +267,19 @@ class K8s(object):
                 LOG.debug('Found no modified pods this attempt. successes=%d',
                           successes)
 
-            time.sleep(inter_success_wait)
+            time.sleep(k8s_wait_attempt_sleep)
 
         return True
 
-    def wait_one_time(self, label_selector='', timeout=100):
-        LOG.debug('Starting to wait: label_selector=%s, timeout=%s',
-                  label_selector, timeout)
+    def _wait_one_time(self, namespace, label_selector, timeout=100):
+        LOG.debug('Starting to wait: namespace=%s, label_selector=%s, '
+                  'timeout=%s', namespace, label_selector, timeout)
         ready_pods = {}
         modified_pods = set()
         w = watch.Watch()
         first_event = True
+
+        # TODO(MarshM) still need to filter pods on namespace
         for event in w.stream(self.client.list_pod_for_all_namespaces,
                               label_selector=label_selector,
                               timeout_seconds=timeout):
@@ -269,7 +287,7 @@ class K8s(object):
                 pod_list = self.client.list_pod_for_all_namespaces(
                     label_selector=label_selector,
                     timeout_seconds=timeout)
-                for pod in pod_list.items:
+                for pod in pod_list:
                     LOG.debug('Setting up to wait for pod %s',
                               pod.metadata.name)
                     ready_pods[pod.metadata.name] = False
@@ -277,33 +295,48 @@ class K8s(object):
 
             event_type = event['type'].upper()
             pod_name = event['object'].metadata.name
+            LOG.debug('Watch event for pod %s namespace=%s label_selector=%s',
+                      pod_name, namespace, label_selector)
 
             if event_type in {'ADDED', 'MODIFIED'}:
                 status = event['object'].status
-                is_ready = status.phase in READY_PHASES
+                pod_phase = status.phase
+                pod_is_running = pod_phase in POD_READY_PHASES
 
-                if is_ready:
-                    LOG.debug('Pod %s (%s) is_ready=%s', pod_name, event_type,
-                              is_ready)
+                LOG.debug('Pod %s (%s): pod_running=%s phase=%s',
+                          pod_name, event_type, pod_is_running, pod_phase)
+
+                containers_ready = True
+                for container in status.container_statuses:
+                    containers_ready = containers_ready and container.ready
+                    LOG.debug('Pod %s containers: container=%s ready=%s',
+                              pod_name, container.name, container.ready)
+
+                pod_ready = True
+                if pod_phase == 'Succeeded':
+                    LOG.debug('Pod %s finished running successfully',
+                              pod_name)
+                elif pod_is_running and containers_ready:
+                    LOG.debug('Pod %s is ready and all containers running',
+                              pod_name)
                 else:
-                    container_statuses = status.container_statuses
-                    conditions = status.conditions
-                    LOG.debug('Pod %s (%s) is_ready=%s container_statuses=%s '
-                              'conditions=%s', pod_name, event_type, is_ready,
-                              container_statuses, conditions)
+                    pod_ready = False
+                    LOG.debug('Pod %s not ready: container_statuses=%s '
+                              'conditions=%s', pod_name,
+                              status.container_statuses, status.conditions)
 
-                ready_pods[pod_name] = is_ready
+                ready_pods[pod_name] = pod_ready
 
                 if event_type == 'MODIFIED':
                     modified_pods.add(pod_name)
 
             elif event_type == 'DELETED':
-                LOG.debug('Removing pod %s from tracking', pod_name)
+                LOG.debug('Pod %s: removed from tracking', pod_name)
                 ready_pods.pop(pod_name)
 
             elif event_type == 'ERROR':
-                LOG.error('Got error event for pod: %s',
-                          event['object'].to_dict())
+                LOG.error('Pod %s: Got error event %s',
+                          pod_name, event['object'].to_dict())
                 raise exceptions.KubernetesErrorEventException(
                     'Got error event for pod: %s' % event['object'])
 
@@ -321,3 +354,11 @@ class K8s(object):
         # (unlikely) or in the case of the watch timing out.
         return (not all(ready_pods.values()), modified_pods,
                 [name for name, ready in ready_pods.items() if not ready])
+
+    def _list_pod_for_namespace(self, namespace, label_selector, timeout):
+        pod_list = self.client.list_pod_for_all_namespaces(
+            label_selector=label_selector,
+            timeout_seconds=timeout)
+        pod_list = [
+            p for p in pod_list.items if p.metadata.namespace == namespace]
+        return pod_list
