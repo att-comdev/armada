@@ -56,7 +56,9 @@ class Armada(object):
                  tiller_port=None,
                  tiller_namespace=None,
                  values=None,
-                 target_manifest=None):
+                 target_manifest=None,
+                 k8s_wait_attempts=1,
+                 k8s_wait_attempt_sleep=1):
         '''
         Initialize the Armada engine and establish a connection to Tiller.
 
@@ -75,6 +77,10 @@ class Armada(object):
             ``CONF.tiller_namespace``.
         :param str target_manifest: The target manifest to run. Useful for
             specifying which manifest to run when multiple are available.
+        :param int k8s_wait_attempts: The number of times to attempt waiting
+            for pods to become ready.
+        :param int k8s_wait_attempt_sleep: The time in seconds to sleep
+            between attempts.
         '''
         tiller_port = tiller_port or CONF.tiller_port
         tiller_namespace = tiller_namespace or CONF.tiller_namespace
@@ -92,6 +98,8 @@ class Armada(object):
         self.values = values
         self.documents = documents
         self.target_manifest = target_manifest
+        self.k8s_wait_attempts = k8s_wait_attempts
+        self.k8s_wait_attempt_sleep = k8s_wait_attempt_sleep
         self.manifest = self.get_armada_manifest()
 
     def get_armada_manifest(self):
@@ -353,6 +361,8 @@ class Armada(object):
                             release=prefix_chart,
                             labels=wait_values.get('labels', ''),
                             namespace=chart.namespace,
+                            k8s_wait_attempts=self.k8s_wait_attempts,
+                            k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
                             timeout=wait_values.get('timeout', DEFAULT_TIMEOUT)
                         )
 
@@ -378,7 +388,10 @@ class Armada(object):
                             release=prefix_chart,
                             labels=wait_values.get('labels', ''),
                             namespace=chart.namespace,
-                            timeout=wait_values.get('timeout', 3600))
+                            k8s_wait_attempts=self.k8s_wait_attempts,
+                            k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
+                            timeout=wait_values.get('timeout', DEFAULT_TIMEOUT)
+                        )
 
                     msg['install'].append(prefix_chart)
 
@@ -396,7 +409,11 @@ class Armada(object):
                     else:
                         LOG.info("FAILED: %s", prefix_chart)
 
-            self.tiller.k8s.wait_until_ready(timeout=chart_timeout)
+            # TODO(MarshM) does this need release/labels/namespace?
+            self.tiller.k8s.wait_until_ready(
+                k8s_wait_attempts=self.k8s_wait_attempts,
+                k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
+                timeout=chart_timeout)
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()
