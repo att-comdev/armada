@@ -207,7 +207,7 @@ class K8s(object):
 
     def wait_until_ready(self,
                          release=None,
-                         namespace='default',
+                         namespace=None,
                          labels='',
                          timeout=300,
                          sleep=15,
@@ -218,6 +218,7 @@ class K8s(object):
         :param timeout - time before disconnecting stream
         '''
         label_selector = ''
+        namespace = namespace or CONF.tiller_namespace
 
         if labels:
             label_selector = label_selectors(labels)
