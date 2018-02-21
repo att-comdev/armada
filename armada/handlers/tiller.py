@@ -226,6 +226,7 @@ class Tiller(object):
                 action_type = action.get("type")
                 if "job" in action_type:
                     LOG.info("Creating %s in namespace: %s", name, namespace)
+                    # TODO(MarshM) create_job_action does nothing but LOG.debug
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
@@ -239,6 +240,7 @@ class Tiller(object):
                 action_type = action.get("type")
                 if "job" in action_type:
                     LOG.info("Creating %s in namespace: %s", name, namespace)
+                    # TODO(MarshM) create_job_action does nothing but LOG.debug
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
