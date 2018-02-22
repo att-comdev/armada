@@ -1,11 +1,10 @@
 # APP INFO
 DOCKER_REGISTRY ?= quay.io
 IMAGE_PREFIX    ?= attcomdev
-SHORT_NAME      ?= armada
+IMAGE_NAME      ?= armada
 HELM            ?= helm
 LABEL           ?= commit-id
 PYTHON          = python3
-APP             = armada
 CHART      = charts/armada
 
 # VERSION INFO
@@ -18,8 +17,8 @@ ifdef VERSION
 	DOCKER_VERSION = $(VERSION)
 endif
 
-DOCKER_VERSION ?= git-${GIT_SHA}
-IMAGE := ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/${SHORT_NAME}:${DOCKER_VERSION}
+IMAGE_TAG ?= git-${GIT_SHA}
+IMAGE := ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}
 SHELL = /bin/bash
 
 info:
