@@ -46,17 +46,14 @@ def _enforce_policy(action, target, credentials, do_raise=True):
 
 
 def enforce(rule):
-
-    setup_policy()
-
     def decorator(func):
         @functools.wraps(func)
         def handler(*args, **kwargs):
+            setup_policy()
             context = args[1].context
             _enforce_policy(rule, {}, context, do_raise=True)
             return func(*args, **kwargs)
         return handler
-
     return decorator
 
 
