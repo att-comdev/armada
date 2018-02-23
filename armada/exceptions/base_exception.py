@@ -29,9 +29,9 @@ class ArmadaBaseException(Exception):
 
     def __init__(self, message=None, **kwargs):
         self.message = message or self.message
-        try:
+        try:  # nosec
             self.message = self.message % kwargs
-        except TypeError:
+        except Exception:
             pass
         super(ArmadaBaseException, self).__init__(self.message)
 

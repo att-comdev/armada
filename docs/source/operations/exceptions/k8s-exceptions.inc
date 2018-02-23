@@ -1,5 +1,5 @@
 ..
-  Copyright 2017 AT&T Intellectual Property.
+  Copyright 2018 AT&T Intellectual Property.
   All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,19 +14,20 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-.. list-table:: **Lint Exceptions**
+
+.. list-table:: **Kubernetes Exceptions**
   :widths: 5 50
   :header-rows: 1
 
   * - Exception Name
     - Description
-  * - InvalidArmadaObjectException
-    - .. autoexception:: armada.exceptions.lint_exceptions.InvalidArmadaObjectException
+  * - KubernetesErrorEventException
+    - .. autoexception:: armada.exceptions.k8s_exceptions.KubernetesErrorEventException
          :members:
          :show-inheritance:
          :undoc-members:
-  * - InvalidManifestException
-    - .. autoexception:: armada.exceptions.lint_exceptions.InvalidManifestException
+  * - KubernetesUnknownStreamingEventTypeException
+    - .. autoexception:: armada.exceptions.k8s_exceptions.KubernetesUnknownStreamingEventTypeException
          :members:
          :show-inheritance:
          :undoc-members:
