@@ -131,6 +131,8 @@ conf:
       delay_auth_decision: true
     armada_api:
       bind_port: 8000
+    oslo_policy:
+      policy_file: "policy.yaml"
   paste:
     app:armada-api:
       paste.app_factory: armada.api.server:paste_start_armada
