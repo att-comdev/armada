@@ -19,7 +19,7 @@ set -ex
 CMD="armada"
 
 # Define port
-PORT=${PORT:-9000}
+PORT=${ARMADA_API_PORT:-9000}
 # How long uWSGI should wait for each Armada response
 ARMADA_API_TIMEOUT=${ARMADA_API_TIMEOUT:-"3600"}
 # Number of uWSGI workers to handle API requests
@@ -32,7 +32,7 @@ ARMADA_API_THREADS=${ARMADA_API_THREADS:-"1"}
 # server during import in `armada.api.server`.
 if [ "$1" = 'server' ]; then
     exec uwsgi \
-        --http :${PORT} \
+        --http :${ARMADA_API_PORT} \
         --http-timeout $ARMADA_API_TIMEOUT \
         --enable-threads \
         -L \

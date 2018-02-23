@@ -152,6 +152,9 @@ conf:
 pod:
   env:
     armada_api:
+# ARMADA_API_PORT should = conf.armada.armada_api.bind_port in standard cases
+       - name: ARMADA_API_PORT
+         value: 8000
 #      - name: http_proxy
 #        value: http://proxy.example.com:8080
 #      - name: https_proxy
