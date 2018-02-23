@@ -17,6 +17,8 @@ import logging as log
 import uuid
 import yaml
 
+from oslo_utils import excutils
+
 import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -41,23 +43,22 @@ class BaseResource(object):
         resp.headers['Allow'] = ','.join(allowed_methods)
         resp.status = falcon.HTTP_200
 
-    def req_yaml(self, req):
+    def req_yaml(self, req, default=None):
         if req.content_length is None or req.content_length == 0:
-            return None
+            return default
 
         raw_body = req.stream.read(req.content_length or 0)
 
         if raw_body is None:
-            return None
+            return default
 
         try:
-            return yaml.safe_load_all(raw_body.decode('utf-8'))
+            return list(yaml.safe_load_all(raw_body.decode('utf-8')))
         except yaml.YAMLError as jex:
-            self.error(
-                req.context,
-                "Invalid YAML in request: \n%s" % raw_body.decode('utf-8'))
-            raise Exception(
-                "%s: Invalid YAML in body: %s" % (req.path, jex))
+            with excutils.save_and_reraise_exception():
+                self.error(
+                    req.context,
+                    "Invalid YAML in request: \n%s" % raw_body.decode('utf-8'))
 
     def req_json(self, req):
         if req.content_length is None or req.content_length == 0:

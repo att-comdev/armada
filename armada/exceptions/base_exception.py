@@ -31,7 +31,7 @@ class ArmadaBaseException(Exception):
         self.message = message or self.message
         try:
             self.message = self.message % kwargs
-        except TypeError:
+        except Exception:
             pass
         super(ArmadaBaseException, self).__init__(self.message)
 
