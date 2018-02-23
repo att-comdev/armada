@@ -22,8 +22,8 @@ Armada Exceptions
 .. include:: base-exceptions.inc
 .. include:: chartbuilder-exceptions.inc
 .. include:: k8s-exceptions.inc
-.. include:: lint-exceptions.inc
 .. include:: manifest-exceptions.inc
 .. include:: override-exceptions.inc
 .. include:: source-exceptions.inc
 .. include:: tiller-exceptions.inc
+.. include:: validate-exceptions.inc
