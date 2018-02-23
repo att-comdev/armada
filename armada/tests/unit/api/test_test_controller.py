@@ -12,9 +12,107 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import os
+import yaml
+
+import mock
+
+from armada.api.controller import test
 from armada.common.policies import base as policy_base
+from armada.exceptions import manifest_exceptions
 from armada.tests import test_utils
 from armada.tests.unit.api import base
+
+
+class TestControllerTest(base.BaseControllerTest):
+
+    @mock.patch.object(test, 'Manifest')
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_with_manifest(self, mock_tiller, mock_manifest):
+        rules = {'armada:tests_manifest': '@'}
+        self.policy.set_rules(rules)
+
+        manifest_path = os.path.join(os.getcwd(), 'examples',
+                                     'keystone-manifest.yaml')
+        with open(manifest_path, 'r') as f:
+            payload = f.read()
+        documents = list(yaml.safe_load_all(payload))
+
+        resp = self.app.simulate_post('/api/v1.0/tests', body=payload)
+        self.assertEqual(200, resp.status_code)
+
+        result = json.loads(resp.text)
+        expected = {
+            "tests": {"passed": [], "skipped": [], "failed": []}
+        }
+        self.assertEqual(expected, result)
+
+        mock_manifest.assert_called_once_with(
+            documents, target_manifest=None)
+        self.assertTrue(mock_tiller.called)
+
+
+@test_utils.attr(type=['negative'])
+class TestControllerNegativeTest(base.BaseControllerTest):
+
+    @mock.patch.object(test, 'Manifest')
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_tiller_exc_returns_500(self, mock_tiller, _):
+        rules = {'armada:tests_manifest': '@'}
+        self.policy.set_rules(rules)
+
+        mock_tiller.side_effect = Exception
+
+        resp = self.app.simulate_post('/api/v1.0/tests')
+        self.assertEqual(500, resp.status_code)
+
+    @mock.patch.object(test, 'Manifest')
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_validation_failure_returns_400(
+            self, *_):
+        rules = {'armada:tests_manifest': '@'}
+        self.policy.set_rules(rules)
+
+        manifest_path = os.path.join(os.getcwd(), 'examples',
+                                     'keystone-manifest.yaml')
+        with open(manifest_path, 'r') as f:
+            payload = f.read()
+
+        documents = list(yaml.safe_load_all(payload))
+        documents[0]['schema'] = 'totally-invalid'
+        invalid_payload = yaml.safe_dump_all(documents)
+
+        resp = self.app.simulate_post('/api/v1.0/tests',
+                                      body=invalid_payload)
+        self.assertEqual(400, resp.status_code)
+        message = json.loads(resp.text)['message']
+        self.assertEqual('Failed to validate documents.', message)
+
+    @mock.patch.object(test, 'Manifest')
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_manifest_failure_returns_400(
+            self, _, mock_manifest):
+        rules = {'armada:tests_manifest': '@'}
+        self.policy.set_rules(rules)
+
+        mock_manifest.return_value.get_manifest.side_effect = (
+            manifest_exceptions.ManifestException)
+
+        manifest_path = os.path.join(os.getcwd(), 'examples',
+                                     'keystone-manifest.yaml')
+        with open(manifest_path, 'r') as f:
+            payload = f.read()
+
+        documents = list(yaml.safe_load_all(payload))
+        documents[0]['schema'] = 'totally-invalid'
+        invalid_payload = yaml.safe_dump_all(documents)
+
+        resp = self.app.simulate_post('/api/v1.0/tests',
+                                      body=invalid_payload)
+        self.assertEqual(400, resp.status_code)
+        message = json.loads(resp.text)['message']
+        self.assertEqual('Failed to validate documents.', message)
 
 
 class TestControllerNegativeRbacTest(base.BaseControllerTest):
