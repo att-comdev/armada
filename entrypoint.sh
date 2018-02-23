@@ -19,7 +19,7 @@ set -ex
 CMD="armada"
 
 # Define port
-PORT=${ARMADA_API_PORT:-9000}
+PORT=${ARMADA_API_PORT:-8000}
 # How long uWSGI should wait for each Armada response
 ARMADA_API_TIMEOUT=${ARMADA_API_TIMEOUT:-"3600"}
 # Number of uWSGI workers to handle API requests
