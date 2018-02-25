@@ -23,8 +23,8 @@ from armada.api.controller.armada import Apply
 from armada.api.middleware import AuthMiddleware
 from armada.api.middleware import ContextMiddleware
 from armada.api.middleware import LoggingMiddleware
-from armada.api.controller.test import Test
-from armada.api.controller.test import Tests
+from armada.api.controller.test import TestReleasesReleaseNameController
+from armada.api.controller.test import TestReleasesManifestController
 from armada.api.controller.health import Health
 from armada.api.controller.tiller import Release
 from armada.api.controller.tiller import Status
@@ -62,8 +62,8 @@ def create(enable_middleware=CONF.middleware):
         ('apply', Apply()),
         ('releases', Release()),
         ('status', Status()),
-        ('tests', Tests()),
-        ('test/{release}', Test()),
+        ('tests', TestReleasesManifestController()),
+        ('test/{release}', TestReleasesReleaseNameController()),
         ('validatedesign', Validate()),
     )
 
