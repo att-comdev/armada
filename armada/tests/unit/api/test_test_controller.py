@@ -25,7 +25,7 @@ from armada.tests import test_utils
 from armada.tests.unit.api import base
 
 
-class TestControllerTest(base.BaseControllerTest):
+class TestReleasesManifestControllerTest(base.BaseControllerTest):
 
     @mock.patch.object(test, 'Manifest')
     @mock.patch.object(test, 'Tiller')
@@ -53,8 +53,53 @@ class TestControllerTest(base.BaseControllerTest):
         self.assertTrue(mock_tiller.called)
 
 
+class TestReleasesReleaseNameControllerTest(base.BaseControllerTest):
+
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_test_pass(self, mock_tiller):
+        rules = {'armada:test_release': '@'}
+        self.policy.set_rules(rules)
+
+        testing_release = mock_tiller.return_value.testing_release
+        testing_release.return_value = mock.Mock(
+            **{'info.status.last_test_suite_run.result': [
+                mock.Mock(status='PASSED')]})
+
+        resp = self.app.simulate_get('/api/v1.0/test/fake-release')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('MESSAGE: Test Pass',
+                         json.loads(resp.text)['message'])
+
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_test_fail(self, mock_tiller):
+        rules = {'armada:test_release': '@'}
+        self.policy.set_rules(rules)
+
+        testing_release = mock_tiller.return_value.testing_release
+        testing_release.return_value = mock.Mock(
+            **{'info.status.last_test_suite_run.result': [
+                mock.Mock(status='FAILED')]})
+
+        resp = self.app.simulate_get('/api/v1.0/test/fake-release')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('MESSAGE: Test Fail',
+                         json.loads(resp.text)['message'])
+
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_no_test_found(self, mock_tiller):
+        rules = {'armada:test_release': '@'}
+        self.policy.set_rules(rules)
+
+        mock_tiller.return_value.testing_release.return_value = None
+
+        resp = self.app.simulate_get('/api/v1.0/test/fake-release')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('MESSAGE: No test found',
+                         json.loads(resp.text)['message'])
+
+
 @test_utils.attr(type=['negative'])
-class TestControllerNegativeTest(base.BaseControllerTest):
+class TestReleasesManifestControllerNegativeTest(base.BaseControllerTest):
 
     @mock.patch.object(test, 'Manifest')
     @mock.patch.object(test, 'Tiller')
@@ -130,7 +175,22 @@ class TestControllerNegativeTest(base.BaseControllerTest):
                          resp_body['message'])
 
 
-class TestControllerNegativeRbacTest(base.BaseControllerTest):
+@test_utils.attr(type=['negative'])
+class TestReleasesReleaseNameControllerNegativeTest(base.BaseControllerTest):
+
+    @mock.patch.object(test, 'Tiller')
+    def test_test_controller_tiller_exc_returns_500(self, mock_tiller):
+        rules = {'armada:test_release': '@'}
+        self.policy.set_rules(rules)
+
+        mock_tiller.side_effect = Exception
+
+        resp = self.app.simulate_get('/api/v1.0/test/fake-release')
+        self.assertEqual(500, resp.status_code)
+
+
+class TestReleasesReleaseNameControllerNegativeRbacTest(
+        base.BaseControllerTest):
 
     @test_utils.attr(type=['negative'])
     def test_test_release_insufficient_permissions(self):
@@ -141,6 +201,9 @@ class TestControllerNegativeRbacTest(base.BaseControllerTest):
         self.policy.set_rules(rules)
         resp = self.app.simulate_get('/api/v1.0/test/test-release')
         self.assertEqual(403, resp.status_code)
+
+
+class TestReleasesManifestControllerNegativeRbacTest(base.BaseControllerTest):
 
     @test_utils.attr(type=['negative'])
     def test_tests_manifest_insufficient_permissions(self):

@@ -29,7 +29,7 @@ from armada.utils import validate
 CONF = cfg.CONF
 
 
-class Test(api.BaseResource):
+class TestReleasesReleaseNameController(api.BaseResource):
     '''
     Test Helm releases via release name.
     '''
@@ -61,7 +61,7 @@ class Test(api.BaseResource):
             test_status = getattr(
                 tiller_resp.info.status, 'last_test_suite_run', 'FAILED')
 
-            if test_status.result[0].status:
+            if test_status.result[0].status == 'PASSED':
                 msg['result'] = 'PASSED: {}'.format(release)
                 msg['message'] = 'MESSAGE: Test Pass'
                 self.logger.info(msg)
@@ -78,7 +78,7 @@ class Test(api.BaseResource):
         resp.content_type = 'application/json'
 
 
-class Tests(api.BaseResource):
+class TestReleasesManifestController(api.BaseResource):
     '''
     Test Helm releases via a Manifest.
     '''
