@@ -10,12 +10,13 @@ Operations Guide
    :maxdepth: 2
    :caption: Contents:
 
-   guide-api.rst
-   guide-build-armada-yaml.rst
-   guide-configure.rst
-   guide-troubleshooting.rst
-   guide-use-armada.rst
+   guide-api
+   guide-build-armada-yaml
+   guide-configure
+   guide-troubleshooting
+   guide-use-armada
+   validation
    exceptions/index
-   guide-helm-plugin.rst
-   sampleconf.rst
-   samplepolicy.rst
+   guide-helm-plugin
+   sampleconf
+   samplepolicy
