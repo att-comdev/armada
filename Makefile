@@ -1,7 +1,22 @@
+# Copyright 2018 AT&T Intellectual Property.  All other rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # APP INFO
 DOCKER_REGISTRY ?= quay.io
 IMAGE_PREFIX    ?= attcomdev
 IMAGE_NAME      ?= armada
+IMAGE_TAG       ?= latest
 HELM            ?= helm
 LABEL           ?= commit-id
 PYTHON          = python3
@@ -17,7 +32,6 @@ ifdef VERSION
 	DOCKER_VERSION = $(VERSION)
 endif
 
-IMAGE_TAG ?= git-${GIT_SHA}
 IMAGE := ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}
 SHELL = /bin/bash
 
@@ -58,14 +72,34 @@ check-tox:
 		exit 2; \
 	fi
 
-.PHONY: docker-build
+.PHONY: images
 images: check-docker
-	docker build --rm -t ${IMAGE} --label $(LABEL) .
 
 .PHONY: dry-run
 dry-run: clean
 	tools/helm_tk.sh $(HELM)
 	$(HELM) template $(CHART)
+
+.PHONY: docs
+docs: clean build_docs
+
+.PHONY: run_images
+run_images: run_armada
+
+.PHONY: run_armada
+run_armada: #build_armada
+	#ID=docker run -d $(IMAGE)
+	@if [$(findstring "204 No Content", (curl -v GET 10.97.120.121:8000/api/v1.0/health))]
+		echo("Health Check Complete")
+	#docker rm -fv $ID
+
+.PHONY: build_docs
+build_docs:
+	tox -e docs
+
+.PHONY: build_armada
+build_armada:
+	docker build -t $(IMAGE) --label $(LABEL) -f Dockerfile .
 
 # make tools
 .PHONY: protoc
