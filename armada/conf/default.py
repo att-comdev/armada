@@ -89,18 +89,12 @@ path to the private key that includes the name of the key itself.""")),
         'tiller_release_roles',
         default=['admin'],
         help=utils.fmt('IDs of approved API access roles.')),
-
-    cfg.ListOpt(
-        'tiller_status_roles',
-        default=['admin'],
-        help=utils.fmt('IDs of approved API access roles.'))
 ]
 
 
 def register_opts(conf):
     conf.register_opts(default_options)
-    conf.register_opts(
-        loading.get_auth_plugin_conf_options('password'),
+    conf.register_opts(loading.get_auth_plugin_conf_options('password'),
         group='keystone_authtoken')
 
 
