@@ -89,11 +89,6 @@ path to the private key that includes the name of the key itself.""")),
         'tiller_release_roles',
         default=['admin'],
         help=utils.fmt('IDs of approved API access roles.')),
-
-    cfg.ListOpt(
-        'tiller_status_roles',
-        default=['admin'],
-        help=utils.fmt('IDs of approved API access roles.'))
 ]
 
 
