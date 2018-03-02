@@ -215,6 +215,10 @@ To run the Python linter, execute::
 
   $ tox -e pep8
 
+  or
+
+  $ make test-pep8
+
 To lint Helm charts, execute::
 
   $ make lint
@@ -223,17 +227,53 @@ To run unit tests, execute::
 
   $ tox -e py35
 
+  or
+
+  $ make test-unit
+
 To run the test coverage job::
 
   $ tox -e coverage
+
+  or
+
+  $ make test-coverage
 
 To run security checks via `Bandit`_ execute::
 
   $ tox -e bandit
 
+  or
+
+  $ make test-bandit
+
+To build the docker images::
+
+  $ make images
+
 To build all Armada charts, execute::
 
   $ make charts
+
+To build a helm template for the charts::
+
+  $ make dry-run
+
+To run lint, charts, and image targets all at once::
+
+  $ make all
+
+To render any documentation that has build steps::
+
+  $ make docs
+
+To build armada's image::
+
+  $ make run_armada
+
+To build all images::
+
+  $ make run_images
 
 To generate sample configuration and policy files needed for Armada deployment,
 execute (respectively)::
