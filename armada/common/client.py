@@ -33,25 +33,25 @@ class ArmadaClient(object):
     def _set_endpoint(self, version, action):
         return API_VERSION.format(version, action)
 
-    def get_status(self, query):
+    def get_status(self, query, timeout=None):
 
         endpoint = self._set_endpoint('1.0', 'status')
-        resp = self.session.get(endpoint, query=query)
+        resp = self.session.get(endpoint, query=query, timeout=timeout)
 
         self._check_response(resp)
 
         return resp.json()
 
-    def get_releases(self, query):
+    def get_releases(self, query, timeout=None):
 
         endpoint = self._set_endpoint('1.0', 'releases')
-        resp = self.session.get(endpoint, query=query)
+        resp = self.session.get(endpoint, query=query, timeout=timeout)
 
         self._check_response(resp)
 
         return resp.json()
 
-    def post_validate(self, manifest=None):
+    def post_validate(self, manifest=None, timeout=None):
 
         endpoint = self._set_endpoint('1.0', 'validatedesign')
         # TODO(sh8121att) Look to update the UCP convention to
@@ -63,7 +63,8 @@ class ArmadaClient(object):
             data=req_body,
             headers={
                 'content-type': 'application/json'
-            })
+            },
+            timeout=timeout)
 
         self._check_response(resp)
 
@@ -74,7 +75,8 @@ class ArmadaClient(object):
                    manifest_ref=None,
                    values=None,
                    set=None,
-                   query=None):
+                   query=None,
+                   timeout=None):
         """Call the Armada API to apply a Manifest.
 
         If ``manifest`` is not None, then the request body will be a fully
@@ -92,6 +94,7 @@ class ArmadaClient(object):
         :param values: list of local files containing values.yaml overrides
         :param set: list of single-value overrides
         :param query: explicit query string parameters
+        :param timeout: a tuple of connect, read timeout (x, y)
         """
         endpoint = self._set_endpoint('1.0', 'apply')
 
@@ -107,7 +110,8 @@ class ArmadaClient(object):
                 query=query,
                 headers={
                     'content-type': 'application/x-yaml'
-                })
+                },
+                timeout=timeout)
         elif manifest_ref:
             req_body = {
                 'hrefs': manifest_ref,
@@ -119,25 +123,27 @@ class ArmadaClient(object):
                 query=query,
                 headers={
                     'content-type': 'application/json'
-                })
+                },
+                timeout=timeout)
 
         self._check_response(resp)
 
         return resp.json()
 
-    def get_test_release(self, release=None, query=None):
+    def get_test_release(self, release=None, query=None, timeout=None):
 
         endpoint = self._set_endpoint('1.0', 'test/{}'.format(release))
-        resp = self.session.get(endpoint, query=query)
+        resp = self.session.get(endpoint, query=query, timeout=timeout)
 
         self._check_response(resp)
 
         return resp.json()
 
-    def post_test_manifest(self, manifest=None, query=None):
+    def post_test_manifest(self, manifest=None, query=None, timeout=None):
 
         endpoint = self._set_endpoint('1.0', 'tests')
-        resp = self.session.post(endpoint, body=manifest, query=query)
+        resp = self.session.post(endpoint, body=manifest, query=query,
+                                 timeout=timeout)
 
         self._check_response(resp)
 
