@@ -14,3 +14,4 @@ bandit
 pytest==3.2.1
 pytest-mock
 pytest-cov
+responses>=0.8.1
