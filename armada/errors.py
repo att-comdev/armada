@@ -22,7 +22,6 @@ from oslo_log import log as logging
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_TIMEOUT = 3600
 CONF = cfg.CONF
 
 
@@ -153,7 +152,7 @@ def default_error_serializer(req, resp, exception):
 
 def default_exception_handler(ex, req, resp, params):
     """
-    Catch-all execption handler for standardized output.
+    Catch-all exception handler for standardized output.
     If this is a standard falcon HTTPError, rethrow it for handling
     """
     if isinstance(ex, falcon.HTTPError):
@@ -219,7 +218,7 @@ class AppError(Exception):
     @staticmethod
     def _gen_ex_message(title, description):
         ttl = title or 'Exception'
-        dsc = description or 'No additional decsription'
+        dsc = description or 'No additional description'
         return '{} : {}'.format(ttl, dsc)
 
     @staticmethod

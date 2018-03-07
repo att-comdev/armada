@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 from uuid import UUID
 
 from oslo_config import cfg
@@ -97,7 +99,24 @@ class LoggingMiddleware(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
+    # don't log any headers beginning with X-*
+    hdr_exclude = re.compile('x-.*', re.IGNORECASE)
+
+    def process_request(self, req, resp):
+        """ Set up values to be logged across the request
+        """
+        ctx = req.context
+        extra = {
+            'user': ctx.user,
+            'req_id': ctx.request_id,
+            'external_ctx': ctx.external_marker,
+        }
+        self.logger.info("Request %s %s" % (req.method, req.url), extra=extra)
+        self._log_headers(req.headers)
+
     def process_response(self, req, resp, resource, req_succeeded):
+        """ Log the response information
+        """
         ctx = req.context
         extra = {
             'user': ctx.user,
@@ -105,4 +124,13 @@ class LoggingMiddleware(object):
             'external_ctx': ctx.external_marker,
         }
         resp.append_header('X-Armada-Req', ctx.request_id)
-        self.logger.info("%s - %s" % (req.uri, resp.status), extra=extra)
+        self.logger.info("%s %s - %s" % (req.method, req.uri, resp.status),
+                         extra=extra)
+        self.logger.debug("Response body:%s", resp.body)
+
+    def _log_headers(self, headers):
+        """ Log request headers, while scrubbing sensitive values
+        """
+        for header, header_value in headers.items():
+            if not LoggingMiddleware.hdr_exclude.match(header):
+                self.logger.debug("Header %s: %s", header, header_value)

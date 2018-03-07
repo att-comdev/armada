@@ -19,8 +19,6 @@ from oslo_log import log as logging
 from armada.common.i18n import _
 
 LOG = logging.getLogger(__name__)
-
-DEFAULT_TIMEOUT = 3600
 CONF = cfg.CONF
 
 

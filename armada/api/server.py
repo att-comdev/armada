@@ -36,7 +36,7 @@ CONF = cfg.CONF
 
 
 def create(enable_middleware=CONF.middleware):
-    """Entry point for intializing Armada server.
+    """Entry point for initializing Armada server.
 
     :param enable_middleware: Whether to enable middleware.
     :type enable_middleware: bool
@@ -47,8 +47,8 @@ def create(enable_middleware=CONF.middleware):
             request_type=ArmadaRequest,
             middleware=[
                 AuthMiddleware(),
+                ContextMiddleware(),
                 LoggingMiddleware(),
-                ContextMiddleware()
             ])
     else:
         api = falcon.API(request_type=ArmadaRequest)

@@ -65,7 +65,7 @@ class Tiller(object):
         # init k8s connectivity
         self.k8s = K8s()
 
-        # init tiller channel
+        # init Tiller channel
         self.channel = self.get_channel()
 
         # init timeout for all requests
@@ -73,20 +73,29 @@ class Tiller(object):
         # be fed at runtime as an override
         self.timeout = TILLER_TIMEOUT
 
+        LOG.debug('Armada is using Tiller at: %s:%s, namespace=%s, timeout=%s',
+                  self.tiller_host, self.tiller_port, self.tiller_namespace,
+                  self.timeout)
+
     @property
     def metadata(self):
         '''
-        Return tiller metadata for requests
+        Return Tiller metadata for requests
         '''
         return [(b'x-helm-api-client', TILLER_VERSION)]
 
     def get_channel(self):
         '''
-        Return a tiller channel
+        Return a Tiller channel
         '''
         tiller_ip = self._get_tiller_ip()
         tiller_port = self._get_tiller_port()
         try:
+            LOG.debug('Tiller getting gRPC insecure channel at %s:%s '
+                      'with options: [grpc.max_send_message_length=%s, '
+                      'grpc.max_receive_message_length=%s]',
+                      tiller_ip, tiller_port,
+                      MAX_MESSAGE_LENGTH, MAX_MESSAGE_LENGTH)
             return grpc.insecure_channel(
                 '%s:%s' % (tiller_ip, tiller_port),
                 options=[
@@ -99,49 +108,56 @@ class Tiller(object):
 
     def _get_tiller_pod(self):
         '''
-        Returns tiller pod using the tiller pod labels specified in the Armada
+        Returns Tiller pod using the Tiller pod labels specified in the Armada
         config
         '''
         pods = None
         namespace = self._get_tiller_namespace()
         pods = self.k8s.get_namespace_pod(namespace,
                                           CONF.tiller_pod_labels).items
-        # No tiller pods found
+        # No Tiller pods found
         if not pods:
             raise ex.TillerPodNotFoundException(CONF.tiller_pod_labels)
 
-        # Return first tiller pod in running state
+        # Return first Tiller pod in running state
         for pod in pods:
             if pod.status.phase == 'Running':
+                LOG.debug('Found at least one Running Tiller pod.')
                 return pod
 
-        # No tiller pod found in running state
+        # No Tiller pod found in running state
         raise ex.TillerPodNotRunningException()
 
     def _get_tiller_ip(self):
         '''
-        Returns the tiller pod's IP address by searching all namespaces
+        Returns the Tiller pod's IP address by searching all namespaces
         '''
         if self.tiller_host:
+            LOG.debug('Using Tiller host IP: %s', self.tiller_host)
             return self.tiller_host
         else:
             pod = self._get_tiller_pod()
+            LOG.debug('Using Tiller pod IP: %s', pod.status.pod_ip)
             return pod.status.pod_ip
 
     def _get_tiller_port(self):
         '''Stub method to support arbitrary ports in the future'''
+        LOG.debug('Using Tiller host port: %s', self.tiller_port)
         return self.tiller_port
 
     def _get_tiller_namespace(self):
+        LOG.debug('Using Tiller namespace: %s', self.tiller_namespace)
         return self.tiller_namespace
 
     def tiller_status(self):
         '''
-        return if tiller exist or not
+        return if Tiller exist or not
         '''
         if self._get_tiller_ip():
+            LOG.debug('Getting Tiller Status: Tiller exists')
             return True
 
+        LOG.debug('Getting Tiller Status: Tiller does not exist')
         return False
 
     def list_releases(self):
@@ -155,10 +171,13 @@ class Tiller(object):
                                                 STATUS_FAILED],
                                   sort_by='LAST_RELEASED',
                                   sort_order='DESC')
+
+        LOG.debug('Tiller ListReleases() with timeout=%s', self.timeout)
         release_list = stub.ListReleases(req, self.timeout,
                                          metadata=self.metadata)
 
         for y in release_list:
+            LOG.debug('Found release: %s', y.releases)
             releases.extend(y.releases)
 
         return releases
@@ -206,7 +225,7 @@ class Tiller(object):
                     name, release_name, namespace, labels,
                     action_type, chart, disable_hooks, values)
         except Exception:
-            LOG.debug("Pre: Could not update anything, please check yaml")
+            LOG.warn("Pre: Could not update anything, please check yaml")
 
         try:
             for action in actions.get('delete', []):
@@ -217,7 +236,7 @@ class Tiller(object):
                 self.delete_resources(
                     release_name, name, action_type, labels, namespace)
         except Exception:
-            LOG.debug("PRE: Could not delete anything, please check yaml")
+            LOG.warn("PRE: Could not delete anything, please check yaml")
             raise ex.PreUpdateJobDeleteException(name, namespace)
 
         try:
@@ -230,7 +249,7 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
-            LOG.debug("PRE: Could not create anything, please check yaml")
+            LOG.warn("PRE: Could not create anything, please check yaml")
             raise ex.PreUpdateJobCreateException(name, namespace)
 
     def _post_update_actions(self, actions, namespace):
@@ -244,7 +263,7 @@ class Tiller(object):
                     self.k8s.create_job_action(name, action_type)
                     continue
         except Exception:
-            LOG.debug("POST: Could not create anything, please check yaml")
+            LOG.warn("POST: Could not create anything, please check yaml")
             raise ex.PreUpdateJobCreateException(name, namespace)
 
     def list_charts(self):
@@ -264,6 +283,7 @@ class Tiller(object):
                          latest_release.info.status.code)))
             except IndexError:
                 continue
+        LOG.debug('List of Helm Charts from Latest Releases: %s', charts)
         return charts
 
     def update_release(self, chart, release, namespace,
@@ -280,8 +300,9 @@ class Tiller(object):
 
         rel_timeout = self.timeout if not timeout else timeout
 
-        LOG.debug("wait: %s", wait)
-        LOG.debug("timeout: %s", timeout)
+        LOG.debug('Helm update release%s: wait=%s, timeout=%s',
+                  (' (dry run)' if dry_run else ''),
+                  wait, timeout)
 
         if values is None:
             values = Config(raw='')
@@ -323,7 +344,9 @@ class Tiller(object):
 
         rel_timeout = self.timeout if not timeout else timeout
 
-        LOG.info("Wait: %s, Timeout: %s", wait, timeout)
+        LOG.debug('Helm install release%s: wait=%s, timeout=%s',
+                  (' (dry run)' if dry_run else ''),
+                  wait, timeout)
 
         if values is None:
             values = Config(raw='')
@@ -356,8 +379,9 @@ class Tiller(object):
         :param cleanup - removes testing pod created
 
         :returns - results of test pod
-
         '''
+
+        LOG.debug("Helm test release %s, timeout=%s", release, timeout)
 
         try:
 
@@ -391,16 +415,20 @@ class Tiller(object):
         '''
         :param release - name of release to test
         :param version - version of release status
-
         '''
 
+        LOG.debug('Helm getting release status for release=%s, version=%s',
+                  release, version)
         try:
             stub = ReleaseServiceStub(self.channel)
             status_request = GetReleaseStatusRequest(
                 name=release, version=version)
+            LOG.debug('GetReleaseStatusRequest= %s', status_request)
 
-            return stub.GetReleaseStatus(
+            release_status = stub.GetReleaseStatus(
                 status_request, self.timeout, metadata=self.metadata)
+            LOG.debug('GetReleaseStatus= %s', release_status)
+            return release_status
 
         except Exception:
             raise ex.GetReleaseStatusException(release, version)
@@ -409,42 +437,51 @@ class Tiller(object):
         '''
         :param release - name of release to test
         :param version - version of release status
-
         '''
 
+        LOG.debug('Helm getting release content for release=%s, version=%s',
+                  release, version)
         try:
             stub = ReleaseServiceStub(self.channel)
             status_request = GetReleaseContentRequest(
                 name=release, version=version)
+            LOG.debug('GetReleaseContentRequest= %s', status_request)
 
-            return stub.GetReleaseContent(
+            release_content = stub.GetReleaseContent(
                 status_request, self.timeout, metadata=self.metadata)
+            LOG.debug('GetReleaseContent= %s', release_content)
+            return release_content
 
         except Exception:
             raise ex.GetReleaseContentException(release, version)
 
     def tiller_version(self):
         '''
-        :returns - tiller version
+        :returns - Tiller version
         '''
         try:
             stub = ReleaseServiceStub(self.channel)
             release_request = GetVersionRequest()
 
+            LOG.debug('Getting Tiller version, with timeout=%s', self.timeout)
             tiller_version = stub.GetVersion(
                 release_request, self.timeout, metadata=self.metadata)
+            LOG.debug('Got Tiller version response: %s', tiller_version)
 
-            return getattr(tiller_version.Version, 'sem_ver', None)
+            tiller_version = getattr(tiller_version.Version, 'sem_ver', None)
+            LOG.debug('Got Tiller version %s', tiller_version)
+            return tiller_version
 
         except Exception:
+            LOG.debug('Failed to get Tiller version')
             raise ex.TillerVersionException()
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
         '''
-        :params - release - helm chart release name
+        :params - release - Helm chart release name
         :params - purge - deep delete of chart
 
-        deletes a helm chart from tiller
+        deletes a Helm chart from Tiller
         '''
 
         # build release install request
