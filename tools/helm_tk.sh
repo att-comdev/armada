@@ -49,4 +49,3 @@ cd openstack-helm
 git pull
 helm_serve
 make charts
-${HELM} dep up ../../charts/armada

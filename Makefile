@@ -5,7 +5,7 @@ IMAGE_NAME      ?= armada
 HELM            ?= helm
 LABEL           ?= commit-id
 PYTHON          = python3
-CHART      = charts/armada
+CHART           = armada
 
 # VERSION INFO
 GIT_COMMIT = $(shell git rev-parse HEAD)
@@ -65,7 +65,8 @@ images: check-docker
 .PHONY: dry-run
 dry-run: clean
 	tools/helm_tk.sh $(HELM)
-	$(HELM) template $(CHART)
+	$(HELM) dep up charts/$(CHART)
+	$(HELM) template charts/$(CHART)
 
 # make tools
 .PHONY: protoc
@@ -104,9 +105,10 @@ test-pep8: check-tox
 .PHONY: helm-lint
 helm_lint:
 	@tools/helm_tk.sh $(HELM)
-	$(HELM) lint $(CHART)
+	$(HELM) dep up charts/$(CHART)
+	$(HELM) lint charts/$(CHART)
 
 .PHONY: charts
 charts: clean
-	$(HELM) dep up $(CHART)
-	$(HELM) package $(CHART)
+	$(HELM) dep up charts/$(CHART)
+	$(HELM) package charts/$(CHART)
