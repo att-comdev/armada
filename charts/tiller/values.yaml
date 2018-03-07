@@ -32,6 +32,10 @@ deployment:
   # no limit.
   tiller_history: 0
 
+conf:
+  tiller:
+    verbosity: 5
+
 manifests:
   deployment_tiller: true
   service_tiller_deploy: true

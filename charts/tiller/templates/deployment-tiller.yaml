@@ -76,6 +76,11 @@ spec:
           successThreshold: 1
           timeoutSeconds: 1
         name: tiller
+        command:
+          - /tiller
+          - -logtostderr
+          - -v
+          - {{ .Values.conf.tiller.verbosity | quote }}
         ports:
         - containerPort: 44134
           name: tiller
