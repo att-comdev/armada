@@ -16,12 +16,14 @@ import json
 
 import falcon
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from armada import api
 from armada.common import policy
 from armada.handlers.tiller import Tiller
 
 CONF = cfg.CONF
+LOG = logging.getLogger(__name__)
 
 
 class Status(api.BaseResource):
@@ -37,6 +39,10 @@ class Status(api.BaseResource):
                     'tiller_port') or CONF.tiller_port,
                 tiller_namespace=req.get_param(
                     'tiller_namespace', default=CONF.tiller_namespace))
+
+            LOG.debug('Tiller (Status) at: %s:%s, namespace=%s, '
+                      'timeout=%s', tiller.tiller_host, tiller.tiller_port,
+                      tiller.tiller_namespace, tiller.timeout)
 
             message = {
                 'tiller': {
@@ -68,6 +74,10 @@ class Release(api.BaseResource):
                     'tiller_port') or CONF.tiller_port,
                 tiller_namespace=req.get_param(
                     'tiller_namespace', default=CONF.tiller_namespace))
+
+            LOG.debug('Tiller (Release) at: %s:%s, namespace=%s, '
+                      'timeout=%s', tiller.tiller_host, tiller.tiller_port,
+                      tiller.tiller_namespace, tiller.timeout)
 
             releases = {}
             for release in tiller.list_releases():
