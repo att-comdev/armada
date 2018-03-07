@@ -306,8 +306,8 @@ class K8s(object):
                     LOG.debug('Pod %s is ready!', pod_name)
                 else:
                     pod_ready = False
-                    LOG.debug('Pod %s not ready: conditions=[%s] '
-                              'container_statuses=[%s] ', pod_name,
+                    LOG.debug('Pod %s not ready: conditions:\n%s\n'
+                              'container_statuses:\n%s', pod_name,
                               status.conditions, status.container_statuses)
 
                 ready_pods[pod_name] = pod_ready

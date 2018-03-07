@@ -73,9 +73,13 @@ class ArmadaSession(object):
         :return: A requests.Response object
         """
         api_url = '{}{}'.format(self.base_url, endpoint)
+        req_timeout = self._timeout(timeout)
+
+        self.logger.debug("Sending armada_client session GET %s with "
+                          "params=[%s], headers=[%s], timeout=[%s]",
+                          api_url, query, headers, req_timeout)
         resp = self._session.get(
-            api_url, params=query, headers=headers,
-            timeout=self._timeout(timeout))
+            api_url, params=query, headers=headers, timeout=req_timeout)
 
         return resp
 
@@ -95,22 +99,25 @@ class ArmadaSession(object):
         :return: A requests.Response object
         """
         api_url = '{}{}'.format(self.base_url, endpoint)
+        req_timeout = self._timeout(timeout)
 
-        self.logger.debug("Sending POST with armada_client session")
+        self.logger.debug("Sending armada_client session POST %s with "
+                          "params=[%s], headers=[%s], timeout=[%s]",
+                          api_url, query, headers, req_timeout)
         if body is not None:
             self.logger.debug("Sending POST with explicit body: \n%s" % body)
             resp = self._session.post(api_url,
                                       params=query,
                                       data=body,
                                       headers=headers,
-                                      timeout=self._timeout(timeout))
+                                      timeout=req_timeout)
         else:
             self.logger.debug("Sending POST with JSON body: \n%s" % str(data))
             resp = self._session.post(api_url,
                                       params=query,
                                       json=data,
                                       headers=headers,
-                                      timeout=self._timeout(timeout))
+                                      timeout=req_timeout)
 
         return resp
 

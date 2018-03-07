@@ -33,11 +33,11 @@ class TillerControllerTest(base.BaseControllerTest):
         self.policy.set_rules(rules)
 
         mock_tiller.return_value.tiller_status.return_value = 'fake_status'
-        mock_tiller.return_value.tiller_version.return_value = 'fake_verson'
+        mock_tiller.return_value.tiller_version.return_value = 'fake_version'
 
         result = self.app.simulate_get('/api/v1.0/status')
         expected = {
-            'tiller': {'version': 'fake_verson', 'state': 'fake_status'}
+            'tiller': {'version': 'fake_version', 'state': 'fake_status'}
         }
 
         self.assertEqual(expected, result.json)
@@ -53,7 +53,7 @@ class TillerControllerTest(base.BaseControllerTest):
         self.policy.set_rules(rules)
 
         mock_tiller.return_value.tiller_status.return_value = 'fake_status'
-        mock_tiller.return_value.tiller_version.return_value = 'fake_verson'
+        mock_tiller.return_value.tiller_version.return_value = 'fake_version'
 
         result = self.app.simulate_get('/api/v1.0/status',
                                        params_csv=False,
@@ -61,7 +61,7 @@ class TillerControllerTest(base.BaseControllerTest):
                                                'tiller_port': '98765',
                                                'tiller_namespace': 'fake_ns'})
         expected = {
-            'tiller': {'version': 'fake_verson', 'state': 'fake_status'}
+            'tiller': {'version': 'fake_version', 'state': 'fake_status'}
         }
 
         self.assertEqual(expected, result.json)
