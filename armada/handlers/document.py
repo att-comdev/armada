@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ReferenceResolver(object):
-    """Class for handling different data references to resolve them data."""
+    """Class for handling different data references to resolve the data."""
 
     @classmethod
     def resolve_reference(cls, design_ref):
@@ -36,6 +36,7 @@ class ReferenceResolver(object):
         and use that handler to get the data referenced.
 
         :param design_ref: A list of URI-formatted reference to a data entity
+
         :returns: A list of byte arrays
         """
         data = []

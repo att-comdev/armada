@@ -56,7 +56,7 @@ def _validate_armada_manifest(manifest):
     :class:`armada.handlers.manifest.Manifest`.
 
     This will do business logic validation after the input
-    files have be syntatically validated via jsonschema.
+    files have be syntactically validated via jsonschema.
 
     :param dict manifest: The manifest to validate.
 
@@ -97,7 +97,7 @@ def _validate_armada_manifest(manifest):
 
 
 def validate_armada_manifests(documents):
-    """Validate each Aramada manifest found in the document set.
+    """Validate each Armada manifest found in the document set.
 
     :param documents: List of Armada documents to validate
     :type documents: :func: `list[dict]`.
@@ -170,7 +170,7 @@ def validate_armada_document(document):
 def validate_armada_documents(documents):
     """Validates multiple Armada documents.
 
-    :param documents: List of Armada maanifests to validate.
+    :param documents: List of Armada manifests to validate.
     :type documents: :func:`list[dict]`.
 
     :returns: A tuple of bool, list[dict] where the first value is whether
