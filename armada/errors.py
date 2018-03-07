@@ -22,7 +22,6 @@ from oslo_log import log as logging
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_TIMEOUT = 3600
 CONF = cfg.CONF
 
 
@@ -219,7 +218,7 @@ class AppError(Exception):
     @staticmethod
     def _gen_ex_message(title, description):
         ttl = title or 'Exception'
-        dsc = description or 'No additional decsription'
+        dsc = description or 'No additional description'
         return '{} : {}'.format(ttl, dsc)
 
     @staticmethod

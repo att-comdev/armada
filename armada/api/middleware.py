@@ -97,7 +97,23 @@ class LoggingMiddleware(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
+    def process_request(self, req, resp):
+        """ Set up values to be logged across the request
+        """
+        ctx = req.context
+        extra = {
+            'user': ctx.user,
+            'req_id': ctx.request_id,
+            'external_ctx': ctx.external_marker,
+        }
+        self.logger.info("Request %s %s" % (req.method, req.url), extra=extra)
+
+        for header, header_value in req.headers.items():
+            self.logger.info("Request header %s: %s", header, header_value)
+
     def process_response(self, req, resp, resource, req_succeeded):
+        """ Log the response information
+        """
         ctx = req.context
         extra = {
             'user': ctx.user,
@@ -105,4 +121,6 @@ class LoggingMiddleware(object):
             'external_ctx': ctx.external_marker,
         }
         resp.append_header('X-Armada-Req', ctx.request_id)
-        self.logger.info("%s - %s" % (req.uri, resp.status), extra=extra)
+        self.logger.info("%s %s - %s" % (req.method, req.uri, resp.status),
+                         extra=extra)
+        self.logger.debug("Response body:%s", resp.body)
