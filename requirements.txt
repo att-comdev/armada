@@ -1,6 +1,6 @@
 gitpython
-grpcio>=1.6.0
-grpcio-tools>=1.6.0
+grpcio==1.10.0
+grpcio-tools==1.10.0
 keystoneauth1==2.21.0
 keystonemiddleware==4.9.1
 kubernetes>=1.0.0
