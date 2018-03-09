@@ -70,35 +70,35 @@ _TESTRUN = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='status', full_name='hapi.release.TestRun.status', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='info', full_name='hapi.release.TestRun.info', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='started_at', full_name='hapi.release.TestRun.started_at', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='completed_at', full_name='hapi.release.TestRun.completed_at', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -133,14 +133,4 @@ _sym_db.RegisterMessage(TestRun)
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('Z\007release'))
-try:
-  # THESE ELEMENTS WILL BE DEPRECATED.
-  # Please use the generated *_pb2_grpc.py files instead.
-  import grpc
-  from grpc.beta import implementations as beta_implementations
-  from grpc.beta import interfaces as beta_interfaces
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
-except ImportError:
-  pass
 # @@protoc_insertion_point(module_scope)
