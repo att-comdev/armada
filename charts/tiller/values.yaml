@@ -35,6 +35,7 @@ deployment:
 conf:
   tiller:
     verbosity: 5
+    trace: false
 
 manifests:
   deployment_tiller: true

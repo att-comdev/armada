@@ -81,6 +81,9 @@ spec:
           - -logtostderr
           - -v
           - {{ .Values.conf.tiller.verbosity | quote }}
+{{- if .Values.conf.tiller.trace }}
+          - -trace
+{{- end }}
         ports:
         - containerPort: 44134
           name: tiller
