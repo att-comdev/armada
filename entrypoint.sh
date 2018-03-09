@@ -32,10 +32,14 @@ ARMADA_API_THREADS=${ARMADA_API_THREADS:-"1"}
 # server during import in `armada.api.server`.
 if [ "$1" = 'server' ]; then
     exec uwsgi \
+        -b 32768 \
+        --die-on-term \
         --http :${ARMADA_API_PORT} \
         --http-timeout $ARMADA_API_TIMEOUT \
         --enable-threads \
         -L \
+        --lazy-apps \
+        --master \
         --paste config:/etc/armada/api-paste.ini \
         --pyargv "--config-file /etc/armada/armada.conf" \
         --threads $ARMADA_API_THREADS \
