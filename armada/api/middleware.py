@@ -31,9 +31,6 @@ class AuthMiddleware(object):
     def process_request(self, req, resp):
         ctx = req.context
 
-        for k, v in req.headers.items():
-            self.logger.debug("Request with header %s: %s" % (k, v))
-
         auth_status = req.get_header('X-SERVICE-IDENTITY-STATUS')
         service = True
 
