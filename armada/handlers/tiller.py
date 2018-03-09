@@ -21,7 +21,7 @@ from hapi.services.tiller_pb2 import GetReleaseStatusRequest
 from hapi.services.tiller_pb2 import GetVersionRequest
 from hapi.services.tiller_pb2 import InstallReleaseRequest
 from hapi.services.tiller_pb2 import ListReleasesRequest
-from hapi.services.tiller_pb2 import ReleaseServiceStub
+from hapi.services.tiller_pb2_grpc import ReleaseServiceStub
 from hapi.services.tiller_pb2 import TestReleaseRequest
 from hapi.services.tiller_pb2 import UninstallReleaseRequest
 from hapi.services.tiller_pb2 import UpdateReleaseRequest

@@ -94,49 +94,49 @@ _LISTRELEASESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='offset', full_name='hapi.services.tiller.ListReleasesRequest.offset', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sort_by', full_name='hapi.services.tiller.ListReleasesRequest.sort_by', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='filter', full_name='hapi.services.tiller.ListReleasesRequest.filter', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sort_order', full_name='hapi.services.tiller.ListReleasesRequest.sort_order', index=4,
       number=5, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='status_codes', full_name='hapi.services.tiller.ListReleasesRequest.status_codes', index=5,
       number=6, type=14, cpp_type=8, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='namespace', full_name='hapi.services.tiller.ListReleasesRequest.namespace', index=6,
       number=7, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -193,28 +193,28 @@ _LISTRELEASESRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='next', full_name='hapi.services.tiller.ListReleasesResponse.next', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='total', full_name='hapi.services.tiller.ListReleasesResponse.total', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='releases', full_name='hapi.services.tiller.ListReleasesResponse.releases', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -245,14 +245,14 @@ _GETRELEASESTATUSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='version', full_name='hapi.services.tiller.GetReleaseStatusRequest.version', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -283,21 +283,21 @@ _GETRELEASESTATUSRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='info', full_name='hapi.services.tiller.GetReleaseStatusResponse.info', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='namespace', full_name='hapi.services.tiller.GetReleaseStatusResponse.namespace', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -328,14 +328,14 @@ _GETRELEASECONTENTREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='version', full_name='hapi.services.tiller.GetReleaseContentRequest.version', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -366,7 +366,7 @@ _GETRELEASECONTENTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -397,77 +397,77 @@ _UPDATERELEASEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='chart', full_name='hapi.services.tiller.UpdateReleaseRequest.chart', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='values', full_name='hapi.services.tiller.UpdateReleaseRequest.values', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dry_run', full_name='hapi.services.tiller.UpdateReleaseRequest.dry_run', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='disable_hooks', full_name='hapi.services.tiller.UpdateReleaseRequest.disable_hooks', index=4,
       number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='recreate', full_name='hapi.services.tiller.UpdateReleaseRequest.recreate', index=5,
       number=6, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='timeout', full_name='hapi.services.tiller.UpdateReleaseRequest.timeout', index=6,
       number=7, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='reset_values', full_name='hapi.services.tiller.UpdateReleaseRequest.reset_values', index=7,
       number=8, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='wait', full_name='hapi.services.tiller.UpdateReleaseRequest.wait', index=8,
       number=9, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='reuse_values', full_name='hapi.services.tiller.UpdateReleaseRequest.reuse_values', index=9,
       number=10, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='force', full_name='hapi.services.tiller.UpdateReleaseRequest.force', index=10,
       number=11, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -498,7 +498,7 @@ _UPDATERELEASERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -529,56 +529,56 @@ _ROLLBACKRELEASEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dry_run', full_name='hapi.services.tiller.RollbackReleaseRequest.dry_run', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='disable_hooks', full_name='hapi.services.tiller.RollbackReleaseRequest.disable_hooks', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='version', full_name='hapi.services.tiller.RollbackReleaseRequest.version', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='recreate', full_name='hapi.services.tiller.RollbackReleaseRequest.recreate', index=4,
       number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='timeout', full_name='hapi.services.tiller.RollbackReleaseRequest.timeout', index=5,
       number=6, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='wait', full_name='hapi.services.tiller.RollbackReleaseRequest.wait', index=6,
       number=7, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='force', full_name='hapi.services.tiller.RollbackReleaseRequest.force', index=7,
       number=8, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -609,7 +609,7 @@ _ROLLBACKRELEASERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -640,63 +640,63 @@ _INSTALLRELEASEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='values', full_name='hapi.services.tiller.InstallReleaseRequest.values', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dry_run', full_name='hapi.services.tiller.InstallReleaseRequest.dry_run', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='name', full_name='hapi.services.tiller.InstallReleaseRequest.name', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='disable_hooks', full_name='hapi.services.tiller.InstallReleaseRequest.disable_hooks', index=4,
       number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='namespace', full_name='hapi.services.tiller.InstallReleaseRequest.namespace', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='reuse_name', full_name='hapi.services.tiller.InstallReleaseRequest.reuse_name', index=6,
       number=7, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='timeout', full_name='hapi.services.tiller.InstallReleaseRequest.timeout', index=7,
       number=8, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='wait', full_name='hapi.services.tiller.InstallReleaseRequest.wait', index=8,
       number=9, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -727,7 +727,7 @@ _INSTALLRELEASERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -758,28 +758,28 @@ _UNINSTALLRELEASEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='disable_hooks', full_name='hapi.services.tiller.UninstallReleaseRequest.disable_hooks', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='purge', full_name='hapi.services.tiller.UninstallReleaseRequest.purge', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='timeout', full_name='hapi.services.tiller.UninstallReleaseRequest.timeout', index=3,
       number=4, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -810,14 +810,14 @@ _UNINSTALLRELEASERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='info', full_name='hapi.services.tiller.UninstallReleaseResponse.info', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -872,7 +872,7 @@ _GETVERSIONRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -903,14 +903,14 @@ _GETHISTORYREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='max', full_name='hapi.services.tiller.GetHistoryRequest.max', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -941,7 +941,7 @@ _GETHISTORYRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -972,21 +972,21 @@ _TESTRELEASEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='timeout', full_name='hapi.services.tiller.TestReleaseRequest.timeout', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='cleanup', full_name='hapi.services.tiller.TestReleaseRequest.cleanup', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -1017,14 +1017,14 @@ _TESTRELEASERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='status', full_name='hapi.services.tiller.TestReleaseResponse.status', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -1338,470 +1338,4 @@ _sym_db.RegisterServiceDescriptor(_RELEASESERVICE)
 
 DESCRIPTOR.services_by_name['ReleaseService'] = _RELEASESERVICE
 
-try:
-  # THESE ELEMENTS WILL BE DEPRECATED.
-  # Please use the generated *_pb2_grpc.py files instead.
-  import grpc
-  from grpc.beta import implementations as beta_implementations
-  from grpc.beta import interfaces as beta_interfaces
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
-
-
-  class ReleaseServiceStub(object):
-    """ReleaseService is the service that a helm application uses to mutate,
-    query, and manage releases.
-
-    		Release: A named installation composed of a chart and
-    				 config. At any given time a release has one
-    				 chart and one config.
-
-    		Config:  A config is a YAML file that supplies values
-    				 to the parametrizable templates of a chart.
-
-    		Chart:   A chart is a helm package that contains
-    				 metadata, a default config, zero or more
-    				 optionally parameterizable templates, and
-    				 zero or more charts (dependencies).
-    """
-
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.ListReleases = channel.unary_stream(
-          '/hapi.services.tiller.ReleaseService/ListReleases',
-          request_serializer=ListReleasesRequest.SerializeToString,
-          response_deserializer=ListReleasesResponse.FromString,
-          )
-      self.GetReleaseStatus = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/GetReleaseStatus',
-          request_serializer=GetReleaseStatusRequest.SerializeToString,
-          response_deserializer=GetReleaseStatusResponse.FromString,
-          )
-      self.GetReleaseContent = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/GetReleaseContent',
-          request_serializer=GetReleaseContentRequest.SerializeToString,
-          response_deserializer=GetReleaseContentResponse.FromString,
-          )
-      self.UpdateRelease = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/UpdateRelease',
-          request_serializer=UpdateReleaseRequest.SerializeToString,
-          response_deserializer=UpdateReleaseResponse.FromString,
-          )
-      self.InstallRelease = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/InstallRelease',
-          request_serializer=InstallReleaseRequest.SerializeToString,
-          response_deserializer=InstallReleaseResponse.FromString,
-          )
-      self.UninstallRelease = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/UninstallRelease',
-          request_serializer=UninstallReleaseRequest.SerializeToString,
-          response_deserializer=UninstallReleaseResponse.FromString,
-          )
-      self.GetVersion = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/GetVersion',
-          request_serializer=GetVersionRequest.SerializeToString,
-          response_deserializer=GetVersionResponse.FromString,
-          )
-      self.RollbackRelease = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/RollbackRelease',
-          request_serializer=RollbackReleaseRequest.SerializeToString,
-          response_deserializer=RollbackReleaseResponse.FromString,
-          )
-      self.GetHistory = channel.unary_unary(
-          '/hapi.services.tiller.ReleaseService/GetHistory',
-          request_serializer=GetHistoryRequest.SerializeToString,
-          response_deserializer=GetHistoryResponse.FromString,
-          )
-      self.RunReleaseTest = channel.unary_stream(
-          '/hapi.services.tiller.ReleaseService/RunReleaseTest',
-          request_serializer=TestReleaseRequest.SerializeToString,
-          response_deserializer=TestReleaseResponse.FromString,
-          )
-
-
-  class ReleaseServiceServicer(object):
-    """ReleaseService is the service that a helm application uses to mutate,
-    query, and manage releases.
-
-    		Release: A named installation composed of a chart and
-    				 config. At any given time a release has one
-    				 chart and one config.
-
-    		Config:  A config is a YAML file that supplies values
-    				 to the parametrizable templates of a chart.
-
-    		Chart:   A chart is a helm package that contains
-    				 metadata, a default config, zero or more
-    				 optionally parameterizable templates, and
-    				 zero or more charts (dependencies).
-    """
-
-    def ListReleases(self, request, context):
-      """ListReleases retrieves release history.
-      TODO: Allow filtering the set of releases by
-      release status. By default, ListAllReleases returns the releases who
-      current status is "Active".
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def GetReleaseStatus(self, request, context):
-      """GetReleasesStatus retrieves status information for the specified release.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def GetReleaseContent(self, request, context):
-      """GetReleaseContent retrieves the release content (chart + value) for the specified release.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UpdateRelease(self, request, context):
-      """UpdateRelease updates release content.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def InstallRelease(self, request, context):
-      """InstallRelease requests installation of a chart as a new release.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UninstallRelease(self, request, context):
-      """UninstallRelease requests deletion of a named release.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def GetVersion(self, request, context):
-      """GetVersion returns the current version of the server.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RollbackRelease(self, request, context):
-      """RollbackRelease rolls back a release to a previous version.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def GetHistory(self, request, context):
-      """ReleaseHistory retrieves a releasse's history.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RunReleaseTest(self, request, context):
-      """RunReleaseTest executes the tests defined of a named release
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_ReleaseServiceServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'ListReleases': grpc.unary_stream_rpc_method_handler(
-            servicer.ListReleases,
-            request_deserializer=ListReleasesRequest.FromString,
-            response_serializer=ListReleasesResponse.SerializeToString,
-        ),
-        'GetReleaseStatus': grpc.unary_unary_rpc_method_handler(
-            servicer.GetReleaseStatus,
-            request_deserializer=GetReleaseStatusRequest.FromString,
-            response_serializer=GetReleaseStatusResponse.SerializeToString,
-        ),
-        'GetReleaseContent': grpc.unary_unary_rpc_method_handler(
-            servicer.GetReleaseContent,
-            request_deserializer=GetReleaseContentRequest.FromString,
-            response_serializer=GetReleaseContentResponse.SerializeToString,
-        ),
-        'UpdateRelease': grpc.unary_unary_rpc_method_handler(
-            servicer.UpdateRelease,
-            request_deserializer=UpdateReleaseRequest.FromString,
-            response_serializer=UpdateReleaseResponse.SerializeToString,
-        ),
-        'InstallRelease': grpc.unary_unary_rpc_method_handler(
-            servicer.InstallRelease,
-            request_deserializer=InstallReleaseRequest.FromString,
-            response_serializer=InstallReleaseResponse.SerializeToString,
-        ),
-        'UninstallRelease': grpc.unary_unary_rpc_method_handler(
-            servicer.UninstallRelease,
-            request_deserializer=UninstallReleaseRequest.FromString,
-            response_serializer=UninstallReleaseResponse.SerializeToString,
-        ),
-        'GetVersion': grpc.unary_unary_rpc_method_handler(
-            servicer.GetVersion,
-            request_deserializer=GetVersionRequest.FromString,
-            response_serializer=GetVersionResponse.SerializeToString,
-        ),
-        'RollbackRelease': grpc.unary_unary_rpc_method_handler(
-            servicer.RollbackRelease,
-            request_deserializer=RollbackReleaseRequest.FromString,
-            response_serializer=RollbackReleaseResponse.SerializeToString,
-        ),
-        'GetHistory': grpc.unary_unary_rpc_method_handler(
-            servicer.GetHistory,
-            request_deserializer=GetHistoryRequest.FromString,
-            response_serializer=GetHistoryResponse.SerializeToString,
-        ),
-        'RunReleaseTest': grpc.unary_stream_rpc_method_handler(
-            servicer.RunReleaseTest,
-            request_deserializer=TestReleaseRequest.FromString,
-            response_serializer=TestReleaseResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'hapi.services.tiller.ReleaseService', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class BetaReleaseServiceServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """ReleaseService is the service that a helm application uses to mutate,
-    query, and manage releases.
-
-    		Release: A named installation composed of a chart and
-    				 config. At any given time a release has one
-    				 chart and one config.
-
-    		Config:  A config is a YAML file that supplies values
-    				 to the parametrizable templates of a chart.
-
-    		Chart:   A chart is a helm package that contains
-    				 metadata, a default config, zero or more
-    				 optionally parameterizable templates, and
-    				 zero or more charts (dependencies).
-    """
-    def ListReleases(self, request, context):
-      """ListReleases retrieves release history.
-      TODO: Allow filtering the set of releases by
-      release status. By default, ListAllReleases returns the releases who
-      current status is "Active".
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def GetReleaseStatus(self, request, context):
-      """GetReleasesStatus retrieves status information for the specified release.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def GetReleaseContent(self, request, context):
-      """GetReleaseContent retrieves the release content (chart + value) for the specified release.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UpdateRelease(self, request, context):
-      """UpdateRelease updates release content.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def InstallRelease(self, request, context):
-      """InstallRelease requests installation of a chart as a new release.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UninstallRelease(self, request, context):
-      """UninstallRelease requests deletion of a named release.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def GetVersion(self, request, context):
-      """GetVersion returns the current version of the server.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RollbackRelease(self, request, context):
-      """RollbackRelease rolls back a release to a previous version.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def GetHistory(self, request, context):
-      """ReleaseHistory retrieves a releasse's history.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RunReleaseTest(self, request, context):
-      """RunReleaseTest executes the tests defined of a named release
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaReleaseServiceStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """ReleaseService is the service that a helm application uses to mutate,
-    query, and manage releases.
-
-    		Release: A named installation composed of a chart and
-    				 config. At any given time a release has one
-    				 chart and one config.
-
-    		Config:  A config is a YAML file that supplies values
-    				 to the parametrizable templates of a chart.
-
-    		Chart:   A chart is a helm package that contains
-    				 metadata, a default config, zero or more
-    				 optionally parameterizable templates, and
-    				 zero or more charts (dependencies).
-    """
-    def ListReleases(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """ListReleases retrieves release history.
-      TODO: Allow filtering the set of releases by
-      release status. By default, ListAllReleases returns the releases who
-      current status is "Active".
-      """
-      raise NotImplementedError()
-    def GetReleaseStatus(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """GetReleasesStatus retrieves status information for the specified release.
-      """
-      raise NotImplementedError()
-    GetReleaseStatus.future = None
-    def GetReleaseContent(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """GetReleaseContent retrieves the release content (chart + value) for the specified release.
-      """
-      raise NotImplementedError()
-    GetReleaseContent.future = None
-    def UpdateRelease(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UpdateRelease updates release content.
-      """
-      raise NotImplementedError()
-    UpdateRelease.future = None
-    def InstallRelease(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """InstallRelease requests installation of a chart as a new release.
-      """
-      raise NotImplementedError()
-    InstallRelease.future = None
-    def UninstallRelease(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UninstallRelease requests deletion of a named release.
-      """
-      raise NotImplementedError()
-    UninstallRelease.future = None
-    def GetVersion(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """GetVersion returns the current version of the server.
-      """
-      raise NotImplementedError()
-    GetVersion.future = None
-    def RollbackRelease(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RollbackRelease rolls back a release to a previous version.
-      """
-      raise NotImplementedError()
-    RollbackRelease.future = None
-    def GetHistory(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """ReleaseHistory retrieves a releasse's history.
-      """
-      raise NotImplementedError()
-    GetHistory.future = None
-    def RunReleaseTest(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RunReleaseTest executes the tests defined of a named release
-      """
-      raise NotImplementedError()
-
-
-  def beta_create_ReleaseService_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('hapi.services.tiller.ReleaseService', 'GetHistory'): GetHistoryRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseContent'): GetReleaseContentRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseStatus'): GetReleaseStatusRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'GetVersion'): GetVersionRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'InstallRelease'): InstallReleaseRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'ListReleases'): ListReleasesRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'RollbackRelease'): RollbackReleaseRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'RunReleaseTest'): TestReleaseRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'UninstallRelease'): UninstallReleaseRequest.FromString,
-      ('hapi.services.tiller.ReleaseService', 'UpdateRelease'): UpdateReleaseRequest.FromString,
-    }
-    response_serializers = {
-      ('hapi.services.tiller.ReleaseService', 'GetHistory'): GetHistoryResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseContent'): GetReleaseContentResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseStatus'): GetReleaseStatusResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'GetVersion'): GetVersionResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'InstallRelease'): InstallReleaseResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'ListReleases'): ListReleasesResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'RollbackRelease'): RollbackReleaseResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'RunReleaseTest'): TestReleaseResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'UninstallRelease'): UninstallReleaseResponse.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'UpdateRelease'): UpdateReleaseResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('hapi.services.tiller.ReleaseService', 'GetHistory'): face_utilities.unary_unary_inline(servicer.GetHistory),
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseContent'): face_utilities.unary_unary_inline(servicer.GetReleaseContent),
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseStatus'): face_utilities.unary_unary_inline(servicer.GetReleaseStatus),
-      ('hapi.services.tiller.ReleaseService', 'GetVersion'): face_utilities.unary_unary_inline(servicer.GetVersion),
-      ('hapi.services.tiller.ReleaseService', 'InstallRelease'): face_utilities.unary_unary_inline(servicer.InstallRelease),
-      ('hapi.services.tiller.ReleaseService', 'ListReleases'): face_utilities.unary_stream_inline(servicer.ListReleases),
-      ('hapi.services.tiller.ReleaseService', 'RollbackRelease'): face_utilities.unary_unary_inline(servicer.RollbackRelease),
-      ('hapi.services.tiller.ReleaseService', 'RunReleaseTest'): face_utilities.unary_stream_inline(servicer.RunReleaseTest),
-      ('hapi.services.tiller.ReleaseService', 'UninstallRelease'): face_utilities.unary_unary_inline(servicer.UninstallRelease),
-      ('hapi.services.tiller.ReleaseService', 'UpdateRelease'): face_utilities.unary_unary_inline(servicer.UpdateRelease),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_ReleaseService_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('hapi.services.tiller.ReleaseService', 'GetHistory'): GetHistoryRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseContent'): GetReleaseContentRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseStatus'): GetReleaseStatusRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'GetVersion'): GetVersionRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'InstallRelease'): InstallReleaseRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'ListReleases'): ListReleasesRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'RollbackRelease'): RollbackReleaseRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'RunReleaseTest'): TestReleaseRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'UninstallRelease'): UninstallReleaseRequest.SerializeToString,
-      ('hapi.services.tiller.ReleaseService', 'UpdateRelease'): UpdateReleaseRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('hapi.services.tiller.ReleaseService', 'GetHistory'): GetHistoryResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseContent'): GetReleaseContentResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'GetReleaseStatus'): GetReleaseStatusResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'GetVersion'): GetVersionResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'InstallRelease'): InstallReleaseResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'ListReleases'): ListReleasesResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'RollbackRelease'): RollbackReleaseResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'RunReleaseTest'): TestReleaseResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'UninstallRelease'): UninstallReleaseResponse.FromString,
-      ('hapi.services.tiller.ReleaseService', 'UpdateRelease'): UpdateReleaseResponse.FromString,
-    }
-    cardinalities = {
-      'GetHistory': cardinality.Cardinality.UNARY_UNARY,
-      'GetReleaseContent': cardinality.Cardinality.UNARY_UNARY,
-      'GetReleaseStatus': cardinality.Cardinality.UNARY_UNARY,
-      'GetVersion': cardinality.Cardinality.UNARY_UNARY,
-      'InstallRelease': cardinality.Cardinality.UNARY_UNARY,
-      'ListReleases': cardinality.Cardinality.UNARY_STREAM,
-      'RollbackRelease': cardinality.Cardinality.UNARY_UNARY,
-      'RunReleaseTest': cardinality.Cardinality.UNARY_STREAM,
-      'UninstallRelease': cardinality.Cardinality.UNARY_UNARY,
-      'UpdateRelease': cardinality.Cardinality.UNARY_UNARY,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'hapi.services.tiller.ReleaseService', cardinalities, options=stub_options)
-except ImportError:
-  pass
 # @@protoc_insertion_point(module_scope)
