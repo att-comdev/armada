@@ -138,7 +138,11 @@ class TestReleasesManifestControllerNegativeTest(base.BaseControllerTest):
             {'message': (
                 'An error occurred while generating the manifest: Could not '
                 'find dependency chart helm-toolkit in armada/Chart/v1.'),
-             'error': True},
+             'error': True,
+             'kind': 'ValidationMessage',
+             'level': 'Error',
+             'name': 'ARM001',
+             'documents': []},
             resp_body['details']['messageList'])
         self.assertEqual(('Failed to validate documents or generate Armada '
                           'Manifest from documents.'),
@@ -168,7 +172,11 @@ class TestReleasesManifestControllerNegativeTest(base.BaseControllerTest):
         self.assertEqual(
             [{'message': (
                 'An error occurred while generating the manifest: foo.'),
-              'error': True}],
+              'error': True,
+              'kind': 'ValidationMessage',
+              'level': 'Error',
+              'name': 'ARM001',
+              'documents': []}],
             resp_body['details']['messageList'])
         self.assertEqual(('Failed to validate documents or generate Armada '
                           'Manifest from documents.'),

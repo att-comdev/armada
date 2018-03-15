@@ -14,10 +14,13 @@
 
 import click
 import yaml
+from oslo_config import cfg
 
 from armada.cli import CliAction
 from armada.utils.validate import validate_armada_documents
 from armada.handlers.document import ReferenceResolver
+
+CONF = cfg.CONF
 
 
 @click.group()
@@ -44,8 +47,12 @@ SHORT_DESC = "Command validates Armada Manifest."
                   short_help=SHORT_DESC)
 @click.argument('locations',
                 nargs=-1)
+@click.option('--debug',
+              help="Enable debug logging.",
+              is_flag=True)
 @click.pass_context
-def validate_manifest(ctx, locations):
+def validate_manifest(ctx, locations, debug):
+    CONF.debug = debug
     ValidateManifest(ctx, locations).safe_invoke()
 
 
@@ -65,7 +72,9 @@ class ValidateManifest(CliAction):
             try:
                 valid, details = validate_armada_documents(documents)
 
-                if valid:
+                if not documents:
+                    self.logger.warn('No documents to validate.')
+                elif valid:
                     self.logger.info('Successfully validated: %s',
                                      self.locations)
                 else:

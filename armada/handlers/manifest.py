@@ -71,7 +71,7 @@ class Manifest(object):
 
     def _find_documents(self, target_manifest=None):
         """Returns the chart documents, chart group documents,
-        and armada manifest
+        and Armada manifest
 
         If multiple documents with schema "armada/Manifest/v1" are provided,
         specify ``target_manifest`` to select the target one.
@@ -203,10 +203,10 @@ class Manifest(object):
             return chart_group
 
     def build_armada_manifest(self):
-        """Builds the armmada manifest while pulling out data
+        """Builds the Armada manifest while pulling out data
         from the chart_group.
 
-        :returns: The armada manifest with the data of the chart groups.
+        :returns: The Armada manifest with the data of the chart groups.
         :rtype: dict
         :raises ManifestException: If a chart group's data listed
             under ``chart_group['data']`` could not be found.
@@ -234,9 +234,9 @@ class Manifest(object):
     def get_manifest(self):
         """Builds all of the documents including the dependencies of the
         chart documents, the charts in the chart_groups, and the
-        armada manifest
+        Armada manifest
 
-        :returns: The armada manifest.
+        :returns: The Armada manifest.
         :rtype: dict
         """
         self.build_charts_deps()
