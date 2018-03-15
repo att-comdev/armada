@@ -23,6 +23,7 @@ from oslo_log import log as logging
 from armada.const import KEYWORD_GROUPS, KEYWORD_CHARTS, KEYWORD_RELEASE
 from armada.handlers.manifest import Manifest
 from armada.exceptions.manifest_exceptions import ManifestException
+from armada.utils.validation_message import ValidationMessage
 
 LOG = logging.getLogger(__name__)
 # Creates a mapping between ``metadata.name``: ``data`` where the
@@ -65,14 +66,18 @@ def _validate_armada_manifest(manifest):
         the second value is the validation details with a minimum
         keyset of (message(str), error(bool))
     :rtype: tuple.
-
     """
     details = []
 
     try:
         armada_object = manifest.get_manifest().get('armada')
     except ManifestException as me:
-        details.append(dict(message=str(me), error=True))
+        vmsg = ValidationMessage(message=str(me),
+                                 error=True,
+                                 name='ARM001',
+                                 level='Error')
+        LOG.error('ValidationMessage: %s', vmsg.get_output_json())
+        details.append(vmsg.get_output())
         return False, details
 
     groups = armada_object.get(KEYWORD_GROUPS)
@@ -80,7 +85,12 @@ def _validate_armada_manifest(manifest):
     if not isinstance(groups, list):
         message = '{} entry is of wrong type: {} (expected: {})'.format(
             KEYWORD_GROUPS, type(groups), 'list')
-        details.append(dict(message=message, error=True))
+        vmsg = ValidationMessage(message=message,
+                                 error=True,
+                                 name='ARM101',
+                                 level='Error')
+        LOG.info('ValidationMessage: %s', vmsg.get_output_json())
+        details.append(vmsg.get_output())
 
     for group in groups:
         for chart in group.get(KEYWORD_CHARTS):
@@ -88,7 +98,12 @@ def _validate_armada_manifest(manifest):
             if KEYWORD_RELEASE not in chart_obj:
                 message = 'Could not find {} keyword in {}'.format(
                     KEYWORD_RELEASE, chart_obj.get('release'))
-                details.append(dict(message=message, error=True))
+                vmsg = ValidationMessage(message=message,
+                                         error=True,
+                                         name='ARM102',
+                                         level='Error')
+                LOG.info('ValidationMessage: %s', vmsg.get_output_json())
+                details.append(vmsg.get_output())
 
     if len([x for x in details if x.get('error', False)]) > 0:
         return False, details
@@ -108,8 +123,8 @@ def validate_armada_manifests(documents):
     for document in documents:
         if document.get('schema', '') == 'armada/Manifest/v1':
             target = document.get('metadata').get('name')
-            manifest = Manifest(documents,
-                                target_manifest=target)
+            # TODO(MarshM) explore: why does this pass 'documents'?
+            manifest = Manifest(documents, target_manifest=target)
             is_valid, details = _validate_armada_manifest(manifest)
             all_valid = all_valid and is_valid
             messages.extend(details)
@@ -138,28 +153,44 @@ def validate_armada_document(document):
     schema = document.get('schema', '<missing>')
     document_name = document.get('metadata', {}).get('name', None)
     details = []
+    LOG.debug('Validating document [%s] %s', schema, document_name)
 
     if schema in SCHEMAS:
         try:
             validator = jsonschema.Draft4Validator(SCHEMAS[schema])
             for error in validator.iter_errors(document.get('data')):
-                msg = "Invalid document [%s] %s: %s." % \
+                error_message = "Invalid document [%s] %s: %s." % \
                     (schema, document_name, error.message)
-                details.append(dict(message=msg,
-                                    error=True,
-                                    doc_schema=schema,
-                                    doc_name=document_name))
+                vmsg = ValidationMessage(message=error_message,
+                                         error=True,
+                                         name='ARM100',
+                                         level='Error',
+                                         schema=schema,
+                                         doc_name=document_name)
+                LOG.info('ValidationMessage: %s', vmsg.get_output_json())
+                details.append(vmsg.get_output())
         except jsonschema.SchemaError as e:
             error_message = ('The built-in Armada JSON schema %s is invalid. '
                              'Details: %s.' % (e.schema, e.message))
-            LOG.error(error_message)
-            details.append(dict(message=error_message, error=True))
+            vmsg = ValidationMessage(message=error_message,
+                                     error=True,
+                                     name='ARM000',
+                                     level='Error',
+                                     diagnostic='Armada is misconfigured.')
+            LOG.error('ValidationMessage: %s', vmsg.get_output_json())
+            details.append(vmsg.get_output())
     else:
-        error_message = (
-            'Document [%s] %s is not supported.' %
-            (schema, document_name))
-        LOG.info(error_message)
-        details.append(dict(message=error_message, error=False))
+        vmsg = ValidationMessage(message='Unsupported document type.',
+                                 error=False,
+                                 name='ARM002',
+                                 level='Warning',
+                                 schema=schema,
+                                 doc_name=document_name,
+                                 diagnostic='Please ensure document is one of '
+                                            'the following schema types: %s' %
+                                            list(SCHEMAS.keys()))
+        LOG.info('ValidationMessage: %s', vmsg.get_output_json())
+        # Validation API doesn't care about this type of message, don't send
 
     if len([x for x in details if x.get('error', False)]) > 0:
         return False, details
@@ -202,6 +233,7 @@ def validate_manifest_url(value):
         return False
 
 
+# TODO(MarshM) unused except in unit tests, is this useful?
 def validate_manifest_filepath(value):
     return os.path.isfile(value)
 

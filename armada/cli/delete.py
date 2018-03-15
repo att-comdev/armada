@@ -15,12 +15,15 @@
 import yaml
 
 import click
+from oslo_config import cfg
 
 from armada.cli import CliAction
 from armada import const
 from armada.handlers.manifest import Manifest
 from armada.handlers.tiller import Tiller
 from armada.utils.release import release_prefix
+
+CONF = cfg.CONF
 
 
 @click.group()
@@ -71,8 +74,13 @@ SHORT_DESC = "Command deletes releases."
               help="Tiller host port.",
               type=int,
               default=44134)
+@click.option('--debug',
+              help="Enable debug logging.",
+              is_flag=True)
 @click.pass_context
-def delete_charts(ctx, manifest, releases, no_purge, tiller_host, tiller_port):
+def delete_charts(ctx, manifest, releases, no_purge, tiller_host, tiller_port,
+                  debug):
+    CONF.debug = debug
     DeleteChartManifest(ctx, manifest, releases, no_purge, tiller_host,
                         tiller_port).safe_invoke()
 

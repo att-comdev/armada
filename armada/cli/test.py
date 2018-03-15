@@ -77,9 +77,13 @@ SHORT_DESC = "Command tests releases."
               help=("The target manifest to run. Required for specifying "
                     "which manifest to run when multiple are available."),
               default=None)
+@click.option('--debug',
+              help="Enable debug logging.",
+              is_flag=True)
 @click.pass_context
 def test_charts(ctx, file, release, tiller_host, tiller_port, tiller_namespace,
-                target_manifest):
+                target_manifest, debug):
+    CONF.debug = debug
     TestChartManifest(
         ctx, file, release, tiller_host, tiller_port, tiller_namespace,
         target_manifest).safe_invoke()
