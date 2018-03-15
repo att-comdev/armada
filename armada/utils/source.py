@@ -163,7 +163,11 @@ def source_cleanup(git_path):
             LOG.warning('%s is not a valid git repository. Details: %s',
                         git_path, e)
         else:
-            shutil.rmtree(git_path)
+            try:
+                shutil.rmtree(git_path)
+            except OSError as e:
+                LOG.warning('Could not delete the path %s. Details: %s',
+                            git_path, e)
     else:
         LOG.warning('Could not delete the path %s. Is it a git repository?',
                     git_path)

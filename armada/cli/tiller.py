@@ -67,9 +67,13 @@ SHORT_DESC = "Command gets Tiller information."
 @click.option('--status',
               help="Status of Armada services.",
               is_flag=True)
+@click.option('--debug',
+              help="Enable debug logging.",
+              is_flag=True)
 @click.pass_context
 def tiller_service(ctx, tiller_host, tiller_port, tiller_namespace, releases,
-                   status):
+                   status, debug):
+    CONF.debug = debug
     TillerServices(ctx, tiller_host, tiller_port, tiller_namespace, releases,
                    status).safe_invoke()
 

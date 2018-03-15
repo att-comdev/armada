@@ -54,7 +54,6 @@ data:
       type: local
       location: /tmp/dummy/armada
       subpath: chart_2
-      reference: null
     dependencies: []
     timeout: 5
 ---
@@ -117,7 +116,6 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                                     'release': 'test_chart_2',
                                     'source': {
                                         'location': '/tmp/dummy/armada',
-                                        'reference': None,
                                         'subpath': 'chart_2',
                                         'type': 'local'
                                     },

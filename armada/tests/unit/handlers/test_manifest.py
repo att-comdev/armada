@@ -191,7 +191,7 @@ class ManifestTestCase(testtools.TestCase):
         self.assertIsNotNone(built_armada_manifest)
         self.assertIsInstance(built_armada_manifest, dict)
 
-        # the first chart group in the armada manifest
+        # the first chart group in the Armada manifest
         keystone_infra_services_chart_group = armada_manifest. \
             find_chart_group_document('keystone-infra-services')
         keystone_infra_services_chart_group_data = \
@@ -200,7 +200,7 @@ class ManifestTestCase(testtools.TestCase):
         self.assertEqual(keystone_infra_services_chart_group_data,
                          built_armada_manifest['data']['chart_groups'][0])
 
-        # the first chart group in the armada manifest
+        # the first chart group in the Armada manifest
         openstack_keystone_chart_group = armada_manifest. \
             find_chart_group_document('openstack-keystone')
         openstack_keystone_chart_group_data = \

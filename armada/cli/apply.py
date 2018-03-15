@@ -130,9 +130,7 @@ def apply_create(ctx, locations, api, disable_update_post, disable_update_pre,
                  dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
                  tiller_namespace, timeout, values, wait, target_manifest,
                  debug):
-    if debug:
-        CONF.debug = debug
-
+    CONF.debug = debug
     ApplyManifest(ctx, locations, api, disable_update_post, disable_update_pre,
                   dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
                   tiller_namespace, timeout, values, wait,
