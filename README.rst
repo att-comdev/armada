@@ -7,6 +7,8 @@ Armada is a tool for managing multiple Helm charts with dependencies by
 centralizing all configurations in a single Armada YAML and providing
 life-cycle hooks for all Helm releases.
 
+Find more documentation for Armada on `Read The Docs <https://armada-helm.readthedocs.io/>`_.
+
 Overview
 --------
 
