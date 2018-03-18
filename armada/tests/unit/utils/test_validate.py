@@ -75,6 +75,39 @@ class BaseValidateTest(base.ArmadaTestCase):
         return "Invalid document [{}] {}: {}.".format(document, name, message)
 
 
+class ValidateOwnExamplesTestCase(BaseValidateTest):
+    """Validates that each of the relevant example documents under
+    ``armada/examples`` passes internal Armada schema validation.
+
+    """
+
+    def test_own_document_examples(self):
+        examples_path = os.path.join(os.getcwd(), 'examples')
+        example_files = [
+            os.path.join(examples_path, f) for f in os.listdir(examples_path)
+            if os.path.isfile(os.path.join(examples_path, f))
+        ]
+        validated_manifests = []
+
+        for example_file in example_files:
+            with open(example_file) as f:
+                documents = yaml.safe_load_all(f.read())
+
+            # If the example file doesn't have a document with
+            # armada/Manifest/v1 then skip validating it as the example could
+            # merely be an override.
+            has_manifest = any(
+                x['schema'] == 'armada/Manifest/v1' for x in documents)
+            if not has_manifest:
+                continue
+
+            validated_manifests.append(example_file)
+            valid, _ = validate.validate_armada_documents(list(documents))
+            self.assertTrue(valid)
+
+        self.assertTrue(validated_manifests)
+
+
 class ValidateTestCase(BaseValidateTest):
 
     def test_validate_load_schemas(self):

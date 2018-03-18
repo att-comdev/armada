@@ -73,8 +73,10 @@ data:
           type: string
         subpath:
           type: string
+        # Not needed by tar sources.
         reference:
-          type: string
+          type:
+            - string
         proxy_server:
           type: string
         auth_method:

@@ -33,7 +33,6 @@ data:
     type: tar
     location: http://localhost:8879/charts/mariadb-0.1.0.tgz
     subpath: mariadb
-    reference: null
   dependencies:
     - helm-toolkit
 ---
