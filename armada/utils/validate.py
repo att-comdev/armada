@@ -155,6 +155,7 @@ def validate_armada_document(document):
     details = []
     LOG.debug('Validating document [%s] %s', schema, document_name)
 
+    # TODO(felipemonteiro): Improve error message details.
     if schema in SCHEMAS:
         try:
             validator = jsonschema.Draft4Validator(SCHEMAS[schema])
