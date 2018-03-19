@@ -32,12 +32,12 @@ Example
     ---
     schema: armada/Manifest/v1
     metadata:
-        schema: metadata/Document/v1
-        name: simple-armada
+      schema: metadata/Document/v1
+      name: simple-armada
     data:
-        release_prefix: armada
-        chart_groups:
-            - chart_group
+      release_prefix: armada
+      chart_groups:
+        - chart_group
 
 
 armada/ChartGroup/v1
@@ -63,14 +63,14 @@ Example
     ---
     schema: armada/ChartGroup/v1
     metadata:
-        schema: metadata/Document/v1
-        name: blog-group
+      schema: metadata/Document/v1
+      name: blog-group
     data:
-        description: Deploys Simple Service
-        sequenced: False
-        chart_group:
-            - chart
-            - chart
+      description: Deploys Simple Service
+      sequenced: False
+      chart_group:
+        - chart
+        - chart
 
 armada/Chart/v1
 ---------------
@@ -93,7 +93,7 @@ Chart
 +-----------------+----------+---------------------------------------------------------------------------------------+
 | namespace       | string   | namespace of your chart                                                               |
 +-----------------+----------+---------------------------------------------------------------------------------------+
-| wait            | object   | contains wait information such as (timeout, lables)                                   |
+| wait            | object   | contains wait information such as (timeout, labels)                                   |
 +-----------------+----------+---------------------------------------------------------------------------------------+
 | test            | bool     | run pre-defined helm tests helm in a chart                                            |
 +-----------------+----------+---------------------------------------------------------------------------------------+
@@ -277,20 +277,20 @@ Example
       upgrade:
         no_hooks: false
         pre:
-            update:
-                - name: test-daemonset
-                  type: daemonset
-                  labels:
-                    foo: bar
-                    component: bar
-                    rak1: enabled
-            delete:
-                - name: test-job
-                  type: job
-                  labels:
-                    foo: bar
-                    component: bar
-                    rak1: enabled
+          update:
+            - name: test-daemonset
+              type: daemonset
+              labels:
+                foo: bar
+                component: bar
+                rak1: enabled
+          delete:
+            - name: test-job
+              type: job
+              labels:
+                foo: bar
+                component: bar
+                rak1: enabled
       values: {}
       source:
         type: git
