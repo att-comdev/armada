@@ -18,7 +18,7 @@ from armada.exceptions import base_exception
 class ChartBuilderException(base_exception.ArmadaBaseException):
     '''Base class for the Chartbuilder handler exception and error handling.'''
 
-    message = 'An unknown Armada handler error occured.'
+    message = 'An unknown Armada handler error occurred.'
 
 
 class DependencyException(ChartBuilderException):
@@ -45,12 +45,27 @@ class HelmChartBuildException(ChartBuilderException):
     *Coming Soon*
     '''
 
-    def __init__(self, chart_name):
+    def __init__(self, chart_name, details):
         self._chart_name = chart_name
-        self._message = 'Failed to build Helm chart for ' + \
-                        self._chart_name + '.'
+        self._message = ('Failed to build Helm chart for %(chart_name)s. '
+                         'Details: %(details)s'.format(
+                             **{'chart_name': chart_name,
+                                'details': details}))
 
         super(HelmChartBuildException, self).__init__(self._message)
+
+
+class FilesLoadException(ChartBuilderException):
+    '''
+    Exception that occurs while trying to read a file in the chart directory.
+
+    **Troubleshoot:**
+
+    * Ensure that the file can be encoded to utf-8 or else it cannot be parsed.
+    '''
+
+    message = ('A %(clazz)s exception occurred while trying to read '
+               'file: %(file)s. Details:\n%(details)s')
 
 
 class IgnoredFilesLoadException(ChartBuilderException):

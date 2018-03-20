@@ -152,8 +152,33 @@ class ChartBuilder(object):
             abspath = os.path.abspath(os.path.join(root, file))
             relpath = os.path.join(rel_folder_path, file)
 
-            with open(abspath, 'r') as f:
-                file_contents = f.read().encode('utf-8')
+            encodings = ('utf-8', 'latin1')
+            unicode_errors = []
+
+            for encoding in encodings:
+                try:
+                    with open(abspath, 'r') as f:
+                        file_contents = f.read().encode(encoding)
+                except OSError as e:
+                    LOG.debug('Failed to open and read file %s in the helm '
+                              'chart directory.', abspath)
+                    raise chartbuilder_exceptions.FilesLoadException(
+                        file=abspath, details=e)
+                except UnicodeError as e:
+                    LOG.debug('Attempting to read %s using encoding %s.',
+                              abspath, encoding)
+                    msg = "(encoding=%s) %s" % (encoding, str(e))
+                    unicode_errors.append(msg)
+                else:
+                    break
+
+            if len(unicode_errors) == 2:
+                LOG.debug('Failed to read file %s in the helm chart directory.'
+                          ' Ensure that it is encoded using utf-8.', abspath)
+                raise chartbuilder_exceptions.FilesLoadException(
+                    file=abspath, clazz=unicode_errors[0].__class__.__name__,
+                    details='\n'.join(e for e in unicode_errors))
+
             non_template_files.append(
                 Any(type_url=relpath,
                     value=file_contents))
@@ -242,9 +267,10 @@ class ChartBuilder(object):
                 dependencies=dependencies,
                 values=self.get_values(),
                 files=self.get_files())
-        except Exception:
+        except Exception as e:
             chart_name = self.chart.chart_name
-            raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
+            raise chartbuilder_exceptions.HelmChartBuildException(
+                chart_name, details=e)
 
         self._helm_chart = helm_chart
         return helm_chart
