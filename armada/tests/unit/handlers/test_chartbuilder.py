@@ -177,6 +177,18 @@ class ChartBuilderTestCase(testtools.TestCase):
                               key=lambda x: x.type_url)
         self.assertEqual(expected_files, repr(actual_files).strip())
 
+    def test_get_files_with_unicode_characters(self):
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        for filename in ['foo', 'bar', 'Chart.yaml', 'values.yaml']:
+            self._write_temporary_file_contents(
+                chart_dir.path, filename, "DIRC^@^@^@^B^@^@^@×Z®<86>F.1")
+
+        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
+        chartbuilder = ChartBuilder(mock_chart)
+
+        chartbuilder.get_files()
+
     def test_get_basic_helm_chart(self):
         # Before ChartBuilder is executed the `source_dir` points to a
         # directory that was either clone or unpacked from a tarball... pretend
