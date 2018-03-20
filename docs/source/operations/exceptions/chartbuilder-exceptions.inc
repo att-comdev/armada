@@ -25,6 +25,11 @@
          :members:
          :show-inheritance:
          :undoc-members:
+  * - FilesLoadException
+    - .. autoexception:: armada.exceptions.chartbuilder_exceptions.FilesLoadException
+         :members:
+         :show-inheritance:
+         :undoc-members:
   * - HelmChartBuildException
     - .. autoexception:: armada.exceptions.chartbuilder_exceptions.HelmChartBuildException
          :members:
