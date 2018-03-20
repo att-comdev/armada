@@ -165,7 +165,8 @@ class ChartBuilder(object):
             if not any(root.startswith(os.path.join(self.source_directory, x))
                        for x in ['templates', 'charts']):
                 for file in files:
-                    if (file not in files_to_ignore and
+                    if (not file.startswith('.') and
+                            file not in files_to_ignore and
                             file not in non_template_files):
                         _append_file_to_result(root, rel_folder_path, file)
             elif relfolder == 'charts' and '.prov' in files:
