@@ -9,7 +9,7 @@ Commands
 
     Usage: armada apply [OPTIONS] FILENAME
 
-      This command install and updates charts defined in armada manifest
+      This command installs and updates charts defined in armada manifest
 
       The apply argument must be relative path to Armada Manifest. Executing
       apply command once will install all charts defined in manifest. Re-
