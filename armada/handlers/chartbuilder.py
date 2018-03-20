@@ -152,8 +152,20 @@ class ChartBuilder(object):
             abspath = os.path.abspath(os.path.join(root, file))
             relpath = os.path.join(rel_folder_path, file)
 
-            with open(abspath, 'r') as f:
-                file_contents = f.read().encode('utf-8')
+            try:
+                with open(abspath, 'r') as f:
+                    file_contents = f.read().encode('utf-8')
+            except UnicodeError as e:
+                LOG.debug('Failed to read file %s in the helm chart directory.'
+                          'Ensure that it is a non-binary file.', abspath)
+                raise chartbuilder_exceptions.FilesLoadException(
+                    file=abspath, clazz=e.__class__.__name__, details=e)
+            except OSError as e:
+                LOG.debug('Failed to open and read file %s in the helm chart '
+                          'directory.', abspath)
+                raise chartbuilder_exceptions.FilesLoadException(
+                    file=abspath, details=e)
+
             non_template_files.append(
                 Any(type_url=relpath,
                     value=file_contents))
@@ -242,9 +254,10 @@ class ChartBuilder(object):
                 dependencies=dependencies,
                 values=self.get_values(),
                 files=self.get_files())
-        except Exception:
+        except Exception as e:
             chart_name = self.chart.chart_name
-            raise chartbuilder_exceptions.HelmChartBuildException(chart_name)
+            raise chartbuilder_exceptions.HelmChartBuildException(
+                chart_name, details=e)
 
         self._helm_chart = helm_chart
         return helm_chart
