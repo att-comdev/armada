@@ -28,7 +28,7 @@ from armada.handlers.chartbuilder import ChartBuilder
 from armada.exceptions import chartbuilder_exceptions
 
 
-class ChartBuilderTestCase(testtools.TestCase):
+class BaseChartBuilderTestCase(testtools.TestCase):
     chart_yaml = """
         apiVersion: v1
         description: A sample Helm chart for Kubernetes
@@ -121,6 +121,9 @@ class ChartBuilderTestCase(testtools.TestCase):
             self.addCleanup(shutil.rmtree, subdir)
         return subdir
 
+
+class ChartBuilderTestCase(BaseChartBuilderTestCase):
+
     def test_source_clone(self):
         # Create a temporary directory with Chart.yaml that contains data
         # from ``self.chart_yaml``.
@@ -176,6 +179,17 @@ class ChartBuilderTestCase(testtools.TestCase):
         actual_files = sorted(chartbuilder.get_files(),
                               key=lambda x: x.type_url)
         self.assertEqual(expected_files, repr(actual_files).strip())
+
+    def test_get_files_with_unicode_characters(self):
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        for filename in ['foo', 'bar', 'Chart.yaml', 'values.yaml']:
+            self._write_temporary_file_contents(
+                chart_dir.path, filename, "DIRC^@^@^@^B^@^@^@×Z®<86>F.1")
+
+        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
+        chartbuilder = ChartBuilder(mock_chart)
+        chartbuilder.get_files()
 
     def test_get_basic_helm_chart(self):
         # Before ChartBuilder is executed the `source_dir` points to a
@@ -427,3 +441,53 @@ class ChartBuilderTestCase(testtools.TestCase):
             dependency-chart.*Another sample Helm chart for Kubernetes.*
         """).replace('\n', '').strip()
         self.assertRegex(repr(chartbuilder.dump()), re)
+
+
+class ChartBuilderNegativeTestCase(BaseChartBuilderTestCase):
+
+    def setUp(self):
+        super(ChartBuilderNegativeTestCase, self).setUp()
+        # Create an exception for testing since instantiating one manually
+        # is tedious.
+        try:
+            str(b'\xff', 'utf8')
+        except UnicodeDecodeError as e:
+            self.exc_to_raise = e
+        else:
+            self.fail('Failed to create an exception needed for testing.')
+
+    def test_get_files_always_fails_to_read_binary_file_raises_exc(self):
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        for filename in ['foo', 'bar', 'Chart.yaml', 'values.yaml']:
+            self._write_temporary_file_contents(
+                chart_dir.path, filename, "DIRC^@^@^@^B^@^@^@×Z®<86>F.1")
+
+        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
+        chartbuilder = ChartBuilder(mock_chart)
+
+        # Confirm it failed for both encodings.
+        error_re = (r'.*A str exception occurred while trying to read file:'
+                    '.*Details:\n.*\(encoding=utf-8\).*\n\(encoding=latin1\)')
+        with mock.patch("builtins.open", mock.mock_open(read_data="")) \
+                as mock_file:
+            mock_file.return_value.read.side_effect = self.exc_to_raise
+            self.assertRaisesRegexp(chartbuilder_exceptions.FilesLoadException,
+                                    error_re, chartbuilder.get_files)
+
+    def test_get_files_fails_once_to_read_binary_file_passes(self):
+        chart_dir = self.useFixture(fixtures.TempDir())
+        self.addCleanup(shutil.rmtree, chart_dir.path)
+        files = ['foo', 'bar']
+        for filename in files:
+            self._write_temporary_file_contents(
+                chart_dir.path, filename, "DIRC^@^@^@^B^@^@^@×Z®<86>F.1")
+
+        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
+        chartbuilder = ChartBuilder(mock_chart)
+
+        side_effects = [self.exc_to_raise, "", ""]
+        with mock.patch("builtins.open", mock.mock_open(read_data="")) \
+                as mock_file:
+            mock_file.return_value.read.side_effect = side_effects
+            chartbuilder.get_files()
