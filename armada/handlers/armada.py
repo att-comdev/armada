@@ -90,24 +90,19 @@ class Armada(object):
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
         self.dry_run = dry_run
-        self.overrides = set_ovr
         self.tiller_should_wait = tiller_should_wait
         self.tiller_timeout = tiller_timeout
         self.tiller = Tiller(
             tiller_host=tiller_host, tiller_port=tiller_port,
             tiller_namespace=tiller_namespace)
-        self.values = values
-        self.documents = documents
-        self.target_manifest = target_manifest
+        self.documents = Override(
+            documents, overrides=set_ovr,
+            values=values).update_manifests()
         self.k8s_wait_attempts = k8s_wait_attempts
         self.k8s_wait_attempt_sleep = k8s_wait_attempt_sleep
-        self.manifest = self.get_armada_manifest()
-
-    def get_armada_manifest(self):
-        return Manifest(
+        self.manifest = Manifest(
             self.documents,
-            target_manifest=self.target_manifest
-        ).get_manifest()
+            target_manifest=target_manifest).get_manifest()
 
     def find_release_chart(self, known_releases, name):
         '''
@@ -138,12 +133,6 @@ class Armada(object):
             if not valid:
                 raise validate_exceptions.InvalidManifestException(
                     error_messages=details)
-
-        # Override manifest values if --set flag is used
-        if self.overrides or self.values:
-            self.documents = Override(
-                self.documents, overrides=self.overrides,
-                values=self.values).update_manifests()
 
         result, msg_list = validate.validate_armada_manifests(self.documents)
         if not result:
