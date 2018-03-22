@@ -144,6 +144,10 @@ class Armada(object):
                 self.documents, overrides=self.overrides,
                 values=self.values).update_manifests()
 
+        # TODO (powerds0111) setup manifest again with updated documents
+        # we need to refactor similar values
+        self.manifest = self.get_armada_manifest()
+
         result, msg_list = validate.validate_armada_manifests(self.documents)
         if not result:
             raise validate_exceptions.InvalidArmadaObjectException(
