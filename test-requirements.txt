@@ -6,12 +6,12 @@ sphinx>=1.6.2
 sphinx_rtd_theme>=0.2.4
 
 # Testing
-flake8>=3.3.0
-testtools==2.3.0
-codecov
-mock
 bandit
+codecov
+flake8>=3.3.0
+mock
 pytest==3.2.1
-pytest-mock
 pytest-cov
+pytest-mock
 responses>=0.8.1
+testtools==2.3.0
