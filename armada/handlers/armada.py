@@ -17,7 +17,6 @@ import yaml
 
 from oslo_config import cfg
 from oslo_log import log as logging
-from supermutes.dot import dotify
 
 from armada.handlers.chartbuilder import ChartBuilder
 from armada.handlers.manifest import Manifest
@@ -264,66 +263,77 @@ class Armada(object):
 
         for entry in self.manifest[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
 
-            chart_wait = self.wait
+            should_wait = self.wait
+            chart_timeout = self.timeout
             desc = entry.get('description', 'A Chart Group')
-            chart_group = entry.get(const.KEYWORD_CHARTS, [])
+            chart_groups = entry.get(const.KEYWORD_CHARTS, [])
             test_charts = entry.get('test_charts', False)
 
             if entry.get('sequenced', False) or test_charts:
-                chart_wait = True
+                should_wait = True
 
             LOG.info('Deploying: %s', desc)
 
-            for gchart in chart_group:
-                chart = dotify(gchart['chart'])
-                values = gchart.get('chart').get('values', {})
-                wait_values = gchart.get('chart').get('wait', {})
-                test_chart = gchart.get('chart').get('test', False)
+            for chartgroup in chart_groups:
+                chart = chartgroup.get('chart', {})
+                values = chart.get('values', {})
+                test_chart = chart.get('test', False)
+                namespace = chart.get('namespace', None)
+                release = chart.get('release', None)
                 pre_actions = {}
                 post_actions = {}
 
-                if chart.release is None:
+                if release is None:
                     continue
 
                 if test_chart is True:
-                    chart_wait = True
+                    should_wait = True
 
-                # retrieve appropriate timeout value if 'wait' is specified
-                chart_timeout = self.timeout
-                if chart_wait:
+                # retrieve appropriate timeout value
+                # TODO(MarshM): chart's `data.timeout` should be deprecated
+                #               to favor `data.wait.timeout`
+                # TODO(MarshM) also: timeout logic seems to prefer chart values
+                #                    over api/cli, probably should swap?
+                #                    (caution: it always default to 3600,
+                #                    take care to differentiate user input)
+                if should_wait:
                     if chart_timeout == DEFAULT_TIMEOUT:
-                        chart_timeout = getattr(
-                            chart, 'timeout', chart_timeout)
+                        chart_timeout = chart.get('timeout', chart_timeout)
+                wait_values = chart.get('wait', {})
+                wait_values_timeout = wait_values.get('timeout', chart_timeout)
+                wait_values_labels = wait_values.get('labels', '')
 
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
 
                 # determine install or upgrade by examining known releases
-                LOG.debug("RELEASE: %s", chart.release)
+                LOG.debug("RELEASE: %s", release)
                 deployed_releases = [x[0] for x in known_releases]
-                prefix_chart = release_prefix(prefix, chart.release)
+                prefix_chart = release_prefix(prefix, release)
 
                 if prefix_chart in deployed_releases:
 
                     # indicate to the end user what path we are taking
-                    LOG.info("Upgrading release %s", chart.release)
+                    LOG.info("Upgrading release %s", release)
                     # extract the installed chart and installed values from the
                     # latest release so we can compare to the intended state
                     LOG.info("Checking Pre/Post Actions")
                     apply_chart, apply_values = self.find_release_chart(
                         known_releases, prefix_chart)
 
+                    upgrade = chart.get('upgrade', {})
+                    disable_hooks = upgrade.get('no_hooks', False)
+
                     LOG.info("Checking Pre/Post Actions")
-                    upgrade = gchart.get('chart', {}).get('upgrade', False)
-
                     if upgrade:
-                        if not self.disable_update_pre and upgrade.get(
-                                'pre', False):
-                            pre_actions = getattr(chart.upgrade, 'pre', {})
+                        upgrade_pre = upgrade.get('pre', {})
+                        upgrade_post = upgrade.get('post', {})
 
-                        if not self.disable_update_post and upgrade.get(
-                                'post', False):
-                            post_actions = getattr(chart.upgrade, 'post', {})
+                        if not self.disable_update_pre and upgrade_pre:
+                            pre_actions = upgrade_pre
+
+                        if not self.disable_update_post and upgrade_post:
+                            post_actions = upgrade_post
 
                     # show delta for both the chart templates and the chart
                     # values
@@ -339,58 +349,54 @@ class Armada(object):
                         continue
 
                     # do actual update
-                    LOG.info('wait: %s', chart_wait)
+                    LOG.info('Beginning Upgrade, wait: %s, %s',
+                             should_wait, wait_values_timeout)
                     self.tiller.update_release(
                         protoc_chart,
                         prefix_chart,
-                        chart.namespace,
+                        namespace,
                         pre_actions=pre_actions,
                         post_actions=post_actions,
                         dry_run=self.dry_run,
-                        disable_hooks=chart.upgrade.no_hooks,
+                        disable_hooks=disable_hooks,
                         values=yaml.safe_dump(values),
-                        wait=chart_wait,
-                        timeout=chart_timeout)
+                        wait=should_wait,
+                        timeout=wait_values_timeout)
 
-                    if chart_wait:
-                        # TODO(gardlt): after v0.7.1 deprecate timeout values
-                        if not wait_values.get('timeout', None):
-                            wait_values['timeout'] = chart_timeout
-
+                    if should_wait:
                         self.tiller.k8s.wait_until_ready(
                             release=prefix_chart,
-                            labels=wait_values.get('labels', ''),
-                            namespace=chart.namespace,
+                            labels=wait_values_labels,
+                            namespace=namespace,
                             k8s_wait_attempts=self.k8s_wait_attempts,
                             k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
-                            timeout=wait_values.get('timeout', DEFAULT_TIMEOUT)
+                            timeout=wait_values_timeout
                         )
 
                     msg['upgrade'].append(prefix_chart)
 
                 # process install
                 else:
-                    LOG.info("Installing release %s", chart.release)
+                    LOG.info("Installing release %s", release)
+                    LOG.info('Beginning Install, wait: %s, %s',
+                             should_wait, wait_values_timeout)
                     self.tiller.install_release(
                         protoc_chart,
                         prefix_chart,
-                        chart.namespace,
+                        namespace,
                         dry_run=self.dry_run,
                         values=yaml.safe_dump(values),
-                        wait=chart_wait,
-                        timeout=chart_timeout)
+                        wait=should_wait,
+                        timeout=wait_values_timeout)
 
-                    if chart_wait:
-                        if not wait_values.get('timeout', None):
-                            wait_values['timeout'] = chart_timeout
-
+                    if should_wait:
                         self.tiller.k8s.wait_until_ready(
                             release=prefix_chart,
-                            labels=wait_values.get('labels', ''),
-                            namespace=chart.namespace,
+                            labels=wait_values_labels,
+                            namespace=namespace,
                             k8s_wait_attempts=self.k8s_wait_attempts,
                             k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
-                            timeout=wait_values.get('timeout', DEFAULT_TIMEOUT)
+                            timeout=wait_values_timeout
                         )
 
                     msg['install'].append(prefix_chart)
@@ -410,6 +416,7 @@ class Armada(object):
                         LOG.info("FAILED: %s", prefix_chart)
 
             # TODO(MarshM) does this need release/labels/namespace?
+            # TODO(MarshM) consider the chart_timeout according to above logic
             self.tiller.k8s.wait_until_ready(
                 k8s_wait_attempts=self.k8s_wait_attempts,
                 k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
@@ -442,15 +449,17 @@ class Armada(object):
         Produce a unified diff of the installed chart vs our intention
 
         TODO(alanmeadows): This needs to be rewritten to produce better
-        unified diff output and avoid the use of print
+        unified diff output
         '''
 
         source = str(installed_chart.SerializeToString()).split('\n')
         chart_diff = list(
             difflib.unified_diff(source, str(target_chart).split('\n')))
 
+        chart_release = chart.get('release', None)
+
         if len(chart_diff) > 0:
-            LOG.info("Chart Unified Diff (%s)", chart.release)
+            LOG.info("Chart Unified Diff (%s)", chart_release)
             diff_msg = []
             for line in chart_diff:
                 diff_msg.append(line)
@@ -464,7 +473,7 @@ class Armada(object):
                 yaml.safe_dump(target_values).split('\n')))
 
         if len(values_diff) > 0:
-            LOG.info("Values Unified Diff (%s)", chart.release)
+            LOG.info("Values Unified Diff (%s)", chart_release)
             diff_msg = []
             for line in values_diff:
                 diff_msg.append(line)
