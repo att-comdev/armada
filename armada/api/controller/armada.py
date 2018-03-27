@@ -79,8 +79,8 @@ class Apply(api.BaseResource):
                 enable_chart_cleanup=req.get_param_as_bool(
                     'enable_chart_cleanup'),
                 dry_run=req.get_param_as_bool('dry_run'),
-                wait=req.get_param_as_bool('wait'),
-                timeout=req.get_param_as_int('timeout') or 3600,
+                tiller_should_wait=req.get_param_as_bool('wait'),
+                tiller_timeout=req.get_param_as_int('timeout') or 3600,
                 tiller_host=req.get_param('tiller_host'),
                 tiller_port=req.get_param_as_int(
                     'tiller_port') or CONF.tiller_port,

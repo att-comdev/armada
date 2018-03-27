@@ -212,8 +212,8 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                 chart_1['namespace'],
                 dry_run=armada_obj.dry_run,
                 values=yaml.safe_dump(chart_1['values']),
-                wait=armada_obj.wait,
-                timeout=armada_obj.timeout),
+                wait=armada_obj.tiller_should_wait,
+                timeout=armada_obj.tiller_timeout),
             mock.call(
                 mock_chartbuilder().get_helm_chart(),
                 "{}-{}".format(armada_obj.manifest['armada']['release_prefix'],
@@ -221,7 +221,7 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                 chart_2['namespace'],
                 dry_run=armada_obj.dry_run,
                 values=yaml.safe_dump(chart_2['values']),
-                wait=armada_obj.wait,
-                timeout=armada_obj.timeout)
+                wait=armada_obj.tiller_should_wait,
+                timeout=armada_obj.tiller_timeout)
         ]
         mock_tiller.return_value.install_release.assert_has_calls(method_calls)

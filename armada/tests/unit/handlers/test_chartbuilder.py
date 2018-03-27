@@ -21,7 +21,6 @@ import fixtures
 from hapi.chart.chart_pb2 import Chart
 from hapi.chart.metadata_pb2 import Metadata
 import mock
-from supermutes.dot import dotify
 import testtools
 
 from armada.handlers.chartbuilder import ChartBuilder
@@ -132,8 +131,8 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         self._write_temporary_file_contents(chart_dir.path, 'Chart.yaml',
                                             self.chart_yaml)
 
-        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
-        chartbuilder = ChartBuilder(mock_chart)
+        test_chart = {'source_dir': (chart_dir.path, '')}
+        chartbuilder = ChartBuilder(test_chart)
 
         # Validate response type is :class:`hapi.chart.metadata_pb2.Metadata`
         resp = chartbuilder.get_metadata()
@@ -143,8 +142,8 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         chart_dir = self.useFixture(fixtures.TempDir())
         self.addCleanup(shutil.rmtree, chart_dir.path)
 
-        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
-        chartbuilder = ChartBuilder(mock_chart)
+        test_chart = {'source_dir': (chart_dir.path, '')}
+        chartbuilder = ChartBuilder(test_chart)
 
         self.assertRaises(
             chartbuilder_exceptions.MetadataLoadException,
@@ -170,8 +169,8 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         for filename in ['template%d' % x for x in range(3)]:
             self._write_temporary_file_contents(templates_subdir, filename, "")
 
-        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
-        chartbuilder = ChartBuilder(mock_chart)
+        test_chart = {'source_dir': (chart_dir.path, '')}
+        chartbuilder = ChartBuilder(test_chart)
 
         expected_files = ('[type_url: "%s"\n, type_url: "%s"\n]' % ('./bar',
                                                                     './foo'))
@@ -187,8 +186,8 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
             self._write_temporary_file_contents(
                 chart_dir.path, filename, "DIRC^@^@^@^B^@^@^@×Z®<86>F.1")
 
-        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
-        chartbuilder = ChartBuilder(mock_chart)
+        test_chart = {'source_dir': (chart_dir.path, '')}
+        chartbuilder = ChartBuilder(test_chart)
         chartbuilder.get_files()
 
     def test_get_basic_helm_chart(self):
@@ -202,7 +201,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -235,7 +234,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -264,7 +263,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -322,7 +321,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -357,9 +356,9 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         dep_ch = yaml.safe_load(self.dependency_chart_stream)
         dep_ch['chart']['source_dir'] = (dep_chart_dir.path, '')
 
-        main_chart = dotify(ch)
-        dependency_chart = dotify(dep_ch)
-        main_chart.dependencies = [dependency_chart]
+        main_chart = ch
+        dependency_chart = dep_ch
+        main_chart['dependencies'] = [dependency_chart]
 
         chartbuilder = ChartBuilder(main_chart)
         helm_chart = chartbuilder.get_helm_chart()
@@ -418,7 +417,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         self.assertRegex(
             repr(chartbuilder.dump()),
@@ -432,8 +431,8 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         dep_ch = yaml.safe_load(self.dependency_chart_stream)
         dep_ch['chart']['source_dir'] = (dep_chart_dir.path, '')
 
-        dependency_chart = dotify(dep_ch)
-        test_chart.dependencies = [dependency_chart]
+        dependency_chart = dep_ch
+        test_chart['dependencies'] = [dependency_chart]
         chartbuilder = ChartBuilder(test_chart)
 
         re = inspect.cleandoc("""
@@ -463,8 +462,8 @@ class ChartBuilderNegativeTestCase(BaseChartBuilderTestCase):
             self._write_temporary_file_contents(
                 chart_dir.path, filename, "DIRC^@^@^@^B^@^@^@×Z®<86>F.1")
 
-        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
-        chartbuilder = ChartBuilder(mock_chart)
+        test_chart = {'source_dir': (chart_dir.path, '')}
+        chartbuilder = ChartBuilder(test_chart)
 
         # Confirm it failed for both encodings.
         error_re = (r'.*A str exception occurred while trying to read file:'
@@ -483,8 +482,8 @@ class ChartBuilderNegativeTestCase(BaseChartBuilderTestCase):
             self._write_temporary_file_contents(
                 chart_dir.path, filename, "DIRC^@^@^@^B^@^@^@×Z®<86>F.1")
 
-        mock_chart = mock.Mock(source_dir=[chart_dir.path, ''])
-        chartbuilder = ChartBuilder(mock_chart)
+        test_chart = {'source_dir': (chart_dir.path, '')}
+        chartbuilder = ChartBuilder(test_chart)
 
         side_effects = [self.exc_to_raise, "", ""]
         with mock.patch("builtins.open", mock.mock_open(read_data="")) \
