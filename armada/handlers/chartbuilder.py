@@ -20,7 +20,6 @@ from hapi.chart.chart_pb2 import Chart
 from hapi.chart.config_pb2 import Config
 from hapi.chart.metadata_pb2 import Metadata
 from hapi.chart.template_pb2 import Template
-from supermutes.dot import dotify
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -46,7 +45,7 @@ class ChartBuilder(object):
         '''
         Initialize the ChartBuilder class
 
-        Note that tthis will trigger a source pull as part of
+        Note that this will trigger a source pull as part of
         initialization as its necessary in order to examine
         the source service many of the calls on ChartBuilder
         '''
@@ -70,11 +69,12 @@ class ChartBuilder(object):
         '''
         Return the joined path of the source directory and subpath
         '''
+        source_dir = self.chart.get('source_dir')
         return (
-            os.path.join(self.chart.source_dir[0], self.chart.source_dir[1])
-            if (hasattr(self.chart, 'source_dir') and
-                isinstance(self.chart.source_dir, (list, tuple)) and
-                len(self.chart.source_dir) == 2)
+            os.path.join(*source_dir)
+            if (source_dir and
+                isinstance(source_dir, (list, tuple)) and
+                len(source_dir) == 2)
             else ""
         )
 
@@ -116,16 +116,16 @@ class ChartBuilder(object):
 
         try:
             with open(os.path.join(self.source_directory, 'Chart.yaml')) as f:
-                chart_yaml = dotify(yaml.safe_load(f.read().encode('utf-8')))
+                chart_yaml = yaml.safe_load(f.read().encode('utf-8'))
 
         except Exception:
             raise chartbuilder_exceptions.MetadataLoadException()
 
         # construct Metadata object
         return Metadata(
-            description=chart_yaml.description,
-            name=chart_yaml.name,
-            version=chart_yaml.version)
+            description=chart_yaml.get('description'),
+            name=chart_yaml.get('name'),
+            version=chart_yaml.get('version'))
 
     def get_files(self):
         '''
@@ -221,11 +221,12 @@ class ChartBuilder(object):
 
         # process all files in templates/ as a template to attach to the chart
         # building a Template object
+        chart_name = self.chart.get('chart_name', None)
         templates = []
         if not os.path.exists(
                 os.path.join(self.source_directory, 'templates')):
             LOG.warn("Chart %s has no templates directory. "
-                     "No templates will be deployed", self.chart.chart_name)
+                     "No templates will be deployed", chart_name)
         for root, _, files in os.walk(
                 os.path.join(self.source_directory, 'templates'),
                 topdown=True):
@@ -251,13 +252,17 @@ class ChartBuilder(object):
             return self._helm_chart
 
         dependencies = []
-        for dep in self.chart.dependencies:
+        chart_dependencies = self.chart.get('dependencies', [])
+        chart_name = self.chart.get('chart_name', None)
+        chart_release = self.chart.get('release', None)
+        for dep in chart_dependencies:
+            dep_chart = dep.get('chart', {})
+            dep_chart_name = dep_chart.get('chart_name', None)
             LOG.info("Building dependency chart %s for release %s.",
-                     dep.chart.chart_name, self.chart.release)
+                     dep_chart_name, chart_release)
             try:
-                dependencies.append(ChartBuilder(dep.chart).get_helm_chart())
+                dependencies.append(ChartBuilder(dep_chart).get_helm_chart())
             except Exception:
-                chart_name = self.chart.chart_name
                 raise chartbuilder_exceptions.DependencyException(chart_name)
 
         try:
@@ -268,7 +273,6 @@ class ChartBuilder(object):
                 values=self.get_values(),
                 files=self.get_files())
         except Exception as e:
-            chart_name = self.chart.chart_name
             raise chartbuilder_exceptions.HelmChartBuildException(
                 chart_name, details=e)
 

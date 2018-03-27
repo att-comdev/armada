@@ -21,7 +21,6 @@ import fixtures
 from hapi.chart.chart_pb2 import Chart
 from hapi.chart.metadata_pb2 import Metadata
 import mock
-from supermutes.dot import dotify
 import testtools
 
 from armada.handlers.chartbuilder import ChartBuilder
@@ -202,7 +201,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -235,7 +234,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -264,7 +263,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -322,7 +321,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         helm_chart = chartbuilder.get_helm_chart()
 
@@ -357,9 +356,9 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         dep_ch = yaml.safe_load(self.dependency_chart_stream)
         dep_ch['chart']['source_dir'] = (dep_chart_dir.path, '')
 
-        main_chart = dotify(ch)
-        dependency_chart = dotify(dep_ch)
-        main_chart.dependencies = [dependency_chart]
+        main_chart = ch
+        dependency_chart = dep_ch
+        main_chart['dependencies'] = [dependency_chart]
 
         chartbuilder = ChartBuilder(main_chart)
         helm_chart = chartbuilder.get_helm_chart()
@@ -418,7 +417,7 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         ch = yaml.safe_load(self.chart_stream)['chart']
         ch['source_dir'] = (chart_dir.path, '')
 
-        test_chart = dotify(ch)
+        test_chart = ch
         chartbuilder = ChartBuilder(test_chart)
         self.assertRegex(
             repr(chartbuilder.dump()),
@@ -432,8 +431,8 @@ class ChartBuilderTestCase(BaseChartBuilderTestCase):
         dep_ch = yaml.safe_load(self.dependency_chart_stream)
         dep_ch['chart']['source_dir'] = (dep_chart_dir.path, '')
 
-        dependency_chart = dotify(dep_ch)
-        test_chart.dependencies = [dependency_chart]
+        dependency_chart = dep_ch
+        test_chart['dependencies'] = [dependency_chart]
         chartbuilder = ChartBuilder(test_chart)
 
         re = inspect.cleandoc("""
