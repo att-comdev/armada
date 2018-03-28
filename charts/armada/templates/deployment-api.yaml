@@ -105,9 +105,19 @@ spec:
             runAsUser: {{ .Values.pod.user.armada.uid }}
           ports:
             - containerPort: {{ .Values.conf.armada.armada_api.bind_port }}
+          livenessProbe:
+            httpGet:
+              path: /api/v1.0/health
+              port: {{ tuple "armada" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
           readinessProbe:
-            tcpSocket:
-              port: {{ .Values.conf.armada.armada_api.bind_port }}
+            httpGet:
+              scheme: HTTP
+              path: /api/v1.0/health
+              port: {{ tuple "armada" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
           volumeMounts:
             - name: pod-etc-armada
               mountPath: /etc/armada
