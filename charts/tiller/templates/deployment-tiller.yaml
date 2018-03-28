@@ -59,45 +59,46 @@ spec:
     spec:
       serviceAccountName: {{ $serviceAccountName }}
       containers:
-      - env:
-        - name: TILLER_NAMESPACE
-          value: {{ .Values.Name }}
-        - name: TILLER_HISTORY_MAX
-          value: {{ .Values.deployment.tiller_history | quote }}
-        image: {{ .Values.images.tags.tiller  }}
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /liveness
-            port: 44135
-            scheme: HTTP
-          initialDelaySeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        name: tiller
-        command:
-          - /tiller
-          - -logtostderr
-          - -v
-          - {{ .Values.conf.tiller.verbosity | quote }}
+        - name: tiller
+          image: {{ .Values.images.tags.tiller  }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.tiller | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          env:
+            - name: TILLER_NAMESPACE
+              value: {{ .Values.Name }}
+            - name: TILLER_HISTORY_MAX
+              value: {{ .Values.deployment.tiller_history | quote }}
+          command:
+            - /tiller
+            - -logtostderr
+            - -v
+            - {{ .Values.conf.tiller.verbosity | quote }}
 {{- if .Values.conf.tiller.trace }}
-          - -trace
+            - -trace
 {{- end }}
-        ports:
-        - containerPort: 44134
-          name: tiller
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /readiness
-            port: 44135
-            scheme: HTTP
-          initialDelaySeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        resources: {}
+          ports:
+            - name: tiller
+              containerPort: 44134
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readiness
+              port: 44135
+              scheme: HTTP
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /liveness
+              port: 44135
+              scheme: HTTP
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
 status: {}
 {{- end }}

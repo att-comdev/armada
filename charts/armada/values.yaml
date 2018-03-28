@@ -206,6 +206,13 @@ pod:
       requests:
         memory: "128Mi"
         cpu: "100m"
+    tiller:
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
     jobs:
       ks_user:
         limits:
