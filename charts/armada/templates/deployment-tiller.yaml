@@ -44,37 +44,38 @@ spec:
       initContainers:
 {{ tuple $envAll .Values.pod_dependency list | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
-      - env:
-        - name: TILLER_NAMESPACE
-          value: {{ .Release.Namespace }}
-        - name: TILLER_HISTORY_MAX
-          value: "0"
-        image: {{ .Values.images.tags.tiller  }}
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /liveness
-            port: 44135
-            scheme: HTTP
-          initialDelaySeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        name: tiller
-        ports:
-        - containerPort: 44134
-          name: tiller
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /readiness
-            port: 44135
-            scheme: HTTP
-          initialDelaySeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        resources: {}
+        - name: tiller
+          image: {{ .Values.images.tags.tiller  }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.tiller | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          env:
+            - name: TILLER_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: TILLER_HISTORY_MAX
+              value: "0"
+          ports:
+            - containerPort: 44134
+              name: tiller
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /liveness
+              port: 44135
+              scheme: HTTP
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readiness
+              port: 44135
+              scheme: HTTP
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
 status: {}
 {{- end }}

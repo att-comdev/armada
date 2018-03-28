@@ -37,6 +37,17 @@ conf:
     verbosity: 5
     trace: false
 
+pod:
+  resources:
+    enabled: false
+    tiller:
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+
 manifests:
   deployment_tiller: true
   service_tiller_deploy: true
