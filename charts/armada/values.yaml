@@ -228,6 +228,14 @@ pod:
         requests:
           memory: "128Mi"
           cpu: "100m"
+    test:
+      api:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
 
 manifests:
   configmap_bin: true
@@ -242,3 +250,4 @@ manifests:
   service_api: true
   service_ingress_api: true
   service_tiller_deploy: true
+  test_armada_api: true
