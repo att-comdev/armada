@@ -1,0 +1,447 @@
+swagger: "2.0"
+info:
+  title: Armada
+  version: 0.1.0
+  description: |
+    Armada provides operators a way to deploy or upgrade collection of helm
+    charts using a single command.
+  contact:
+    name: Armada Github Repository
+    url: https://github.com/att-comdev/armada
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+basePath: /
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+paths:
+  /versions:
+    get:
+      description: Returns list of all supported versions of Armada. Currently this returns a static value.
+      operationId: getVersions
+      responses:
+        '200':
+          $ref: "#/responses/response-get-versions"
+  /api/v1/health:
+    get:
+      description: Returns the health of the system. [TO BE IMPLEMENTED]
+      operationId: getHealth
+      parameters:
+        - $ref: "#/parameters/x-auth-token"
+      responses:
+        '204':
+          description: Indicates the system is healthy. This is currently the default return.
+        '503':
+          description: Indicates the system is not healthy.  This is not yet implemented.
+  /api/v1/releases:
+    get:
+      description: Returns list of Tiller releases
+      operationId: getReleases
+      parameters:
+        - $ref: "#/parameters/x-auth-token"
+        - $ref: "#/parameters/tiller-host"
+        - $ref: "#/parameters/tiller-port"
+        - $ref: "#/parameters/tiller-namespace"
+      responses:
+        '200':
+          $ref: "#/responses/response-get-releases"
+        '401':
+          $ref: "#/responses/err-no-auth"
+        '403':
+          $ref: "#/responses/err-forbidden"
+        '500':
+          $ref: "#/responses/err-server-error"
+  /api/v1/status:
+    get:
+      description: Returns the status of Tiller
+      operationId: getStatus
+      parameters:
+        - $ref: "#/parameters/x-auth-token"
+        - $ref: "#/parameters/tiller-host"
+        - $ref: "#/parameters/tiller-port"
+        - $ref: "#/parameters/tiller-namespace"
+      responses:
+        '200':
+          $ref: "#/responses/response-get-status"
+        '401':
+          $ref: "#/responses/err-no-auth"
+        '403':
+          $ref: "#/responses/err-forbidden"
+        '500':
+          $ref: "#/responses/err-server-error"
+  /api/v1/apply:
+    post:
+      description: Install or upgrade using an Armada manifest
+      operationId: postApplyManifest
+      consumes:
+        - application/json
+        - application/x-yaml
+      parameters:
+        - $ref: "#/parameters/x-auth-token"
+        - $ref: "#/parameters/content-type"
+        - $ref: "#/parameters/tiller-host"
+        - $ref: "#/parameters/tiller-port"
+        - $ref: "#/parameters/tiller-namespace"
+        - $ref: "#/parameters/target-manifest"
+        - $ref: "#/parameters/disable-update-pre"
+        - $ref: "#/parameters/disable-update-post"
+        - $ref: "#/parameters/enable-chart-cleanup"
+        - $ref: "#/parameters/dry-run"
+        - $ref: "#/parameters/wait"
+        - $ref: "#/parameters/timeout"
+        - name: request_body
+          in: body
+          description: Body containing the manifest hrefs JSON or YAML and a set of overrides
+          schema:
+            type: object
+            properties:
+              hrefs:
+                type: object
+                description: JSON or YAML representation of the manifest being processed.
+              overrides:
+                type: object
+                description: Set of overrides
+      responses:
+        '200':
+          $ref: "#/responses/response-post-apply"
+        '400':
+          $ref: "#/responses/err-bad-request"
+        '401':
+          $ref: "#/responses/err-no-auth"
+        '403':
+          $ref: "#/responses/err-forbidden"
+        '415':
+          $ref: "#/responses/err-unsupported-media-type"
+        '500':
+          $ref: "#/responses/err-server-error"
+  /api/v1/tests:
+    post:
+      description: Test manifest releases
+      operationId: postTests
+      consumes:
+        - application/json
+        - application/x-yaml
+      parameters:
+        - $ref: "#/parameters/x-auth-token"
+        - $ref: "#/parameters/tiller-host"
+        - $ref: "#/parameters/tiller-port"
+        - $ref: "#/parameters/tiller-namespace"
+        - $ref: "#/parameters/target-manifest"
+        # TODO(lamt) This needs to be cleaned up better when migrating to 3.x swagger
+        - name: request_body
+          in: body
+          description: JSON or YAML representation of the manifest being processed.
+          schema:
+            type: object
+      responses:
+        '200':
+          $ref: "#/responses/response-post-tests"
+        '400':
+          $ref: "#/responses/err-bad-request"
+        '401':
+          $ref: "#/responses/err-no-auth"
+        '403':
+          $ref: "#/responses/err-forbidden"
+        '500':
+          $ref: "#/responses/err-server-error"
+  /api/v1/test/{release_name}:
+    post:
+      description: Test specified release name
+      operationId: postReleaseName
+      parameters:
+        - name: release_name
+          in: path
+          required: true
+          description: Name of the release to be tested
+          type: string
+        - $ref: "#/parameters/x-auth-token"
+        - $ref: "#/parameters/tiller-host"
+        - $ref: "#/parameters/tiller-port"
+        - $ref: "#/parameters/tiller-namespace"
+      responses:
+        '200':
+          $ref: "#/responses/response-post-test-release"
+        '401':
+          $ref: "#/responses/err-no-auth"
+        '403':
+          $ref: "#/responses/err-forbidden"
+        '500':
+          $ref: "#/responses/err-server-error"
+  /api/v1/validatedesign:
+    post:
+      description: Validate a design
+      operationId: postValidateDesign
+      consumes:
+        - application/json
+        - application/x-yaml
+      parameters:
+        - $ref: "#/parameters/x-auth-token"
+        # TODO(lamt) This needs to be cleaned up better when migrating to 3.x swagger
+        - name: request_body
+          in: body
+          description: JSON or YAML representation of the manifest being processed.
+          schema:
+            type: object
+      responses:
+        '200':
+          $ref: "#/responses/response-post-validatedesign"
+        '400':
+          $ref: "#/responses/err-bad-request"
+        '401':
+          $ref: "#/responses/err-no-auth"
+        '403':
+          $ref: "#/responses/err-forbidden"
+parameters:
+  x-auth-token:
+    in: header
+    name: X-Auth-Token
+    required: false
+    type: string
+    description: A fernet keystone bearer token used for authentication and authorization
+  content-type:
+    in: header
+    name: Content-Type
+    required: true
+    type: string
+  tiller-host:
+    in: query
+    name: tiller_host
+    required: false
+    type: string
+    description: Hostname of the Tiller server
+    default: None
+  tiller-port:
+    in: query
+    name: tiller_port
+    required: false
+    type: integer
+    description: Port number of the Tiller server. Default is the value of `CONF.tiller_port`.
+  tiller-namespace:
+    in: query
+    name: tiller_namespace
+    required: false
+    type: string
+    description: Tiller namespace. Default is the value of `CONF.tiller_namespace`
+  target-manifest:
+    in: query
+    name: target_manifest
+    required: false
+    type: string
+    description: Specifies the manifest to target if there are multiples.
+  disable-update-pre:
+    in: query
+    name: disable_update_pre
+    required: false
+    type: boolean
+    default: False
+  disable-update-post:
+    in: query
+    name: disable_update_post
+    required: false
+    type: boolean
+    default: False
+  enable-chart-cleanup:
+    in: query
+    name: enable_chart_cleanup
+    required: false
+    type: boolean
+    default: False
+  dry-run:
+    in: query
+    name: dry_run
+    required: false
+    type: boolean
+    description: Flag to simulate an install if set to True
+    default: False
+  wait:
+    in: query
+    name: wait
+    required: false
+    type: boolean
+    description: Specifies whether Tiller should wait until all charts are deployed.
+  timeout:
+    in: query
+    name: timeout
+    required: false
+    type: integer
+    description: Specifies time in seconds Tiller should wait for charts to deploy until timing out.
+    default: 3600
+responses:
+  # HTTP error responses
+  err-bad-request:
+    description: 400 Bad request
+  err-no-auth:
+    description: 401 Not authorized
+  err-forbidden:
+    description: 403 Forbidden
+  err-not-found:
+    description: 404 Not found
+  err-not-allowed:
+    description: 405 Method not allowed
+  err-unsupported-media-type:
+    description: |
+      415 Unsupported Media Type
+
+      Mime type needs to be application/json or application/x-yaml.
+  err-server-error:
+    description: 500 Internal Server Error
+  # API responses
+  response-post-apply:
+    description: Response of application of an Armada manifest
+    schema:
+      allOf:
+        - $ref: "#/definitions/applyresult"
+  response-post-test-release:
+    description: Response of a test of a specified release name
+    schema:
+      allOf:
+        - $ref: "#/definitions/testresult"
+      example:
+        message: "MESSAGE: No test found"
+        result: "FAILED: <reason>"
+  response-post-validatedesign:
+    description: Response of a validation check
+    schema:
+      allOf:
+        - $ref: "#/definitions/base-response"
+      example:
+        kind: Status
+        apiVersion: v1.0
+        reason: Validation
+        metadata: {}
+        details: []
+        status: Success
+        message: Armada validations succeeded.
+        code: 200
+  response-post-tests:
+    description: Response of all tests
+    schema:
+      allOf:
+        - $ref: "#/definitions/base-response"
+      example:
+        kind: Status
+        apiVersion: v1.0
+        reason: Validation
+        metadata: {}
+        details: []
+        status: Failure
+        message: Failed to validate documents or generate Armada Manifest from documents..
+        code: 400
+  response-get-releases:
+    description: Response of all namespaces and releases contained within
+    schema:
+      allOf:
+        - $ref: "#/definitions/releases"
+      example:
+        namespace-one:
+          - release-A
+          - release-B
+        namespace-two:
+          - other-release-X
+          - other-release-Y
+  response-get-versions:
+    description: Response of getting Armada versions
+    schema:
+      allOf:
+      - $ref: "#/definitions/versions"
+      example:
+        v1.0:
+          path: /api/v1.0
+          status: stable
+  response-get-status:
+    description: Response of Tiller statuses
+    schema:
+      allOf:
+        - $ref: "#/definitions/status"
+      example:
+        tiller:
+          state: True
+          version: 0.1.0
+definitions:
+  status:
+    type: object
+    properties:
+      tiller:
+        type: object
+        properties:
+          state:
+            type: boolean
+          version:
+            type: string
+  metadata:
+    type: object
+    additionalProperties:
+      type: string
+  detail:
+    type: object
+    properties:
+      errorCount:
+        type: integer
+      messageList:
+        type: array
+        items:
+          type: string
+  applyresult:
+    type: object
+    properties:
+      message:
+        type: object
+        properties:
+          install:
+            type: array
+            items:
+              type: string
+          upgrade:
+            type: array
+            items:
+              type: string
+          diff:
+            type: object
+            additionalProperties:
+              type: string
+  testresult:
+    type: object
+    properties:
+      message:
+        type: string
+      result:
+        type: string
+  releases:
+    type: object
+    additionalProperties:
+        type: array
+        items:
+          type: string
+  versions:
+    type: object
+    additionalProperties:
+      $ref: "#/definitions/version"
+  version:
+    type: object
+    properties:
+      path:
+        type: string
+      status:
+        type: string
+  base-response:
+    type: object
+    properties:
+      kind:
+        type: string
+      apiVersion:
+        type: string
+      reason:
+        type: string
+      metadata:
+        $ref: "#/definitions/metadata"
+      details:
+        $ref: "#/definitions/detail"
+      status:
+        type: string
+      message:
+        type: string
+      code:
+        type: integer

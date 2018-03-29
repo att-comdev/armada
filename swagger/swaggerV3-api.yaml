@@ -1,0 +1,475 @@
+openapi: 3.0.0
+info:
+  title: Armada
+  version: 0.1.5
+  description: |
+    Armada provides operators a way to deploy or upgrade collection of helm
+    charts using a single command.
+  contact:
+    name: Armada Github Repository
+    url: https://github.com/att-comdev/armada
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+paths:
+  /versions:
+    get:
+      description: Returns list of all supported versions of Armada. Currently this returns a static value.
+      operationId: getVersions
+      responses:
+        '200':
+          $ref: "#/components/responses/response-get-versions"
+  /api/v1/health:
+    get:
+      description: Returns the health of the system. [TODO]
+      operationId: getHealth
+      parameters:
+        - $ref: "#/components/parameters/x-auth-token"
+      responses:
+        '204':
+          description: Indicates the system is healthy. This is currently the default return.
+        '503':
+          description: Indicates the system is not healthy. This is not yet implemented.
+  /api/v1/releases:
+    get:
+      description: Returns list of Tiller releases
+      operationId: getReleases
+      parameters:
+        - $ref: "#/components/parameters/x-auth-token"
+        - $ref: "#/components/parameters/tiller-host"
+        - $ref: "#/components/parameters/tiller-port"
+        - $ref: "#/components/parameters/tiller-namespace"
+      responses:
+        '200':
+          $ref: "#/components/responses/response-get-releases"
+        '401':
+          $ref: "#/components/responses/err-no-auth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-server-error"
+  /api/v1/status:
+    get:
+      description: Returns the status of Tiller
+      operationId: getStatus
+      parameters:
+        - $ref: "#/components/parameters/x-auth-token"
+        - $ref: "#/components/parameters/tiller-host"
+        - $ref: "#/components/parameters/tiller-port"
+        - $ref: "#/components/parameters/tiller-namespace"
+      responses:
+        '200':
+          $ref: "#/components/responses/response-get-status"
+        '401':
+          $ref: "#/components/responses/err-no-auth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-server-error"
+  /api/v1/apply:
+    post:
+      description: Install or upgrade using an Armada manifest
+      operationId: postApplyManifest
+      parameters:
+        - $ref: "#/components/parameters/x-auth-token"
+        - $ref: "#/components/parameters/tiller-host"
+        - $ref: "#/components/parameters/tiller-port"
+        - $ref: "#/components/parameters/tiller-namespace"
+        - $ref: "#/components/parameters/target-manifest"
+        - $ref: "#/components/parameters/disable-update-pre"
+        - $ref: "#/components/parameters/disable-update-post"
+        - $ref: "#/components/parameters/enable-chart-cleanup"
+        - $ref: "#/components/parameters/dry-run"
+        - $ref: "#/components/parameters/wait"
+        - $ref: "#/components/parameters/timeout"
+      requestBody:
+        $ref: "#/components/requestBodies/apply-body"
+      responses:
+        '200':
+          $ref: "#/components/responses/response-post-apply"
+        '400':
+          $ref: "#/components/responses/err-bad-request"
+        '401':
+          $ref: "#/components/responses/err-no-auth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '415':
+          $ref: "#/components/responses/err-unsupported-media-type"
+        '500':
+          $ref: "#/components/responses/err-server-error"
+  /api/v1/tests:
+    post:
+      description: Test manifest releases
+      operationId: postTests
+      parameters:
+        - $ref: "#/components/parameters/x-auth-token"
+        - $ref: "#/components/parameters/tiller-host"
+        - $ref: "#/components/parameters/tiller-port"
+        - $ref: "#/components/parameters/tiller-namespace"
+        - $ref: "#/components/parameters/target-manifest"
+      requestBody:
+        $ref: "#/components/requestBodies/manifest-body"
+      responses:
+        '200':
+          $ref: "#/components/responses/response-post-tests"
+        '400':
+          $ref: "#/components/responses/err-bad-request"
+        '401':
+          $ref: "#/components/responses/err-no-auth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-server-error"
+  /api/v1/test/{release_name}:
+    post:
+      description: Test specified release name
+      operationId: postReleaseName
+      parameters:
+        - $ref: "#/components/parameters/release-name"
+        - $ref: "#/components/parameters/x-auth-token"
+        - $ref: "#/components/parameters/tiller-host"
+        - $ref: "#/components/parameters/tiller-port"
+        - $ref: "#/components/parameters/tiller-namespace"
+      responses:
+        '200':
+          $ref: "#/components/responses/response-post-test-release"
+        '401':
+          $ref: "#/components/responses/err-no-auth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-server-error"
+  /api/v1/validatedesign:
+    post:
+      description: Validate a design
+      operationId: postValidateDesign
+      parameters:
+        - $ref: "#/components/parameters/x-auth-token"
+      requestBody:
+        $ref: "#/components/requestBodies/manifest-body"
+      responses:
+        '200':
+          $ref: "#/components/responses/response-post-validatedesign"
+        '400':
+          $ref: "#/components/responses/err-bad-request"
+        '401':
+          $ref: "#/components/responses/err-no-auth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+components:
+  parameters:
+    x-auth-token:
+      in: header
+      name: X-Auth-Token
+      required: false
+      description: A fernet keystone bearer token used for authentication and authorization
+      schema:
+        type: string
+    release-name:
+      in: path
+      name: release_name
+      required: true
+      description: Name of the release to be tested
+      schema:
+        type: string
+    tiller-host:
+      in: query
+      name: tiller_host
+      required: false
+      description: Hostname of the Tiller server
+      schema:
+        type: string
+    tiller-port:
+      in: query
+      name: tiller_port
+      required: false
+      schema:
+        type: integer
+      description: "Port number of the Tiller server. Default: the value of `CONF.tiller_port`"
+    tiller-namespace:
+      in: query
+      name: tiller_namespace
+      required: false
+      schema:
+        type: string
+      description: "Tiller namespace. Default: Value of `CONF.tiller_namespace`"
+    target-manifest:
+      in: query
+      name: target_manifest
+      required: false
+      schema:
+        type: string
+      description: Specifies the manifest to target if there are multiple manifests
+    disable-update-pre:
+      in: query
+      name: disable_update_pre
+      required: false
+      schema:
+        type: boolean
+    disable-update-post:
+      in: query
+      name: disable_update_post
+      required: false
+      schema:
+        type: boolean
+    enable-chart-cleanup:
+      in: query
+      name: enable_chart_cleanup
+      required: false
+      description: Flag to allow for chart cleanup
+      schema:
+        type: boolean
+    dry-run:
+      in: query
+      name: dry_run
+      required: false
+      description: Flag to simulate an install if set to True
+      schema:
+        type: boolean
+    timeout:
+      in: query
+      name: timeout
+      required: false
+      description: "Specifies time in seconds Tiller should wait for charts to deploy until timing out. Default: 3600"
+      schema:
+        type: integer
+    wait:
+      in: query
+      name: wait
+      required: false
+      description: Specifies whether Tiller should wait until all charts are deployed
+      schema:
+        type: boolean
+  requestBodies:
+    apply-body:
+      required: true
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/manifest-json"
+              - $ref: "#/components/schemas/manifest-refs"
+        application/x-yaml:
+          schema:
+            $ref: "#/components/schemas/manifest-yaml"
+    manifest-body:
+      description: A manifest JSON or YAML object representation of a manifest
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/manifest-json"
+        application/x-yaml:
+          schema:
+            $ref: "#/components/schemas/manifest-yaml"
+  responses:
+    # HTTP error responses
+    err-bad-request:
+      description: 400 Bad request
+    err-no-auth:
+      description: 401 Not authorized
+    err-forbidden:
+      description: 403 Forbidden
+    err-not-found:
+      description: 404 Not found
+    err-not-allowed:
+      description: 405 Method not allowed
+    err-unsupported-media-type:
+      description: |
+        415 Unsupported Media Type
+
+        Mime type needs to be application/json or application/x-yaml.
+    err-server-error:
+      description: 500 Internal Server Error
+    # API responses
+    response-post-apply:
+      description: Response of application of an Armada manifest
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/result-apply"
+    response-post-test-release:
+      description: Response of a test of a specified release name
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/result-test"
+    response-post-validatedesign:
+      description: Response of a validation check
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/base-response"
+    response-post-tests:
+      description: Response of all tests
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/base-response"
+    response-get-releases:
+      description: Response of all namespaces and releases contained within
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/releases"
+    response-get-versions:
+      description: Response of getting Armada versions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/versions"
+    response-get-status:
+      description: Response of Tiller statuses
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/status"
+  schemas:
+    base-response:
+      type: object
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        reason:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/metadata"
+        details:
+          $ref: "#/components/schemas/detail"
+        status:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
+      example:
+        kind: Status
+        apiVersion: v1.0
+        reason: Validation
+        metadata: {}
+        details: []
+        status: Success
+        message: <Success message>
+        code: 200
+    detail:
+      type: object
+      properties:
+        errorCount:
+          type: integer
+        messageList:
+          type: array
+          items:
+            type: string
+    metadata:
+      type: object
+      additionalProperties:
+        type: string
+    releases:
+      type: object
+      additionalProperties:
+          type: array
+          items:
+            type: string
+      example:
+        namespace-one:
+          - release-A
+          - release-B
+        namespace-two:
+          - other-release-X
+          - other-release-Y
+    result-apply:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            install:
+              type: array
+              items:
+                type: string
+            upgrade:
+              type: array
+              items:
+                type: string
+            diff:
+              type: object
+              additionalProperties:
+                type: string
+          example:
+            install:
+              - release-A
+              - release-B
+            upgrade:
+              - release-C
+              - release-D
+            diff:
+              key1: val1
+              key2: val2
+    result-test:
+      type: object
+      properties:
+        message:
+          type: string
+        result:
+          type: string
+      example:
+        message: "MESSAGE: No test found"
+        result: "FAILED: <reason>"
+    status:
+      type: object
+      properties:
+        tiller:
+          type: object
+          properties:
+            state:
+              type: boolean
+            version:
+              type: string
+      example:
+        tiller:
+          state: True
+          version: 0.1.0
+    version:
+      type: object
+      properties:
+        path:
+          type: string
+        status:
+          type: string
+    versions:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/version"
+      example:
+        v1.0:
+          path: /api/v1
+          status: stable
+    manifest-json:
+      type: object
+      example:
+        schema: armada/ChartGroup/v1
+        metadata:
+          schema: metadata/Document/v1
+          nname: someName
+        data:
+          description: Simple Service
+          sequenced: false
+          chart_group:
+            - group1
+            - group2
+    manifest-yaml:
+      type: object
+    manifest-refs:
+      type: object
+      properties:
+        hrefs:
+          oneOf:
+            - $ref: "#/components/schemas/manifest-json"
+            - $ref: "#/components/schemas/manifest-yaml"
+        overrides:
+          type: object
+          additionalProperties:
+            type: string
