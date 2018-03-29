@@ -64,7 +64,8 @@ class Apply(api.BaseResource):
         else:
             self.error(req.context, "Unknown content-type %s"
                        % req.content_type)
-            self.return_error(
+            # TODO(fmontei): Use falcon.<Relevant API Exception Class> instead.
+            return self.return_error(
                 resp,
                 falcon.HTTP_415,
                 message="Request must be in application/x-yaml"

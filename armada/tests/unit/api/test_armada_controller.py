@@ -106,6 +106,20 @@ class ArmadaControllerTest(base.BaseControllerTest):
         self.assertEqual(result.status_code, 400)
 
 
+class ArmadaControllerNegativeTest(base.BaseControllerTest):
+
+    @test_utils.attr(type=['negative'])
+    def test_armada_apply_raises_415_given_unsupported_media_type(self):
+        """Tests the POST /api/v1.0/apply endpoint returns 415 given
+        unsupported media type.
+        """
+        rules = {'armada:create_endpoints': '@'}
+        self.policy.set_rules(rules)
+
+        resp = self.app.simulate_post('/api/v1.0/apply', body=None)
+        self.assertEqual(415, resp.status_code)
+
+
 class ArmadaControllerNegativeRbacTest(base.BaseControllerTest):
 
     @test_utils.attr(type=['negative'])
