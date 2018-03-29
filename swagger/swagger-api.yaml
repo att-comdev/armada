@@ -1,0 +1,281 @@
+---
+openapi: 3.0.0
+info:
+  title: Armada
+  description: |-
+    Armada provides operators a way to deploy or upgrade collection of helm
+    charts using a single command.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.1.0
+paths:
+  /releases:
+    get:
+      operationId: getReleases
+      summary: Get tiller releases
+      responses:
+        '200':
+          $ref: "#/components/responses/get-releases"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '405':
+          $ref: "#/components/responses/err-notallowed"
+  /status:
+    get:
+      operationId: getStatus
+      summary: Get armada status
+      responses:
+        '200':
+          $ref: "#/components/responses/get-status"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '405':
+          $ref: "#/components/responses/err-notallowed"
+  /validatedesign:
+    post:
+      operationId: validateDesign
+      summary: Perform a design validation
+      responses:
+        '200':
+          $ref: "#/components/responses/get-validate"
+        '400':
+          $ref: "#/components/responses/err-badrequest"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '405':
+          $ref: "#/components/responses/err-notallowed"
+  /apply:
+    post:
+      operationId: applyManifest
+      summary: Install or update armada manifest
+      requestBody:
+        $ref: "#/components/requestBodies/armada-request"
+      responses:
+        '200':
+          $ref: "#/components/responses/post-apply"
+        '400':
+          $ref: "#/components/responses/err-badrequest"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '405':
+          $ref: "#/components/responses/err-notallowed"
+  /test/{release}:
+    post:
+      operationId: testReleaseName
+      summary: Test a release name
+      parameters:
+        - name: release
+          in: path
+          required: true
+          description: Name of the release to be tested
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: "#/components/responses/post-test-release"
+        '400':
+          $ref: "#/components/responses/err-badrequest"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '404':
+          $ref: "#/components/responses/err-notfound"
+        '405':
+          $ref: "#/components/responses/err-notallowed"
+  /tests:
+    post:
+      operationId: testReleases
+      summary: Test manifest releases
+      responses:
+        '200':
+          $ref: "#/components/responses/post-tests"
+        '400':
+          $ref: "#/components/responses/err-badrequest"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '404':
+          $ref: "#/components/responses/err-notfound"
+        '405':
+          $ref: "#/components/responses/err-notallowed"
+components:
+  requestBodies:
+    armada-request:
+      description: Base armada request model structure
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              disable-update-post:
+                type: boolean
+              disable-update-pre:
+                type: boolean
+              dry-run:
+                type: boolean
+              enable-chart-cleanup:
+                type: boolean
+              tiller-host:
+                type: string
+              tiller-port:
+                type: integer
+              timeout:
+                type: integer
+              wait:
+                type: boolean
+  responses:
+    err-badrequest:
+      description: 400 Bad request
+    err-noauth:
+      description: 401 Not authorized
+    err-forbidden:
+      description: 403 Forbidden
+    err-notfound:
+      description: 404 Not found
+    err-notallowed:
+      description: 405 Method not allowed
+    get-validate:
+      description: Validation is performed successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - valid
+            properties:
+              valid:
+                type: boolean
+    get-releases:
+      description: Validation is performed successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                $ref: "#/components/schemas/message-releases"
+    get-status:
+      description: Result of the armada status
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                $ref: "#/components/schemas/message-status"
+    post-apply:
+      description: Result in applying an armada manifest
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                $ref: "#/components/schemas/message-apply"
+    post-test-release:
+      description: Result of testing a release name
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                $ref: "#/components/schemas/message-test-release"
+    post-tests:
+      description: Result of tests
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                $ref: "#/components/schemas/message-tests"
+  schemas:
+    message-test-release:
+      type: object
+      properties:
+        message:
+          type: string
+        result:
+          type: string
+    message-apply:
+      type: object
+      properties:
+        installed:
+          $ref: "#/components/schemas/string-array"
+        updated:
+          $ref: "#/components/schemas/string-array"
+        diff:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            key1: someValue
+            key2: someOtherValue
+    message-tests:
+      type: object
+      properties:
+        failed:
+          $ref: "#/components/schemas/string-array"
+        passed:
+          $ref: "#/components/schemas/string-array"
+        skipped:
+          $ref: "#/components/schemas/string-array"
+    message-status:
+      type: object
+      properties:
+        tiller:
+          $ref: "#/components/schemas/status"
+    message-releases:
+      type: object
+      properties:
+        namespaces:
+          $ref: "#/components/schemas/string-array"
+        default:
+          $ref: "#/components/schemas/string-array"
+    status:
+      type: object
+      properties:
+        state:
+          type: boolean
+        version:
+          type: string
+    string-array:
+      type: array
+      items:
+        type: string
+      example:
+        - string1
+        - string2
+    error:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
