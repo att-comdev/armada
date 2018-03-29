@@ -1,0 +1,504 @@
+openapi: 3.0.0
+info:
+  title: Armada
+  description: |-
+    Armada provides operators a way to deploy or upgrade collection of helm
+    charts using a single command.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.1.4
+paths:
+  /api/v1/releases:
+    get:
+      operationId: getReleases
+      summary: Get tiller releases
+      parameters:
+        - $ref: "#/components/parameters/tiller_host"
+        - $ref: "#/components/parameters/tiller_port"
+        - $ref: "#/components/parameters/tiller_namespace"
+      responses:
+        '200':
+          $ref: "#/components/responses/get-releases"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-servererr"
+  /api/v1/health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      description: TODO function
+      responses:
+        '204':
+          description: Default hardcoded response
+  /api/v1/status:
+    get:
+      operationId: getStatus
+      summary: Get armada status
+      parameters:
+        - $ref: "#/components/parameters/tiller_host"
+        - $ref: "#/components/parameters/tiller_port"
+        - $ref: "#/components/parameters/tiller_namespace"
+      responses:
+        '200':
+          $ref: "#/components/responses/get-status"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-servererr"
+  /api/v1/validatedesign:
+    post:
+      operationId: validateDesign
+      summary: Perform a design validation
+      parameters:
+        - $ref: "#/components/parameters/content-json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/json_or_yaml_manifest"
+      responses:
+        '200':
+          $ref: "#/components/responses/get-validate"
+        '400':
+          $ref: "#/components/responses/err-badrequest"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+  /api/v1/apply:
+    post:
+      operationId: applyManifest
+      summary: Install or update armada manifest
+      parameters:
+        - $ref: "#/components/parameters/content-type"
+        - $ref: "#/components/parameters/tiller_host"
+        - $ref: "#/components/parameters/tiller_port"
+        - $ref: "#/components/parameters/tiller_namespace"
+        - $ref: "#/components/parameters/target"
+        - $ref: "#/components/parameters/disable_update_pre"
+        - $ref: "#/components/parameters/disable_update_post"
+        - $ref: "#/components/parameters/enable_chart_cleanup"
+        - $ref: "#/components/parameters/dry_run"
+        - $ref: "#/components/parameters/wait"
+        - $ref: "#/components/parameters/timeout"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/apply-polymorph"
+      responses:
+        '200':
+          $ref: "#/components/responses/post-apply"
+        '400':
+          $ref: "#/components/responses/err-badrequest"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '415':
+          $ref: "#/components/responses/err-unsupported-media-type"
+        '500':
+          $ref: "#/components/responses/err-servererr"
+  /api/v1/test/{release_name}:
+    post:
+      operationId: testReleaseName
+      summary: Test a release name
+      parameters:
+        - name: release_name
+          in: path
+          required: true
+          description: Name of the release to be tested
+          schema:
+            type: string
+        - $ref: "#/components/parameters/tiller_host"
+        - $ref: "#/components/parameters/tiller_port"
+        - $ref: "#/components/parameters/tiller_namespace"
+      responses:
+        '200':
+          $ref: "#/components/responses/post-test-release"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-servererr"
+  /api/v1/tests:
+    post:
+      operationId: testReleases
+      summary: Test manifest releases
+      parameters:
+        - $ref: "#/components/parameters/tiller_host"
+        - $ref: "#/components/parameters/tiller_port"
+        - $ref: "#/components/parameters/tiller_namespace"
+        - $ref: "#/components/parameters/target"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/json_or_yaml_manifest"
+      responses:
+        '200':
+          $ref: "#/components/responses/post-tests"
+        '400':
+          $ref: "#/components/responses/err-badrequest"
+        '401':
+          $ref: "#/components/responses/err-noauth"
+        '403':
+          $ref: "#/components/responses/err-forbidden"
+        '500':
+          $ref: "#/components/responses/err-servererr"
+  /versions:
+    get:
+      operationId: getVersions
+      summary: Gets version
+      description: This function currently statically return a hardcoded response.
+      responses:
+        '200':
+          description: Result in applying an armada manifest
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - v1.0
+                properties:
+                  v1.0:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                        enum:
+                          - /api/v1.0 (hardcoded)
+                      status:
+                        type: string
+                        enum:
+                          - stable (hardcoded)
+
+components:
+  parameters:
+    content-type:
+      in: header
+      name: Content-Type
+      required: true
+      schema:
+        type: string
+        enum:
+          - application/json
+          - application/yaml
+    content-json:
+      in: header
+      name: Content-Type
+      required: true
+      schema:
+        type: string
+        enum:
+          - application/json
+    content-yaml:
+      in: header
+      name: Content-Type
+      required: true
+      schema:
+        type: string
+        enum:
+          - application/yaml
+    tiller_host:
+      in: query
+      name: tiller_host
+      required: false
+      schema:
+        type: string
+      description: Tiller host. There is no default.
+    tiller_port:
+      in: query
+      name: tiller_port
+      required: false
+      schema:
+        type: integer
+      description: Tiller port. Default is `CONF.tiller_port`.
+    tiller_namespace:
+      in: query
+      name: tiller_namespace
+      required: false
+      schema:
+        type: string
+      description: Tiller namepsace. Default is `CONF.tiller_namespace`.
+    target:
+      in: query
+      name: target_manifest
+      required: false
+      schema:
+        type: string
+    disable_update_pre:
+      in: query
+      name: disable_update_pre
+      required: false
+      schema:
+        type: boolean
+    disable_update_post:
+      in: query
+      name: disable_update_post
+      required: false
+      schema:
+        type: boolean
+    enable_chart_cleanup:
+      in: query
+      name: enable_chart_cleanup
+      required: false
+      schema:
+        type: boolean
+    dry_run:
+      in: query
+      name: dry_run
+      required: false
+      schema:
+        type: boolean
+    wait:
+      in: query
+      name: wait
+      required: false
+      schema:
+        type: boolean
+    timeout:
+      in: query
+      name: wait
+      required: false
+      schema:
+        type: integer
+      description: Timeout value in seconds. Default is 3600.
+  responses:
+    err-badrequest:
+      description: 400 Bad request
+    err-noauth:
+      description: 401 Not authorized
+    err-forbidden:
+      description: 403 Forbidden
+    err-notfound:
+      description: 404 Not found
+    err-notallowed:
+      description: 405 Method not allowed
+    err-unsupported-media-type:
+      description: |
+        415 Unsupported Media Type
+
+        Mime type needs to be application/json or application/x-yaml.
+    err-servererr:
+      description: |
+        500 (Unexpected) Server Error
+
+        Code encountering any exception in Armada, short of known bad request, throws this error.
+    get-validate:
+      description: Validation is performed successfully
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/body-get-validation"
+    get-releases:
+      description: Validation is performed successfully
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/message-releases"
+    get-status:
+      description: Result of the armada status
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/message-status"
+    post-apply:
+      description: Result in applying an armada manifest
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                $ref: "#/components/schemas/message-apply"
+    post-test-release:
+      description: Result of testing a release name
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/message-test-release"
+    post-tests:
+      description: Result of tests
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/body-get-tests"
+  schemas:
+    apply-polymorph:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/json_or_yaml_manifest"
+        - $ref: "#/components/schemas/json_or_yaml_manifest_ref"
+    body-get-tests:
+      allOf:
+        - $ref: "#/components/schemas/response-schema"
+        - type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - Success
+                - Failure
+            message:
+              type: string
+              enum:
+                - Armada validations succeeded.
+                - Failed to validate documents or generate Armada Manifest from documents.
+            code:
+              type: integer
+              enum:
+                - 200
+                - 400
+    body-get-validation:
+      allOf:
+        - $ref: "#/components/schemas/response-schema"
+        - type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - Success
+                - Failure
+            message:
+              type: string
+              enum:
+                - Armada validations failed
+                - Armada validations succeeded
+            code:
+              type: integer
+              enum:
+                - 200
+                - 400
+    response-schema:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - Status (hardcoded)
+        apiVersion:
+          type: string
+          enum:
+            - v1.0 (hardcoded)
+        reason:
+          type: string
+          enum:
+            - Validation (hardcoded)
+        metadata:
+          type: object
+        details:
+          $ref: "#/components/schemas/details"
+    details:
+      type: object
+      properties:
+        errorCount:
+          type: integer
+        messageList:
+          type: object
+    message-test-release:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            - "MESSAGE: Test Pass"
+            - "MESSAGE: Test Fail"
+            - "MESSAGE: No test found"
+        result:
+          type: string
+          enum:
+            - "PASSED: <reason>"
+            - "FAILED: <reason>"
+    message-apply:
+      type: object
+      properties:
+        install:
+          $ref: "#/components/schemas/string-array"
+        upgrade:
+          $ref: "#/components/schemas/string-array"
+        diff:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            key1: someValue
+            key2: someOtherValue
+    message-tests:
+      type: object
+      properties:
+        failed:
+          $ref: "#/components/schemas/string-array"
+        passed:
+          $ref: "#/components/schemas/string-array"
+        skipped:
+          $ref: "#/components/schemas/string-array"
+    message-status:
+      type: object
+      properties:
+        tiller:
+          $ref: "#/components/schemas/status"
+    message-releases:
+      type: object
+      properties:
+        releases:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/string-array"
+          example:
+            namespace1:
+              - releaseA
+              - releaseB
+            namespace2:
+              - releaseX
+              - releaseY
+    status:
+      type: object
+      properties:
+        state:
+          type: boolean
+        version:
+          type: string
+    string-array:
+      type: array
+      items:
+        type: string
+      example:
+        - string1
+        - string2
+    error:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+    json_or_yaml_manifest:
+      type: object
+      properties:
+        manifest_content:
+          type: string
+          description: JSON or YAML manifest content, not the actual key or content.
+    json_or_yaml_manifest_ref:
+      type: object
+      properties:
+        hrefs:
+          $ref: "#/components/schemas/json_or_yaml_manifest"
+        overrides:
+          type: object
+          description: set or []
