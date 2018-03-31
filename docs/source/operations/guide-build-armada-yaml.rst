@@ -24,8 +24,8 @@ armada/Manifest/v1
 |                     |        |                      |
 +---------------------+--------+----------------------+
 
-Example
-^^^^^^^
+Manifest Example
+^^^^^^^^^^^^^^^^
 
 ::
 
@@ -55,8 +55,8 @@ armada/ChartGroup/v1
 | test_charts     | bool     | run pre-defined helm tests helm in a ChartGroup                        |
 +-----------------+----------+------------------------------------------------------------------------+
 
-Example
-^^^^^^^
+Chart Group Example
+^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -99,7 +99,7 @@ Chart
 +-----------------+----------+---------------------------------------------------------------------------------------+
 | install         | object   | install the chart into your Kubernetes cluster                                        |
 +-----------------+----------+---------------------------------------------------------------------------------------+
-| update          | object   | update the chart managed by the armada yaml                                           |
+| upgrade         | object   | upgrade the chart managed by the armada yaml                                          |
 +-----------------+----------+---------------------------------------------------------------------------------------+
 | values          | object   | override any default values in the charts                                             |
 +-----------------+----------+---------------------------------------------------------------------------------------+
@@ -110,20 +110,20 @@ Chart
 | timeout         | int      | time (in seconds) allotted for chart to deploy when 'wait' flag is set (DEPRECATED)   |
 +-----------------+----------+---------------------------------------------------------------------------------------+
 
-Update - Pre or Post
-^^^^^^^^^^^^^^^^^^^^
+Upgrade, Install - Pre or Post
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 +-------------+----------+---------------------------------------------------------------+
 | keyword     | type     | action                                                        |
 +=============+==========+===============================================================+
-| pre         | object   | actions prior to updating chart                               |
+| pre         | object   | actions prior to updating/installing chart                    |
 +-------------+----------+---------------------------------------------------------------+
-| post        | object   | actions post updating chart                                   |
+| post        | object   | actions post updating/installing chart                        |
 +-------------+----------+---------------------------------------------------------------+
 
 
-Update - Actions
-^^^^^^^^^^^^^^^^
+Upgrade - Actions
+^^^^^^^^^^^^^^^^^
 
 +-------------+----------+---------------------------------------------------------------+
 | keyword     | type     | action                                                        |
@@ -136,11 +136,11 @@ Update - Actions
 
 .. note::
 
-    Update actions are performed in the pre/post sections of update
+    Update actions are performed in the pre/post sections of upgrade
 
 
-Update - Actions - Update/Delete
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Upgrade - Actions - Update/Delete
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 +-------------+----------+---------------------------------------------------------------+
 | keyword     | type     | action                                                        |
@@ -160,8 +160,67 @@ Update - Actions - Update/Delete
 
    Delete Actions only support type: 'job'
 
-Example
-^^^^^^^
+Chart Example
+^^^^^^^^^^^^^
+
+::
+
+    ---
+    schema: armada/Chart/v1
+    metadata:
+      schema: metadata/Document/v1
+      name: blog-1
+    data:
+      chart_name: blog-1
+      release_name: blog-1
+      namespace: default
+      wait:
+        timeout: 100
+      install:
+        no_hooks: false
+      upgrade:
+        no_hooks: false
+        pre:
+          update:
+            - name: test-daemonset
+              type: daemonset
+              labels:
+                foo: bar
+                component: bar
+                rak1: enabled
+          delete:
+            - name: test-job
+              type: job
+              labels:
+                foo: bar
+                component: bar
+                rak1: enabled
+      values: {}
+      source:
+        type: git
+        location: https://github.com/namespace/repo
+        subpath: .
+        reference: master
+      dependencies: []
+
+
+Source
+^^^^^^
+
++-------------+----------+-----------------------------------------------------------------------------------+
+| keyword     | type     | action                                                                            |
++=============+==========+===================================================================================+
+| type        | string   | source to build the chart: ``git``, ``local``, or ``tar``                         |
++-------------+----------+-----------------------------------------------------------------------------------+
+| location    | string   | ``url`` or ``path`` to the chart's parent directory                               |
++-------------+----------+-----------------------------------------------------------------------------------+
+| subpath     | string   | (optional) relative path to target chart from parent (``.`` if not specified)     |
++-------------+----------+-----------------------------------------------------------------------------------+
+| reference   | string   | (optional) branch, commit, or reference in the repo (``master`` if not specified) |
++-------------+----------+-----------------------------------------------------------------------------------+
+
+Source Example
+^^^^^^^^^^^^^^
 
 ::
 
@@ -239,65 +298,6 @@ Example
         reference: null
       dependencies: []
 
-
-Source
-^^^^^^
-
-+-------------+----------+-----------------------------------------------------------------------------------+
-| keyword     | type     | action                                                                            |
-+=============+==========+===================================================================================+
-| type        | string   | source to build the chart: ``git``, ``local``, or ``tar``                         |
-+-------------+----------+-----------------------------------------------------------------------------------+
-| location    | string   | ``url`` or ``path`` to the chart's parent directory                               |
-+-------------+----------+-----------------------------------------------------------------------------------+
-| subpath     | string   | (optional) relative path to target chart from parent (``.`` if not specified)     |
-+-------------+----------+-----------------------------------------------------------------------------------+
-| reference   | string   | (optional) branch, commit, or reference in the repo (``master`` if not specified) |
-+-------------+----------+-----------------------------------------------------------------------------------+
-
-
-Example
-^^^^^^^
-
-::
-
-    ---
-    schema: armada/Chart/v1
-    metadata:
-      schema: metadata/Document/v1
-      name: blog-1
-    data:
-      chart_name: blog-1
-      release_name: blog-1
-      namespace: default
-      wait:
-        timeout: 100
-      install:
-        no_hooks: false
-      upgrade:
-        no_hooks: false
-        pre:
-          update:
-            - name: test-daemonset
-              type: daemonset
-              labels:
-                foo: bar
-                component: bar
-                rak1: enabled
-          delete:
-            - name: test-job
-              type: job
-              labels:
-                foo: bar
-                component: bar
-                rak1: enabled
-      values: {}
-      source:
-        type: git
-        location: https://github.com/namespace/repo
-        subpath: .
-        reference: master
-      dependencies: []
 
 
 
