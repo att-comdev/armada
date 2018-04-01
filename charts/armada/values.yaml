@@ -23,7 +23,7 @@ labels:
 images:
   tags:
     api: quay.io/attcomdev/armada:latest
-    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.0
     ks_endpoints: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     ks_service: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     ks_user: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
