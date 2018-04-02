@@ -15,6 +15,8 @@
 import os
 import yaml
 
+import testtools
+
 from armada.tests.unit import base
 from armada.utils import validate
 
@@ -211,6 +213,9 @@ data:
 
         self.assertTrue(is_valid)
 
+    @testtools.skipUnless(
+        base.is_connected(),
+        'validate_manifest_url requires network connectivity.')
     def test_validate_manifest_url(self):
         value = 'url'
         self.assertFalse(validate.validate_manifest_url(value))
