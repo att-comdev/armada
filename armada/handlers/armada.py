@@ -234,6 +234,10 @@ class Armada(object):
         '''
         filtered_releases = []
         known_releases = self.tiller.list_charts()
+
+        if not known_releases:
+            raise armada_exceptions.KnownReleasesException()
+
         for release in known_releases:
             if release[4] == status:
                 filtered_releases.append(release)
@@ -256,7 +260,7 @@ class Armada(object):
         prefix = self.manifest.get(const.KEYWORD_ARMADA).get(
             const.KEYWORD_PREFIX)
 
-        if known_releases is None:
+        if not known_releases:
             raise armada_exceptions.KnownReleasesException()
 
         for release in known_releases:
@@ -264,7 +268,6 @@ class Armada(object):
                       release[1])
 
         for entry in self.manifest[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
-
             tiller_should_wait = self.tiller_should_wait
             tiller_timeout = self.tiller_timeout
             desc = entry.get('description', 'A Chart Group')

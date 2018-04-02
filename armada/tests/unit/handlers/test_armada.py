@@ -15,6 +15,8 @@
 import mock
 import yaml
 
+from armada import const
+from armada.exceptions import armada_exceptions
 from armada.handlers import armada
 from armada.tests.unit import base
 
@@ -146,10 +148,47 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
         armada_obj = armada.Armada(yaml_documents)
 
         # Mock methods called by `pre_flight_ops()`.
-        mock_tiller.tiller_status.return_value = True
+        m_tiller = mock_tiller.return_value
+        m_tiller.tiller_status.return_value = True
         mock_source.git_clone.return_value = CHART_SOURCES[0][0]
 
         self._test_pre_flight_ops(armada_obj)
+
+        mock_tiller.assert_called_once_with(tiller_host=None,
+                                            tiller_namespace='kube-system',
+                                            tiller_port=44134)
+        mock_source.git_clone.assert_called_once_with(
+            'git://github.com/dummy/armada', 'master', auth_method=None,
+            proxy_server=None)
+
+    @mock.patch.object(armada, 'source')
+    @mock.patch('armada.handlers.armada.Tiller')
+    def test_pre_flight_ops_with_failed_releases(self, mock_tiller,
+                                                 mock_source):
+        """Test pre-flight functions uninstalls failed Tiller releases."""
+        yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+        armada_obj = armada.Armada(yaml_documents)
+
+        # Mock methods called by `pre_flight_ops()`.
+        m_tiller = mock_tiller.return_value
+        m_tiller.tiller_status.return_value = True
+        mock_source.git_clone.return_value = CHART_SOURCES[0][0]
+
+        # Only the first two releases failed and should be uninstalled. Armada
+        # looks at index [4] for each release to determine the status.
+        m_tiller.list_charts.return_value = [
+            ['armada-test_chart_1', None, None, None, const.STATUS_FAILED],
+            ['armada-test_chart_2', None, None, None, const.STATUS_FAILED],
+            [None, None, None, None, const.STATUS_DEPLOYED]
+        ]
+
+        self._test_pre_flight_ops(armada_obj)
+
+        # Assert both failed releases were uninstalled.
+        m_tiller.uninstall_release.assert_has_calls([
+            mock.call('armada-test_chart_1'),
+            mock.call('armada-test_chart_2')
+        ])
 
         mock_tiller.assert_called_once_with(tiller_host=None,
                                             tiller_namespace='kube-system',
@@ -166,7 +205,8 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
         armada_obj = armada.Armada(yaml_documents)
 
         # Mock methods called by `pre_flight_ops()`.
-        mock_tiller.tiller_status.return_value = True
+        m_tiller = mock_tiller.return_value
+        m_tiller.tiller_status.return_value = True
         mock_source.git_clone.return_value = CHART_SOURCES[0][0]
 
         self._test_pre_flight_ops(armada_obj)
@@ -185,7 +225,7 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
     @mock.patch('armada.handlers.armada.Tiller')
     def test_install(self, mock_tiller, mock_chartbuilder, mock_pre_flight,
                      mock_post_flight):
-        '''Test install functionality from the sync() method'''
+        """Test install functionality from the sync() method."""
 
         # Instantiate Armada object.
         yaml_documents = list(yaml.safe_load_all(TEST_YAML))
@@ -197,7 +237,6 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
         chart_2 = charts[1]['chart']
 
         # Mock irrelevant methods called by `armada.sync()`.
-        mock_tiller.list_charts.return_value = []
         mock_chartbuilder.get_source_path.return_value = None
         mock_chartbuilder.get_helm_chart.return_value = None
 
@@ -225,3 +264,30 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                 timeout=armada_obj.tiller_timeout)
         ]
         mock_tiller.return_value.install_release.assert_has_calls(method_calls)
+
+
+class ArmadaHandlerNegativeTestCase(base.ArmadaTestCase):
+
+    @mock.patch('armada.handlers.armada.Tiller')
+    def test_pre_flight_ops_without_known_releases_raises_exc(
+            self, mock_tiller):
+        m_tiller = mock_tiller.return_value
+        m_tiller.list_charts.return_value = []
+
+        yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+        armada_obj = armada.Armada(yaml_documents)
+
+        self.assertRaises(armada_exceptions.KnownReleasesException,
+                          armada_obj.pre_flight_ops)
+
+    @mock.patch('armada.handlers.armada.Tiller')
+    def test_sync_without_known_releases_raises_exc(
+            self, mock_tiller):
+        m_tiller = mock_tiller.return_value
+        m_tiller.list_charts.return_value = []
+
+        yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+        armada_obj = armada.Armada(yaml_documents)
+
+        self.assertRaises(armada_exceptions.KnownReleasesException,
+                          armada_obj.sync)
