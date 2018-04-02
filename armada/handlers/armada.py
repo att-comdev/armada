@@ -22,7 +22,6 @@ from armada.handlers.chartbuilder import ChartBuilder
 from armada.handlers.manifest import Manifest
 from armada.handlers.override import Override
 from armada.handlers.tiller import Tiller
-from armada.exceptions import armada_exceptions
 from armada.exceptions import source_exceptions
 from armada.exceptions import validate_exceptions
 from armada.exceptions import tiller_exceptions
@@ -215,16 +214,20 @@ class Armada(object):
             chart_name = chart.get('chart_name')
             raise source_exceptions.ChartSourceException(ct_type, chart_name)
 
-    def get_releases_by_status(self, status):
+    def get_releases_by_status(self, *statuses):
         '''
-        :params status - status string to filter releases on
+        Return the list of Tiller releases by the given ``statuses``.
 
-        Return a list of current releases with a specified status
+        :param tuple statuses: Status strings to filter releases on.
+        :returns: A list of current releases that match at least one of the
+                  values in ``statuses``.
+        :rtype: list
         '''
         filtered_releases = []
         known_releases = self.tiller.list_charts()
+
         for release in known_releases:
-            if release[4] == status:
+            if release[4] in statuses:
                 filtered_releases.append(release)
 
         return filtered_releases
@@ -236,34 +239,31 @@ class Armada(object):
 
         msg = {'install': [], 'upgrade': [], 'diff': []}
 
-        # TODO: (gardlt) we need to break up this func into
-        # a more cleaner format
+        # TODO: (gardlt) we need to break up this func into a cleaner format.
         self.pre_flight_ops()
 
-        # extract known charts on tiller right now
-        known_releases = self.tiller.list_charts()
+        # Retrieve currently deployed/failed charts from Tiller.
+        known_releases = self.get_releases_by_status(const.STATUS_DEPLOYED,
+                                                     const.STATUS_FAILED)
         prefix = self.manifest.get(const.KEYWORD_ARMADA).get(
             const.KEYWORD_PREFIX)
-
-        if known_releases is None:
-            raise armada_exceptions.KnownReleasesException()
 
         for release in known_releases:
             LOG.debug("Release %s, Version %s found on Tiller", release[0],
                       release[1])
 
         for entry in self.manifest[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS]:
-
             tiller_should_wait = self.tiller_should_wait
             tiller_timeout = self.tiller_timeout
-            desc = entry.get('description', 'A Chart Group')
             chart_groups = entry.get(const.KEYWORD_CHARTS, [])
             test_charts = entry.get('test_charts', False)
+            desc = entry.get('description') or 'Chartgroup with name %s' % (
+                entry.get('name', 'Unspecified'))
 
             if entry.get('sequenced', False) or test_charts:
                 tiller_should_wait = True
 
-            LOG.info('Deploying: %s', desc)
+            LOG.info('Deploying Chartgroup: %s', desc)
 
             for chartgroup in chart_groups:
                 chart = chartgroup.get('chart', {})
@@ -280,7 +280,7 @@ class Armada(object):
                 if test_chart is True:
                     tiller_should_wait = True
 
-                # retrieve appropriate timeout value
+                # Retrieve appropriate timeout value
                 # TODO(MarshM): chart's `data.timeout` should be deprecated
                 #               to favor `data.wait.timeout`
                 # TODO(MarshM) also: timeout logic seems to prefer chart values
@@ -296,8 +296,10 @@ class Armada(object):
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
 
-                # determine install or upgrade by examining known releases
-                LOG.debug("RELEASE: %s", release)
+                # Determine whether to install or upgrade the chart by
+                # examining known, deployed releases.
+                LOG.debug("Processing release=%s.", release)
+
                 deployed_releases = [x[0] for x in known_releases]
                 prefix_chart = release_prefix(prefix, release)
 
@@ -305,19 +307,18 @@ class Armada(object):
                 # tiller status to decide whether to install/upgrade rather
                 # than checking for list membership.
                 if prefix_chart in deployed_releases:
-
-                    # indicate to the end user what path we are taking
+                    # Indicate to the end user what path we are taking
                     LOG.info("Upgrading release %s", release)
-                    # extract the installed chart and installed values from the
+
+                    # Extract the installed chart and installed values from the
                     # latest release so we can compare to the intended state
                     apply_chart, apply_values = self.find_release_chart(
                         known_releases, prefix_chart)
 
                     upgrade = chart.get('upgrade', {})
-                    disable_hooks = upgrade.get('no_hooks', False)
-
-                    LOG.info("Checking Pre/Post Actions")
                     if upgrade:
+                        LOG.info("Upgrading release=%s and processing "
+                                 "pre/post actions for it.", release)
                         upgrade_pre = upgrade.get('pre', {})
                         upgrade_post = upgrade.get('post', {})
 
@@ -326,11 +327,14 @@ class Armada(object):
 
                         if not self.disable_update_post and upgrade_post:
                             post_actions = upgrade_post
+                    else:
+                        pre_actions = post_actions = {}
 
-                    # show delta for both the chart templates and the chart
-                    # values
-                    # TODO(alanmeadows) account for .files differences
-                    # once we support those
+                    # Show delta for both the chart templates and the chart
+                    # values.
+                    #
+                    # TODO(alanmeadows): Account for .files differences
+                    # once we support those.
                     LOG.info('Checking upgrade chart diffs.')
                     upgrade_diff = self.show_diff(
                         chart, apply_chart, apply_values,
@@ -340,9 +344,11 @@ class Armada(object):
                         LOG.info("There are no updates found in this chart")
                         continue
 
-                    # do actual update
+                    # Perform the actual update.
                     LOG.info('Beginning Upgrade, wait: %s, %s',
                              tiller_should_wait, wait_timeout)
+
+                    disable_hooks = upgrade.get('no_hooks', False)
                     self.tiller.update_release(
                         protoc_chart,
                         prefix_chart,
@@ -367,7 +373,8 @@ class Armada(object):
 
                     msg['upgrade'].append(prefix_chart)
 
-                # process install
+                # Install the chart release instead as it currently hasn't
+                # been deployed.
                 else:
                     LOG.info("Installing release %s", release)
                     LOG.info('Beginning Install, wait: %s, %s',
