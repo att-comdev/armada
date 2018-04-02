@@ -15,6 +15,8 @@
 
 from __future__ import absolute_import
 
+import socket
+
 import fixtures
 import mock
 from oslo_config import cfg
@@ -23,6 +25,20 @@ import testtools
 from armada.conf import default
 
 CONF = cfg.CONF
+
+
+def is_connected():
+    """Verifies whether network connectivity is up.
+
+    :returns: True if connected else False.
+    """
+    try:
+        host = socket.gethostbyname("www.github.com")
+        socket.create_connection((host, 80), 2)
+        return True
+    except (socket.error, socket.herror, socket.timeout):
+        pass
+    return False
 
 
 class ArmadaTestCase(testtools.TestCase):
