@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import socket
 import shutil
 
 import fixtures
@@ -24,20 +23,6 @@ from armada.exceptions import source_exceptions
 from armada.tests.unit import base
 from armada.tests import test_utils
 from armada.utils import source
-
-
-def is_connected():
-    """Verifies whether network connectivity is up.
-
-    :returns: True if connected else False.
-    """
-    try:
-        host = socket.gethostbyname("www.github.com")
-        socket.create_connection((host, 80), 2)
-        return True
-    except (socket.error, socket.herror, socket.timeout):
-        pass
-    return False
 
 
 class GitTestCase(base.ArmadaTestCase):
@@ -55,14 +40,14 @@ class GitTestCase(base.ArmadaTestCase):
                 self.assertIn(expected_ref, git_file.read())
 
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_good_url(self):
         url = 'http://github.com/att-comdev/armada'
         git_dir = source.git_clone(url)
         self._validate_git_clone(git_dir)
 
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_commit(self):
         url = 'http://github.com/att-comdev/armada'
         commit = 'cba78d1d03e4910f6ab1691bae633c5bddce893d'
@@ -70,7 +55,7 @@ class GitTestCase(base.ArmadaTestCase):
         self._validate_git_clone(git_dir)
 
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_ref(self):
         ref = 'refs/changes/54/457754/73'
         git_dir = source.git_clone(
@@ -79,7 +64,7 @@ class GitTestCase(base.ArmadaTestCase):
 
     @test_utils.attr(type=['negative'])
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_empty_url(self):
         url = ''
         # error_re = '%s is not a valid git repository.' % url
@@ -89,7 +74,7 @@ class GitTestCase(base.ArmadaTestCase):
 
     @test_utils.attr(type=['negative'])
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_bad_url(self):
         url = 'http://github.com/dummy/armada'
 
@@ -100,7 +85,7 @@ class GitTestCase(base.ArmadaTestCase):
     #      difficult to achieve behind a corporate proxy
     @test_utils.attr(type=['negative'])
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     def test_git_clone_fake_proxy(self):
         url = 'http://github.com/att-comdev/armada'
         proxy_url = test_utils.rand_name(
@@ -162,7 +147,7 @@ class GitTestCase(base.ArmadaTestCase):
         mock_tarfile.extractall.assert_not_called()
 
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     @mock.patch.object(source, 'LOG')
     def test_source_cleanup(self, mock_log):
         url = 'http://github.com/att-comdev/armada'
@@ -206,7 +191,7 @@ class GitTestCase(base.ArmadaTestCase):
             actual_call)
 
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     @test_utils.attr(type=['negative'])
     @mock.patch.object(source, 'os')
     def test_git_clone_ssh_auth_method_fails_auth(self, mock_os):
@@ -219,7 +204,7 @@ class GitTestCase(base.ArmadaTestCase):
             ref='refs/changes/17/388517/5', auth_method='SSH')
 
     @testtools.skipUnless(
-        is_connected(), 'git clone requires network connectivity.')
+        base.is_connected(), 'git clone requires network connectivity.')
     @test_utils.attr(type=['negative'])
     @mock.patch.object(source, 'os')
     def test_git_clone_ssh_auth_method_missing_ssh_key(self, mock_os):
