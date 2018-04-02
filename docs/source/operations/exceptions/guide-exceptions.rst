@@ -18,7 +18,6 @@ Armada Exceptions
 =================
 
 .. include:: api-exceptions.inc
-.. include:: armada-exceptions.inc
 .. include:: base-exceptions.inc
 .. include:: chartbuilder-exceptions.inc
 .. include:: k8s-exceptions.inc
