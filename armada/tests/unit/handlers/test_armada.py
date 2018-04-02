@@ -15,6 +15,7 @@
 import mock
 import yaml
 
+from armada import const
 from armada.handlers import armada
 from armada.tests.unit import base
 
@@ -146,10 +147,47 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
         armada_obj = armada.Armada(yaml_documents)
 
         # Mock methods called by `pre_flight_ops()`.
-        mock_tiller.tiller_status.return_value = True
+        m_tiller = mock_tiller.return_value
+        m_tiller.tiller_status.return_value = True
         mock_source.git_clone.return_value = CHART_SOURCES[0][0]
 
         self._test_pre_flight_ops(armada_obj)
+
+        mock_tiller.assert_called_once_with(tiller_host=None,
+                                            tiller_namespace='kube-system',
+                                            tiller_port=44134)
+        mock_source.git_clone.assert_called_once_with(
+            'git://github.com/dummy/armada', 'master', auth_method=None,
+            proxy_server=None)
+
+    @mock.patch.object(armada, 'source')
+    @mock.patch('armada.handlers.armada.Tiller')
+    def test_pre_flight_ops_with_failed_releases(self, mock_tiller,
+                                                 mock_source):
+        """Test pre-flight functions uninstalls failed Tiller releases."""
+        yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+        armada_obj = armada.Armada(yaml_documents)
+
+        # Mock methods called by `pre_flight_ops()`.
+        m_tiller = mock_tiller.return_value
+        m_tiller.tiller_status.return_value = True
+        mock_source.git_clone.return_value = CHART_SOURCES[0][0]
+
+        # Only the first two releases failed and should be uninstalled. Armada
+        # looks at index [4] for each release to determine the status.
+        m_tiller.list_charts.return_value = [
+            ['armada-test_chart_1', None, None, None, const.STATUS_FAILED],
+            ['armada-test_chart_2', None, None, None, const.STATUS_FAILED],
+            [None, None, None, None, const.STATUS_DEPLOYED]
+        ]
+
+        self._test_pre_flight_ops(armada_obj)
+
+        # Assert both failed releases were uninstalled.
+        m_tiller.uninstall_release.assert_has_calls([
+            mock.call('armada-test_chart_1'),
+            mock.call('armada-test_chart_2')
+        ])
 
         mock_tiller.assert_called_once_with(tiller_host=None,
                                             tiller_namespace='kube-system',
@@ -166,7 +204,8 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
         armada_obj = armada.Armada(yaml_documents)
 
         # Mock methods called by `pre_flight_ops()`.
-        mock_tiller.tiller_status.return_value = True
+        m_tiller = mock_tiller.return_value
+        m_tiller.tiller_status.return_value = True
         mock_source.git_clone.return_value = CHART_SOURCES[0][0]
 
         self._test_pre_flight_ops(armada_obj)
@@ -179,49 +218,81 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                     mock_source.source_cleanup.assert_called_with(
                         CHART_SOURCES[counter][0])
 
-    @mock.patch.object(armada.Armada, 'post_flight_ops')
-    @mock.patch.object(armada.Armada, 'pre_flight_ops')
-    @mock.patch('armada.handlers.armada.ChartBuilder')
-    @mock.patch('armada.handlers.armada.Tiller')
-    def test_install(self, mock_tiller, mock_chartbuilder, mock_pre_flight,
+    def _test_sync(self, known_releases):
+        """Test install functionality from the sync() method."""
+
+        @mock.patch.object(armada.Armada, 'post_flight_ops')
+        @mock.patch.object(armada.Armada, 'pre_flight_ops')
+        @mock.patch('armada.handlers.armada.ChartBuilder')
+        @mock.patch('armada.handlers.armada.Tiller')
+        def _do_test(mock_tiller, mock_chartbuilder, mock_pre_flight,
                      mock_post_flight):
-        '''Test install functionality from the sync() method'''
+            # Instantiate Armada object.
+            yaml_documents = list(yaml.safe_load_all(TEST_YAML))
+            armada_obj = armada.Armada(yaml_documents)
+            armada_obj.show_diff = mock.Mock()
 
-        # Instantiate Armada object.
+            charts = armada_obj.manifest['armada']['chart_groups'][0][
+                'chart_group']
+            chart_1 = charts[0]['chart']
+            chart_2 = charts[1]['chart']
+
+            m_tiller = mock_tiller.return_value
+            m_tiller.list_charts.return_value = known_releases
+
+            # Stub out irrelevant methods called by `armada.sync()`.
+            mock_chartbuilder.get_source_path.return_value = None
+            mock_chartbuilder.get_helm_chart.return_value = None
+
+            armada_obj.sync()
+
+            expected_install_release_calls = []
+
+            for release in known_releases:
+                if release[0] == 'armada-test_chart_1':
+                    chart = chart_1
+                elif release[1] == 'armada-test_chart_2':
+                    chart = chart_2
+                else:
+                    raise ValueError(
+                        'Can only use "armada-test_chart_1" or '
+                        '"armada-test_chart_2" as valid test entries.')
+
+                if release[-1] != const.STATUS_DEPLOYED:
+                    expected_install_release_calls.append(
+                        mock.call(
+                            mock_chartbuilder().get_helm_chart(),
+                            "{}-{}".format(armada_obj.manifest['armada'][
+                                           'release_prefix'],
+                                           chart['release']),
+                            chart_1['namespace'],
+                            dry_run=armada_obj.dry_run,
+                            values=yaml.safe_dump(chart_1['values']),
+                            wait=armada_obj.tiller_should_wait,
+                            timeout=armada_obj.tiller_timeout
+                        )
+                    )
+                else:
+                    pass
+
+            # Check params that should be passed to `tiller.install_release()`.
+            m_tiller.install_release.assert_has_calls(
+                expected_install_release_calls)
+
+        _do_test()
+
+    def test_armada_sync_with_no_deployed_releases(self):
+        self._test_sync([])
+
+    @mock.patch.object(armada, 'LOG', autospec=True)
+    def test_armada_sync_with_one_deployed_release(self, mock_log):
         yaml_documents = list(yaml.safe_load_all(TEST_YAML))
-        armada_obj = armada.Armada(yaml_documents)
+        chart = yaml_documents[-1]
 
-        charts = armada_obj.manifest['armada']['chart_groups'][0][
-            'chart_group']
-        chart_1 = charts[0]['chart']
-        chart_2 = charts[1]['chart']
-
-        # Mock irrelevant methods called by `armada.sync()`.
-        mock_tiller.list_charts.return_value = []
-        mock_chartbuilder.get_source_path.return_value = None
-        mock_chartbuilder.get_helm_chart.return_value = None
-
-        armada_obj.sync()
-
-        # Check params that should be passed to `tiller.install_release()`.
-        method_calls = [
-            mock.call(
-                mock_chartbuilder().get_helm_chart(),
-                "{}-{}".format(armada_obj.manifest['armada']['release_prefix'],
-                               chart_1['release']),
-                chart_1['namespace'],
-                dry_run=armada_obj.dry_run,
-                values=yaml.safe_dump(chart_1['values']),
-                wait=armada_obj.tiller_should_wait,
-                timeout=armada_obj.tiller_timeout),
-            mock.call(
-                mock_chartbuilder().get_helm_chart(),
-                "{}-{}".format(armada_obj.manifest['armada']['release_prefix'],
-                               chart_2['release']),
-                chart_2['namespace'],
-                dry_run=armada_obj.dry_run,
-                values=yaml.safe_dump(chart_2['values']),
-                wait=armada_obj.tiller_should_wait,
-                timeout=armada_obj.tiller_timeout)
+        known_releases = [
+            ['armada-test_chart_1', None, chart, None, const.STATUS_DEPLOYED]
         ]
-        mock_tiller.return_value.install_release.assert_has_calls(method_calls)
+        self._test_sync(known_releases)
+
+        self.assertNotIn(mock.call("Upgrading release"),
+                         mock_log.info.mock_calls[0][1])
