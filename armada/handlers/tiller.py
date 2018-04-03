@@ -58,10 +58,13 @@ class Tiller(object):
     '''
 
     def __init__(self, tiller_host=None, tiller_port=None,
-                 tiller_namespace=None):
+                 tiller_namespace=None, dry_run=False):
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port or CONF.tiller_port
         self.tiller_namespace = tiller_namespace or CONF.tiller_namespace
+
+        self.dry_run = dry_run
+
         # init k8s connectivity
         self.k8s = K8s()
 
@@ -154,10 +157,8 @@ class Tiller(object):
         return if Tiller exist or not
         '''
         if self._get_tiller_ip():
-            LOG.debug('Getting Tiller Status: Tiller exists')
             return True
 
-        LOG.debug('Getting Tiller Status: Tiller does not exist')
         return False
 
     def list_releases(self):
@@ -172,12 +173,12 @@ class Tiller(object):
                                   sort_by='LAST_RELEASED',
                                   sort_order='DESC')
 
-        LOG.debug('Tiller ListReleases() with timeout=%s', self.timeout)
         release_list = stub.ListReleases(req, self.timeout,
                                          metadata=self.metadata)
 
         for y in release_list:
-            LOG.debug('Found release: %s', y.releases)
+            # TODO(MarshM) log this lower than debug
+            # LOG.debug('Found release: %s', y.releases)
             releases.extend(y.releases)
 
         return releases
@@ -283,11 +284,11 @@ class Tiller(object):
                          latest_release.info.status.code)))
             except IndexError:
                 continue
-        LOG.debug('List of Helm Charts from Latest Releases: %s', charts)
+        # TODO(MarshM) log this lower than debug
+        # LOG.debug('List of Helm Charts from Latest Releases: %s', charts)
         return charts
 
     def update_release(self, chart, release, namespace,
-                       dry_run=False,
                        pre_actions=None,
                        post_actions=None,
                        disable_hooks=False,
@@ -301,7 +302,7 @@ class Tiller(object):
         rel_timeout = self.timeout if not timeout else timeout
 
         LOG.debug('Helm update release%s: wait=%s, timeout=%s',
-                  (' (dry run)' if dry_run else ''),
+                  (' (dry run)' if self.dry_run else ''),
                   wait, timeout)
 
         if values is None:
@@ -317,7 +318,7 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             release_request = UpdateReleaseRequest(
                 chart=chart,
-                dry_run=dry_run,
+                dry_run=self.dry_run,
                 disable_hooks=disable_hooks,
                 values=values,
                 name=release,
@@ -334,7 +335,6 @@ class Tiller(object):
         self._post_update_actions(post_actions, namespace)
 
     def install_release(self, chart, release, namespace,
-                        dry_run=False,
                         values=None,
                         wait=False,
                         timeout=None):
@@ -345,7 +345,7 @@ class Tiller(object):
         rel_timeout = self.timeout if not timeout else timeout
 
         LOG.debug('Helm install release%s: wait=%s, timeout=%s',
-                  (' (dry run)' if dry_run else ''),
+                  (' (dry run)' if self.dry_run else ''),
                   wait, timeout)
 
         if values is None:
@@ -358,7 +358,7 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             release_request = InstallReleaseRequest(
                 chart=chart,
-                dry_run=dry_run,
+                dry_run=self.dry_run,
                 values=values,
                 name=release,
                 namespace=namespace,
@@ -384,7 +384,6 @@ class Tiller(object):
         LOG.debug("Helm test release %s, timeout=%s", release, timeout)
 
         try:
-
             stub = ReleaseServiceStub(self.channel)
 
             release_request = TestReleaseRequest(
@@ -408,6 +407,7 @@ class Tiller(object):
                 return self.get_release_status(release)
 
         except Exception:
+            LOG.exception('Exception during Helm test.')
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Test')
 
@@ -423,11 +423,10 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             status_request = GetReleaseStatusRequest(
                 name=release, version=version)
-            LOG.debug('GetReleaseStatusRequest= %s', status_request)
 
             release_status = stub.GetReleaseStatus(
                 status_request, self.timeout, metadata=self.metadata)
-            LOG.debug('GetReleaseStatus= %s', release_status)
+            LOG.debug('Got release status: %s', release_status)
             return release_status
 
         except Exception:
@@ -445,11 +444,10 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             status_request = GetReleaseContentRequest(
                 name=release, version=version)
-            LOG.debug('GetReleaseContentRequest= %s', status_request)
 
             release_content = stub.GetReleaseContent(
                 status_request, self.timeout, metadata=self.metadata)
-            LOG.debug('GetReleaseContent= %s', release_content)
+            LOG.debug('Got release content: %s', release_content)
             return release_content
 
         except Exception:
@@ -463,17 +461,15 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             release_request = GetVersionRequest()
 
-            LOG.debug('Getting Tiller version, with timeout=%s', self.timeout)
             tiller_version = stub.GetVersion(
                 release_request, self.timeout, metadata=self.metadata)
-            LOG.debug('Got Tiller version response: %s', tiller_version)
 
             tiller_version = getattr(tiller_version.Version, 'sem_ver', None)
             LOG.debug('Got Tiller version %s', tiller_version)
             return tiller_version
 
         except Exception:
-            LOG.debug('Failed to get Tiller version')
+            LOG.exception('Failed to get Tiller version')
             raise ex.TillerVersionException()
 
     def uninstall_release(self, release, disable_hooks=False, purge=True):
@@ -484,7 +480,13 @@ class Tiller(object):
         deletes a Helm chart from Tiller
         '''
 
-        # build release install request
+        # Helm client calls ReleaseContent in Delete dry-run scenario
+        if self.dry_run:
+            LOG.debug('Uninstall %s release: not supported in DRY RUN, '
+                      'getting ReleaseContent instead', release)
+            return self.get_release_content(release)
+
+        # build release uninstall request
         try:
             stub = ReleaseServiceStub(self.channel)
             LOG.info("Uninstall %s release with disable_hooks=%s, "
@@ -521,6 +523,7 @@ class Tiller(object):
                 LOG.debug("Release: %s will be removed", chart)
                 self.uninstall_release(chart)
 
+    # TODO(MarshM) care for dry-run on k8s actions?
     def delete_resources(self, release_name, resource_name, resource_type,
                          resource_labels, namespace, wait=False):
         '''
@@ -540,6 +543,7 @@ class Tiller(object):
                   "selectors %s.", namespace, label_selector)
 
         if 'job' in resource_type:
+            # TODO(MarshM) care for dry-run?
             get_jobs = self.k8s.get_namespace_job(namespace, label_selector)
             for jb in get_jobs.items:
                 jb_name = jb.metadata.name
@@ -547,6 +551,7 @@ class Tiller(object):
 
                 self.k8s.delete_job_action(jb_name, namespace)
 
+        # TODO(MarshM) care for dry-run?
         elif 'pod' in resource_type:
             release_pods = self.k8s.get_namespace_pod(
                 namespace, label_selector)
@@ -561,6 +566,7 @@ class Tiller(object):
             LOG.error("Unable to execute name: %s type: %s ",
                       resource_name, resource_type)
 
+    # TODO(MarshM) care for dry-run
     def rolling_upgrade_pod_deployment(self, name, release_name, namespace,
                                        resource_labels, action_type, chart,
                                        disable_hooks, values):
@@ -577,6 +583,7 @@ class Tiller(object):
             if resource_labels is not None:
                 label_selector = label_selectors(resource_labels)
 
+            # TODO(MarshM) care for dry-run?
             get_daemonset = self.k8s.get_namespace_daemonset(
                 namespace=namespace, label=label_selector)
 
@@ -586,6 +593,7 @@ class Tiller(object):
                 if ds_name == name:
                     LOG.info("Deleting %s : %s in %s", action_type, ds_name,
                              namespace)
+                    # TODO(MarshM) care for dry-run?
                     self.k8s.delete_daemon_action(ds_name, namespace)
 
                     # update the daemonset yaml
@@ -596,6 +604,7 @@ class Tiller(object):
                     template['spec']['template']['metadata'][
                         'labels'] = ds_labels
 
+                    # TODO(MarshM) care for dry-run?
                     self.k8s.create_daemon_action(
                         namespace=namespace, template=template)
 
@@ -605,4 +614,4 @@ class Tiller(object):
                         wait=True)
 
         else:
-            LOG.error("Unable to exectue name: % type: %s", name, action_type)
+            LOG.error("Unable to execute name: % type: %s", name, action_type)

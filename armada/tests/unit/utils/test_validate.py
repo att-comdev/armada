@@ -74,6 +74,10 @@ class BaseValidateTest(base.ArmadaTestCase):
     def _build_error_message(self, document, name, message):
         return "Invalid document [{}] {}: {}.".format(document, name, message)
 
+    def _build_json_error_message(self, document, name, message):
+        return "JSON Schema Validation: Invalid document [{}] {}: {}.".format(
+            document, name, message)
+
 
 class ValidateOwnExamplesTestCase(BaseValidateTest):
     """Validates that each of the relevant example documents under
@@ -128,12 +132,6 @@ class ValidateTestCase(BaseValidateTest):
         valid, details = validate.validate_armada_documents(list(documents))
 
         self.assertTrue(valid)
-
-    def test_validate_manifest_passes(self):
-        manifest = yaml.safe_load(template_manifest)
-        is_valid, error = validate.validate_armada_document(manifest)
-
-        self.assertTrue(is_valid)
 
     def test_validate_chart_group_with_values(self):
         test_chart_group = """
@@ -193,21 +191,8 @@ data:
     values: {}
     dependencies: []
 """
-
         chart_group = yaml.safe_load_all(test_chart_group)
         is_valid, error = validate.validate_armada_documents(list(chart_group))
-
-        self.assertTrue(is_valid)
-
-    def test_validate_group_passes(self):
-        chart_group = yaml.safe_load(template_chart_group)
-        is_valid, error = validate.validate_armada_document(chart_group)
-
-        self.assertTrue(is_valid)
-
-    def test_validate_chart_passes(self):
-        chart = yaml.safe_load(template_chart)
-        is_valid, error = validate.validate_armada_document(chart)
 
         self.assertTrue(is_valid)
 
@@ -257,79 +242,9 @@ class ValidateNegativeTestCase(BaseValidateTest):
         del mariadb_document['data']['release']
 
         _, error_messages = validate.validate_armada_documents(documents)
-        expected_error = self._build_error_message(
+        expected_error = self._build_json_error_message(
             'armada/Chart/v1', 'mariadb',
             "'release' is a required property")
 
         self.assertEqual(1, len(error_messages))
         self.assertEqual(expected_error, error_messages[0]['message'])
-
-    def test_validate_validate_group_without_required_chart_group(self):
-        template_manifest = """
-        schema: armada/ChartGroup/v1
-        metadata:
-            schema: metadata/Document/v1
-            name: example-manifest
-        data:
-            description: this is sample
-        """
-        document = yaml.safe_load(template_manifest)
-        is_valid, error = validate.validate_armada_document(document)
-
-        expected_error = self._build_error_message(
-            'armada/ChartGroup/v1', 'example-manifest',
-            "'chart_group' is a required property")
-
-        self.assertFalse(is_valid)
-        self.assertEqual(error[0]['message'], expected_error)
-
-    def test_validate_manifest_without_required_release_prefix(self):
-        template_manifest = """
-        schema: armada/Manifest/v1
-        metadata:
-            schema: metadata/Document/v1
-            name: example-manifest
-        data:
-            chart_groups:
-                - example-group
-        """
-        document = yaml.safe_load(template_manifest)
-        is_valid, error = validate.validate_armada_document(document)
-        expected_error = self._build_error_message(
-            'armada/Manifest/v1', 'example-manifest',
-            "'release_prefix' is a required property")
-
-        self.assertFalse(is_valid)
-        self.assertEqual(error[0]['message'], expected_error)
-
-    def test_validate_chart_without_required_release_property(self):
-        template_manifest = """
-        schema: armada/Chart/v1
-        metadata:
-          schema: metadata/Document/v1
-          name: example-chart
-        data:
-          chart_name: keystone
-          namespace: undercloud
-          timeout: 100
-          install:
-            no_hooks: false
-          upgrade:
-            no_hooks: false
-          values: {}
-          source:
-            type: git
-            location: git://github.com/example/example
-            subpath: example-chart
-            reference: master
-          dependencies:
-            - dep-chart
-        """
-        document = yaml.safe_load(template_manifest)
-        is_valid, error = validate.validate_armada_document(document)
-        expected_error = self._build_error_message(
-            'armada/Chart/v1', 'example-chart',
-            "'release' is a required property")
-
-        self.assertFalse(is_valid)
-        self.assertEqual(error[0]['message'], expected_error)

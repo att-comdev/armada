@@ -26,8 +26,8 @@ class ValidationMessage(object):
     :param string name: Identifying name of the validation.
     :param string level: The severity of validation result, as "Error",
         "Warning", or "Info"
-    :param string schema: The schema of the document being validated.
-    :param string doc_name: The name of the document being validated.
+    :param array documents: An array of dicts containing the schema and name of
+        the document(s) being validated.
     :param string diagnostic: Information about what lead to the message,
         or details for resolution.
     """
@@ -36,12 +36,9 @@ class ValidationMessage(object):
                  message='Document validation error.',
                  error=True,
                  name='Armada error',
+                 documents=None,
                  level='Error',
-                 schema=None,
-                 doc_name=None,
                  diagnostic=None):
-
-        # TODO(MarshM) should validate error and level inputs
 
         self.output = {
             'message': message,
@@ -51,8 +48,8 @@ class ValidationMessage(object):
             'level': level,
             'kind': 'ValidationMessage'
         }
-        if schema and doc_name:
-            self.output['documents'].append(dict(schema=schema, name=doc_name))
+        if documents:
+            self.output['documents'].extend(documents)
         if diagnostic:
             self.output.update(diagnostic=diagnostic)
 

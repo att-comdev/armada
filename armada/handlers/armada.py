@@ -94,7 +94,7 @@ class Armada(object):
         self.tiller_timeout = tiller_timeout
         self.tiller = Tiller(
             tiller_host=tiller_host, tiller_port=tiller_port,
-            tiller_namespace=tiller_namespace)
+            tiller_namespace=tiller_namespace, dry_run=dry_run)
         self.documents = Override(
             documents, overrides=set_ovr,
             values=values).update_manifests()
@@ -116,8 +116,6 @@ class Armada(object):
         """Perform a series of checks and operations to ensure proper
         deployment.
         """
-        LOG.info("Performing pre-flight operations.")
-
         # Ensure Tiller is available and manifest is valid
         if not self.tiller.tiller_status():
             raise tiller_exceptions.TillerServicesUnavailableException()
@@ -150,9 +148,13 @@ class Armada(object):
                     ch_release_name = release_prefix(
                         prefix, ch.get('chart').get('chart_name'))
                     if release[0] == ch_release_name:
-                        LOG.info('Purging failed release %s '
-                                 'before deployment', release[0])
-                        self.tiller.uninstall_release(release[0])
+                        if self.dry_run:
+                            LOG.info('Would purge failed release %s '
+                                     'before deployment.', release[0])
+                        else:
+                            LOG.info('Purging failed release %s '
+                                     'before deployment.', release[0])
+                            self.tiller.uninstall_release(release[0])
 
         # Clone the chart sources
         #
@@ -233,11 +235,13 @@ class Armada(object):
         '''
         Synchronize Helm with the Armada Config(s)
         '''
+        if self.dry_run:
+            LOG.info('Armada is in DRY RUN mode, no changes being made.')
 
         msg = {'install': [], 'upgrade': [], 'diff': []}
 
-        # TODO: (gardlt) we need to break up this func into
-        # a more cleaner format
+        # TODO: (gardlt) we need to break up this func into a cleaner format
+        LOG.info("Performing pre-flight operations.")
         self.pre_flight_ops()
 
         # extract known charts on tiller right now
@@ -258,9 +262,9 @@ class Armada(object):
             tiller_timeout = self.tiller_timeout
             desc = entry.get('description', 'A Chart Group')
             chart_groups = entry.get(const.KEYWORD_CHARTS, [])
-            test_charts = entry.get('test_charts', False)
+            test_chartgroup = entry.get('test_charts', False)
 
-            if entry.get('sequenced', False) or test_charts:
+            if entry.get('sequenced', False) or test_chartgroup:
                 tiller_should_wait = True
 
             LOG.info('Deploying: %s', desc)
@@ -277,7 +281,7 @@ class Armada(object):
                 if release is None:
                     continue
 
-                if test_chart is True:
+                if test_chart:
                     tiller_should_wait = True
 
                 # retrieve appropriate timeout value
@@ -288,7 +292,7 @@ class Armada(object):
                 #                    (caution: it always default to 3600,
                 #                    take care to differentiate user input)
                 if tiller_should_wait and tiller_timeout == DEFAULT_TIMEOUT:
-                        tiller_timeout = chart.get('timeout', tiller_timeout)
+                    tiller_timeout = chart.get('timeout', tiller_timeout)
                 wait_values = chart.get('wait', {})
                 wait_timeout = wait_values.get('timeout', tiller_timeout)
                 wait_values_labels = wait_values.get('labels', {})
@@ -297,24 +301,21 @@ class Armada(object):
                 protoc_chart = chartbuilder.get_helm_chart()
 
                 # determine install or upgrade by examining known releases
-                LOG.debug("RELEASE: %s", release)
                 deployed_releases = [x[0] for x in known_releases]
                 prefix_chart = release_prefix(prefix, release)
 
                 if prefix_chart in deployed_releases:
 
                     # indicate to the end user what path we are taking
-                    LOG.info("Upgrading release %s", release)
+                    LOG.info("Attempting Upgrade release: %s", release)
                     # extract the installed chart and installed values from the
                     # latest release so we can compare to the intended state
-                    LOG.info("Checking Pre/Post Actions")
                     apply_chart, apply_values = self.find_release_chart(
                         known_releases, prefix_chart)
 
                     upgrade = chart.get('upgrade', {})
                     disable_hooks = upgrade.get('no_hooks', False)
 
-                    LOG.info("Checking Pre/Post Actions")
                     if upgrade:
                         upgrade_pre = upgrade.get('pre', {})
                         upgrade_post = upgrade.get('post', {})
@@ -347,7 +348,7 @@ class Armada(object):
                         namespace,
                         pre_actions=pre_actions,
                         post_actions=post_actions,
-                        dry_run=self.dry_run,
+                        # dry_run=self.dry_run,
                         disable_hooks=disable_hooks,
                         values=yaml.safe_dump(values),
                         wait=tiller_should_wait,
@@ -367,14 +368,14 @@ class Armada(object):
 
                 # process install
                 else:
-                    LOG.info("Installing release %s", release)
+                    LOG.info("Attempting Install release: %s", release)
                     LOG.info('Beginning Install, wait: %s, %s',
                              tiller_should_wait, wait_timeout)
                     self.tiller.install_release(
                         protoc_chart,
                         prefix_chart,
                         namespace,
-                        dry_run=self.dry_run,
+                        # dry_run=self.dry_run,
                         values=yaml.safe_dump(values),
                         wait=tiller_should_wait,
                         timeout=wait_timeout)
@@ -391,26 +392,43 @@ class Armada(object):
 
                     msg['install'].append(prefix_chart)
 
-                LOG.debug("Cleaning up chart source in %s",
-                          chartbuilder.source_directory)
+                # LOG.debug("Cleaning up chart source in %s",
+                #           chartbuilder.source_directory)
 
-                if test_charts or (test_chart is True):
-                    LOG.info('Testing: %s', prefix_chart)
-                    resp = self.tiller.testing_release(prefix_chart)
-                    test_status = getattr(resp.info.status,
-                                          'last_test_suite_run', 'FAILED')
-                    LOG.info("Test INFO: %s", test_status)
-                    if resp:
-                        LOG.info("PASSED: %s", prefix_chart)
+                # TODO(MarshM) this should handle chart vs chartgroup better
+                if (test_chartgroup or test_chart):
+                    if self.dry_run:
+                        LOG.info('Skipping test (dry run): %s', prefix_chart)
                     else:
-                        LOG.info("FAILED: %s", prefix_chart)
+                        LOG.info('Testing: %s', prefix_chart)
+                        resp = self.tiller.testing_release(prefix_chart)
+                        test_status = getattr(resp.info.status,
+                                            'last_test_suite_run', 'FAILED')
+                        LOG.info("Test INFO: %s", test_status)
+                        if resp:
+                            LOG.info("PASSED: %s", prefix_chart)
+                        else:
+                            LOG.info("FAILED: %s", prefix_chart)
+
+                # ################
+                # END CHART LOOP #
+                # ################
 
             # TODO(MarshM) does this need release/labels/namespace?
             # TODO(MarshM) consider the tiller_timeout according to above logic
+            #       because it currently waits on the timeout from the last
+            #       chart processed, certainly not expected behavior
+            LOG.info('Final k8s wait after chartgroup %s, %s seconds',
+                     desc, tiller_timeout)
+            tiller_timeout = 10
             self.tiller.k8s.wait_until_ready(
                 k8s_wait_attempts=self.k8s_wait_attempts,
                 k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
                 timeout=tiller_timeout)
+
+            # #####################
+            # END CHARTGROUP LOOP #
+            # #####################
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()
