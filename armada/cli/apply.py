@@ -188,19 +188,19 @@ class ApplyManifest(CliAction):
                     self.logger.info(ch)
 
     def invoke(self):
-        if not self.ctx.obj.get('api', False):
-            try:
-                doc_data = ReferenceResolver.resolve_reference(self.locations)
-                documents = list()
-                for d in doc_data:
-                    documents.extend(list(yaml.safe_load_all(d.decode())))
-            except InvalidPathException as ex:
-                self.logger.error(str(ex))
-                return
-            except yaml.YAMLError as yex:
-                self.logger.error("Invalid YAML found: %s" % str(yex))
-                return
+        try:
+            doc_data = ReferenceResolver.resolve_reference(self.locations)
+            documents = list()
+            for d in doc_data:
+                documents.extend(list(yaml.safe_load_all(d.decode())))
+        except InvalidPathException as ex:
+            self.logger.error(str(ex))
+            return
+        except yaml.YAMLError as yex:
+            self.logger.error("Invalid YAML found: %s" % str(yex))
+            return
 
+        if not self.ctx.obj.get('api', False):
             armada = Armada(
                 documents,
                 disable_update_pre=self.disable_update_pre,
@@ -239,5 +239,5 @@ class ApplyManifest(CliAction):
             client = self.ctx.obj.get('CLIENT')
 
             resp = client.post_apply(
-                manifest_ref=self.locations, set=self.set, query=query)
+                documents=documents, set=self.set, query=query)
             self.output(resp.get('message'))
