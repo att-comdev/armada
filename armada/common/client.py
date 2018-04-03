@@ -100,9 +100,8 @@ class ArmadaClient(object):
 
         if manifest:
             if values or set:
-                document = list(yaml.safe_load_all(manifest))
                 override = Override(
-                    document, overrides=set, values=values).update_manifests()
+                    manifest, overrides=set, values=values).update_manifests()
                 manifest = yaml.dump(override)
             resp = self.session.post(
                 endpoint,
