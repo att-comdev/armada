@@ -71,7 +71,7 @@ class ArmadaClient(object):
         return resp.json()
 
     def post_apply(self,
-                   manifest=None,
+                   documents=None,
                    manifest_ref=None,
                    values=None,
                    set=None,
@@ -79,16 +79,16 @@ class ArmadaClient(object):
                    timeout=None):
         """Call the Armada API to apply a Manifest.
 
-        If ``manifest`` is not None, then the request body will be a fully
+        If ``documents`` is not None, then the request body will be a fully
         rendered set of YAML documents including overrides and
         values-files application.
 
-        If ``manifest`` is None and ``manifest_ref`` is not, then the request
+        If ``documents`` is None and ``manifest_ref`` is not, then the request
         body will be a JSON structure providing a list of references
         to Armada manifest documents and a list of overrides. Local
         values files are not supported when using the API with references.
 
-        :param manifest: string of YAML formatted Armada manifests
+        :param documents: list of YAML formatted Armada documents
         :param manifest_ref: valid file paths or URIs referring to Armada
                              manifests
         :param values: list of local files containing values.yaml overrides
@@ -98,11 +98,10 @@ class ArmadaClient(object):
         """
         endpoint = self._set_endpoint('1.0', 'apply')
 
-        if manifest:
+        if documents:
             if values or set:
-                document = list(yaml.safe_load_all(manifest))
                 override = Override(
-                    document, overrides=set, values=values).update_manifests()
+                    documents, overrides=set, values=values).update_manifests()
                 manifest = yaml.dump(override)
             resp = self.session.post(
                 endpoint,
