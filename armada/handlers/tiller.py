@@ -324,6 +324,7 @@ class Tiller(object):
                 wait=wait,
                 timeout=timeout)
 
+            # TODO(MarshM) berre handle dry-run for validations
             stub.UpdateRelease(
                 release_request, rel_timeout + GRPC_EPSILON,
                 metadata=self.metadata)
@@ -365,6 +366,7 @@ class Tiller(object):
                 wait=wait,
                 timeout=timeout)
 
+            # TODO(MarshM) berre handle dry-run for validations
             return stub.InstallRelease(
                 release_request, rel_timeout + GRPC_EPSILON,
                 metadata=self.metadata)

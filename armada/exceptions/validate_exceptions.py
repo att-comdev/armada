@@ -16,9 +16,9 @@ from armada.exceptions import base_exception
 
 
 class ValidateException(base_exception.ArmadaBaseException):
-    '''Base class for linting exceptions and errors.'''
+    '''Base class for validation exceptions and errors.'''
 
-    message = 'An unknown linting error occurred.'
+    message = 'An unknown validation error occurred.'
 
 
 class InvalidManifestException(ValidateException):
@@ -33,18 +33,21 @@ class InvalidManifestException(ValidateException):
                '%(error_messages)s.')
 
 
+# TODO(MarshM) unused and undocumented
 class InvalidChartNameException(ValidateException):
     '''Exception that occurs when an invalid filename is encountered.'''
 
     message = 'Chart name must be a string.'
 
 
+# TODO(MarshM) unused
 class InvalidChartDefinitionException(ValidateException):
     '''Exception when invalid chart definition is encountered.'''
 
     message = 'Invalid chart definition. Chart definition must be array.'
 
 
+# TODO(MarshM) unused
 class InvalidReleaseException(ValidateException):
     '''Exception that occurs when a release is invalid.'''
 

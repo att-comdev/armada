@@ -55,6 +55,8 @@ data:
     test:
       type: boolean
     timeout:
+      # NOTE(MarshM) data.timeout should be deprecated.
+      # Need to handle gracefully, and document.
       type: integer
     wait:
       type: object
