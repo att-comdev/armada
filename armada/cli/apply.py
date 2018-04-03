@@ -85,6 +85,9 @@ SHORT_DESC = "Command installs manifest charts."
 @click.option('--enable-chart-cleanup',
               help="Clean up unmanaged charts.",
               is_flag=True)
+@click.option('--pass-manifest-file',
+              help="Pass armada manifest file NOT reference to the server.",
+              is_flag=True)
 @click.option('--set',
               help=("Use to override Armada Manifest values. Accepts "
                     "overrides that adhere to the format "
@@ -130,14 +133,14 @@ SHORT_DESC = "Command installs manifest charts."
               is_flag=True)
 @click.pass_context
 def apply_create(ctx, locations, api, disable_update_post, disable_update_pre,
-                 dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
-                 tiller_namespace, timeout, values, wait, target_manifest,
-                 debug):
+                 dry_run, enable_chart_cleanup, pass_manifest_file, set,
+                 tiller_host, tiller_port, tiller_namespace, timeout, values,
+                 wait, target_manifest, debug):
     CONF.debug = debug
     ApplyManifest(ctx, locations, api, disable_update_post, disable_update_pre,
-                  dry_run, enable_chart_cleanup, set, tiller_host, tiller_port,
-                  tiller_namespace, timeout, values, wait,
-                  target_manifest).safe_invoke()
+                  dry_run, enable_chart_cleanup, pass_manifest_file, set,
+                  tiller_host, tiller_port, tiller_namespace, timeout, values,
+                  wait, target_manifest).safe_invoke()
 
 
 class ApplyManifest(CliAction):
@@ -149,6 +152,7 @@ class ApplyManifest(CliAction):
                  disable_update_pre,
                  dry_run,
                  enable_chart_cleanup,
+                 pass_manifest_file,
                  set,
                  tiller_host,
                  tiller_port,
@@ -166,6 +170,7 @@ class ApplyManifest(CliAction):
         self.disable_update_pre = disable_update_pre
         self.dry_run = dry_run
         self.enable_chart_cleanup = enable_chart_cleanup
+        self.pass_manifest_file = pass_manifest_file
         self.set = set
         self.tiller_host = tiller_host
         self.tiller_port = tiller_port
@@ -190,19 +195,19 @@ class ApplyManifest(CliAction):
                     self.logger.info('Chart/values diff: %s', ch)
 
     def invoke(self):
-        if not self.ctx.obj.get('api', False):
-            try:
-                doc_data = ReferenceResolver.resolve_reference(self.locations)
-                documents = list()
-                for d in doc_data:
-                    documents.extend(list(yaml.safe_load_all(d.decode())))
-            except InvalidPathException as ex:
-                self.logger.error(str(ex))
-                return
-            except yaml.YAMLError as yex:
-                self.logger.error("Invalid YAML found: %s" % str(yex))
-                return
+        try:
+            doc_data = ReferenceResolver.resolve_reference(self.locations)
+            documents = list()
+            for d in doc_data:
+                documents.extend(list(yaml.safe_load_all(d.decode())))
+        except InvalidPathException as ex:
+            self.logger.error(str(ex))
+            return
+        except yaml.YAMLError as yex:
+            self.logger.error("Invalid YAML found: %s" % str(yex))
+            return
 
+        if not self.ctx.obj.get('api', False):
             armada = Armada(
                 documents,
                 disable_update_pre=self.disable_update_pre,
@@ -239,7 +244,10 @@ class ApplyManifest(CliAction):
             }
 
             client = self.ctx.obj.get('CLIENT')
-
-            resp = client.post_apply(
-                manifest_ref=self.locations, set=self.set, query=query)
+            if self.pass_manifest_file:
+                resp = client.post_apply(
+                    manifest=documents, set=self.set, query=query)
+            else:
+                resp = client.post_apply(
+                    manifest_ref=self.locations, set=self.set, query=query)
             self.output(resp.get('message'))
