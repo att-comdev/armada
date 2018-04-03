@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc8641ad_46dbaf6a",
+        "filename": "armada/tests/unit/handlers/test_armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-03T13:56:01Z",
+      "side": 1,
+      "message": "self.fail",
+      "range": {
+        "startLine": 258,
+        "startChar": 20,
+        "endLine": 258,
+        "endChar": 36
+      },
+      "revId": "eade75c1626573c9ba125420eef70722fa3f9468",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
