@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "690d573c_4bcb6db9",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-03T18:25:00Z",
+      "side": 1,
+      "message": "This also looks like it can go under the condition of L308.",
+      "range": {
+        "startLine": 322,
+        "startChar": 0,
+        "endLine": 333,
+        "endChar": 32
+      },
+      "revId": "97c17142f22c155f711cfc3e0b0736349b9b5ec6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
