@@ -15,11 +15,15 @@
 import json
 import falcon
 import yaml
+from oslo_config import cfg
 
 from armada import api
 from armada.common import policy
-from armada.utils.validate import validate_armada_documents
+from armada.handlers.armada import Armada
 from armada.handlers.document import ReferenceResolver
+from armada.utils.validate import validate_armada_documents
+
+CONF = cfg.CONF
 
 
 class Validate(api.BaseResource):
@@ -65,6 +69,26 @@ class Validate(api.BaseResource):
 
             resp_body['details']['errorCount'] = len(error_details)
             resp_body['details']['messageList'] = details
+
+            # If validation was successful, also run a Tiller dry-run
+            if result:
+                try:
+                    self.logger.info('Beginning dry-run of Armada')
+                    armada = Armada(
+                        documents,
+                        dry_run=True,
+                        tiller_host=req.get_param('tiller_host'),
+                        tiller_port=req.get_param_as_int(
+                            'tiller_port') or CONF.tiller_port,
+                        tiller_namespace=req.get_param(
+                            'tiller_namespace', default=CONF.tiller_namespace)
+                    )
+                    msg = armada.sync()
+                    self.logger.info('Dry-run complete: %s', msg)
+                except Exception as e:
+                    self.logger.error('Armada validation was unable to '
+                                      'process dry-run: %s', str(e))
+            # TODO(MarshM) how to pass dryrun to client.post_validate() ??
 
             if result:
                 resp.status = falcon.HTTP_200

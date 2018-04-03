@@ -17,8 +17,9 @@ import yaml
 from oslo_config import cfg
 
 from armada.cli import CliAction
-from armada.utils.validate import validate_armada_documents
+from armada.handlers.armada import Armada
 from armada.handlers.document import ReferenceResolver
+from armada.utils.validate import validate_armada_documents
 
 CONF = cfg.CONF
 
@@ -47,20 +48,37 @@ SHORT_DESC = "Command validates Armada Manifest."
                   short_help=SHORT_DESC)
 @click.argument('locations',
                 nargs=-1)
+@click.option('--tiller-host',
+              help="Tiller host IP.",
+              default=None)
+@click.option('--tiller-port',
+              help="Tiller host port.",
+              type=int,
+              default=CONF.tiller_port)
+@click.option('--tiller-namespace', '-tn',
+              help="Tiller namespace.",
+              type=str,
+              default=CONF.tiller_namespace)
 @click.option('--debug',
               help="Enable debug logging.",
               is_flag=True)
 @click.pass_context
-def validate_manifest(ctx, locations, debug):
+def validate_manifest(ctx, locations, tiller_host, tiller_port,
+                      tiller_namespace, debug):
     CONF.debug = debug
-    ValidateManifest(ctx, locations).safe_invoke()
+    ValidateManifest(ctx, locations, tiller_host, tiller_port,
+                     tiller_namespace).safe_invoke()
 
 
 class ValidateManifest(CliAction):
-    def __init__(self, ctx, locations):
+    def __init__(self, ctx, locations, tiller_host, tiller_port,
+                 tiller_namespace):
         super(ValidateManifest, self).__init__()
         self.ctx = ctx
         self.locations = locations
+        self.tiller_host = tiller_host
+        self.tiller_port = tiller_port
+        self.tiller_namespace = tiller_namespace
 
     def invoke(self):
         if not self.ctx.obj.get('api', False):
@@ -75,16 +93,34 @@ class ValidateManifest(CliAction):
                 if not documents:
                     self.logger.warn('No documents to validate.')
                 elif valid:
-                    self.logger.info('Successfully validated: %s',
+                    self.logger.info('Successfully validated documents: %s',
                                      self.locations)
                 else:
-                    self.logger.info('Validation failed: %s', self.locations)
+                    self.logger.info('Document validation failed: %s',
+                                     self.locations)
+
+                # If validation was successful, also run a Tiller dry-run
+                if valid:
+                    try:
+                        self.logger.info('Beginning dry-run of Armada')
+                        armada = Armada(
+                            documents,
+                            dry_run=True,
+                            tiller_host=self.tiller_host,
+                            tiller_port=self.tiller_port,
+                            tiller_namespace=self.tiller_namespace)
+                        msg = armada.sync()
+                        self.logger.info('Dry-run complete: %s', msg)
+                    except Exception as e:
+                        self.logger.error('Armada validation was unable to '
+                                          'process dry-run: %s', str(e))
 
                 for m in details:
                     self.logger.info('Validation details: %s', str(m))
+
             except Exception:
-                raise Exception('Exception raised during '
-                                'validation: %s', self.locations)
+                raise Exception('Exception raised during validation: %s',
+                                self.locations)
         else:
             if len(self.locations) > 1:
                 self.logger.error(
@@ -94,6 +130,7 @@ class ValidateManifest(CliAction):
                 return
 
             client = self.ctx.obj.get('CLIENT')
+            # TODO(MarshM) how to pass dryrun to client.post_validate() ??
             resp = client.post_validate(self.locations[0])
 
             if resp.get('code') == 200:

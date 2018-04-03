@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import jsonschema
 import os
 import pkg_resources
 import requests
@@ -21,9 +20,14 @@ import yaml
 from oslo_log import log as logging
 
 from armada.const import KEYWORD_GROUPS, KEYWORD_CHARTS, KEYWORD_RELEASE
+from armada.const import DOCUMENT_MANIFEST
 from armada.handlers.manifest import Manifest
 from armada.exceptions.manifest_exceptions import ManifestException
-from armada.utils.validation_message import ValidationMessage
+from armada.utils.validation.manifest_structure import \
+    ManifestStructureValidator
+from armada.utils.validation.schema_validate import SchemaValidator
+from armada.utils.validation.validation_message import ValidationMessage
+
 
 LOG = logging.getLogger(__name__)
 # Creates a mapping between ``metadata.name``: ``data`` where the
@@ -74,7 +78,7 @@ def _validate_armada_manifest(manifest):
     except ManifestException as me:
         vmsg = ValidationMessage(message=str(me),
                                  error=True,
-                                 name='ARM001',
+                                 name='ARM200',
                                  level='Error')
         LOG.error('ValidationMessage: %s', vmsg.get_output_json())
         details.append(vmsg.get_output())
@@ -121,81 +125,30 @@ def validate_armada_manifests(documents):
     all_valid = True
 
     for document in documents:
-        if document.get('schema', '') == 'armada/Manifest/v1':
-            target = document.get('metadata').get('name')
-            # TODO(MarshM) explore: why does this pass 'documents'?
+        if document.get('schema', '') == DOCUMENT_MANIFEST:
+            target = document.get('metadata', {}).get('name')
             manifest = Manifest(documents, target_manifest=target)
+
+            # ManifestStructureValidator will ensure only 1 manifest
+            validator = ManifestStructureValidator()
+            continue_running = validator.validate(manifest, target)
+
+            docs_valid = (validator.error_counter == 0)
+            all_valid = all_valid and docs_valid
+            messages.extend(validator.messages)
+
+            if not continue_running:
+                continue
+
+            # Manifest passed previous check so there is only 1 manifest doc
+            manifest.manifest = manifest.manifests[0] if manifest.manifests \
+                else None
+
             is_valid, details = _validate_armada_manifest(manifest)
             all_valid = all_valid and is_valid
             messages.extend(details)
 
     return all_valid, messages
-
-
-def validate_armada_document(document):
-    """Validates a document ingested by Armada by subjecting it to JSON schema
-    validation.
-
-    :param dict dictionary: The document to validate.
-
-    :returns: A tuple of (bool, list[dict]) where the first value
-        indicates whether the validation succeeded or failed and
-        the second value is the validation details with a minimum
-        keyset of (message(str), error(bool))
-    :rtype: tuple.
-    :raises TypeError: If ``document`` is not of type ``dict``.
-
-    """
-    if not isinstance(document, dict):
-        raise TypeError('The provided input "%s" must be a dictionary.'
-                        % document)
-
-    schema = document.get('schema', '<missing>')
-    document_name = document.get('metadata', {}).get('name', None)
-    details = []
-    LOG.debug('Validating document [%s] %s', schema, document_name)
-
-    if schema in SCHEMAS:
-        try:
-            validator = jsonschema.Draft4Validator(SCHEMAS[schema])
-            for error in validator.iter_errors(document.get('data')):
-                error_message = "Invalid document [%s] %s: %s." % \
-                    (schema, document_name, error.message)
-                vmsg = ValidationMessage(message=error_message,
-                                         error=True,
-                                         name='ARM100',
-                                         level='Error',
-                                         schema=schema,
-                                         doc_name=document_name)
-                LOG.info('ValidationMessage: %s', vmsg.get_output_json())
-                details.append(vmsg.get_output())
-        except jsonschema.SchemaError as e:
-            error_message = ('The built-in Armada JSON schema %s is invalid. '
-                             'Details: %s.' % (e.schema, e.message))
-            vmsg = ValidationMessage(message=error_message,
-                                     error=True,
-                                     name='ARM000',
-                                     level='Error',
-                                     diagnostic='Armada is misconfigured.')
-            LOG.error('ValidationMessage: %s', vmsg.get_output_json())
-            details.append(vmsg.get_output())
-    else:
-        vmsg = ValidationMessage(message='Unsupported document type.',
-                                 error=False,
-                                 name='ARM002',
-                                 level='Warning',
-                                 schema=schema,
-                                 doc_name=document_name,
-                                 diagnostic='Please ensure document is one of '
-                                            'the following schema types: %s' %
-                                            list(SCHEMAS.keys()))
-        LOG.info('ValidationMessage: %s', vmsg.get_output_json())
-        # Validation API doesn't care about this type of message, don't send
-
-    if len([x for x in details if x.get('error', False)]) > 0:
-        return False, details
-
-    return True, details
 
 
 def validate_armada_documents(documents):
@@ -212,13 +165,24 @@ def validate_armada_documents(documents):
     messages = []
     # Track if all the documents in the set are valid
     all_valid = True
+    continue_running = True
 
     for document in documents:
-        is_valid, details = validate_armada_document(document)
-        all_valid = all_valid and is_valid
-        messages.extend(details)
+        # is_valid, details = validate_armada_document(document)
+        # all_valid = all_valid and is_valid
+        # messages.extend(details)
 
-    if all_valid:
+        validator = SchemaValidator(SCHEMAS)
+        continue_running = validator.validate(document)
+
+        docs_valid = (validator.error_counter == 0)
+        all_valid = all_valid and docs_valid
+        messages.extend(validator.messages)
+
+        if not continue_running:
+            break
+
+    if continue_running and all_valid:
         valid, details = validate_armada_manifests(documents)
         all_valid = all_valid and valid
         messages.extend(details)

@@ -154,6 +154,8 @@ class Override(object):
         try:
             validate.validate_armada_documents(self.documents)
         except Exception:
+            # TODO(MarshM) this is catching exceptions from validation, should
+            #              probably change to actually handle errors
             raise override_exceptions.InvalidOverrideValueException(
                 self.overrides)
 

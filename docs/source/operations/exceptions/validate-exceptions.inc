@@ -14,7 +14,7 @@
   License for the specific language governing permissions and limitations
   under the License.
 
-.. list-table:: **Lint Exceptions**
+.. list-table:: **Validate Exceptions**
   :widths: 5 50
   :header-rows: 1
 

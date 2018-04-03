@@ -16,7 +16,8 @@ from copy import deepcopy
 from oslo_log import log as logging
 
 from armada import const
-from armada import exceptions
+from armada.utils.validation.document_dependency import \
+    DocumentDependencyValidator
 
 LOG = logging.getLogger(__name__)
 
@@ -49,29 +50,14 @@ class Manifest(object):
             properties.
         """
         self.documents = deepcopy(documents)
-        self.charts, self.groups, manifests = self._find_documents(
-            target_manifest)
+        self.target_manifest = target_manifest
+        # self.charts, self.groups, self.manifests =
+        self._classify_documents()
 
-        if len(manifests) > 1:
-            error = ('Multiple manifests are not supported. Ensure that the '
-                     '`target_manifest` option is set to specify the target '
-                     'manifest')
-            LOG.error(error)
-            raise exceptions.ManifestException(details=error)
-        else:
-            self.manifest = manifests[0] if manifests else None
-
-        if not all([self.charts, self.groups, self.manifest]):
-            expected_schemas = [const.DOCUMENT_CHART, const.DOCUMENT_GROUP]
-            error = ('Documents must be a list of documents with at least one '
-                     'of each of the following schemas: %s and only one '
-                     'manifest' % expected_schemas)
-            LOG.error(error)
-            raise exceptions.ManifestException(details=error)
-
-    def _find_documents(self, target_manifest=None):
-        """Returns the chart documents, chart group documents,
-        and Armada manifest
+    # TODO(MarshM) fix docstring
+    def _classify_documents(self):
+        """Establishes the chart documents, chart group documents,
+        and Armada manifest(s)
 
         If multiple documents with schema "armada/Manifest/v1" are provided,
         specify ``target_manifest`` to select the target one.
@@ -83,153 +69,25 @@ class Manifest(object):
             found in ``self.documents``
         :rtype: tuple
         """
-        charts = []
-        groups = []
-        manifests = []
+        self.charts = []
+        self.groups = []
+        self.manifests = []
         for document in self.documents:
-            if document.get('schema') == const.DOCUMENT_CHART:
-                charts.append(document)
-            if document.get('schema') == const.DOCUMENT_GROUP:
-                groups.append(document)
-            if document.get('schema') == const.DOCUMENT_MANIFEST:
+            doc_schema = document.get('schema', '<missing>')
+            if doc_schema == const.DOCUMENT_CHART:
+                self.charts.append(document)
+            elif doc_schema == const.DOCUMENT_GROUP:
+                self.groups.append(document)
+            elif doc_schema == const.DOCUMENT_MANIFEST:
                 manifest_name = document.get('metadata', {}).get('name')
-                if target_manifest:
-                    if manifest_name == target_manifest:
-                        manifests.append(document)
+                if self.target_manifest:
+                    if manifest_name == self.target_manifest:
+                        self.manifests.append(document)
                 else:
-                    manifests.append(document)
-        return charts, groups, manifests
-
-    def find_chart_document(self, name):
-        """Returns a chart document with the specified name
-
-        :param str name: name of the desired chart document
-        :returns: The requested chart document
-        :rtype: dict
-        :raises ManifestException: If a chart document with the
-            specified name is not found
-        """
-        for chart in self.charts:
-            if chart.get('metadata', {}).get('name') == name:
-                return chart
-        raise exceptions.ManifestException(
-            details='Could not find a {} named "{}"'.format(
-                const.DOCUMENT_CHART, name))
-
-    def find_chart_group_document(self, name):
-        """Returns a chart group document with the specified name
-
-        :param str name: name of the desired chart group document
-        :returns: The requested chart group document
-        :rtype: dict
-        :raises ManifestException: If a chart
-            group document with the specified name is not found
-        """
-        for group in self.groups:
-            if group.get('metadata', {}).get('name') == name:
-                return group
-        raise exceptions.ManifestException(
-            details='Could not find a {} named "{}"'.format(
-                const.DOCUMENT_GROUP, name))
-
-    def build_charts_deps(self):
-        """Build chart dependencies for every ``chart``.
-
-        :returns: None
-        """
-        for chart in self.charts:
-            self.build_chart_deps(chart)
-
-    def build_chart_groups(self):
-        """Build chart dependencies for every ``chart_group``.
-
-        :returns: None
-        """
-        for chart_group in self.groups:
-            self.build_chart_group(chart_group)
-
-    def build_chart_deps(self, chart):
-        """Recursively build chart dependencies for ``chart``.
-
-        :param dict chart: The chart whose dependencies will be recursively
-            built.
-        :returns: The chart with all dependencies.
-        :rtype: dict
-        :raises ManifestException: If a chart for a dependency name listed
-            under ``chart['data']['dependencies']`` could not be found.
-        """
-        try:
-            dep = None
-            for iter, dep in enumerate(chart.get('data').get('dependencies')):
-                if isinstance(dep, dict):
-                    continue
-                chart_dep = self.find_chart_document(dep)
-                self.build_chart_deps(chart_dep)
-                chart['data']['dependencies'][iter] = {
-                    'chart': chart_dep.get('data')
-                }
-        except Exception:
-            raise exceptions.ManifestException(
-                details="Could not find dependency chart {} in {}".format(
-                    dep, const.DOCUMENT_CHART))
-        else:
-            return chart
-
-    def build_chart_group(self, chart_group):
-        """Builds the chart dependencies for`charts`chart group``.
-
-        :param dict chart_group: The chart_group whose dependencies
-            will be built.
-        :returns: The chart_group with all dependencies.
-        :rtype: dict
-        :raises ManifestException: If a chart for a dependency name listed
-            under ``chart_group['data']['chart_group']`` could not be found.
-        """
-        try:
-            chart = None
-            for iter, chart in enumerate(chart_group.get('data').get(
-                    'chart_group', [])):
-                if isinstance(chart, dict):
-                    continue
-                chart_dep = self.find_chart_document(chart)
-                chart_group['data']['chart_group'][iter] = {
-                    'chart': chart_dep.get('data')
-                }
-        except Exception:
-            raise exceptions.ManifestException(
-                details="Could not find chart {} in {}".format(
-                    chart, const.DOCUMENT_GROUP))
-        else:
-            return chart_group
-
-    def build_armada_manifest(self):
-        """Builds the Armada manifest while pulling out data
-        from the chart_group.
-
-        :returns: The Armada manifest with the data of the chart groups.
-        :rtype: dict
-        :raises ManifestException: If a chart group's data listed
-            under ``chart_group['data']`` could not be found.
-        """
-        try:
-            group = None
-            for iter, group in enumerate(self.manifest.get('data').get(
-                    'chart_groups', [])):
-                if isinstance(group, dict):
-                    continue
-                chart_grp = self.find_chart_group_document(group)
-
-                # Add name to chart group
-                ch_grp_data = chart_grp.get('data')
-                ch_grp_data['name'] = chart_grp.get('metadata').get('name')
-
-                self.manifest['data']['chart_groups'][iter] = ch_grp_data
-        except Exception:
-            raise exceptions.ManifestException(
-                "Could not find chart group {} in {}".format(
-                    group, const.DOCUMENT_MANIFEST))
-        else:
-            return self.manifest
+                    self.manifests.append(document)
+            else:
+                LOG.warn('unknown document type: %s', doc_schema)
+        # return charts, groups, manifests
 
     def get_manifest(self):
         """Builds all of the documents including the dependencies of the
@@ -239,10 +97,15 @@ class Manifest(object):
         :returns: The Armada manifest.
         :rtype: dict
         """
-        self.build_charts_deps()
-        self.build_chart_groups()
-        self.build_armada_manifest()
+
+        validator = DocumentDependencyValidator()
+        manifest_with_deps = validator.validate(self)
+
+        # TODO(MarshM) Handle errors?
+        if validator.error_counter > 0:
+            LOG.info('Found [%s] document validation errors: %s',
+                     validator.error_counter, validator.messages)
 
         return {
-            'armada': self.manifest.get('data')
+            'armada': manifest_with_deps.get('data')
         }

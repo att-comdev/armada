@@ -94,7 +94,7 @@ class Armada(object):
         self.tiller_timeout = tiller_timeout
         self.tiller = Tiller(
             tiller_host=tiller_host, tiller_port=tiller_port,
-            tiller_namespace=tiller_namespace)
+            tiller_namespace=tiller_namespace, dry_run=dry_run)
         self.documents = Override(
             documents, overrides=set_ovr,
             values=values).update_manifests()
@@ -150,9 +150,13 @@ class Armada(object):
                     ch_release_name = release_prefix(
                         prefix, ch.get('chart').get('chart_name'))
                     if release[0] == ch_release_name:
-                        LOG.info('Purging failed release %s '
-                                 'before deployment', release[0])
-                        self.tiller.uninstall_release(release[0])
+                        if self.dry_run:
+                            LOG.info('Would purge failed release %s '
+                                     'before deployment.', release[0])
+                        else:
+                            LOG.info('Purging failed release %s '
+                                     'before deployment.', release[0])
+                            self.tiller.uninstall_release(release[0])
 
         # Clone the chart sources
         #
@@ -234,6 +238,9 @@ class Armada(object):
         Synchronize Helm with the Armada Config(s)
         '''
 
+        if self.dry_run:
+            LOG.info('Armada is in DRY RUN mode, no changes being made.')
+
         msg = {'install': [], 'upgrade': [], 'diff': []}
 
         # TODO: (gardlt) we need to break up this func into
@@ -288,7 +295,7 @@ class Armada(object):
                 #                    (caution: it always default to 3600,
                 #                    take care to differentiate user input)
                 if tiller_should_wait and tiller_timeout == DEFAULT_TIMEOUT:
-                        tiller_timeout = chart.get('timeout', tiller_timeout)
+                    tiller_timeout = chart.get('timeout', tiller_timeout)
                 wait_values = chart.get('wait', {})
                 wait_timeout = wait_values.get('timeout', tiller_timeout)
                 wait_values_labels = wait_values.get('labels', {})
@@ -304,17 +311,16 @@ class Armada(object):
                 if prefix_chart in deployed_releases:
 
                     # indicate to the end user what path we are taking
-                    LOG.info("Upgrading release %s", release)
+                    LOG.info("Attempting Upgrade release %s", release)
                     # extract the installed chart and installed values from the
                     # latest release so we can compare to the intended state
-                    LOG.info("Checking Pre/Post Actions")
                     apply_chart, apply_values = self.find_release_chart(
                         known_releases, prefix_chart)
 
                     upgrade = chart.get('upgrade', {})
                     disable_hooks = upgrade.get('no_hooks', False)
 
-                    LOG.info("Checking Pre/Post Actions")
+                    LOG.debug("Checking Pre/Post Actions")
                     if upgrade:
                         upgrade_pre = upgrade.get('pre', {})
                         upgrade_post = upgrade.get('post', {})
@@ -347,7 +353,7 @@ class Armada(object):
                         namespace,
                         pre_actions=pre_actions,
                         post_actions=post_actions,
-                        dry_run=self.dry_run,
+                        # dry_run=self.dry_run,
                         disable_hooks=disable_hooks,
                         values=yaml.safe_dump(values),
                         wait=tiller_should_wait,
@@ -367,14 +373,14 @@ class Armada(object):
 
                 # process install
                 else:
-                    LOG.info("Installing release %s", release)
+                    LOG.info("Attempting Install release %s", release)
                     LOG.info('Beginning Install, wait: %s, %s',
                              tiller_should_wait, wait_timeout)
                     self.tiller.install_release(
                         protoc_chart,
                         prefix_chart,
                         namespace,
-                        dry_run=self.dry_run,
+                        # dry_run=self.dry_run,
                         values=yaml.safe_dump(values),
                         wait=tiller_should_wait,
                         timeout=wait_timeout)
