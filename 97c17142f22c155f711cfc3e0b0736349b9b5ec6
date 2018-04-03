@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "493c6dd9_2e4158a5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-03T23:30:30Z",
+      "side": 1,
+      "message": "Remove this stuff, update with new stuff",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 64
+      },
+      "revId": "97c17142f22c155f711cfc3e0b0736349b9b5ec6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "690d573c_4bcb6db9",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 6
