@@ -15,53 +15,6 @@ limitations under the License.
 */}}
 
 {{- if .Values.manifests.job_ks_user }}
-{{- $envAll := . }}
-{{- $dependencies := .Values.dependencies.ks_user }}
-{{- $serviceAccountName := "armada-ks-user" }}
-{{ tuple $envAll $dependencies $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: armada-ks-user
-spec:
-  template:
-    metadata:
-      labels:
-{{ tuple $envAll "armada" "ks-user" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
-    spec:
-      serviceAccountName: {{ $serviceAccountName }}
-      restartPolicy: OnFailure
-      nodeSelector:
-        {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
-      initContainers:
-{{ tuple $envAll $dependencies list | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
-      containers:
-        - name: armada-ks-user
-          image: {{ .Values.images.tags.ks_user }}
-          imagePullPolicy: {{ .Values.images.pull_policy }}
-{{ tuple $envAll $envAll.Values.pod.resources.jobs.ks_user | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
-          command:
-            - /tmp/ks-user.sh
-          volumeMounts:
-            - name: ks-user-sh
-              mountPath: /tmp/ks-user.sh
-              subPath: ks-user.sh
-              readOnly: true
-          env:
-{{- with $env := dict "ksUserSecret" .Values.secrets.identity.admin }}
-{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
-{{- end }}
-            - name: SERVICE_OS_SERVICE_NAME
-              value: "armada"
-{{- with $env := dict "ksUserSecret" .Values.secrets.identity.user }}
-{{- include "helm-toolkit.snippets.keystone_user_create_env_vars" $env | indent 12 }}
-{{- end }}
-            - name: SERVICE_OS_ROLE
-              value: {{ .Values.endpoints.identity.auth.user.role | quote }}
-      volumes:
-        - name: ks-user-sh
-          configMap:
-            name: armada-bin
-            defaultMode: 0555
+{{- $ksUserJob := dict "envAll" . "serviceName" "armada" -}}
+{{ $ksUserJob | include "helm-toolkit.manifests.job_ks_user" }}
 {{- end }}

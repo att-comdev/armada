@@ -25,9 +25,7 @@ limitations under the License.
 {{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.armada.keystone_authtoken "auth_url" | quote | trunc 0 -}}
 {{- end -}}
 
-
-{{- $userIdentity := .Values.endpoints.identity.auth.user -}}
-
+{{- $userIdentity := .Values.endpoints.identity.auth.armada -}}
 {{- if empty .Values.conf.armada.keystone_authtoken.project_name -}}
 {{- set .Values.conf.armada.keystone_authtoken "project_name" $userIdentity.project_name | quote | trunc 0 -}}
 {{- end -}}
@@ -50,10 +48,10 @@ kind: ConfigMap
 metadata:
   name: armada-etc
 data:
-  armada.conf: |+
+  armada.conf: |
 {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.armada | indent 4 }}
-  api-paste.ini: |+
+  api-paste.ini: |
 {{ include "helm-toolkit.utils.to_ini" .Values.conf.paste | indent 4 }}
-  policy.yaml: |+
-{{  toYaml .Values.conf.policy | indent 4 }}
+  policy.yaml: |
+{{ toYaml .Values.conf.policy | indent 4 }}
 {{- end }}
