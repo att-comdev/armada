@@ -17,6 +17,9 @@
 release_group: null
 
 labels:
+  job:
+    node_selector_key: ucp-control-plane
+    node_selector_value: enabled
   node_selector_key: ucp-control-plane
   node_selector_value: enabled
 
@@ -24,42 +27,48 @@ images:
   tags:
     api: quay.io/attcomdev/armada:latest
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.0
-    ks_endpoints: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-    ks_service: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-    ks_user: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    ks_endpoints: docker.io/openstackhelm/heat:newton
+    ks_service: docker.io/openstackhelm/heat:newton
+    ks_user: docker.io/openstackhelm/heat:newton
 
   pull_policy: "IfNotPresent"
 
 network:
   api:
     ingress:
-      public: false
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
     node_port:
       enabled: true
       port: 31903
 
 dependencies:
-  ks_user:
-    services:
-    - service: identity
-      endpoint: internal
-  ks_service:
-    services:
-    - service: identity
-      endpoint: internal
-  ks_endpoints:
-    jobs:
-    - armada-ks-service
-    services:
-    - service: identity
-      endpoint: internal
-  api:
-    jobs:
-    - armada-ks-service
-    - armada-ks-user
-    services:
-    - service: identity
-      endpoint: internal
+  static:
+    ks_user:
+      services:
+      - service: identity
+        endpoint: internal
+    ks_service:
+      services:
+      - service: identity
+        endpoint: internal
+    ks_endpoints:
+      jobs:
+      - armada-ks-service
+      services:
+      - service: identity
+        endpoint: internal
+    api:
+      jobs:
+      - armada-ks-service
+      - armada-ks-user
+      services:
+      - service: identity
+        endpoint: internal
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -76,13 +85,13 @@ endpoints:
         region_name: RegionOne
         user_domain_name: default
         username: admin
-      user:
-        password: armada
-        project_domain_name: ucp
+      armada:
+        password: password
+        project_domain_name: default
         project_name: service
         region_name: RegionOne
         role: admin
-        user_domain_name: ucp
+        user_domain_name: default
         username: armada
     hosts:
       default: keystone-api
@@ -116,7 +125,7 @@ endpoints:
 secrets:
   identity:
     admin: armada-keystone-admin
-    user: armada-keystone-user
+    armada: armada-keystone-user
 
 conf:
   armada:
@@ -241,6 +250,6 @@ manifests:
   job_ks_service: true
   job_ks_user: true
   secret_keystone: true
-  service_api: true
-  service_ingress_api: true
+  service: true
+  service_ingress: true
   test_armada_api: true
