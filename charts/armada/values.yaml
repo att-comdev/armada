@@ -17,49 +17,57 @@
 release_group: null
 
 labels:
+  job:
+    node_selector_key: ucp-control-plane
+    node_selector_value: enabled
   node_selector_key: ucp-control-plane
   node_selector_value: enabled
 
 images:
+  pull_policy: IfNotPresent
   tags:
-    api: quay.io/attcomdev/armada:latest
-    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.0
-    ks_endpoints: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-    ks_service: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-    ks_user: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-
-  pull_policy: "IfNotPresent"
+    api: 'quay.io/attcomdev/armada:latest'
+    dep_check: 'quay.io/stackanetes/kubernetes-entrypoint:v0.3.0'
+    ks_endpoints: 'docker.io/openstackhelm/heat:newton'
+    ks_service: 'docker.io/openstackhelm/heat:newton'
+    ks_user: 'docker.io/openstackhelm/heat:newton'
 
 network:
   api:
     ingress:
-      public: false
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+      classes:
+        cluster: nginx-cluster
+        namespace: nginx
+      public: true
     node_port:
-      enabled: true
+      enabled: false
       port: 31903
 
 dependencies:
-  ks_user:
-    services:
-    - service: identity
-      endpoint: internal
-  ks_service:
-    services:
-    - service: identity
-      endpoint: internal
-  ks_endpoints:
-    jobs:
-    - armada-ks-service
-    services:
-    - service: identity
-      endpoint: internal
-  api:
-    jobs:
-    - armada-ks-service
-    - armada-ks-user
-    services:
-    - service: identity
-      endpoint: internal
+  static:
+    api:
+      jobs:
+        - armada-ks-service
+        - armada-ks-user
+      services:
+        - endpoint: internal
+          service: identity
+    ks_endpoints:
+      jobs:
+        - armada-ks-service
+      services:
+        - endpoint: internal
+          service: identity
+    ks_service:
+      services:
+        - endpoint: internal
+          service: identity
+    ks_user:
+      services:
+        - endpoint: internal
+          service: identity
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -76,13 +84,13 @@ endpoints:
         region_name: RegionOne
         user_domain_name: default
         username: admin
-      user:
-        password: armada
-        project_domain_name: ucp
+      armada:
+        password: password
+        project_domain_name: default
         project_name: service
         region_name: RegionOne
         role: admin
-        user_domain_name: ucp
+        user_domain_name: default
         username: armada
     hosts:
       default: keystone-api
@@ -116,35 +124,35 @@ endpoints:
 secrets:
   identity:
     admin: armada-keystone-admin
-    user: armada-keystone-user
+    armada: armada-keystone-user
 
 conf:
   armada:
+    armada_api:
+      bind_port: 8000
     keystone_authtoken:
       auth_type: password
       auth_version: 3
       delay_auth_decision: true
-    armada_api:
-      bind_port: 8000
     oslo_policy:
-      policy_file: "policy.yaml"
+      policy_file: policy.yaml
   paste:
-    app:armada-api:
-      paste.app_factory: armada.api.server:paste_start_armada
-    pipeline:main:
+    'app:armada-api':
+      paste.app_factory: 'armada.api.server:paste_start_armada'
+    'filter:authtoken':
+      paste.filter_factory: 'keystonemiddleware.auth_token:filter_factory'
+    'pipeline:main':
       pipeline: authtoken armada-api
-    filter:authtoken:
-      paste.filter_factory: keystonemiddleware.auth_token:filter_factory
   policy:
-    admin_required: "role:admin"
-    service_or_admin: "rule:admin_required or rule:service_role"
-    service_role: "role:service"
-    armada:create_endpoints: "rule:admin_required"
-    armada:validate_manifest: "rule:admin_required"
-    armada:test_release: "rule:admin_required"
-    armada:test_manifest: "rule:admin_required"
-    tiller:get_status: "rule:admin_required"
-    tiller:get_released: "rule:admin_required"
+    admin_required: 'role:admin'
+    'armada:create_endpoints': 'rule:admin_required'
+    'armada:test_manifest': 'rule:admin_required'
+    'armada:test_release': 'rule:admin_required'
+    'armada:validate_manifest': 'rule:admin_required'
+    service_or_admin: 'rule:admin_required or rule:service_role'
+    service_role: 'role:service'
+    'tiller:get_released': 'rule:admin_required'
+    'tiller:get_status': 'rule:admin_required'
 
 pod:
   env:
@@ -241,6 +249,6 @@ manifests:
   job_ks_service: true
   job_ks_user: true
   secret_keystone: true
-  service_api: true
-  service_ingress_api: true
+  service: true
+  service_ingress: true
   test_armada_api: true

@@ -16,7 +16,7 @@ limitations under the License.
 
 {{- if .Values.manifests.deployment_api }}
 {{- $envAll := . }}
-{{- $dependencies := .Values.dependencies.api }}
+{{- $dependencies := .Values.dependencies.static.api }}
 {{- $mounts_armada_api := .Values.pod.mounts.armada_api.armada_api }}
 {{- $mounts_armada_api_init := .Values.pod.mounts.armada_api.init_container }}
 {{- $serviceAccountName := "armada-api" }}
@@ -104,7 +104,8 @@ spec:
           securityContext:
             runAsUser: {{ .Values.pod.user.armada.uid }}
           ports:
-            - containerPort: {{ .Values.conf.armada.armada_api.bind_port }}
+            - name: armada-api
+              containerPort: {{ tuple "armada" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
           livenessProbe:
             httpGet:
               path: /api/v1.0/health
