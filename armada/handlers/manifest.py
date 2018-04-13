@@ -160,7 +160,8 @@ class Manifest(object):
         """
         try:
             dep = None
-            for iter, dep in enumerate(chart.get('data').get('dependencies')):
+            chart_dependencies = chart.get('data', {}).get('dependencies')
+            for iter, dep in enumerate(chart_dependencies):
                 if isinstance(dep, dict):
                     continue
                 chart_dep = self.find_chart_document(dep)

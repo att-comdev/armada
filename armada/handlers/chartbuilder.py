@@ -33,21 +33,15 @@ CONF = cfg.CONF
 
 class ChartBuilder(object):
     '''
-    This class handles taking chart intentions as a parameter and
-    turning those into proper protoc helm charts that can be
-    pushed to tiller.
-
-    It also processes chart source declarations, fetching chart
-    source from external resources where necessary
+    This class handles taking chart intentions as a parameter and turning those
+    into proper ``protoc`` Helm charts that can be pushed to Tiller.
     '''
 
     def __init__(self, chart, parent=None):
-        '''
-        Initialize the ChartBuilder class
+        '''Initialize the :class:`ChartBuilder` class.
 
-        Note that this will trigger a source pull as part of
-        initialization as its necessary in order to examine
-        the source service many of the calls on ChartBuilder
+        :param dict chart: The document containing all intentions to pass to
+                           Tiller.
         '''
 
         # cache for generated protoc chart object
@@ -66,8 +60,10 @@ class ChartBuilder(object):
         self.ignored_files = self.get_ignored_files()
 
     def get_source_path(self):
-        '''
-        Return the joined path of the source directory and subpath
+        '''Return the joined path of the source directory and subpath.
+
+        Returns the "source_dir" property from the chart which is expected
+        to be a 2-tuple of (source directory, subpath). Returns "" otherwise.
         '''
         source_dir = self.chart.get('source_dir')
         return (
@@ -79,9 +75,7 @@ class ChartBuilder(object):
         )
 
     def get_ignored_files(self):
-        '''
-        Load files from .helmignore if present
-        '''
+        '''Load files to ignore from .helmignore if present.'''
         try:
             ignored_files = []
             if os.path.exists(os.path.join(self.source_directory,
@@ -94,11 +88,11 @@ class ChartBuilder(object):
             raise chartbuilder_exceptions.IgnoredFilesLoadException()
 
     def ignore_file(self, filename):
-        '''
-        :params file - filename to compare against list of ignored files
+        '''Returns whether a given ``filename`` should be ignored.
 
-        Returns true if file matches an ignored file wildcard or exact name,
-         false otherwise
+        :param filename: Filename to compare against list of ignored files.
+        :returns: True if file matches an ignored file wildcard or exact name,
+            False otherwise.
         '''
         for ignored_file in self.ignored_files:
             if (ignored_file.startswith('*') and
@@ -109,11 +103,9 @@ class ChartBuilder(object):
         return False
 
     def get_metadata(self):
+        '''Extract metadata from Chart.yaml to construct an instance of
+        :class:`hapi.chart.metadata_pb2.Metadata`.
         '''
-        Process metadata
-        '''
-        # extract Chart.yaml to construct metadata
-
         try:
             with open(os.path.join(self.source_directory, 'Chart.yaml')) as f:
                 chart_yaml = yaml.safe_load(f.read().encode('utf-8'))
@@ -121,7 +113,7 @@ class ChartBuilder(object):
         except Exception:
             raise chartbuilder_exceptions.MetadataLoadException()
 
-        # construct Metadata object
+        # Construct Metadata object.
         return Metadata(
             description=chart_yaml.get('description'),
             name=chart_yaml.get('name'),
@@ -199,9 +191,7 @@ class ChartBuilder(object):
         return non_template_files
 
     def get_values(self):
-        '''
-        Return the chart (default) values
-        '''
+        '''Return the chart's (default) values.'''
 
         # create config object representing unmarshaled values.yaml
         if os.path.exists(os.path.join(self.source_directory, 'values.yaml')):
@@ -215,12 +205,11 @@ class ChartBuilder(object):
         return Config(raw=raw_values)
 
     def get_templates(self):
-        '''
-        Return all the chart templates
-        '''
+        '''Return all the chart templates.
 
-        # process all files in templates/ as a template to attach to the chart
-        # building a Template object
+        Process all files in templates/ as a template to attach to the chart,
+        building a :class:`hapi.chart.template_pb2.Template` object.
+        '''
         chart_name = self.chart.get('chart_name')
         templates = []
         if not os.path.exists(
@@ -245,8 +234,10 @@ class ChartBuilder(object):
         return templates
 
     def get_helm_chart(self):
-        '''
-        Return a helm chart object
+        '''Return a Helm chart object.
+
+        Constructs a :class:`hapi.chart.chart_pb2.Chart` object from the
+        ``chart`` intentions, including all dependencies.
         '''
         if self._helm_chart:
             return self._helm_chart
@@ -280,10 +271,9 @@ class ChartBuilder(object):
         return helm_chart
 
     def dump(self):
-        '''
-        This method is used to dump a chart object as a
-        serialized string so that we can perform a diff
+        '''Dumps a chart object as a serialized string so that we can perform a
+        diff.
 
-        It should recurse into dependencies
+        It recurses into dependencies.
         '''
         return self.get_helm_chart().SerializeToString()
