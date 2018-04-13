@@ -181,11 +181,10 @@ class ApplyManifest(CliAction):
 
             for ch in resp[result]:
                 if not result == 'diff':
-                    msg = 'Chart {} was {}ed'.format(ch, result)
+                    msg = 'Chart {} took action: {}'.format(ch, result)
                     self.logger.info(msg)
                 else:
-                    self.logger.info('Chart values diff')
-                    self.logger.info(ch)
+                    self.logger.info('Chart/values diff: %s', ch)
 
     def invoke(self):
         if not self.ctx.obj.get('api', False):
