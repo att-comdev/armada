@@ -160,7 +160,8 @@ class Manifest(object):
         """
         try:
             dep = None
-            for iter, dep in enumerate(chart.get('data').get('dependencies')):
+            chart_dependencies = chart.get('data', {}).get('dependencies')
+            for iter, dep in enumerate(chart_dependencies):
                 if isinstance(dep, dict):
                     continue
                 chart_dep = self.find_chart_document(dep)
@@ -187,13 +188,13 @@ class Manifest(object):
         """
         try:
             chart = None
-            for iter, chart in enumerate(chart_group.get('data').get(
+            for iter, chart in enumerate(chart_group.get('data', {}).get(
                     'chart_group', [])):
                 if isinstance(chart, dict):
                     continue
                 chart_dep = self.find_chart_document(chart)
                 chart_group['data']['chart_group'][iter] = {
-                    'chart': chart_dep.get('data')
+                    'chart': chart_dep.get('data', {})
                 }
         except Exception:
             raise exceptions.ManifestException(
@@ -213,7 +214,7 @@ class Manifest(object):
         """
         try:
             group = None
-            for iter, group in enumerate(self.manifest.get('data').get(
+            for iter, group in enumerate(self.manifest.get('data', {}).get(
                     'chart_groups', [])):
                 if isinstance(group, dict):
                     continue
