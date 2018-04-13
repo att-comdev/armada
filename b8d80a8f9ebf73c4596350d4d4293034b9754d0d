@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f6cb7a92_bce8ef39",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-13T17:03:11Z",
+      "side": 1,
+      "message": "I agree, I thought I had left a comment to that effect asking whether this was correct behavior, though the code around L298-300 uses deployed_releases which is a misleading name.",
+      "parentUuid": "20d54f5d_ea7e007a",
+      "revId": "b8d80a8f9ebf73c4596350d4d4293034b9754d0d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce8f248f_4c45680f",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 8
