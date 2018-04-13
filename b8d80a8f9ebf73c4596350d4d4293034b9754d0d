@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20d54f5d_ea7e007a",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-13T16:15:50Z",
+      "side": 1,
+      "message": "This is changing from current behavior to look at DEPLOYED and FAILED, to only look at DEPLOYED.  I think this could cause problems with the install/upgrade cycle, if we try to install over top of a failed release, instead of treating it as an upgrade.\n\nThoughts?",
+      "revId": "b8d80a8f9ebf73c4596350d4d4293034b9754d0d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce8f248f_4c45680f",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-13T16:15:50Z",
+      "side": 1,
+      "message": "Nice update... we should include one around L300 for upgrade",
+      "range": {
+        "startLine": 368,
+        "startChar": 16,
+        "endLine": 369,
+        "endChar": 32
+      },
+      "revId": "b8d80a8f9ebf73c4596350d4d4293034b9754d0d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
