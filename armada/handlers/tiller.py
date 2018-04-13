@@ -177,7 +177,7 @@ class Tiller(object):
                                          metadata=self.metadata)
 
         for y in release_list:
-            LOG.debug('Found release: %s', y.releases)
+            # LOG.debug('Found release: %s', y.releases
             releases.extend(y.releases)
 
         return releases
@@ -283,7 +283,7 @@ class Tiller(object):
                          latest_release.info.status.code)))
             except IndexError:
                 continue
-        LOG.debug('List of Helm Charts from Latest Releases: %s', charts)
+        # LOG.debug('List of Helm Charts from Latest Releases: %s', charts)
         return charts
 
     def update_release(self, chart, release, namespace,
@@ -324,10 +324,12 @@ class Tiller(object):
                 wait=wait,
                 timeout=timeout)
 
-            stub.UpdateRelease(
+            update_msg = stub.UpdateRelease(
                 release_request, rel_timeout + GRPC_EPSILON,
                 metadata=self.metadata)
+            return update_msg
         except Exception:
+            LOG.exception('Error while updating release %s', release)
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Upgrade')
 
@@ -365,10 +367,12 @@ class Tiller(object):
                 wait=wait,
                 timeout=timeout)
 
-            return stub.InstallRelease(
+            install_msg = stub.InstallRelease(
                 release_request, rel_timeout + GRPC_EPSILON,
                 metadata=self.metadata)
+            return install_msg
         except Exception:
+            LOG.exception('Error while installing release %s', release)
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Install')
 
@@ -408,6 +412,7 @@ class Tiller(object):
                 return self.get_release_status(release)
 
         except Exception:
+            LOG.exception('Error while testing release %s', release)
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Test')
 
@@ -423,7 +428,6 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             status_request = GetReleaseStatusRequest(
                 name=release, version=version)
-            LOG.debug('GetReleaseStatusRequest= %s', status_request)
 
             release_status = stub.GetReleaseStatus(
                 status_request, self.timeout, metadata=self.metadata)
@@ -445,7 +449,6 @@ class Tiller(object):
             stub = ReleaseServiceStub(self.channel)
             status_request = GetReleaseContentRequest(
                 name=release, version=version)
-            LOG.debug('GetReleaseContentRequest= %s', status_request)
 
             release_content = stub.GetReleaseContent(
                 status_request, self.timeout, metadata=self.metadata)
@@ -466,7 +469,6 @@ class Tiller(object):
             LOG.debug('Getting Tiller version, with timeout=%s', self.timeout)
             tiller_version = stub.GetVersion(
                 release_request, self.timeout, metadata=self.metadata)
-            LOG.debug('Got Tiller version response: %s', tiller_version)
 
             tiller_version = getattr(tiller_version.Version, 'sem_ver', None)
             LOG.debug('Got Tiller version %s', tiller_version)
@@ -496,6 +498,7 @@ class Tiller(object):
                 release_request, self.timeout, metadata=self.metadata)
 
         except Exception:
+            LOG.exception('Error while uninstalling release %s', release)
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Delete')
 

@@ -251,13 +251,14 @@ class K8s(object):
                 timeout=deadline_remaining)
 
             if timed_out:
-                LOG.info('Timed out waiting for pods: %s', unready_pods)
+                LOG.info('Timed out waiting for pods: %s',
+                         sorted(unready_pods))
                 return False
 
             if modified_pods:
                 successes = 0
                 LOG.debug('Continuing to wait, found modified pods: %s',
-                          modified_pods)
+                          sorted(modified_pods))
             else:
                 successes += 1
                 LOG.debug('Found no modified pods this attempt. successes=%d',

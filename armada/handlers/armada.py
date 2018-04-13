@@ -307,7 +307,6 @@ class Armada(object):
                     LOG.info("Upgrading release %s", release)
                     # extract the installed chart and installed values from the
                     # latest release so we can compare to the intended state
-                    LOG.info("Checking Pre/Post Actions")
                     apply_chart, apply_values = self.find_release_chart(
                         known_releases, prefix_chart)
 
@@ -329,7 +328,7 @@ class Armada(object):
                     # values
                     # TODO(alanmeadows) account for .files differences
                     # once we support those
-
+                    LOG.info('Checking upgrade chart diffs.')
                     upgrade_diff = self.show_diff(
                         chart, apply_chart, apply_values,
                         chartbuilder.dump(), values, msg)
@@ -407,6 +406,7 @@ class Armada(object):
 
             # TODO(MarshM) does this need release/labels/namespace?
             # TODO(MarshM) consider the tiller_timeout according to above logic
+            LOG.info('Wait after Chartgroup (%s) %ssec', desc, tiller_timeout)
             self.tiller.k8s.wait_until_ready(
                 k8s_wait_attempts=self.k8s_wait_attempts,
                 k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
@@ -449,13 +449,14 @@ class Armada(object):
         chart_release = chart.get('release', None)
 
         if len(chart_diff) > 0:
-            LOG.info("Chart Unified Diff (%s)", chart_release)
             diff_msg = []
             for line in chart_diff:
                 diff_msg.append(line)
-                LOG.debug(line)
-
             msg['diff'].append({'chart': diff_msg})
+            pretty_diff = '\n'.join(diff_msg).replace(
+                '\\n', '\n').replace('\n\n', '\n')
+            LOG.info("Found diff in chart (%s)", chart_release)
+            LOG.debug(pretty_diff)
 
         values_diff = list(
             difflib.unified_diff(
@@ -463,12 +464,14 @@ class Armada(object):
                 yaml.safe_dump(target_values).split('\n')))
 
         if len(values_diff) > 0:
-            LOG.info("Values Unified Diff (%s)", chart_release)
             diff_msg = []
             for line in values_diff:
                 diff_msg.append(line)
-                LOG.debug(line)
-                msg['diff'].append({'values': diff_msg})
+            msg['diff'].append({'values': diff_msg})
+            pretty_diff = '\n'.join(diff_msg).replace(
+                '\\n', '\n').replace('\n\n', '\n')
+            LOG.info("Found diff in chart values (%s)", chart_release)
+            LOG.debug(pretty_diff)
 
         result = (len(chart_diff) > 0) or (len(values_diff) > 0)
 
