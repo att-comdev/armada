@@ -61,7 +61,7 @@ class Override(object):
     def find_manifest_document(self, doc_path):
         for doc in self.documents:
             if doc.get('schema') == self.find_document_type(
-                doc_path[0]) and doc.get('metadata').get(
+                doc_path[0]) and doc.get('metadata', {}).get(
                     'name') == doc_path[1]:
                 return doc
 
@@ -104,10 +104,9 @@ class Override(object):
     def override_manifest_value(self, doc_path, data_path, new_value):
         document = self.find_manifest_document(doc_path)
         new_data = self.array_to_dict(data_path, new_value)
-        self.update(document.get('data'), new_data)
+        self.update(document.get('data', {}), new_data)
 
     def update_document(self, merging_values):
-
         for doc in merging_values:
             if doc.get('schema') == const.DOCUMENT_CHART:
                 self.update_chart_document(doc)
@@ -119,22 +118,25 @@ class Override(object):
     def update_chart_document(self, ovr):
         for doc in self.documents:
             if doc.get('schema') == const.DOCUMENT_CHART and doc.get(
-                    'metadata').get('name') == ovr.get('metadata').get('name'):
-                self.update(doc.get('data'), ovr.get('data'))
+                    'metadata', {}).get('name') == ovr.get('metadata', {}).get(
+                        'name'):
+                self.update(doc.get('data', {}), ovr.get('data', {}))
                 return
 
     def update_chart_group_document(self, ovr):
         for doc in self.documents:
             if doc.get('schema') == const.DOCUMENT_GROUP and doc.get(
-                    'metadata').get('name') == ovr.get('metadata').get('name'):
-                self.update(doc.get('data'), ovr.get('data'))
+                    'metadata', {}).get('name') == ovr.get('metadata', {}).get(
+                        'name'):
+                self.update(doc.get('data', {}), ovr.get('data', {}))
                 return
 
     def update_armada_manifest(self, ovr):
         for doc in self.documents:
             if doc.get('schema') == const.DOCUMENT_MANIFEST and doc.get(
-                    'metadata').get('name') == ovr.get('metadata').get('name'):
-                self.update(doc.get('data'), ovr.get('data'))
+                    'metadata', {}).get('name') == ovr.get('metadata', {}).get(
+                        'name'):
+                self.update(doc.get('data', {}), ovr.get('data', {}))
                 return
 
     def update_manifests(self):
