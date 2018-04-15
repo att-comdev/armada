@@ -134,7 +134,7 @@ class TestReleasesManifestController(api.BaseResource):
                 tiller_namespace=req.get_param(
                     'tiller_namespace', default=CONF.tiller_namespace))
         # TODO(fmontei): Provide more sensible exception(s) here.
-        except Exception as e:
+        except Exception:
             err_message = 'Failed to initialize Tiller handler.'
             self.error(req.context, err_message)
             return self.return_error(

@@ -54,7 +54,7 @@ class BaseResource(object):
 
         try:
             return list(yaml.safe_load_all(raw_body.decode('utf-8')))
-        except yaml.YAMLError as jex:
+        except yaml.YAMLError:
             with excutils.save_and_reraise_exception():
                 self.error(
                     req.context,
