@@ -37,7 +37,7 @@ from armada.utils.release import label_selectors
 TILLER_VERSION = b'2.7.2'
 TILLER_TIMEOUT = 300
 GRPC_EPSILON = 60
-RELEASE_LIMIT = 64
+RELEASE_LIMIT = 128  # TODO(mark-burnett): There may be a better page size.
 RUNTEST_SUCCESS = 9
 
 # the standard gRPC max message size is 4MB
@@ -166,6 +166,8 @@ class Tiller(object):
         '''
         releases = []
         stub = ReleaseServiceStub(self.channel)
+        # TODO(mark-burnett): Since we're limiting page size, we need to
+        # iterate through all the pages when collecting this list.
         req = ListReleasesRequest(limit=RELEASE_LIMIT,
                                   status_codes=[STATUS_DEPLOYED,
                                                 STATUS_FAILED],

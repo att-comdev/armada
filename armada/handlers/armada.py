@@ -301,6 +301,9 @@ class Armada(object):
                 deployed_releases = [x[0] for x in known_releases]
                 prefix_chart = release_prefix(prefix, release)
 
+                # TODO(mark-burnett): It may be more robust to directly call
+                # tiller status to decide whether to install/upgrade rather
+                # than checking for list membership.
                 if prefix_chart in deployed_releases:
 
                     # indicate to the end user what path we are taking
