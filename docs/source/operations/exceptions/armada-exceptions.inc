@@ -20,6 +20,14 @@
 
   * - Exception Name
     - Description
+  * - ArmadaChartGroupTimeoutException
+    - .. autoexception:: armada.exceptions.armada_exceptions.ArmadaChartGroupTimeoutException
+         :members:
+         :show-inheritance:
+         :undoc-members:
+
+  * - Exception Name
+    - Description
   * - KnownReleasesException
     - .. autoexception:: armada.exceptions.armada_exceptions.KnownReleasesException
          :members:

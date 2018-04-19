@@ -55,7 +55,6 @@ data:
       location: /tmp/dummy/armada
       subpath: chart_2
     dependencies: []
-    timeout: 5
 ---
 schema: armada/Chart/v1
 metadata:
@@ -72,7 +71,6 @@ data:
       subpath: chart_1
       reference: master
     dependencies: []
-    timeout: 50
 """
 
 CHART_SOURCES = [('git://github.com/dummy/armada', 'chart_1'),
@@ -104,7 +102,6 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                                         'type': 'git'
                                     },
                                     'source_dir': CHART_SOURCES[0],
-                                    'timeout': 50,
                                     'values': {}
                                 }
                             },
@@ -120,7 +117,6 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                                         'type': 'local'
                                     },
                                     'source_dir': CHART_SOURCES[1],
-                                    'timeout': 5,
                                     'values': {}
                                 }
                             }
@@ -212,8 +208,8 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                 chart_1['namespace'],
                 dry_run=armada_obj.dry_run,
                 values=yaml.safe_dump(chart_1['values']),
-                wait=armada_obj.tiller_should_wait,
-                timeout=armada_obj.tiller_timeout),
+                timeout=0,
+                wait=False),
             mock.call(
                 mock_chartbuilder().get_helm_chart(),
                 "{}-{}".format(armada_obj.manifest['armada']['release_prefix'],
@@ -221,7 +217,7 @@ class ArmadaHandlerTestCase(base.ArmadaTestCase):
                 chart_2['namespace'],
                 dry_run=armada_obj.dry_run,
                 values=yaml.safe_dump(chart_2['values']),
-                wait=armada_obj.tiller_should_wait,
-                timeout=armada_obj.tiller_timeout)
+                timeout=0,
+                wait=False)
         ]
         mock_tiller.return_value.install_release.assert_has_calls(method_calls)

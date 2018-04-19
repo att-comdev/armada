@@ -21,6 +21,14 @@ class ArmadaException(base_exception.ArmadaBaseException):
     message = 'An unknown Armada handler error occurred.'
 
 
+class ArmadaChartGroupTimeoutException(ArmadaException):
+    '''Exception that occurs when Armada times out while processing.'''
+
+    def __init__(self, chartgroup_name):
+        self._message = 'Armada timed out on ChartGroup: %s' % chartgroup_name
+        super(ArmadaChartGroupTimeoutException, self).__init__(self._message)
+
+
 class KnownReleasesException(ArmadaException):
     '''
     Exception that occurs when no known releases are found.

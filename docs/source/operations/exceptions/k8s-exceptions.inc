@@ -31,3 +31,8 @@
          :members:
          :show-inheritance:
          :undoc-members:
+  * - KubernetesWatchTimeoutException
+    - .. autoexception:: armada.exceptions.k8s_exceptions.KubernetesWatchTimeoutException
+         :members:
+         :show-inheritance:
+         :undoc-members:

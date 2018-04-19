@@ -23,9 +23,9 @@ KEYWORD_PREFIX = 'release_prefix'
 KEYWORD_GROUPS = 'chart_groups'
 KEYWORD_CHARTS = 'chart_group'
 KEYWORD_RELEASE = 'release'
-KEYWORD_CHART = 'chart'
 
-# Statuses
+# Tiller
+DEFAULT_TILLER_TIMEOUT = 3600
 STATUS_DEPLOYED = 'DEPLOYED'
 STATUS_FAILED = 'FAILED'
 

@@ -46,7 +46,8 @@ Commands
       --tiller-host TEXT            Tiller host IP.
       --tiller-port INTEGER         Tiller host port.
       -tn, --tiller-namespace TEXT  Tiller namespace.
-      --timeout INTEGER             Specifies time to wait for charts to deploy.
+      --timeout INTEGER             Specifies time to wait for each chartgroup
+                                    to fully finish deploying.
       -f, --values TEXT             Use to override multiple Armada Manifest
                                     values by reading overrides from a
                                     values.yaml-type file.
