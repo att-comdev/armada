@@ -106,9 +106,10 @@ SHORT_DESC = "Command installs manifest charts."
               type=str,
               default=CONF.tiller_namespace)
 @click.option('--timeout',
-              help="Specifies time to wait for charts to deploy.",
+              help="Specifies time to wait for each chart to fully "
+                   "finish deploying.",
               type=int,
-              default=3600)
+              default=0)
 @click.option('--values', '-f',
               help=("Use to override multiple Armada Manifest values by "
                     "reading overrides from a values.yaml-type file."),
@@ -116,7 +117,9 @@ SHORT_DESC = "Command installs manifest charts."
               type=str,
               default=[])
 @click.option('--wait',
-              help="Wait until all charts deployed.",
+              help=("Force Tiller to wait until all charts are deployed, "
+                    "rather than using each chart's specified wait policy. "
+                    "This is equivalent to sequenced chartgroups."),
               is_flag=True)
 @click.option('--target-manifest',
               help=("The target manifest to run. Required for specifying "
@@ -207,8 +210,8 @@ class ApplyManifest(CliAction):
                 enable_chart_cleanup=self.enable_chart_cleanup,
                 dry_run=self.dry_run,
                 set_ovr=self.set,
-                tiller_should_wait=self.wait,
-                tiller_timeout=self.timeout,
+                force_wait=self.wait,
+                timeout=self.timeout,
                 tiller_host=self.tiller_host,
                 tiller_port=self.tiller_port,
                 tiller_namespace=self.tiller_namespace,

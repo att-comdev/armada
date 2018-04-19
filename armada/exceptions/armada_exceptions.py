@@ -21,6 +21,14 @@ class ArmadaException(base_exception.ArmadaBaseException):
     message = 'An unknown Armada handler error occurred.'
 
 
+class ArmadaTimeoutException(ArmadaException):
+    '''Exception that occurs when Armada times out while processing.'''
+
+    def __init__(self, reason):
+        self._message = 'Armada timed out waiting on: %s' % (reason)
+        super(ArmadaTimeoutException, self).__init__(self._message)
+
+
 class KnownReleasesException(ArmadaException):
     '''
     Exception that occurs when no known releases are found.
