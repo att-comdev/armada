@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8af9bd8f_64db523c",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1013122
+      },
+      "writtenOn": "2018-04-19T17:01:02Z",
+      "side": 1,
+      "message": "Where does the chart timeout actually get decreased?",
+      "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
