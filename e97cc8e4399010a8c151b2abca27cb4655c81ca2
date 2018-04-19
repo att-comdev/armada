@@ -16,6 +16,24 @@
       "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb1c8555_256f646b",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-19T17:39:03Z",
+      "side": 1,
+      "message": "At the beginning of each pass through the for loop, L292.",
+      "parentUuid": "8af9bd8f_64db523c",
+      "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
