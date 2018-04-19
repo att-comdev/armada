@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "b501c6b7_72f8bf4d",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-19T18:37:40Z",
+      "side": 1,
+      "message": "I think the chartgroup timeout is similar to the sum total timeout of all the timeouts of the charts that belong to that chartgroup. So a timeout at the chartgroup level and a timeout at the chart level also feels like an unnecessary duplication of logic just like the other now-deprecated timeout value at the chart level.",
+      "parentUuid": "428228e0_74575c79",
+      "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e1ef8c4_b56f70a4",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 1
