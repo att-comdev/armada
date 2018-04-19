@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import difflib
+import time
 import yaml
 
 from oslo_config import cfg
@@ -22,18 +23,25 @@ from armada.handlers.chartbuilder import ChartBuilder
 from armada.handlers.manifest import Manifest
 from armada.handlers.override import Override
 from armada.handlers.tiller import Tiller
-from armada.exceptions import armada_exceptions
+from armada.exceptions.armada_exceptions import KnownReleasesException
+from armada.exceptions.armada_exceptions import \
+    ArmadaChartGroupTimeoutException
 from armada.exceptions import source_exceptions
 from armada.exceptions import validate_exceptions
 from armada.exceptions import tiller_exceptions
 from armada.utils.release import release_prefix
 from armada.utils import source
 from armada.utils import validate
-from armada import const
+
+from armada.const import DEFAULT_TILLER_TIMEOUT
+from armada.const import KEYWORD_ARMADA
+from armada.const import KEYWORD_CHARTS
+from armada.const import KEYWORD_GROUPS
+from armada.const import KEYWORD_PREFIX
+from armada.const import STATUS_FAILED
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
-DEFAULT_TIMEOUT = 3600
 
 
 class Armada(object):
@@ -49,8 +57,8 @@ class Armada(object):
                  enable_chart_cleanup=False,
                  dry_run=False,
                  set_ovr=None,
-                 tiller_should_wait=False,
-                 tiller_timeout=DEFAULT_TIMEOUT,
+                 force_wait=False,
+                 chartgroup_timeout=-1,
                  tiller_host=None,
                  tiller_port=None,
                  tiller_namespace=None,
@@ -67,10 +75,10 @@ class Armada(object):
             operations.
         :param bool enable_chart_cleanup: Clean up unmanaged charts.
         :param bool dry_run: Run charts without installing them.
-        :param bool tiller_should_wait: Specifies whether Tiller should wait
-            until all charts are deployed.
-        :param int tiller_timeout: Specifies time Tiller should wait for charts
-            to deploy until timing out.
+        :param bool force_wait: Force Tiller to wait until all charts are
+            deployed, rather than using each chart's specified wait policy.
+        :param int chartgroup_timeout: Specifies overall time in seconds that
+            Tiller should wait for chartgroups until timing out.
         :param str tiller_host: Tiller host IP. Default is None.
         :param int tiller_port: Tiller host port. Default is
             ``CONF.tiller_port``.
@@ -90,8 +98,8 @@ class Armada(object):
         self.disable_update_post = disable_update_post
         self.enable_chart_cleanup = enable_chart_cleanup
         self.dry_run = dry_run
-        self.tiller_should_wait = tiller_should_wait
-        self.tiller_timeout = tiller_timeout
+        self.force_wait = force_wait
+        self.chartgroup_timeout = chartgroup_timeout
         self.tiller = Tiller(
             tiller_host=tiller_host, tiller_port=tiller_port,
             tiller_namespace=tiller_namespace)
@@ -140,13 +148,13 @@ class Armada(object):
                 details=','.join([m.get('message') for m in msg_list]))
 
         # Purge known releases that have failed and are in the current yaml
-        armada_data = self.manifest.get(const.KEYWORD_ARMADA, {})
-        prefix = armada_data.get(const.KEYWORD_PREFIX, '')
-        failed_releases = self.get_releases_by_status(const.STATUS_FAILED)
+        manifest_data = self.manifest.get(KEYWORD_ARMADA, {})
+        prefix = manifest_data.get(KEYWORD_PREFIX, '')
+        failed_releases = self.get_releases_by_status(STATUS_FAILED)
 
         for release in failed_releases:
-            for group in armada_data.get(const.KEYWORD_GROUPS, []):
-                for ch in group.get(const.KEYWORD_CHARTS, []):
+            for group in manifest_data.get(KEYWORD_GROUPS, []):
+                for ch in group.get(KEYWORD_CHARTS, []):
                     ch_release_name = release_prefix(
                         prefix, ch.get('chart', {}).get('chart_name'))
                     if release[0] == ch_release_name:
@@ -159,8 +167,8 @@ class Armada(object):
         # We only support a git source type right now, which can also
         # handle git:// local paths as well
         repos = {}
-        for group in armada_data.get(const.KEYWORD_GROUPS, []):
-            for ch in group.get(const.KEYWORD_CHARTS, []):
+        for group in manifest_data.get(KEYWORD_GROUPS, []):
+            for ch in group.get(KEYWORD_CHARTS, []):
                 self.tag_cloned_repo(ch, repos)
 
                 for dep in ch.get('chart', {}).get('dependencies', []):
@@ -241,79 +249,105 @@ class Armada(object):
 
         # extract known charts on tiller right now
         known_releases = self.tiller.list_charts()
-        armada_data = self.manifest.get(const.KEYWORD_ARMADA, {})
-        prefix = armada_data.get(const.KEYWORD_PREFIX, '')
+        manifest_data = self.manifest.get(KEYWORD_ARMADA, {})
+        prefix = manifest_data.get(KEYWORD_PREFIX, '')
 
         # TODO(fmontei): This is a useless exception that is probably never
         # thrown as `known_releases` is a list and the proper behavior here
         # should be to return early. Fix this once all side effects of
         # correcting this are well understood.
         if known_releases is None:
-            raise armada_exceptions.KnownReleasesException()
+            raise KnownReleasesException()
 
+        LOG.debug('Getting known releases from Tiller...')
         for release in known_releases:
-            LOG.debug("Release %s, Version %s found on Tiller", release[0],
-                      release[1])
+            LOG.debug('Found release %s (status=%s), version %s',
+                      release[0], release[4], release[1])
 
-        for group in armada_data.get(const.KEYWORD_GROUPS, []):
-            tiller_should_wait = self.tiller_should_wait
-            tiller_timeout = self.tiller_timeout
-            desc = group.get('description', 'A Chart Group')
-            charts = group.get(const.KEYWORD_CHARTS, [])
-            test_charts = group.get('test_charts', False)
+        for chartgroup in manifest_data.get(KEYWORD_GROUPS, []):
+            cg_name = chartgroup.get('name', '<missing name>')
+            cg_desc = chartgroup.get('description', '<missing description>')
+            LOG.info('Processing ChartGroup: %s (%s)', cg_name, cg_desc)
 
-            if group.get('sequenced', False) or test_charts:
-                tiller_should_wait = True
+            cg_sequenced = chartgroup.get('sequenced', False)
+            cg_test_all_charts = chartgroup.get('test_charts', False)
 
-            LOG.info('Deploying: %s', desc)
+            cg_timeout = chartgroup.get('timeout', self.chartgroup_timeout)
+            if cg_timeout == -1:
+                LOG.warn('No ChartGroup timeout specified, using default: %ss',
+                         DEFAULT_TILLER_TIMEOUT)
+                cg_timeout = DEFAULT_TILLER_TIMEOUT
 
-            for chart in charts:
-                chart = chart.get('chart', {})
+            namespaces_seen = set()
+            tests_to_run = []
+
+            cg_charts = chartgroup.get(KEYWORD_CHARTS, [])
+
+            # Begin ChartGroup timeout deadline
+            cg_deadline = time.time() + cg_timeout
+
+            for chart_entry in cg_charts:
+                chart = chart_entry.get('chart', {})
+                namespace = chart.get('namespace')
+                namespaces_seen.add(namespace)
+                release = chart.get('release')
                 values = chart.get('values', {})
-                test_chart = chart.get('test', False)
-                namespace = chart.get('namespace', None)
-                release = chart.get('release', None)
                 pre_actions = {}
                 post_actions = {}
 
-                if release is None:
-                    continue
+                release_name = release_prefix(prefix, release)
 
-                if test_chart is True:
-                    tiller_should_wait = True
+                # Check remaining timeout deadline
+                cg_timer = int(cg_deadline - time.time())
+                LOG.info('Processing release %s, ChartGroup timeout '
+                         'remaining: %ss', release_name, cg_timer)
+                if cg_timer <= 0:
+                    LOG.error('ChartGroup timeout expired!')
+                    raise ArmadaChartGroupTimeoutException(cg_name, cg_desc)
 
-                # retrieve appropriate timeout value
+                # Retrieve appropriate timeout value
                 # TODO(MarshM): chart's `data.timeout` should be deprecated
-                #               to favor `data.wait.timeout`
-                # TODO(MarshM) also: timeout logic seems to prefer chart values
-                #                    over api/cli, probably should swap?
-                #                    (caution: it always default to 3600,
-                #                    take care to differentiate user input)
-                if tiller_should_wait and tiller_timeout == DEFAULT_TIMEOUT:
-                    tiller_timeout = chart.get('timeout', tiller_timeout)
+                chart_timeout = chart.get('timeout', 0)
+                # Favor data.wait.timeout over data.timeout, until removed
                 wait_values = chart.get('wait', {})
-                wait_timeout = wait_values.get('timeout', tiller_timeout)
-                wait_values_labels = wait_values.get('labels', {})
+                wait_timeout = wait_values.get('timeout', chart_timeout)
+                wait_labels = wait_values.get('labels', {})
+
+                # TODO(MarshM) should we consider 0 timeout but with labels
+                #   as a valid wait scenario?
+                this_chart_should_wait = (
+                    cg_sequenced or self.force_wait or
+                    wait_timeout > 0 or len(wait_labels) > 0)
+
+                if this_chart_should_wait and not wait_timeout:
+                    LOG.warn('No Chart timeout specified, using default: %ss',
+                             DEFAULT_TILLER_TIMEOUT)
+                    wait_timeout = DEFAULT_TILLER_TIMEOUT
+
+                if wait_timeout > cg_timer:
+                    LOG.warn('Chart timeout (%s) exceeds remaining ChartGroup '
+                             'timeout (%s), decreasing Chart timeout.',
+                             wait_timeout, cg_timer)
+
+                # Chart test policy can override ChartGroup, if specified
+                test_this_chart = chart.get('test', cg_test_all_charts)
 
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
 
-                # determine install or upgrade by examining known releases
-                LOG.debug("RELEASE: %s", release)
                 deployed_releases = [x[0] for x in known_releases]
-                prefix_chart = release_prefix(prefix, release)
 
                 # TODO(mark-burnett): It may be more robust to directly call
                 # tiller status to decide whether to install/upgrade rather
                 # than checking for list membership.
-                if prefix_chart in deployed_releases:
+                if release_name in deployed_releases:
 
                     # indicate to the end user what path we are taking
-                    LOG.info("Upgrading release %s", release)
+                    LOG.info("Upgrading release %s", release_name)
                     # extract the installed chart and installed values from the
                     # latest release so we can compare to the intended state
                     apply_chart, apply_values = self.find_release_chart(
-                        known_releases, prefix_chart)
+                        known_releases, release_name)
 
                     upgrade = chart.get('upgrade', {})
                     disable_hooks = upgrade.get('no_hooks', False)
@@ -329,7 +363,7 @@ class Armada(object):
                         if not self.disable_update_post and upgrade_post:
                             post_actions = upgrade_post
 
-                    # show delta for both the chart templates and the chart
+                    # Show delta for both the chart templates and the chart
                     # values
                     # TODO(alanmeadows) account for .files differences
                     # once we support those
@@ -342,80 +376,108 @@ class Armada(object):
                         LOG.info("There are no updates found in this chart")
                         continue
 
+                    # TODO(MarshM): Add tiller dry-run before upgrade and
+                    # consider deadline impacts
+
                     # do actual update
-                    LOG.info('Beginning Upgrade, wait: %s, %s',
-                             tiller_should_wait, wait_timeout)
+                    LOG.info('Beginning Upgrade, wait=%s, timeout=%ss',
+                             this_chart_should_wait, wait_timeout)
                     self.tiller.update_release(
                         protoc_chart,
-                        prefix_chart,
+                        release_name,
                         namespace,
                         pre_actions=pre_actions,
                         post_actions=post_actions,
                         dry_run=self.dry_run,
                         disable_hooks=disable_hooks,
                         values=yaml.safe_dump(values),
-                        wait=tiller_should_wait,
+                        wait=this_chart_should_wait,
                         timeout=wait_timeout)
 
-                    if tiller_should_wait:
+                    if this_chart_should_wait:
                         self.tiller.k8s.wait_until_ready(
-                            release=prefix_chart,
-                            labels=wait_values_labels,
+                            release=release_name,
+                            labels=wait_labels,
                             namespace=namespace,
                             k8s_wait_attempts=self.k8s_wait_attempts,
                             k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
                             timeout=wait_timeout
                         )
 
-                    msg['upgrade'].append(prefix_chart)
+                    msg['upgrade'].append(release_name)
 
                 # process install
                 else:
-                    LOG.info("Installing release %s", release)
-                    LOG.info('Beginning Install, wait: %s, %s',
-                             tiller_should_wait, wait_timeout)
+                    LOG.info("Installing release %s", release_name)
+                    LOG.info('Beginning Install, wait=%s, timeout=%ss',
+                             this_chart_should_wait, wait_timeout)
                     self.tiller.install_release(
                         protoc_chart,
-                        prefix_chart,
+                        release_name,
                         namespace,
                         dry_run=self.dry_run,
                         values=yaml.safe_dump(values),
-                        wait=tiller_should_wait,
+                        wait=this_chart_should_wait,
                         timeout=wait_timeout)
 
-                    if tiller_should_wait:
+                    if this_chart_should_wait:
                         self.tiller.k8s.wait_until_ready(
-                            release=prefix_chart,
-                            labels=wait_values_labels,
+                            release=release_name,
+                            labels=wait_labels,
                             namespace=namespace,
                             k8s_wait_attempts=self.k8s_wait_attempts,
                             k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
                             timeout=wait_timeout
                         )
 
-                    msg['install'].append(prefix_chart)
+                    msg['install'].append(release_name)
 
-                LOG.debug("Cleaning up chart source in %s",
-                          chartbuilder.source_directory)
+                # Sequenced ChartGroup should run tests after each Chart
+                # TODO(MarshM): Should we have a test timeout value?
+                if test_this_chart and cg_sequenced:
+                    cg_timer = int(cg_deadline - time.time())
+                    LOG.info('Running sequenced test, ChartGroup timeout '
+                             'remaining: %ss.', cg_timer)
+                    if cg_timer <= 0:
+                        LOG.error('ChartGroup timeout expired!')
+                        raise ArmadaChartGroupTimeoutException(
+                            cg_name, cg_desc)
+                    self._test_chart(release_name, cg_timer)
 
-                if test_charts or (test_chart is True):
-                    LOG.info('Testing: %s', prefix_chart)
-                    resp = self.tiller.testing_release(prefix_chart)
-                    test_status = getattr(resp.info.status,
-                                          'last_test_suite_run', 'FAILED')
-                    LOG.info("Test INFO: %s", test_status)
-                    if resp:
-                        LOG.info("PASSED: %s", prefix_chart)
-                    else:
-                        LOG.info("FAILED: %s", prefix_chart)
+                # Un-sequenced ChartGroup should run tests at the end
+                elif test_this_chart:
+                    tests_to_run.append(release_name)
 
-            # TODO(MarshM) does this need release/labels/namespace?
-            # TODO(MarshM) consider the tiller_timeout according to above logic
-            LOG.info('Wait after Chartgroup (%s) %ssec', desc, tiller_timeout)
-            self.tiller.k8s.wait_until_ready(
-                k8s_wait_attempts=self.k8s_wait_attempts,
-                k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
-                timeout=tiller_timeout)
+            # End of Charts in ChartGroup
+            LOG.info('All Charts applied.')
+
+            # After all Charts are applied, we should wait for the entire
+            # ChartGroup to become healthy by looking at the namespaces seen
+            # TODO(MarshM): Need to restrict to only charts we processed
+            for ns in namespaces_seen:
+                cg_timer = int(cg_deadline - time.time())
+                LOG.info('Final wait for healthy namespace (%s), ChartGroup '
+                         'timeout remaining: %ss.', ns, cg_timer)
+                if cg_timer <= 0:
+                    LOG.error('ChartGroup timeout expired!')
+                    raise ArmadaChartGroupTimeoutException(cg_name, cg_desc)
+
+                self.tiller.k8s.wait_until_ready(
+                    namespace=ns,
+                    k8s_wait_attempts=self.k8s_wait_attempts,
+                    k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
+                    timeout=cg_timer)
+
+            # After entire ChartGroup is healthy, run any pending tests
+            for test in tests_to_run:
+                cg_timer = int(cg_deadline - time.time())
+                LOG.info('Testing release %s, Chartgroup timeout '
+                         'remaining: %ss.', test, cg_timer)
+                if cg_timer <= 0:
+                    LOG.error('ChartGroup timeout expired!')
+                    raise ArmadaChartGroupTimeoutException(cg_name, cg_desc)
+
+                self._test_chart(test, cg_timer)
 
         LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()
@@ -423,7 +485,7 @@ class Armada(object):
         if self.enable_chart_cleanup:
             self.tiller.chart_cleanup(
                 prefix,
-                self.manifest[const.KEYWORD_ARMADA][const.KEYWORD_GROUPS])
+                self.manifest[KEYWORD_ARMADA][KEYWORD_GROUPS])
 
         return msg
 
@@ -432,14 +494,25 @@ class Armada(object):
         Operations to run after deployment process has terminated
         '''
         # Delete temp dirs used for deployment
-        for group in self.manifest.get(const.KEYWORD_ARMADA, {}).get(
-                const.KEYWORD_GROUPS, []):
-            for ch in group.get(const.KEYWORD_CHARTS, []):
+        for group in self.manifest.get(KEYWORD_ARMADA, {}).get(
+                KEYWORD_GROUPS, []):
+            for ch in group.get(KEYWORD_CHARTS, []):
                 chart = ch.get('chart', {})
                 if chart.get('source', {}).get('type') == 'git':
                     source_dir = chart.get('source_dir')
                     if isinstance(source_dir, tuple) and source_dir:
                         source.source_cleanup(source_dir[0])
+
+    def _test_chart(self, prefix_chart, timeout):
+        # TODO(MarshM): Fix testing, it's broken
+        resp = self.tiller.testing_release(prefix_chart, timeout=timeout)
+        test_status = getattr(resp.info.status,
+                              'last_test_suite_run', 'FAILED')
+        LOG.info("Test INFO: %s", test_status)
+        if resp:
+            LOG.info("PASSED: %s", prefix_chart)
+        else:
+            LOG.info("FAILED: %s", prefix_chart)
 
     def show_diff(self, chart, installed_chart, installed_values, target_chart,
                   target_values, msg):

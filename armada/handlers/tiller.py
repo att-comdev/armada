@@ -168,6 +168,7 @@ class Tiller(object):
         stub = ReleaseServiceStub(self.channel)
         # TODO(mark-burnett): Since we're limiting page size, we need to
         # iterate through all the pages when collecting this list.
+        # NOTE(MarshM): `Helm List` defaults to returning Deployed and Failed
         req = ListReleasesRequest(limit=RELEASE_LIMIT,
                                   status_codes=[STATUS_DEPLOYED,
                                                 STATUS_FAILED],
@@ -210,7 +211,7 @@ class Tiller(object):
                 return template
 
     def _pre_update_actions(self, actions, release_name, namespace, chart,
-                            disable_hooks, values):
+                            disable_hooks, values, timeout):
         '''
         :params actions - array of items actions
         :params namespace - name of pod for actions
@@ -225,9 +226,10 @@ class Tiller(object):
 
                 self.rolling_upgrade_pod_deployment(
                     name, release_name, namespace, labels,
-                    action_type, chart, disable_hooks, values)
+                    action_type, chart, disable_hooks, values, timeout)
         except Exception:
             LOG.warn("Pre: Could not update anything, please check yaml")
+            raise ex.PreUpdateJobDeleteException(name, namespace)
 
         try:
             for action in actions.get('delete', []):
@@ -235,8 +237,8 @@ class Tiller(object):
                 action_type = action.get('type')
                 labels = action.get('labels', None)
 
-                self.delete_resources(
-                    release_name, name, action_type, labels, namespace)
+                self.delete_resources(release_name, name, action_type,
+                                      labels, namespace, timeout)
         except Exception:
             LOG.warn("PRE: Could not delete anything, please check yaml")
             raise ex.PreUpdateJobDeleteException(name, namespace)
@@ -312,7 +314,7 @@ class Tiller(object):
             values = Config(raw=values)
 
         self._pre_update_actions(pre_actions, release, namespace, chart,
-                                 disable_hooks, values)
+                                 disable_hooks, values, timeout)
 
         # build release install request
         try:
@@ -527,7 +529,8 @@ class Tiller(object):
                 self.uninstall_release(chart)
 
     def delete_resources(self, release_name, resource_name, resource_type,
-                         resource_labels, namespace, wait=False):
+                         resource_labels, namespace, wait=False,
+                         timeout=TILLER_TIMEOUT):
         '''
         :params release_name - release name the specified resource is under
         :params resource_name - name of specific resource
@@ -541,16 +544,16 @@ class Tiller(object):
         label_selector = ''
         if resource_labels is not None:
             label_selector = label_selectors(resource_labels)
-        LOG.debug("Deleting resources in namespace %s matching"
+        LOG.debug("Deleting resources in namespace %s matching "
                   "selectors %s.", namespace, label_selector)
 
         if 'job' in resource_type:
             get_jobs = self.k8s.get_namespace_job(namespace, label_selector)
             for jb in get_jobs.items:
                 jb_name = jb.metadata.name
-                LOG.info("Deleting %s in namespace: %s", jb_name, namespace)
-
-                self.k8s.delete_job_action(jb_name, namespace)
+                LOG.info("Deleting job %s in namespace: %s",
+                         jb_name, namespace)
+                self.k8s.delete_job_action(jb_name, namespace, timeout=timeout)
 
         elif 'pod' in resource_type:
             release_pods = self.k8s.get_namespace_pod(
@@ -558,7 +561,8 @@ class Tiller(object):
 
             for pod in release_pods.items:
                 pod_name = pod.metadata.name
-                LOG.info("Deleting %s in namespace: %s", pod_name, namespace)
+                LOG.info("Deleting pod %s in namespace: %s",
+                         pod_name, namespace)
                 self.k8s.delete_namespace_pod(pod_name, namespace)
                 if wait:
                     self.k8s.wait_for_pod_redeployment(pod_name, namespace)
@@ -568,7 +572,8 @@ class Tiller(object):
 
     def rolling_upgrade_pod_deployment(self, name, release_name, namespace,
                                        resource_labels, action_type, chart,
-                                       disable_hooks, values):
+                                       disable_hooks, values,
+                                       timeout=TILLER_TIMEOUT):
         '''
         update statefullsets (daemon, stateful)
         '''
@@ -607,7 +612,7 @@ class Tiller(object):
                     # delete pods
                     self.delete_resources(
                         release_name, name, 'pod', resource_labels, namespace,
-                        wait=True)
+                        wait=True, timeout=timeout)
 
         else:
             LOG.error("Unable to exectue name: % type: %s", name, action_type)
