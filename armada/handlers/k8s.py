@@ -22,6 +22,7 @@ from kubernetes.client.rest import ApiException
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from armada.const import DEFAULT_K8S_TIMEOUT
 from armada.utils.release import label_selectors
 from armada.exceptions import k8s_exceptions as exceptions
 
@@ -48,7 +49,8 @@ class K8s(object):
         self.extension_api = client.ExtensionsV1beta1Api()
 
     def delete_job_action(self, name, namespace="default",
-                          propagation_policy='Foreground'):
+                          propagation_policy='Foreground',
+                          timeout=DEFAULT_K8S_TIMEOUT):
         '''
         :params name - name of the job
         :params namespace - name of pod that job
@@ -58,13 +60,38 @@ class K8s(object):
                                     before the Job is marked as deleted.
         '''
         try:
+            LOG.debug('Deleting job %s, Wait timeout=%s', name, timeout)
             body = client.V1DeleteOptions()
-            self.batch_api.delete_namespaced_job(
-                name=name, namespace=namespace, body=body,
-                propagation_policy=propagation_policy)
+            w = watch.Watch()
+            issue_delete = True
+            for event in w.stream(self.batch_api.list_namespaced_job,
+                                  namespace=namespace,
+                                  timeout_seconds=timeout):
+                if issue_delete:
+                    self.batch_api.delete_namespaced_job(
+                        name=name, namespace=namespace, body=body,
+                        propagation_policy=propagation_policy)
+                    issue_delete = False
+
+                event_type = event['type'].upper()
+                job_name = event['object'].metadata.name
+
+                if event_type == 'DELETED' and job_name == name:
+                    LOG.debug('Successfully deleted job %s', job_name)
+                    return
+
+            LOG.info(
+                'Reached timeout while waiting to delete job %s, namespace=%s',
+                name, namespace)
+            raise exceptions.KubernetesWatchTimeoutException(
+                'Timed out while deleting job: name=%s, namespace=%s' %
+                (name, namespace))
+
         except ApiException as e:
-            LOG.error("Exception when deleting job: name=%s, namespace=%s: %s",
-                      name, namespace, e)
+            LOG.exception(
+                "Exception when deleting job: name=%s, namespace=%s",
+                name, namespace)
+            raise e
 
     def get_namespace_job(self, namespace="default", label_selector=''):
         '''
@@ -188,7 +215,8 @@ class K8s(object):
                         LOG.info('New pod %s deployed', new_pod_name)
                         w.stop()
 
-    def wait_get_completed_podphase(self, release, timeout=300):
+    def wait_get_completed_podphase(self, release,
+                                    timeout=DEFAULT_K8S_TIMEOUT):
         '''
         :param release - part of namespace
         :param timeout - time before disconnecting stream
@@ -207,9 +235,9 @@ class K8s(object):
 
     def wait_until_ready(self,
                          release=None,
-                         namespace='default',
+                         namespace='',
                          labels='',
-                         timeout=300,
+                         timeout=DEFAULT_K8S_TIMEOUT,
                          k8s_wait_attempts=1,
                          k8s_wait_attempt_sleep=1):
         '''
@@ -232,9 +260,18 @@ class K8s(object):
         sleep_time = (k8s_wait_attempt_sleep if k8s_wait_attempt_sleep >= 1
                       else 1)
 
-        LOG.debug("Wait on %s (%s) for %s sec (k8s wait %s times, sleep %ss)",
+        LOG.debug("Wait on namespace=(%s) labels=(%s) for %s sec "
+                  "(k8s wait %s times, sleep %ss)",
                   namespace, label_selector, timeout,
                   wait_attempts, sleep_time)
+
+        if not namespace:
+            # This shouldn't be reachable
+            LOG.warn('"namespace" not specified, waiting across all available '
+                     'namespaces is likely to cause unintended consequences.')
+        if not label_selector:
+            LOG.warn('"label_selector" not specified, waiting with no labels '
+                     'may cause unintended consequences.')
 
         deadline = time.time() + timeout
 
@@ -243,7 +280,7 @@ class K8s(object):
 
         successes = 0
         while successes < wait_attempts:
-            deadline_remaining = int(deadline - time.time())
+            deadline_remaining = int(round(deadline - time.time()))
             if deadline_remaining <= 0:
                 return False
             timed_out, modified_pods, unready_pods = self._wait_one_time(
@@ -253,6 +290,9 @@ class K8s(object):
             if timed_out:
                 LOG.info('Timed out waiting for pods: %s',
                          sorted(unready_pods))
+                raise exceptions.KubernetesWatchTimeoutException(
+                    'Timed out while waiting on namespace=(%s) labels=(%s)' %
+                    (namespace, label_selector))
                 return False
 
             if modified_pods:
@@ -276,17 +316,23 @@ class K8s(object):
         w = watch.Watch()
         first_event = True
 
-        # TODO(MarshM) still need to filter pods on namespace
-        for event in w.stream(self.client.list_pod_for_all_namespaces,
-                              label_selector=label_selector,
-                              timeout_seconds=timeout):
+        # Watch across specific namespace, or all
+        kwargs = {
+            'label_selector': label_selector,
+            'timeout_seconds': timeout,
+        }
+        if namespace:
+            func_to_call = self.client.list_namespaced_pod
+            kwargs['namespace'] = namespace
+        else:
+            func_to_call = self.client.list_pod_for_all_namespaces
+
+        for event in w.stream(func_to_call, **kwargs):
             if first_event:
-                pod_list = self.client.list_pod_for_all_namespaces(
-                    label_selector=label_selector,
-                    timeout_seconds=timeout)
+                pod_list = func_to_call(**kwargs)
                 for pod in pod_list.items:
-                    LOG.debug('Setting up to wait for pod %s',
-                              pod.metadata.name)
+                    LOG.debug('Setting up to wait for pod %s namespace=%s',
+                              pod.metadata.name, pod.metadata.namespace)
                     ready_pods[pod.metadata.name] = False
                 first_event = False
 
