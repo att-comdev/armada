@@ -18,7 +18,13 @@ from armada.exceptions.base_exception import ArmadaBaseException as ex
 class KubernetesException(ex):
     '''Base class for Kubernetes exceptions and error handling.'''
 
-    message = 'An unknown Kubernetes error occured.'
+    message = 'An unknown Kubernetes error occurred.'
+
+
+class KubernetesWatchTimeoutException(KubernetesException):
+    '''Exception for timing out during a watch on a Kubernetes object'''
+
+    message = 'Kubernetes Watch has timed out.'
 
 
 class KubernetesUnknownStreamingEventTypeException(KubernetesException):
