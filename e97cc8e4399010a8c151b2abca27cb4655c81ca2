@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3c410891_3a0a79a8",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-20T02:09:19Z",
+      "side": 1,
+      "message": "This is a requirements concern at the moment, and will be discussed in the near future!",
+      "parentUuid": "428228e0_74575c79",
+      "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e1ef8c4_b56f70a4",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 1
@@ -65,6 +83,30 @@
       "writtenOn": "2018-04-19T18:29:37Z",
       "side": 1,
       "message": "I believe you can make this just set() and call `add` rather than `append` and then you can cast it to a list on L459 to simplify things.",
+      "range": {
+        "startLine": 284,
+        "startChar": 30,
+        "endLine": 284,
+        "endChar": 32
+      },
+      "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c490ced6_24955282",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-20T02:09:19Z",
+      "side": 1,
+      "message": "Good call, I was being dense.  Don\u0027t even need to cast to list below.",
+      "parentUuid": "5e1ef8c4_b56f70a4",
       "range": {
         "startLine": 284,
         "startChar": 30,
@@ -135,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "db7134ef_79cbebc0",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-20T02:09:19Z",
+      "side": 1,
+      "message": "Thanks, I meant to do this and forgot to.",
+      "parentUuid": "2ef30b8b_84321bfc",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 15
+      },
+      "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "528385d7_6c3986cd",
         "filename": "armada/handlers/k8s.py",
         "patchSetId": 1
@@ -146,6 +212,30 @@
       "writtenOn": "2018-04-19T18:29:37Z",
       "side": 1,
       "message": "Why only try the deletion once if it can fail?",
+      "range": {
+        "startLine": 74,
+        "startChar": 20,
+        "endLine": 74,
+        "endChar": 40
+      },
+      "revId": "e97cc8e4399010a8c151b2abca27cb4655c81ca2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9684fa8f_71e40e90",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-20T02:09:19Z",
+      "side": 1,
+      "message": "Not worried about the delete failing, that should throw an ApiException.  I\u0027m looking to catch when the delete is completed before continuing on.",
+      "parentUuid": "528385d7_6c3986cd",
       "range": {
         "startLine": 74,
         "startChar": 20,
