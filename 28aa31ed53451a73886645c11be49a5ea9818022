@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af9163b1_75f6310a",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-25T06:01:14Z",
+      "side": 1,
+      "message": "If both charts were converted to dicts then newlines won\u0027t matter and that should making diffing way easier.",
+      "range": {
+        "startLine": 515,
+        "startChar": 0,
+        "endLine": 517,
+        "endChar": 68
+      },
+      "revId": "28aa31ed53451a73886645c11be49a5ea9818022",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
