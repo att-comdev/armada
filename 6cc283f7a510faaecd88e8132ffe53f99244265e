@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05dc6a69_b0d53299",
+        "filename": "armada/cli/apply.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-26T20:40:39Z",
+      "side": 1,
+      "message": "Should update description here too.",
+      "range": {
+        "startLine": 120,
+        "startChar": 20,
+        "endLine": 120,
+        "endChar": 53
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "744fd19d_95da6734",
+        "filename": "armada/cli/apply.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-26T20:40:39Z",
+      "side": 1,
+      "message": "Looking at API code this should be fine as the param is still externally called wait.",
+      "range": {
+        "startLine": 236,
+        "startChar": 16,
+        "endLine": 236,
+        "endChar": 33
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9751f7d2_4e3e761d",
+        "filename": "armada/const.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-26T20:40:39Z",
+      "side": 1,
+      "message": "It looks like elsewhere this is now 0?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 21
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2aeff76f_a592b7fa",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-26T20:40:39Z",
+      "side": 1,
+      "message": "This is 3600 but seems like elsewhere you changed it to 0.",
+      "range": {
+        "startLine": 296,
+        "startChar": 29,
+        "endLine": 296,
+        "endChar": 50
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34330e01_8f71d513",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-26T20:40:39Z",
+      "side": 1,
+      "message": "Seems like this is a TODO as currently it returns True/False but you don\u0027t do anything with those values",
+      "range": {
+        "startLine": 460,
+        "startChar": 16,
+        "endLine": 460,
+        "endChar": 50
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a75e8df_0a4a2382",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-26T20:40:39Z",
+      "side": 1,
+      "message": "Should be an error",
+      "range": {
+        "startLine": 83,
+        "startChar": 16,
+        "endLine": 83,
+        "endChar": 20
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "93e529e6_eca81695",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-26T20:40:39Z",
+      "side": 1,
+      "message": "I\u0027m not actually sure how this can be raised. AttributeError seems more like but this looks like something to fix later.\n\nIndexError is only raised for arrays and iterables, AttributeError whenever __getattr__ fails and that\u0027s called when you access attributes on objects.\n\nBesides that if this can raise an IndexError (supposedly) why not L353+ or L406+?",
+      "range": {
+        "startLine": 306,
+        "startChar": 19,
+        "endLine": 306,
+        "endChar": 29
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
