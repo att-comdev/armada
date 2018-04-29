@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "23417b3c_1d018f51",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1011939
+      },
+      "writtenOn": "2018-04-29T02:01:38Z",
+      "side": 1,
+      "message": "It appears that 0 is just a signal that no user specified overrides are in place, not an actual default effective value.",
+      "parentUuid": "2aeff76f_a592b7fa",
+      "range": {
+        "startLine": 296,
+        "startChar": 29,
+        "endLine": 296,
+        "endChar": 50
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "34330e01_8f71d513",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 6
