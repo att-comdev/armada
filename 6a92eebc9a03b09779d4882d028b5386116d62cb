@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e93ed8bd_ce558118",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-04-30T23:27:11Z",
+      "side": 1,
+      "message": "__class__.__name__ which returns the name of the class rather than the class obj itself",
+      "range": {
+        "startLine": 308,
+        "startChar": 28,
+        "endLine": 308,
+        "endChar": 37
+      },
+      "revId": "6a92eebc9a03b09779d4882d028b5386116d62cb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
