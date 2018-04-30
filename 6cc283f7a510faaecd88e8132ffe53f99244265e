@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8ebe1c70_53e2737f",
+        "filename": "armada/cli/apply.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-30T19:46:59Z",
+      "side": 1,
+      "message": "I assume you mean update to match closer to the param description in armada handler.  Updated.",
+      "parentUuid": "05dc6a69_b0d53299",
+      "range": {
+        "startLine": 120,
+        "startChar": 20,
+        "endLine": 120,
+        "endChar": 53
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "744fd19d_95da6734",
         "filename": "armada/cli/apply.py",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "bcd09e7e_b8637495",
+        "filename": "armada/cli/apply.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-30T19:46:59Z",
+      "side": 1,
+      "message": "Yes, I am not changing the api/cli command name.  Just armada handler class, to reflect the actual intention of the variable.",
+      "parentUuid": "744fd19d_95da6734",
+      "range": {
+        "startLine": 236,
+        "startChar": 16,
+        "endLine": 236,
+        "endChar": 33
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9751f7d2_4e3e761d",
         "filename": "armada/const.py",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2018-04-26T20:40:39Z",
       "side": 1,
       "message": "It looks like elsewhere this is now 0?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 21
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38151865_e2940445",
+        "filename": "armada/const.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-30T19:46:59Z",
+      "side": 1,
+      "message": "Unrelated, the others are 0 for uninitialized state.  I went back and forth on -1 or 0 a couple times.\nThis is the actual true default, if the user doesn\u0027t specify anything in their chart or api/cli input.",
+      "parentUuid": "9751f7d2_4e3e761d",
       "range": {
         "startLine": 28,
         "startChar": 0,
@@ -118,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "ae501fad_2faef852",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-30T19:46:59Z",
+      "side": 1,
+      "message": "Correct.  0 is for uninitialized.  If the user hasn\u0027t provided a valid default, armada will use 3600.",
+      "parentUuid": "23417b3c_1d018f51",
+      "range": {
+        "startLine": 296,
+        "startChar": 29,
+        "endLine": 296,
+        "endChar": 50
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "34330e01_8f71d513",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 6
@@ -129,6 +225,30 @@
       "writtenOn": "2018-04-26T20:40:39Z",
       "side": 1,
       "message": "Seems like this is a TODO as currently it returns True/False but you don\u0027t do anything with those values",
+      "range": {
+        "startLine": 460,
+        "startChar": 16,
+        "endLine": 460,
+        "endChar": 50
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f28f9de_bdff44d1",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-30T19:46:59Z",
+      "side": 1,
+      "message": "Correct, there is a TODO and opened bug to fix the test logic itself.  This maintains parity, while moving the test functionality into its own function for re-use.",
+      "parentUuid": "34330e01_8f71d513",
       "range": {
         "startLine": 460,
         "startChar": 16,
@@ -164,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "14d080ad_cf9acb38",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-30T19:46:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a75e8df_0a4a2382",
+      "range": {
+        "startLine": 83,
+        "startChar": 16,
+        "endLine": 83,
+        "endChar": 20
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "93e529e6_eca81695",
         "filename": "armada/handlers/tiller.py",
         "patchSetId": 6
@@ -175,6 +319,30 @@
       "writtenOn": "2018-04-26T20:40:39Z",
       "side": 1,
       "message": "I\u0027m not actually sure how this can be raised. AttributeError seems more like but this looks like something to fix later.\n\nIndexError is only raised for arrays and iterables, AttributeError whenever __getattr__ fails and that\u0027s called when you access attributes on objects.\n\nBesides that if this can raise an IndexError (supposedly) why not L353+ or L406+?",
+      "range": {
+        "startLine": 306,
+        "startChar": 19,
+        "endLine": 306,
+        "endChar": 29
+      },
+      "revId": "6cc283f7a510faaecd88e8132ffe53f99244265e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b25476a9_9bbfd99a",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-04-30T19:46:59Z",
+      "side": 1,
+      "message": "Good catch, this must just be old code.  I ran a couple tests and updated to the more appropriate AttributeError, which still isn\u0027t necessarily valid behavior anyway.",
+      "parentUuid": "93e529e6_eca81695",
       "range": {
         "startLine": 306,
         "startChar": 19,
