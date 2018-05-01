@@ -46,29 +46,62 @@ class K8s(object):
 
         self.client = client.CoreV1Api()
         self.batch_api = client.BatchV1Api()
+        self.batch_v1beta1_api = client.BatchV1beta1Api()
         self.extension_api = client.ExtensionsV1beta1Api()
 
     def delete_job_action(self, name, namespace="default",
                           propagation_policy='Foreground',
                           timeout=DEFAULT_K8S_TIMEOUT):
         '''
-        :params name - name of the job
-        :params namespace - name of pod that job
+        :params name - name of job
+        :params namespace - namespace of job
         :params propagation_policy - The Kubernetes propagation_policy to apply
-                                    to the delete. Default 'Foreground' means
-                                    that child Pods to the Job will be deleted
-                                    before the Job is marked as deleted.
+            to the delete. Default 'Foreground' means that child pods to the
+            job will be deleted before the job is marked as deleted.
         '''
+        self._delete_job_action(
+            self.batch_api.list_namespaced_job,
+            self.batch_api.delete_namespaced_job,
+            "job",
+            name,
+            namespace,
+            propagation_policy,
+            timeout)
+
+    def delete_cron_job_action(self, name, namespace="default",
+                               propagation_policy='Foreground',
+                               timeout=DEFAULT_K8S_TIMEOUT):
+        '''
+        :params name - name of cron job
+        :params namespace - namespace of cron job
+        :params propagation_policy - The Kubernetes propagation_policy to apply
+            to the delete. Default 'Foreground' means that child pods of the
+            cron job will be deleted before the cron job is marked as deleted.
+        '''
+        self._delete_job_action(
+            self.batch_v1beta1_api.list_namespaced_cron_job,
+            self.batch_v1beta1_api.delete_namespaced_cron_job,
+            "cron job",
+            name,
+            namespace,
+            propagation_policy,
+            timeout)
+
+    def _delete_job_action(self, list_func, delete_func, job_type_description,
+                           name, namespace="default",
+                           propagation_policy='Foreground',
+                           timeout=DEFAULT_K8S_TIMEOUT):
         try:
-            LOG.debug('Deleting job %s, Wait timeout=%s', name, timeout)
+            LOG.debug('Deleting %s %s, Wait timeout=%s',
+                      job_type_description, name, timeout)
             body = client.V1DeleteOptions()
             w = watch.Watch()
             issue_delete = True
-            for event in w.stream(self.batch_api.list_namespaced_job,
+            for event in w.stream(list_func,
                                   namespace=namespace,
                                   timeout_seconds=timeout):
                 if issue_delete:
-                    self.batch_api.delete_namespaced_job(
+                    delete_func(
                         name=name, namespace=namespace, body=body,
                         propagation_policy=propagation_policy)
                     issue_delete = False
@@ -77,32 +110,48 @@ class K8s(object):
                 job_name = event['object'].metadata.name
 
                 if event_type == 'DELETED' and job_name == name:
-                    LOG.debug('Successfully deleted job %s', job_name)
+                    LOG.debug('Successfully deleted %s %s',
+                              job_type_description, job_name)
                     return
 
-            err_msg = ('Reached timeout while waiting to delete job: '
-                       'name=%s, namespace=%s' % (name, namespace))
+            err_msg = ('Reached timeout while waiting to delete %s: '
+                       'name=%s, namespace=%s' %
+                       (job_type_description, name, namespace))
             LOG.error(err_msg)
             raise exceptions.KubernetesWatchTimeoutException(err_msg)
 
         except ApiException as e:
             LOG.exception(
-                "Exception when deleting job: name=%s, namespace=%s",
-                name, namespace)
+                "Exception when deleting %s: name=%s, namespace=%s",
+                job_type_description, name, namespace)
             raise e
 
     def get_namespace_job(self, namespace="default", label_selector=''):
         '''
-        :params lables - of the job
-        :params namespace - name of jobs
+        :params label_selector - labels of the jobs
+        :params namespace - namespace of the jobs
         '''
 
         try:
             return self.batch_api.list_namespaced_job(
                 namespace, label_selector=label_selector)
         except ApiException as e:
-            LOG.error("Exception getting a job: namespace=%s, label=%s: %s",
+            LOG.error("Exception getting jobs: namespace=%s, label=%s: %s",
                       namespace, label_selector, e)
+
+    def get_namespace_cron_job(self, namespace="default", label_selector=''):
+        '''
+        :params label_selector - labels of the cron jobs
+        :params namespace - namespace of the cron jobs
+        '''
+
+        try:
+            return self.batch_v1beta1_api.list_namespaced_cron_job(
+                namespace, label_selector=label_selector)
+        except ApiException as e:
+            LOG.error(
+                "Exception getting cron jobs: namespace=%s, label=%s: %s",
+                namespace, label_selector, e)
 
     def create_job_action(self, name, namespace="default"):
         '''
