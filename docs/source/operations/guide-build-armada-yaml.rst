@@ -158,7 +158,7 @@ Upgrade - Actions - Update/Delete
 
 .. note::
 
-   Delete Actions only support type: 'job'
+   Delete Actions support type: 'pod', 'job', 'cronjob'
 
 Chart Example
 ^^^^^^^^^^^^^

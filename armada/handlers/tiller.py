@@ -584,15 +584,32 @@ class Tiller(object):
         LOG.debug("Deleting resources in namespace %s matching "
                   "selectors %s.", namespace, label_selector)
 
-        if 'job' in resource_type:
+        handled = False
+        if resource_type == 'job':
             get_jobs = self.k8s.get_namespace_job(namespace, label_selector)
             for jb in get_jobs.items:
                 jb_name = jb.metadata.name
                 LOG.info("Deleting job %s in namespace: %s",
                          jb_name, namespace)
                 self.k8s.delete_job_action(jb_name, namespace, timeout=timeout)
+            handled = True
 
-        elif 'pod' in resource_type:
+        if resource_type == 'cronjob' or resource_type == 'job':
+            get_jobs = self.k8s.get_namespace_cron_job(
+                namespace, label_selector)
+            for jb in get_jobs.items:
+                jb_name = jb.metadata.name
+                LOG.info("Deleting cron job %s in namespace: %s",
+                         jb_name, namespace)
+                if resource_type == 'job':
+                    # TODO: Eventually disallow this, allowing initially since
+                    #       some existing clients were expecting this behavior.
+                    LOG.warning("Deleting cron jobs via `type: job` is "
+                                "deprecated, use `type: cronjob` instead")
+                self.k8s.delete_cron_job_action(jb_name, namespace)
+            handled = True
+
+        if resource_type == 'pod':
             release_pods = self.k8s.get_namespace_pod(
                 namespace, label_selector)
 
@@ -603,7 +620,9 @@ class Tiller(object):
                 self.k8s.delete_namespace_pod(pod_name, namespace)
                 if wait:
                     self.k8s.wait_for_pod_redeployment(pod_name, namespace)
-        else:
+            handled = True
+
+        if not handled:
             LOG.error("Unable to execute name: %s type: %s ",
                       resource_name, resource_type)
 
