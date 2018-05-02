@@ -439,6 +439,9 @@ class Armada(object):
             # ChartGroup to become healthy by looking at the namespaces seen
             # TODO(MarshM): Need to restrict to only charts we processed
             # TODO(MarshM): Need to determine a better timeout
+            #   (not cg_max_timeout)
+            if cg_max_timeout <= 0:
+                cg_max_timeout = DEFAULT_CHART_TIMEOUT
             deadline = time.time() + cg_max_timeout
             for ns in namespaces_seen:
                 timer = int(round(deadline - time.time()))
