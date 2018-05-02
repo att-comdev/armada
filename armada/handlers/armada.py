@@ -269,16 +269,18 @@ class Armada(object):
             for chart_entry in cg_charts:
                 chart = chart_entry.get('chart', {})
                 namespace = chart.get('namespace')
-                namespaces_seen.add(namespace)
                 release = chart.get('release')
                 values = chart.get('values', {})
                 pre_actions = {}
                 post_actions = {}
 
+                wait_timeout = self.timeout
+                wait_labels = {}
+
                 release_name = release_prefix(prefix, release)
 
                 # Retrieve appropriate timeout value
-                wait_timeout = self.timeout
+
                 if wait_timeout <= 0:
                     # TODO(MarshM): chart's `data.timeout` should be deprecated
                     chart_timeout = chart.get('timeout', 0)
@@ -295,6 +297,9 @@ class Armada(object):
                     LOG.warn('No Chart timeout specified, using default: %ss',
                              DEFAULT_CHART_TIMEOUT)
                     wait_timeout = DEFAULT_CHART_TIMEOUT
+
+                # Track namespaces + labels touched
+                namespaces_seen.add((namespace, tuple(wait_labels.items())))
 
                 # Naively take largest timeout to apply at end
                 # TODO(MarshM) better handling of timeout/timer
@@ -437,20 +442,26 @@ class Armada(object):
 
             # After all Charts are applied, we should wait for the entire
             # ChartGroup to become healthy by looking at the namespaces seen
-            # TODO(MarshM): Need to restrict to only charts we processed
+            # TODO(MarshM): Need to restrict to only releases we processed
             # TODO(MarshM): Need to determine a better timeout
+            #               (not cg_max_timeout)
+            if cg_max_timeout <= 0:
+                cg_max_timeout = DEFAULT_CHART_TIMEOUT
             deadline = time.time() + cg_max_timeout
-            for ns in namespaces_seen:
+            for (ns, labels) in namespaces_seen:
+                labels_dict = dict(labels)
                 timer = int(round(deadline - time.time()))
-                LOG.info('Final wait for healthy namespace (%s), '
-                         'timeout remaining: %ss.', ns, timer)
+                LOG.info('Final wait for healthy namespace (%s), label=(%s), '
+                         'timeout remaining: %ss.', ns, labels_dict, timer)
                 if timer <= 0:
-                    reason = 'Timeout expired waiting on namespace: %s' % (ns)
+                    reason = ('Timeout expired waiting on namespace: %s, '
+                              'label: %s' % (ns, labels_dict))
                     LOG.error(reason)
                     raise ArmadaTimeoutException(reason)
 
                 self.tiller.k8s.wait_until_ready(
                     namespace=ns,
+                    labels=labels_dict,
                     k8s_wait_attempts=self.k8s_wait_attempts,
                     k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
                     timeout=timer)

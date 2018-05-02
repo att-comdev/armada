@@ -307,7 +307,7 @@ class K8s(object):
         return True
 
     def _wait_one_time(self, namespace, label_selector, timeout=100):
-        LOG.debug('Starting to wait: namespace=%s, label_selector=%s, '
+        LOG.debug('Starting to wait: namespace=%s, label_selector=(%s), '
                   'timeout=%s', namespace, label_selector, timeout)
         ready_pods = {}
         modified_pods = set()
