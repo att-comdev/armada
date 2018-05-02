@@ -275,10 +275,13 @@ class Armada(object):
                 pre_actions = {}
                 post_actions = {}
 
+                wait_timeout = self.timeout
+                wait_labels = {}
+
                 release_name = release_prefix(prefix, release)
 
                 # Retrieve appropriate timeout value
-                wait_timeout = self.timeout
+
                 if wait_timeout <= 0:
                     # TODO(MarshM): chart's `data.timeout` should be deprecated
                     chart_timeout = chart.get('timeout', 0)
@@ -439,6 +442,9 @@ class Armada(object):
             # ChartGroup to become healthy by looking at the namespaces seen
             # TODO(MarshM): Need to restrict to only charts we processed
             # TODO(MarshM): Need to determine a better timeout
+            #   (not cg_max_timeout)
+            if cg_max_timeout <= 0:
+                cg_max_timeout = DEFAULT_CHART_TIMEOUT
             deadline = time.time() + cg_max_timeout
             for ns in namespaces_seen:
                 timer = int(round(deadline - time.time()))
