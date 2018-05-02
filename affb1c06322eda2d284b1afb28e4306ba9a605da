@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18f7b00e_47aadd5d",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-02T22:08:44Z",
+      "side": 1,
+      "message": "Wouldn\u0027t this always be wait_values.get(\u0027labels\u0027, {})?",
+      "range": {
+        "startLine": 279,
+        "startChar": 30,
+        "endLine": 279,
+        "endChar": 32
+      },
+      "revId": "affb1c06322eda2d284b1afb28e4306ba9a605da",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
