@@ -22,6 +22,30 @@
       "revId": "affb1c06322eda2d284b1afb28e4306ba9a605da",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3fa2459_68389e41",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-03T14:31:49Z",
+      "side": 1,
+      "message": "Yes, but it\u0027s defined in an if block and then used below, causing \"referenced before assignment\" errors",
+      "parentUuid": "18f7b00e_47aadd5d",
+      "range": {
+        "startLine": 279,
+        "startChar": 30,
+        "endLine": 279,
+        "endChar": 32
+      },
+      "revId": "affb1c06322eda2d284b1afb28e4306ba9a605da",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
