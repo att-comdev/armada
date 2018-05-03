@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "12fb3c87_1e556ea4",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-03T20:48:15Z",
+      "side": 1,
+      "message": "I think if the code base were already at all consistent here that would make sense, but since it\u0027s not it seems more important to remain consistent with the existing related code (other methods with same params in the highlighted case) than with the small subset of code being touched, as this just adds noise to the patchset, while still leaving the resulting code base no more consistent than before.  Seems better to do a comprehensive style update on larger portions of the code base as its own PS, although it may be difficult to come to a consensus about rules for single vs double quotes as the python community does not appear to have been able to do so to date.",
+      "parentUuid": "2e0b2d62_847f2a1c",
+      "range": {
+        "startLine": 71,
+        "startChar": 43,
+        "endLine": 72,
+        "endChar": 62
+      },
+      "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54db1546_39daf96e",
         "filename": "armada/handlers/tiller.py",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2018-05-03T18:34:21Z",
       "side": 1,
       "message": "Yoda statements aren\u0027t needed in Python (can\u0027t assign in a conditional).  Pylint, C0122, also flags this as incorrect.  Code works, just not preferred.  Same for line 588.",
+      "range": {
+        "startLine": 601,
+        "startChar": 11,
+        "endLine": 601,
+        "endChar": 63
+      },
+      "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebdc655f_a770034b",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-03T20:48:15Z",
+      "side": 1,
+      "message": "Is pylint conformity a goal?  We don\u0027t appear to run it currently via `make lint`, so wasn\u0027t aware that it was.  pep8 doesn\u0027t seem to care about this.  happy to make the change, but we ought to integrate pylint if we intend to support it.  I\u0027ve had issues in the past with some of the python style checkers contradicting each other.",
+      "parentUuid": "0a6b3486_7a789a2f",
       "range": {
         "startLine": 601,
         "startChar": 11,
