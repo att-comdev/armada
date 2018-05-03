@@ -116,6 +116,30 @@
       "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd6fa748_f612fedd",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1013049
+      },
+      "writtenOn": "2018-05-03T21:03:38Z",
+      "side": 1,
+      "message": "We don\u0027t run pylint.  It was just the best reference I could find on a \u0027Python standard\u0027.  Doesn\u0027t need to change, just when I see something that catches my eye with Python I try and figure out best practices (if they exist).",
+      "parentUuid": "ebdc655f_a770034b",
+      "range": {
+        "startLine": 601,
+        "startChar": 11,
+        "endLine": 601,
+        "endChar": 63
+      },
+      "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
