@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "2e0b2d62_847f2a1c",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1013049
+      },
+      "writtenOn": "2018-05-03T18:34:21Z",
+      "side": 1,
+      "message": "I know it is a copy/paste thing, but maybe be consistent on single vs double quotes within a single patch set?",
+      "range": {
+        "startLine": 71,
+        "startChar": 43,
+        "endLine": 72,
+        "endChar": 62
+      },
+      "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54db1546_39daf96e",
         "filename": "armada/handlers/tiller.py",
         "patchSetId": 1
@@ -18,6 +41,29 @@
         "startChar": 45,
         "endLine": 568,
         "endChar": 58
+      },
+      "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a6b3486_7a789a2f",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1013049
+      },
+      "writtenOn": "2018-05-03T18:34:21Z",
+      "side": 1,
+      "message": "Yoda statements aren\u0027t needed in Python (can\u0027t assign in a conditional).  Pylint, C0122, also flags this as incorrect.  Code works, just not preferred.  Same for line 588.",
+      "range": {
+        "startLine": 601,
+        "startChar": 11,
+        "endLine": 601,
+        "endChar": 63
       },
       "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
