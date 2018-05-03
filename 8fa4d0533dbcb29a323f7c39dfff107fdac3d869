@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54db1546_39daf96e",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-03T14:29:25Z",
+      "side": 1,
+      "message": "This param is currently ignored (besides a log message) and thus deleting resources by name is currently unimplemented.  Should we implement this, or remove the feature?  In this PS or a follow up?",
+      "range": {
+        "startLine": 568,
+        "startChar": 45,
+        "endLine": 568,
+        "endChar": 58
+      },
+      "revId": "8fa4d0533dbcb29a323f7c39dfff107fdac3d869",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
