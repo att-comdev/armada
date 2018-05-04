@@ -110,6 +110,10 @@ clean:
 	rm -rf build
 
 # testing checks
+.PHONY: tests
+tests: check-tox helm_lint
+	tox
+
 .PHONY: test-all
 test-all: check-tox helm_lint
 	tox
