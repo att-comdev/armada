@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "846038da_9334b5a0",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-07T22:09:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c47d3d27_44f3100a",
+      "range": {
+        "startLine": 387,
+        "startChar": 56,
+        "endLine": 387,
+        "endChar": 62
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68d2619c_76cdfa4b",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-05-07T21:05:25Z",
       "side": 1,
       "message": "should this go inside the `if` on L377?  same q for install below.",
+      "range": {
+        "startLine": 387,
+        "startChar": 20,
+        "endLine": 388,
+        "endChar": 77
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6518b55e_dad886c0",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-07T22:09:05Z",
+      "side": 1,
+      "message": "No, in fact this is specifically for waiting below, on the charts that weren\u0027t included in the if-blocks mentioned.\nI contemplated putting it in an else condition, but decided it won\u0027t hurt to wait again anyway, as anything in the above wait should already be healthy by the time we check below.",
+      "parentUuid": "68d2619c_76cdfa4b",
       "range": {
         "startLine": 387,
         "startChar": 20,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "89ac8b9b_e9128c2f",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-07T22:09:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a152bd4d_9a706b22",
+      "range": {
+        "startLine": 451,
+        "startChar": 12,
+        "endLine": 451,
+        "endChar": 74
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "382fd18c_653d2ab8",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2018-05-07T21:05:25Z",
       "side": 1,
       "message": "nit: applying?  just thinking from a perspective of what I\u0027d want to see in e.g. console of CLI",
+      "range": {
+        "startLine": 488,
+        "startChar": 23,
+        "endLine": 488,
+        "endChar": 33
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef32a793_beeac8f2",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-07T22:09:05Z",
+      "side": 1,
+      "message": "I typed \"applying\" originally, and then changed it because there is some further logic where armada.sync() gets called.  I think it\u0027s probably appropriate to change it back though.",
+      "parentUuid": "382fd18c_653d2ab8",
       "range": {
         "startLine": 488,
         "startChar": 23,
