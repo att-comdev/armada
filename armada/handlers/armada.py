@@ -258,7 +258,7 @@ class Armada(object):
             cg_sequenced = chartgroup.get('sequenced', False)
             cg_test_all_charts = chartgroup.get('test_charts', False)
 
-            namespaces_seen = set()
+            ns_label_set = set()
             tests_to_run = []
 
             cg_charts = chartgroup.get(KEYWORD_CHARTS, [])
@@ -280,7 +280,6 @@ class Armada(object):
                 release_name = release_prefix(prefix, release)
 
                 # Retrieve appropriate timeout value
-
                 if wait_timeout <= 0:
                     # TODO(MarshM): chart's `data.timeout` should be deprecated
                     chart_timeout = chart.get('timeout', 0)
@@ -289,24 +288,24 @@ class Armada(object):
                     wait_timeout = wait_values.get('timeout', chart_timeout)
                     wait_labels = wait_values.get('labels', {})
 
+                # Determine wait logic
                 this_chart_should_wait = (
                     cg_sequenced or self.force_wait or
-                    wait_timeout > 0 or len(wait_labels) > 0)
+                    wait_timeout > 0 or len(wait_labels) > 0) and (
+                        not self.dry_run)
 
                 if this_chart_should_wait and wait_timeout <= 0:
                     LOG.warn('No Chart timeout specified, using default: %ss',
                              DEFAULT_CHART_TIMEOUT)
                     wait_timeout = DEFAULT_CHART_TIMEOUT
 
-                # Track namespaces + labels touched
-                namespaces_seen.add((namespace, tuple(wait_labels.items())))
-
                 # Naively take largest timeout to apply at end
                 # TODO(MarshM) better handling of timeout/timer
                 cg_max_timeout = max(wait_timeout, cg_max_timeout)
 
                 # Chart test policy can override ChartGroup, if specified
-                test_this_chart = chart.get('test', cg_test_all_charts)
+                test_this_chart = chart.get('test', cg_test_all_charts) and (
+                    not self.dry_run)
 
                 chartbuilder = ChartBuilder(chart)
                 protoc_chart = chartbuilder.get_helm_chart()
@@ -385,6 +384,9 @@ class Armada(object):
                             timeout=timer
                         )
 
+                    # Track namespace+labels touched by update
+                    ns_label_set.add((namespace, tuple(wait_labels.items())))
+
                     LOG.info('Upgrade completed with results from Tiller: %s',
                              tiller_result.__dict__)
                     msg['upgrade'].append(release_name)
@@ -416,6 +418,9 @@ class Armada(object):
                             timeout=timer
                         )
 
+                    # Track namespace+labels touched by install
+                    ns_label_set.add((namespace, tuple(wait_labels.items())))
+
                     LOG.info('Install completed with results from Tiller: %s',
                              tiller_result.__dict__)
                     msg['install'].append(release_name)
@@ -431,6 +436,7 @@ class Armada(object):
                         LOG.error(reason)
                         raise ArmadaTimeoutException(reason)
                     self._test_chart(release_name, timer)
+                    # TODO(MarshM): handle test failure or timeout
 
                 # Un-sequenced ChartGroup should run tests at the end
                 elif test_this_chart:
@@ -438,7 +444,7 @@ class Armada(object):
                     tests_to_run.append((release_name, timer))
 
             # End of Charts in ChartGroup
-            LOG.info('All Charts applied.')
+            LOG.info('All Charts applied in ChartGroup %s.', cg_name)
 
             # After all Charts are applied, we should wait for the entire
             # ChartGroup to become healthy by looking at the namespaces seen
@@ -448,7 +454,7 @@ class Armada(object):
             if cg_max_timeout <= 0:
                 cg_max_timeout = DEFAULT_CHART_TIMEOUT
             deadline = time.time() + cg_max_timeout
-            for (ns, labels) in namespaces_seen:
+            for (ns, labels) in ns_label_set:
                 labels_dict = dict(labels)
                 timer = int(round(deadline - time.time()))
                 LOG.info('Final wait for healthy namespace (%s), label=(%s), '
@@ -469,8 +475,9 @@ class Armada(object):
             # After entire ChartGroup is healthy, run any pending tests
             for (test, test_timer) in tests_to_run:
                 self._test_chart(test, test_timer)
+                # TODO(MarshM): handle test failure or timeout
 
-        LOG.info("Performing Post-Flight Operations")
+        LOG.info('Performing Post-Flight Operations.')
         self.post_flight_ops()
 
         if self.enable_chart_cleanup:
@@ -478,6 +485,7 @@ class Armada(object):
                 prefix,
                 self.manifest[KEYWORD_ARMADA][KEYWORD_GROUPS])
 
+        LOG.info('Done processing manifest.')
         return msg
 
     def post_flight_ops(self):
@@ -498,12 +506,12 @@ class Armada(object):
         # TODO(MarshM): Fix testing, it's broken, and track timeout
         resp = self.tiller.testing_release(release_name, timeout=timeout)
         status = getattr(resp.info.status, 'last_test_suite_run', 'FAILED')
-        LOG.info("Test INFO: %s", status)
+        LOG.info("Test info.status: %s", status)
         if resp:
-            LOG.info("PASSED: %s", release_name)
+            LOG.info("Test passed for release: %s", release_name)
             return True
         else:
-            LOG.info("FAILED: %s", release_name)
+            LOG.info("Test failed for release: %s", release_name)
             return False
 
     def show_diff(self, chart, installed_chart, installed_values, target_chart,
