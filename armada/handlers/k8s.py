@@ -92,7 +92,7 @@ class K8s(object):
                            propagation_policy='Foreground',
                            timeout=DEFAULT_K8S_TIMEOUT):
         try:
-            LOG.debug('Deleting %s %s, Wait timeout=%s',
+            LOG.debug('Watching to delete %s %s, Wait timeout=%s',
                       job_type_description, name, timeout)
             body = client.V1DeleteOptions()
             w = watch.Watch()
@@ -108,10 +108,11 @@ class K8s(object):
 
                 event_type = event['type'].upper()
                 job_name = event['object'].metadata.name
+                LOG.debug('Watch event %s on %s', event_type, job_name)
 
                 if event_type == 'DELETED' and job_name == name:
-                    LOG.debug('Successfully deleted %s %s',
-                              job_type_description, job_name)
+                    LOG.info('Successfully deleted %s %s',
+                             job_type_description, job_name)
                     return
 
             err_msg = ('Reached timeout while waiting to delete %s: '
