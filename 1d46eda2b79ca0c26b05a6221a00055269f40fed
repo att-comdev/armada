@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6021f654_08b79829",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T15:01:02Z",
+      "side": 1,
+      "message": "Since this affects several files in armada, would want to do as separate patchset.  I wonder if the doc generation can be configured to catch this somehow.",
+      "parentUuid": "1d60b582_494792eb",
+      "range": {
+        "startLine": 56,
+        "startChar": 8,
+        "endLine": 56,
+        "endChar": 22
+      },
+      "revId": "1d46eda2b79ca0c26b05a6221a00055269f40fed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b2acef7_fd6da252",
         "filename": "armada/handlers/k8s.py",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "55270c8b_4f8c88e2",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T15:01:02Z",
+      "side": 1,
+      "message": "Will fix as part of the :params doc fix as follow up.",
+      "parentUuid": "9b2acef7_fd6da252",
+      "range": {
+        "startLine": 59,
+        "startChar": 70,
+        "endLine": 59,
+        "endChar": 72
+      },
+      "revId": "1d46eda2b79ca0c26b05a6221a00055269f40fed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee4220aa_3fa85d97",
         "filename": "armada/handlers/k8s.py",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2018-05-07T02:07:33Z",
       "side": 1,
       "message": "Should this be default or kube-system? Aren\u0027t all objects created via Tiller on behalf of Armada in which case it should be kube-system as per: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/\n\n\"kube-system The namespace for objects created by the Kubernetes system\"\n\nIn which case we should use CONF.tiller_namespace instead: https://github.com/att-comdev/armada/blob/master/armada/conf/default.py#L79 \n\nApplies to all other methods above too.",
+      "range": {
+        "startLine": 142,
+        "startChar": 48,
+        "endLine": 142,
+        "endChar": 55
+      },
+      "revId": "1d46eda2b79ca0c26b05a6221a00055269f40fed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5800528_35360a16",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T15:01:02Z",
+      "side": 1,
+      "message": "I think a default value for namespace in this and all the other methods here (elsewhere in armada?) is probably more likely to hide a bug than to actually be useful, so IMO the best thing to do would be to remove the default values.  Better to be explicit, can always add back default value later if it becomes onerous.  Since it affects at least the whole file, would want to do as separate patchset.",
+      "parentUuid": "ee4220aa_3fa85d97",
       "range": {
         "startLine": 142,
         "startChar": 48,
