@@ -46,6 +46,54 @@
       "revId": "2b714888c490a9f7c5a11383eb18b7226d1b1dc8",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8cf1f873_cad35b00",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T20:10:53Z",
+      "side": 1,
+      "message": "as explained above I don\u0027t think there is a data race between the deletes, is there any other reason for a try/catch here?",
+      "parentUuid": "de72e747_86a434c4",
+      "range": {
+        "startLine": 609,
+        "startChar": 16,
+        "endLine": 609,
+        "endChar": 67
+      },
+      "revId": "2b714888c490a9f7c5a11383eb18b7226d1b1dc8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "abf99782_aedf146b",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T20:10:53Z",
+      "side": 1,
+      "message": "`k8s.delete_job_action()` and `k8s.delete_cron_job_action()` both call `k8s._delete_job_action()` (formerly known as `k8s.delete_job_action()` prior to this PS), which was recently fixed to properly wait for the delete to complete before returning (assuming the fix worked), so there should be no danger of it trying to delete the same job on 2 different calls.  Even without that though, a kubernetes resource can only be a job or a cron job, so it shouldn\u0027t show up in both cases.  A job/cron job could match multiple delete hooks if it has both sets of labels, but again that shouldn\u0027t be a problem with the recent fix to `k8s._delete_job_action()` so that it properly waits.",
+      "parentUuid": "b53f6338_1793abdf",
+      "range": {
+        "startLine": 609,
+        "startChar": 16,
+        "endLine": 609,
+        "endChar": 67
+      },
+      "revId": "2b714888c490a9f7c5a11383eb18b7226d1b1dc8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
