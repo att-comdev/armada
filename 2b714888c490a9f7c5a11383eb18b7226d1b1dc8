@@ -94,6 +94,30 @@
       "revId": "2b714888c490a9f7c5a11383eb18b7226d1b1dc8",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6cbd1529_80d56e5a",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-07T20:34:55Z",
+      "side": 1,
+      "message": "No, thanks for the explanation.",
+      "parentUuid": "8cf1f873_cad35b00",
+      "range": {
+        "startLine": 609,
+        "startChar": 16,
+        "endLine": 609,
+        "endChar": 67
+      },
+      "revId": "2b714888c490a9f7c5a11383eb18b7226d1b1dc8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
