@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c47d3d27_44f3100a",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T21:05:25Z",
+      "side": 1,
+      "message": "nit: upgrade",
+      "range": {
+        "startLine": 387,
+        "startChar": 56,
+        "endLine": 387,
+        "endChar": 62
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68d2619c_76cdfa4b",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T21:05:25Z",
+      "side": 1,
+      "message": "should this go inside the `if` on L377?  same q for install below.",
+      "range": {
+        "startLine": 387,
+        "startChar": 20,
+        "endLine": 388,
+        "endChar": 77
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a152bd4d_9a706b22",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T21:05:25Z",
+      "side": 1,
+      "message": "can remove this TODO now?",
+      "range": {
+        "startLine": 451,
+        "startChar": 12,
+        "endLine": 451,
+        "endChar": 74
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "382fd18c_653d2ab8",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-07T21:05:25Z",
+      "side": 1,
+      "message": "nit: applying?  just thinking from a perspective of what I\u0027d want to see in e.g. console of CLI",
+      "range": {
+        "startLine": 488,
+        "startChar": 23,
+        "endLine": 488,
+        "endChar": 33
+      },
+      "revId": "d4869b085064060bd3f39747d29f54b290eff139",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
