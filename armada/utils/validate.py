@@ -189,7 +189,8 @@ def validate_armada_document(document):
                                  diagnostic='Please ensure document is one of '
                                             'the following schema types: %s' %
                                             list(SCHEMAS.keys()))
-        LOG.info('ValidationMessage: %s', vmsg.get_output_json())
+        LOG.info('Unsupported document type, ignoring %s.', schema)
+        LOG.debug('ValidationMessage: %s', vmsg.get_output_json())
         # Validation API doesn't care about this type of message, don't send
 
     if len([x for x in details if x.get('error', False)]) > 0:

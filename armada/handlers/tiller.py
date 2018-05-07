@@ -38,7 +38,7 @@ TILLER_VERSION = b'2.7.2'
 TILLER_TIMEOUT = 300
 GRPC_EPSILON = 60
 RELEASE_LIMIT = 128  # TODO(mark-burnett): There may be a better page size.
-RUNTEST_SUCCESS = 9
+RELEASE_RUNTEST_SUCCESS = 9
 
 # the standard gRPC max message size is 4MB
 # this expansion comes at a performance penalty
@@ -417,7 +417,7 @@ class Tiller(object):
             status = self.get_release_status(release)
             raise ex.ReleaseException(release, status, 'Install')
 
-    def testing_release(self, release, timeout=300, cleanup=True):
+    def testing_release(self, release, timeout=TILLER_TIMEOUT, cleanup=True):
         '''
         :param release - name of release to test
         :param timeout - runtime before exiting
@@ -426,7 +426,7 @@ class Tiller(object):
         :returns - results of test pod
         '''
 
-        LOG.debug("Helm test release %s, timeout=%s", release, timeout)
+        LOG.info("Running Helm test: release=%s, timeout=%s", release, timeout)
 
         try:
 
@@ -441,12 +441,12 @@ class Tiller(object):
                 LOG.info('No test found')
                 return False
 
-            if content.release.hooks[0].events[0] == RUNTEST_SUCCESS:
+            if content.release.hooks[0].events[0] == RELEASE_RUNTEST_SUCCESS:
                 test = stub.RunReleaseTest(
-                    release_request, self.timeout, metadata=self.metadata)
+                    release_request, timeout, metadata=self.metadata)
 
                 if test.running():
-                    self.k8s.wait_get_completed_podphase(release)
+                    self.k8s.wait_get_completed_podphase(release, timeout)
 
                 test.cancel()
 

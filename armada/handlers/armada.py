@@ -253,12 +253,13 @@ class Armada(object):
         for chartgroup in manifest_data.get(KEYWORD_GROUPS, []):
             cg_name = chartgroup.get('name', '<missing name>')
             cg_desc = chartgroup.get('description', '<missing description>')
-            LOG.info('Processing ChartGroup: %s (%s)', cg_name, cg_desc)
-
             cg_sequenced = chartgroup.get('sequenced', False)
             cg_test_all_charts = chartgroup.get('test_charts', False)
+            LOG.info('Processing ChartGroup: %s (%s), sequenced=%s, '
+                     'test_charts=%s', cg_name, cg_desc, cg_sequenced,
+                     cg_test_all_charts)
 
-            namespaces_seen = set()
+            ns_label_set = set()
             tests_to_run = []
 
             cg_charts = chartgroup.get(KEYWORD_CHARTS, [])
@@ -280,7 +281,6 @@ class Armada(object):
                 release_name = release_prefix(prefix, release)
 
                 # Retrieve appropriate timeout value
-
                 if wait_timeout <= 0:
                     # TODO(MarshM): chart's `data.timeout` should be deprecated
                     chart_timeout = chart.get('timeout', 0)
@@ -289,6 +289,7 @@ class Armada(object):
                     wait_timeout = wait_values.get('timeout', chart_timeout)
                     wait_labels = wait_values.get('labels', {})
 
+                # Determine wait logic
                 this_chart_should_wait = (
                     cg_sequenced or self.force_wait or
                     wait_timeout > 0 or len(wait_labels) > 0)
@@ -297,9 +298,6 @@ class Armada(object):
                     LOG.warn('No Chart timeout specified, using default: %ss',
                              DEFAULT_CHART_TIMEOUT)
                     wait_timeout = DEFAULT_CHART_TIMEOUT
-
-                # Track namespaces + labels touched
-                namespaces_seen.add((namespace, tuple(wait_labels.items())))
 
                 # Naively take largest timeout to apply at end
                 # TODO(MarshM) better handling of timeout/timer
@@ -376,14 +374,12 @@ class Armada(object):
                         timeout=timer)
 
                     if this_chart_should_wait:
-                        self.tiller.k8s.wait_until_ready(
-                            release=release_name,
-                            labels=wait_labels,
-                            namespace=namespace,
-                            k8s_wait_attempts=self.k8s_wait_attempts,
-                            k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
-                            timeout=timer
+                        self._wait_until_ready(
+                            release_name, wait_labels, namespace, timer
                         )
+
+                    # Track namespace+labels touched by upgrade
+                    ns_label_set.add((namespace, tuple(wait_labels.items())))
 
                     LOG.info('Upgrade completed with results from Tiller: %s',
                              tiller_result.__dict__)
@@ -407,14 +403,12 @@ class Armada(object):
                         timeout=timer)
 
                     if this_chart_should_wait:
-                        self.tiller.k8s.wait_until_ready(
-                            release=release_name,
-                            labels=wait_labels,
-                            namespace=namespace,
-                            k8s_wait_attempts=self.k8s_wait_attempts,
-                            k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
-                            timeout=timer
+                        self._wait_until_ready(
+                            release_name, wait_labels, namespace, timer
                         )
+
+                    # Track namespace+labels touched by install
+                    ns_label_set.add((namespace, tuple(wait_labels.items())))
 
                     LOG.info('Install completed with results from Tiller: %s',
                              tiller_result.__dict__)
@@ -431,6 +425,7 @@ class Armada(object):
                         LOG.error(reason)
                         raise ArmadaTimeoutException(reason)
                     self._test_chart(release_name, timer)
+                    # TODO(MarshM): handle test failure or timeout
 
                 # Un-sequenced ChartGroup should run tests at the end
                 elif test_this_chart:
@@ -438,39 +433,37 @@ class Armada(object):
                     tests_to_run.append((release_name, timer))
 
             # End of Charts in ChartGroup
-            LOG.info('All Charts applied.')
+            LOG.info('All Charts applied in ChartGroup %s.', cg_name)
 
             # After all Charts are applied, we should wait for the entire
             # ChartGroup to become healthy by looking at the namespaces seen
-            # TODO(MarshM): Need to restrict to only releases we processed
             # TODO(MarshM): Need to determine a better timeout
             #               (not cg_max_timeout)
             if cg_max_timeout <= 0:
                 cg_max_timeout = DEFAULT_CHART_TIMEOUT
             deadline = time.time() + cg_max_timeout
-            for (ns, labels) in namespaces_seen:
+            for (ns, labels) in ns_label_set:
                 labels_dict = dict(labels)
                 timer = int(round(deadline - time.time()))
-                LOG.info('Final wait for healthy namespace (%s), label=(%s), '
-                         'timeout remaining: %ss.', ns, labels_dict, timer)
+                LOG.info('Final ChartGroup wait for healthy namespace (%s), '
+                         'labels=(%s), timeout remaining: %ss.',
+                         ns, labels_dict, timer)
                 if timer <= 0:
                     reason = ('Timeout expired waiting on namespace: %s, '
-                              'label: %s' % (ns, labels_dict))
+                              'labels: (%s)' % (ns, labels_dict))
                     LOG.error(reason)
                     raise ArmadaTimeoutException(reason)
 
-                self.tiller.k8s.wait_until_ready(
-                    namespace=ns,
-                    labels=labels_dict,
-                    k8s_wait_attempts=self.k8s_wait_attempts,
-                    k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
-                    timeout=timer)
+                self._wait_until_ready(
+                    release_name=None, wait_labels=labels_dict,
+                    namespace=ns, timeout=timer
+                )
 
             # After entire ChartGroup is healthy, run any pending tests
             for (test, test_timer) in tests_to_run:
                 self._test_chart(test, test_timer)
+                # TODO(MarshM): handle test failure or timeout
 
-        LOG.info("Performing Post-Flight Operations")
         self.post_flight_ops()
 
         if self.enable_chart_cleanup:
@@ -478,12 +471,15 @@ class Armada(object):
                 prefix,
                 self.manifest[KEYWORD_ARMADA][KEYWORD_GROUPS])
 
+        LOG.info('Done applying manifest.')
         return msg
 
     def post_flight_ops(self):
         '''
         Operations to run after deployment process has terminated
         '''
+        LOG.info("Performing post-flight operations.")
+
         # Delete temp dirs used for deployment
         for group in self.manifest.get(KEYWORD_ARMADA, {}).get(
                 KEYWORD_GROUPS, []):
@@ -494,16 +490,38 @@ class Armada(object):
                     if isinstance(source_dir, tuple) and source_dir:
                         source.source_cleanup(source_dir[0])
 
+    def _wait_until_ready(self, release_name, wait_labels, namespace, timeout):
+        if self.dry_run:
+            LOG.info('Skipping wait during `dry-run`, would have waited on '
+                     'namespace=%s, labels=(%s) for %ss.',
+                     namespace, wait_labels, timeout)
+            return
+
+        self.tiller.k8s.wait_until_ready(
+            release=release_name,
+            labels=wait_labels,
+            namespace=namespace,
+            k8s_wait_attempts=self.k8s_wait_attempts,
+            k8s_wait_attempt_sleep=self.k8s_wait_attempt_sleep,
+            timeout=timeout
+        )
+
     def _test_chart(self, release_name, timeout):
-        # TODO(MarshM): Fix testing, it's broken, and track timeout
+        if self.dry_run:
+            LOG.info('Skipping test during `dry-run`, would have tested '
+                     'release=%s with timeout %ss.',
+                     release_name, timeout)
+            return True
+
+        # TODO(MarshM): Fix testing, it's broken
         resp = self.tiller.testing_release(release_name, timeout=timeout)
         status = getattr(resp.info.status, 'last_test_suite_run', 'FAILED')
-        LOG.info("Test INFO: %s", status)
+        LOG.info("Test info.status: %s", status)
         if resp:
-            LOG.info("PASSED: %s", release_name)
+            LOG.info("Test passed for release: %s", release_name)
             return True
         else:
-            LOG.info("FAILED: %s", release_name)
+            LOG.info("Test failed for release: %s", release_name)
             return False
 
     def show_diff(self, chart, installed_chart, installed_values, target_chart,

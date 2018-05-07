@@ -97,6 +97,7 @@ class Apply(api.BaseResource):
                     'message': msg,
                 }
             )
+            self.logger.debug('Sending API response, body:\n%s', resp.body)
 
             resp.content_type = 'application/json'
             resp.status = falcon.HTTP_200
