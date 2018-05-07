@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d60b582_494792eb",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-07T02:07:33Z",
+      "side": 1,
+      "message": "As an aside this sphinx syntax is incorrect. It should be:\n\n   :param name: ...\n\nDitto below (applies to other methods too).",
+      "range": {
+        "startLine": 56,
+        "startChar": 8,
+        "endLine": 56,
+        "endChar": 22
+      },
+      "revId": "1d46eda2b79ca0c26b05a6221a00055269f40fed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2acef7_fd6da252",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-07T02:07:33Z",
+      "side": 1,
+      "message": "of",
+      "range": {
+        "startLine": 59,
+        "startChar": 70,
+        "endLine": 59,
+        "endChar": 72
+      },
+      "revId": "1d46eda2b79ca0c26b05a6221a00055269f40fed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee4220aa_3fa85d97",
+        "filename": "armada/handlers/k8s.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-07T02:07:33Z",
+      "side": 1,
+      "message": "Should this be default or kube-system? Aren\u0027t all objects created via Tiller on behalf of Armada in which case it should be kube-system as per: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/\n\n\"kube-system The namespace for objects created by the Kubernetes system\"\n\nIn which case we should use CONF.tiller_namespace instead: https://github.com/att-comdev/armada/blob/master/armada/conf/default.py#L79 \n\nApplies to all other methods above too.",
+      "range": {
+        "startLine": 142,
+        "startChar": 48,
+        "endLine": 142,
+        "endChar": 55
+      },
+      "revId": "1d46eda2b79ca0c26b05a6221a00055269f40fed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
