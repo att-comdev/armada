@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b53f6338_1793abdf",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-07T19:32:09Z",
+      "side": 1,
+      "message": "Will this raise an exception if L594 was already executed (in the case where resource_type is \u0027job\u0027 in which case L588 and L597 pass)? I\u0027m assuming that a cronjob can be a subset of a job and that a data race may exist between the first deletion and the second listing of cron jobs.\n\nIf so, you might have to do on L597:\n\n    if not handled and resource_type in [\u0027cronjob\u0027, \u0027job\u0027]:\n        ...",
+      "range": {
+        "startLine": 609,
+        "startChar": 16,
+        "endLine": 609,
+        "endChar": 67
+      },
+      "revId": "2b714888c490a9f7c5a11383eb18b7226d1b1dc8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
