@@ -96,6 +96,29 @@
     },
     {
       "key": {
+        "uuid": "7b6fc5d4_78ee3205",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-08T15:13:24Z",
+      "side": 1,
+      "message": "same question as for the tests, what about putting the wait calls in a function e.g. `self._wait_until_ready()` and doing the check for `if not self.dry_run` in it, and having an else which logs \"Skipping wait for ... due to dry run\", that way you can see the waits would have been were it not a dry run.",
+      "range": {
+        "startLine": 294,
+        "startChar": 61,
+        "endLine": 295,
+        "endChar": 41
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "020be4f5_c6bc6e55",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 2
@@ -136,6 +159,52 @@
         "startChar": 14,
         "endLine": 300,
         "endChar": 56
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0a079d4_73fb462e",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-08T15:13:24Z",
+      "side": 1,
+      "message": "rather than guarding `self._test_chart()` from being called, would it be better to move the check for `if not self.dry_run` inside of `self._test_chart()` and then have an `else` which logs a message e.g. \"Skipping tests for release %s since it\u0027s a dry-run\", that way you can see what tests would have been run were it not a dry_run.",
+      "range": {
+        "startLine": 307,
+        "startChar": 71,
+        "endLine": 308,
+        "endChar": 37
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5dc07bfc_254aae74",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1013519
+      },
+      "writtenOn": "2018-05-08T15:13:24Z",
+      "side": 1,
+      "message": "should this wait be guarded by `if not self.dry_run:` as well?",
+      "range": {
+        "startLine": 467,
+        "startChar": 16,
+        "endLine": 472,
+        "endChar": 34
       },
       "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
