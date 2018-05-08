@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "100b1707_3ed8c117",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-08T15:46:35Z",
+      "side": 1,
+      "message": "I\u0027m open to reworking the logs or encapsulating into a new function, but i don\u0027t think logging the wait that would have happened is necessarily helpful.  Dry-run is about the changes Tiller would have made to the system.",
+      "parentUuid": "7b6fc5d4_78ee3205",
+      "range": {
+        "startLine": 294,
+        "startChar": 61,
+        "endLine": 295,
+        "endChar": 41
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "020be4f5_c6bc6e55",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 2
@@ -189,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "0f2dc99c_350c153f",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-08T15:46:35Z",
+      "side": 1,
+      "message": "Good idea, I\u0027ll make this update.",
+      "parentUuid": "f0a079d4_73fb462e",
+      "range": {
+        "startLine": 307,
+        "startChar": 71,
+        "endLine": 308,
+        "endChar": 37
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5dc07bfc_254aae74",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 2
@@ -200,6 +248,30 @@
       "writtenOn": "2018-05-08T15:13:24Z",
       "side": 1,
       "message": "should this wait be guarded by `if not self.dry_run:` as well?",
+      "range": {
+        "startLine": 467,
+        "startChar": 16,
+        "endLine": 472,
+        "endChar": 34
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72f4e844_b9dd0496",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-08T15:46:35Z",
+      "side": 1,
+      "message": "Good catch, it should!  No need to wait when we didn\u0027t change anything.",
+      "parentUuid": "5dc07bfc_254aae74",
       "range": {
         "startLine": 467,
         "startChar": 16,
