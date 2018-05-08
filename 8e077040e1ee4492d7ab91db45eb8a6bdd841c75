@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "dc529290_524311a5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-08T15:12:09Z",
+      "side": 1,
+      "message": "ha oops... this is more like skip both test and wait, on dry-run",
+      "parentUuid": "71bc813a_514155a0",
+      "range": {
+        "startLine": 11,
+        "startChar": 16,
+        "endLine": 11,
+        "endChar": 20
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5fa17776_dbf7c993",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-05-08T14:27:25Z",
       "side": 1,
       "message": "I think that if our use case is to not wait during a dry run then that should be conveyed in documentation as it appears that Tiller can work with both dry_run\u003dTrue and wait\u003e0.",
+      "range": {
+        "startLine": 295,
+        "startChar": 28,
+        "endLine": 295,
+        "endChar": 40
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bf42a47d_452194c3",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-08T15:12:09Z",
+      "side": 1,
+      "message": "It\u0027s probably a good target for documentation, but the point is simply that there is nothing to wait on while you dry-run. Armada isn\u0027t making any changes to the system on dry-run.",
+      "parentUuid": "5fa17776_dbf7c993",
       "range": {
         "startLine": 295,
         "startChar": 28,
