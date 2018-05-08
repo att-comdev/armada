@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "020be4f5_c6bc6e55",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1008770
+      },
+      "writtenOn": "2018-05-08T02:53:25Z",
+      "side": 1,
+      "message": "why not move this logic into the 283 if-block?  and change the default value of L285 and L288 to DEFAULT_CHART_TIMEOUT? All this is block is doing is added the conditional check of this_chart_should_wait.",
+      "range": {
+        "startLine": 297,
+        "startChar": 14,
+        "endLine": 300,
+        "endChar": 56
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
