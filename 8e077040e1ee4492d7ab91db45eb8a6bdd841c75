@@ -22,6 +22,30 @@
       "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3459c530_ce50f9f8",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-08T14:23:59Z",
+      "side": 1,
+      "message": "It\u0027s possible for the block at 283 to \u003d0 (it doesn\u0027t exist in the chart or overrides), while 292 can \u003dtrue based on other conditions.  Since a positive wait_timeout is one condition to trigger waiting, we still need to handle the DEFAULT wait_timeout after.",
+      "parentUuid": "020be4f5_c6bc6e55",
+      "range": {
+        "startLine": 297,
+        "startChar": 14,
+        "endLine": 300,
+        "endChar": 56
+      },
+      "revId": "8e077040e1ee4492d7ab91db45eb8a6bdd841c75",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
