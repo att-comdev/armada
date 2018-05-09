@@ -41,7 +41,7 @@ class CliAction(object):
         except ArmadaBaseException:
             self.logger.exception('Caught internal exception')
             sys.exit(1)
-        except:
+        except Exception:
             self.logger.exception('Caught unexpected exception')
             sys.exit(1)
 

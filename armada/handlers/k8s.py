@@ -41,7 +41,7 @@ class K8s(object):
         '''
         try:
             config.load_incluster_config()
-        except:
+        except config.config_exception.ConfigException:
             config.load_kube_config()
 
         self.client = client.CoreV1Api()
