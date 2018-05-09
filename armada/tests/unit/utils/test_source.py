@@ -35,7 +35,7 @@ def is_connected():
         host = socket.gethostbyname("www.github.com")
         socket.create_connection((host, 80), 2)
         return True
-    except:
+    except (socket.error, socket.herror, socket.timeout):
         pass
     return False
 

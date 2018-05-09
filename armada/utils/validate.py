@@ -229,7 +229,7 @@ def validate_armada_documents(documents):
 def validate_manifest_url(value):
     try:
         return (requests.get(value).status_code == 200)
-    except:
+    except requests.exceptions.RequestException:
         return False
 
 

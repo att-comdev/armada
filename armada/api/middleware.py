@@ -86,7 +86,7 @@ class ContextMiddleware(object):
     def is_valid_uuid(self, id, version=4):
         try:
             uuid_obj = UUID(id, version=version)
-        except:
+        except (TypeError, ValueError):
             return False
 
         return str(uuid_obj) == id
