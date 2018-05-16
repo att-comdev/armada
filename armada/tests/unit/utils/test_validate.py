@@ -185,7 +185,7 @@ data:
     source:
       reference: master
       subpath: helm-toolkit
-      location: https://git.openstack.org/openstack/openstack-helm
+      location: https://git.openstack.org/openstack/openstack-helm-infra
       type: git
     namespace: helm-toolkit
     upgrade:

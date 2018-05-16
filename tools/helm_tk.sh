@@ -44,8 +44,8 @@ function helm_serve {
 
 mkdir -p build
 cd build
-git clone --depth 1 https://git.openstack.org/openstack/openstack-helm.git || true
-cd openstack-helm
+git clone --depth 1 https://git.openstack.org/openstack/openstack-helm-infra.git || true
+cd openstack-helm-infra
 git pull
 helm_serve
 make charts
