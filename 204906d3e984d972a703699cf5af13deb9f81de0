@@ -239,6 +239,24 @@
       "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ade05207_8580cb93",
+        "filename": "armada/utils/validate.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T21:05:22Z",
+      "side": 1,
+      "message": "Er, I meant as an info-level ValidationMessage that is returned in the `messages` section of the server response, but that might be noisy too.",
+      "parentUuid": "6fda38bb_9946c77a",
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
