@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a26abc0d_559412c7",
+        "filename": "armada/api/controller/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-16T21:00:18Z",
+      "side": 1,
+      "message": "This is just the list of installs, upgrades, and helm chart diffs.  I\u0027m not actually sure if a helm chart diff can contain sensitive data, but we\u0027d be exposing the same info in other places... worth a second look.",
+      "parentUuid": "577e60ec_649b95cc",
+      "range": {
+        "startLine": 100,
+        "startChar": 64,
+        "endLine": 100,
+        "endChar": 74
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d0c7ec7f_bdfd8818",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 4
@@ -59,6 +83,30 @@
       "writtenOn": "2018-05-16T20:51:48Z",
       "side": 1,
       "message": "I tried this out quickly using a test, and it appears to sort, but I\u0027m unsure whether this\u0027ll guarantee the exact order each time. You MAY need to wrap this in sorted(tuple(wait_labels.items())) but I\u0027m not 100%.",
+      "range": {
+        "startLine": 382,
+        "startChar": 49,
+        "endLine": 382,
+        "endChar": 75
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94f28b58_04283412",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-16T21:00:18Z",
+      "side": 1,
+      "message": "The order coming out later isn\u0027t particularly important, but I\u0027ll definitely double check the logic here.",
+      "parentUuid": "e759228b_336315ce",
       "range": {
         "startLine": 382,
         "startChar": 49,
@@ -111,6 +159,30 @@
     },
     {
       "key": {
+        "uuid": "5dd5f5cf_08c40d63",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-16T21:00:18Z",
+      "side": 1,
+      "message": "I\u0027d say the first 2 are good candidates for armada.const, the others are just functional constants to avoid magic numbers in the code.\nWill consider during refactors here, thanks.",
+      "parentUuid": "9f992bd9_5e3d1c98",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 27
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e50bf50a_4a36b9c8",
         "filename": "armada/utils/validate.py",
         "patchSetId": 4
@@ -122,6 +194,24 @@
       "writtenOn": "2018-05-16T20:51:48Z",
       "side": 1,
       "message": "Later this could be added as an info-level message.",
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fda38bb_9946c77a",
+        "filename": "armada/utils/validate.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-16T21:00:18Z",
+      "side": 1,
+      "message": "This particular message (pretty-formatted JSON) is too noisy on info, I was actually dropping it to debug here, with a new info just saying something happened!",
+      "parentUuid": "e50bf50a_4a36b9c8",
       "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
