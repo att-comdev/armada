@@ -27,14 +27,3 @@ class ArmadaTimeoutException(ArmadaException):
     def __init__(self, reason):
         self._message = 'Armada timed out waiting on: %s' % (reason)
         super(ArmadaTimeoutException, self).__init__(self._message)
-
-
-class KnownReleasesException(ArmadaException):
-    '''
-    Exception that occurs when no known releases are found.
-
-    **Troubleshoot:**
-    *Coming Soon*
-    '''
-
-    message = 'No known releases found'
