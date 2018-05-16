@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "5eddfbcf_e0785172",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T21:04:14Z",
+      "side": 1,
+      "message": "Well I inferred that ns_label_set is trying to keep track of all the unique wait labels per namespace, and I wasn\u0027t sure whether the wait_labels can ever be different across charts.",
+      "parentUuid": "94f28b58_04283412",
+      "range": {
+        "startLine": 382,
+        "startChar": 49,
+        "endLine": 382,
+        "endChar": 75
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6e0dc6cd_0ce619d6",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 4
