@@ -25,11 +25,3 @@
          :members:
          :show-inheritance:
          :undoc-members:
-
-  * - Exception Name
-    - Description
-  * - KnownReleasesException
-    - .. autoexception:: armada.exceptions.armada_exceptions.KnownReleasesException
-         :members:
-         :show-inheritance:
-         :undoc-members:
