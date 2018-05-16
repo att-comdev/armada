@@ -111,7 +111,7 @@ clean:
 
 # testing checks
 .PHONY: tests
-tests: check-tox helm_lint
+tests: check-tox
 	tox
 
 .PHONY: test-all

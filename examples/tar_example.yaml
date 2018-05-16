@@ -10,7 +10,7 @@ data:
   values: {}
   source:
     type: git
-    location: git://github.com/openstack/openstack-helm
+    location: git://github.com/openstack/openstack-helm-infra
     subpath: helm-toolkit
     reference: master
   dependencies: []
