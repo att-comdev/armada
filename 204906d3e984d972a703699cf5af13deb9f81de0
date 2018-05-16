@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "577e60ec_649b95cc",
+        "filename": "armada/api/controller/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T20:51:48Z",
+      "side": 1,
+      "message": "I think the answer to this is No, but can this ever reveal sensitive data in the logs?",
+      "range": {
+        "startLine": 100,
+        "startChar": 64,
+        "endLine": 100,
+        "endChar": 74
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0c7ec7f_bdfd8818",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T20:51:48Z",
+      "side": 1,
+      "message": "++ Nice to see some helper functions here",
+      "range": {
+        "startLine": 377,
+        "startChar": 29,
+        "endLine": 377,
+        "endChar": 46
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759228b_336315ce",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T20:51:48Z",
+      "side": 1,
+      "message": "I tried this out quickly using a test, and it appears to sort, but I\u0027m unsure whether this\u0027ll guarantee the exact order each time. You MAY need to wrap this in sorted(tuple(wait_labels.items())) but I\u0027m not 100%.",
+      "range": {
+        "startLine": 382,
+        "startChar": 49,
+        "endLine": 382,
+        "endChar": 75
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e0dc6cd_0ce619d6",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T20:51:48Z",
+      "side": 1,
+      "message": "Ditto",
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9f992bd9_5e3d1c98",
+        "filename": "armada/handlers/tiller.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T20:51:48Z",
+      "side": 1,
+      "message": "Maybe consider moving into armada.const or some such later?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 27
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e50bf50a_4a36b9c8",
+        "filename": "armada/utils/validate.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1011942
+      },
+      "writtenOn": "2018-05-16T20:51:48Z",
+      "side": 1,
+      "message": "Later this could be added as an info-level message.",
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
