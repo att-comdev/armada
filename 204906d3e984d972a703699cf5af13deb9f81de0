@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "be797c0d_920849c1",
+        "filename": "armada/handlers/armada.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-16T21:25:14Z",
+      "side": 1,
+      "message": "They sure can!  But again, at the point we use this full list, the order we originally saw them doesn\u0027t really matter.",
+      "parentUuid": "5eddfbcf_e0785172",
+      "range": {
+        "startLine": 382,
+        "startChar": 49,
+        "endLine": 382,
+        "endChar": 75
+      },
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6e0dc6cd_0ce619d6",
         "filename": "armada/handlers/armada.py",
         "patchSetId": 4
@@ -254,6 +278,24 @@
       "side": 1,
       "message": "Er, I meant as an info-level ValidationMessage that is returned in the `messages` section of the server response, but that might be noisy too.",
       "parentUuid": "6fda38bb_9946c77a",
+      "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "274ffc00_86c727dd",
+        "filename": "armada/utils/validate.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1012987
+      },
+      "writtenOn": "2018-05-16T21:25:14Z",
+      "side": 1,
+      "message": "Oh!  perhaps the comment is just in an odd location, but check out L194 immediately below... :)\n\nShipyard specifically doesn\u0027t want this message.  Of course, Shipyard isn\u0027t necessarily the ONLY possible client of Armada API.",
+      "parentUuid": "ade05207_8580cb93",
       "revId": "204906d3e984d972a703699cf5af13deb9f81de0",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
