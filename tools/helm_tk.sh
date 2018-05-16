@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Script to setup helm-toolkit and helm dep up the shipyard chart
+# Script to setup helm-toolkit and helm dep up the armada/tiller chart
 #
 HELM=$1
 
@@ -44,8 +44,11 @@ function helm_serve {
 
 mkdir -p build
 cd build
-git clone --depth 1 https://git.openstack.org/openstack/openstack-helm.git || true
-cd openstack-helm
+git clone --depth 1 https://git.openstack.org/openstack/openstack-helm-infra.git || true
+cd openstack-helm-infra
 git pull
 helm_serve
-make charts
+make helm-toolkit
+${HELM} dep up ../../charts/armada
+${HELM} dep up ../../charts/tiller
+
